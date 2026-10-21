@@ -57,6 +57,7 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
     stencil: false,
     preserveDrawingBuffer: opts.still,
   });
+  renderer.debug.checkShaderErrors = import.meta.env.DEV;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.58;
   renderer.shadowMap.enabled = true;

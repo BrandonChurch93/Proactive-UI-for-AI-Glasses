@@ -102,6 +102,13 @@ export class ThreeBridge implements SceneBridge {
     this.sim = sim;
   }
 
+  dispose(): void {
+    this.glow.dispose();
+    this.flare.dispose();
+    this.colTex.dispose();
+    this.group.clear();
+  }
+
   viewport(): Viewport {
     return { w: innerWidth, h: innerHeight };
   }

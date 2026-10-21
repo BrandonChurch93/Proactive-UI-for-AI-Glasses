@@ -162,6 +162,7 @@ export class Walk {
     this.overlay?.dispose();
     this.overlay = null;
     this.world.core.scene.remove(this.bridge.group);
+    this.bridge.dispose();
     this.listeners.clear();
   }
 
