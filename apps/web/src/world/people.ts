@@ -135,6 +135,9 @@ export class PeopleView {
     for (const [id, v] of this.views) {
       if (!seen.has(id)) {
         this.group.remove(v.root);
+        v.mixer.stopAllAction();
+        v.mixer.uncacheRoot(v.root);
+        for (const m of v.meshes) (m as THREE.SkinnedMesh).skeleton?.dispose();
         this.views.delete(id);
       }
     }
