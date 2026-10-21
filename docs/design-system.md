@@ -207,7 +207,7 @@ Zones:
 
 Rules:
 1. Anchor at sign height for a storefront, chest height for a person. The pane offsets up and toward the nearer screen edge, joined by the leader. When there is no room above, it sits below the anchor instead of pinning to the top edge.
-2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it. The only exception is a glance on the thing being looked at, which folds on look-away or after 4 s. When the zone grows, content inside it is pushed out over 320 ms, never cut.
+2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it. The only exception is the pane on the thing being looked at, which sits beside it while it is looked at and leaves the zone on look-away (walking rules, rule 1, as built). When the zone grows, content inside it is pushed out over 320 ms, never cut.
 3. Keep-out: roadway, moving vehicles, people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). A pane that cannot clear them drops to a pip.
 4. Calm backdrop: façade over sky over road, never over a bright sign. (The pip may sit above a marquee, never on it: a glow on a glow is invisible.)
 5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it.

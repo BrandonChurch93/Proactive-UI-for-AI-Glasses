@@ -17,7 +17,8 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 - Trigger: every frame, from the pace band.
 - Response: the keep-out zone in the center of the view scales with speed. Stopped: middle 33% of width × 40% of height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. World-zone content is placed outside it; content already inside it when the zone grows is pushed out over 320 ms ease-out, not cut.
-- Eval: in every frame of every walk, no persistent world-zone pane intersects the zone for its current band. The single exception is a glance on the gaze target, which may sit in the zone for at most 4 s.
+- Eval: in every frame of every walk, no world-zone pane intersects the zone for its current band. The single exception is the pane on the thing being looked at, for as long as it is looked at.
+- As built (changed after owner testing): the exception covers every level on the gaze target, not only a glance for 4 s. Gaze is the center of the view, so the thing being looked at is always inside the zone; pushing its pane out of the zone put the card half a screen away from the store, with the leader running back across the street. The pane on the thing you are looking at now sits beside it. Everything else keeps the zone clear, and the moment the look moves away the pane leaves the zone and walks down by look-away.
 
 ## Rule 2 · Reading budget
 
