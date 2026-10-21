@@ -1,0 +1,23 @@
+.plate {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+.text {
+  text-align: center;
+  padding: 0 16px;
+}
+.name {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(28px, 4.2vw, 52px);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.subtitle {
+  margin: 12px 0 0;
+  font-size: clamp(14px, 1.4vw, 17px);
+  color: var(--ink-2);
+}

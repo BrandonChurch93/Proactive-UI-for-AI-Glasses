@@ -4,3 +4,5 @@ dist/
 .DS_Store
 packages/evals/report/*.html
 apps/web/public/assets/raw/
+test-results/
+shots/

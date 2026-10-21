@@ -1,0 +1,9 @@
+reference/
+docs/
+data/
+pnpm-lock.yaml
+dist/
+packages/evals/scenarios/*.walk.json
+packages/evals/report/
+apps/web/public/
+*.md
