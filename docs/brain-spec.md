@@ -1,0 +1,132 @@
+# Brain Spec · the decision engine
+
+The brain decides what to show the wearer, at what level, when, and when to hold back. It is a pure TypeScript package with no dependency on Three.js or the DOM. The simulation is one adapter; real glasses would be another. The brain never knows it is in a simulation.
+
+It is a deterministic rules policy. No model, no network, no randomness. Every threshold is a number in `config.ts`. Given the same scenario script, two runs produce identical logs.
+
+## 1. Shape
+
+```
+packages/brain
+  src/
+    types.ts         WorldSnapshot, Candidate, Decision, Reason, Config
+    pace.ts          pace band with hysteresis (walking-rules pace bands)
+    gates.ts         hard gates: safety, social, snooze, budget
+    candidates.ts    entities, inbox items and proactive moments → candidates
+    score.ts         relevance × value × proximity × novelty − cost
+    ladder.ts        the dwell ladder: pip / glance / card / expanded by attention and band
+    reading.ts       the reading budget: copy caps and trims per band
+    pocket.ts        save on pinch while moving; surface at the pause
+    timing.ts        now / next-pause / batched / after-gate; auto-fold; hysteresis
+    brain.ts         the tick: snapshot in, decisions out
+    log.ts           decision log, replayable
+    config.ts        every number, with defaults; overridable per scenario
+  test/              unit tests, lean
+```
+
+One loop, 10 Hz in the sim. Gates, pace, candidates, score, ladder, reading budget, pocket, timing, placement hints, log. Nothing async.
+
+## 2. Input: `WorldSnapshot`
+
+Produced by the adapter every tick.
+
+```ts
+interface WorldSnapshot {
+  t: number;                        // seconds since walk start, from the sim clock
+  wearer: {
+    pos: Vec3; heading: Vec3; speed: number;         // m/s
+    state: 'walking' | 'stopped' | 'crossing';
+    gaze: { target?: string; dwellMs: number; dir: Vec3; pitch: number; yawRate: number };
+    pinch?: { target: string };                       // this tick only
+  };
+  env: {
+    crosswalk?: { id: string; distance: number; signal: 'walk' | 'flash' | 'dont'; secondsLeft: number; inRoadway: boolean };
+    vehicles: { id: string; kind: 'car' | 'bus' | 'truck' | 'bike'; pos: Vec3; vel: Vec3; bounds: Box3; timeToPath?: number }[];
+    people: { id: string; pos: Vec3; bounds: Box3; facing: boolean; onPath: boolean }[];
+    sidewalkNarrowsAhead?: { fromN: number; toN: number };
+    backdrop: Record<string, number>;                 // luminance 0..1 behind each visible pane, by candidate id
+  };
+  social: { inConversation: boolean; companions: number };
+  entities: Entity[];               // places, stops, signs, within 120 m
+  inbox: Notification[];            // texts, DMs, social, app updates, calls; arrive at scripted times
+  goal: { scenario: 'hungry' | 'errands' | 'walking'; stops?: Stop[]; destination?: string };
+  wearerModel: { dismissed: Record<string, number>; accepted: Record<string, number>; budgetUsed: number; pocket: string[]; snoozeUntil?: number };
+}
+```
+
+Entities carry a `kind` (food, cafe, theater, venue, shop, service, transit, park, sign), a position and anchor height, live data (wait, seats, hours, next departures), and a `depth` payload for the expanded view. See `docs/world-spec.md` and `data/places.json`.
+
+## 3. Output: `Decision[]`
+
+```ts
+interface Decision {
+  id: string;                       // stable per candidate
+  action: 'show' | 'hold' | 'promote' | 'demote' | 'dismiss' | 'save' | 'surface';
+  level: 'pip' | 'glance' | 'card' | 'expanded' | 'whisper';
+  timing: 'now' | 'next-pause' | 'batched' | 'after-gate';
+  channel: 'visual' | 'ground' | 'edge';
+  placement: { anchor: string; zone: 'world' | 'ground' | 'view'; prefer: 'side' | 'above' | 'below' };
+  content: { name: string; fact?: string; reason: Reason; depthRef?: string };
+  reason: Reason;
+  score: number;
+  band: 'stopped' | 'stroll' | 'walk' | 'brisk';
+  signals: SignalBundle;            // everything the decision rested on, for the log
+}
+
+interface Reason {
+  kind: 'goal' | 'world' | 'gate' | 'budget' | 'social' | 'edge' | 'pace' | 'pocket';
+  text: string;                     // the one line the wearer may see, at most 48 characters
+  parts: { signal: string; value: number | string; weight: number }[];   // for the inspector
+}
+```
+
+Reasons cite only the goal or the world. Never the wearer's body, eyes or habits. A pace reason reads "Saved for the next stop", never "You were walking fast".
+
+## 4. The tick, in order
+
+1. **Pace band.** From `wearer.speed`, with 600 ms hysteresis. Stopped < 0.2, Stroll 0.2 to 0.9, Walk 0.9 to 1.6, Brisk above. The band is attached to every decision.
+2. **Gates.** Hard rules, no scoring:
+   - Safety: `wearer.state === 'crossing'` or `env.crosswalk.inRoadway` or any vehicle with `timeToPath < 3` → every world-zone item holds, ground safety text shows, the held glyph counts anything that arrives. A bike with `timeToPath < 3` approaching from behind on the wearer's side → `BIKE · Ns` on the ground in the stop tone, with an arrow for its direction.
+   - Social: `inConversation` (someone is talking to the wearer; not scripted in the v1 walks, covered by a focused eval) → messages and non-safety items hold; the curb follow-up becomes "When you're free". Any person within 2 m ahead on the wearer's path (`env.people` with `onPath`) → messages hold until passed; the wearer threads past people with nothing new arriving.
+   - Snooze: `t < wearerModel.snoozeUntil` → only safety shows. The glyph counts down.
+   - Budget: an attention budget per walk (default 7 shows, regenerates one per 40 s of quiet). Empty budget → only safety, calls, and gaze-triggered items.
+3. **Candidates.** Every entity within range, every inbox item, every proactive moment (`docs/scenarios.md` lists them), and the pocket when the band is Stopped. Each gets `relevance` from the goal and `value` from the world.
+4. **Score.** `score = relevance × value × proximity × novelty − cost`:
+   - `relevance` ∈ [0,1]: 1 for an entity matching the goal, .35 for a gaze target regardless of goal, .1 otherwise.
+   - `value`: wait and seats for food; time-to-departure for transit; seats left for shows; an errand stop that is open and on the route for errands.
+   - `proximity`: `1 − distance / range`.
+   - `novelty`: 1, halved per prior dismissal of that kind, ×1.2 per prior acceptance.
+   - `cost`: .25 base, +.15 per band above Stopped, +.3 if a card is already open.
+5. **Ladder** (`docs/walking-rules.md` rule 10 and the pace bands). World-zone items only; view-zone items (the errands card, toasts, the pocket, the ask glance) follow the notification rules and are allowed in any band but Brisk. Pip for any candidate above 0. Glance if score > .45 and fewer than three glances are up, or on 0.8 s of dwell. Card on the band's card dwell past the glance (0.8 s Stopped, 1.0 s Stroll, 1.6 s Walk; never in Brisk), or on a pinch in Stopped or Stroll. Expanded on a further 2.0 s of dwell on the card or a pinch, in Stopped or Stroll only. Looking away for 1.2 s walks down one level at a time. In Brisk, a dwelt target produces a `whisper` instead of any pane.
+6. **Pocket.** A pinch on a gaze target in Walk or Brisk emits `save`; nothing opens. When the band has been Stopped for 2 s and the pocket is not empty and the time available (the signal countdown at a signal, otherwise 20 s) is at least 6 s, emit `surface` with the time available. Under 6 s, wait for the next pause.
+7. **Reading budget.** Before a show, estimate reading time (words × 240 ms + numbers × 320 ms) against the time the item will stay in comfortable view at the current speed. Trim by rule: drop the reason line first, then the second fact. Glance copy while moving is capped at three words plus one number. Never truncate with an ellipsis.
+8. **Timing.** `now` if stopped or the item is a gaze target; `next-pause` for messages while walking; `batched` if a card is open; `after-gate` if a gate is up. Auto-fold: a non-gaze world-zone glance folds after 2.5 s in Walk, 4 s in Stroll, never in Stopped; a view-zone item while moving folds after 4 s unless looked at.
+9. **Hysteresis.** A score-driven level change holds for 1.2 s unless a gate fires, and a score-driven promotion needs the score to hold for 400 ms. The dwell ladder's climbs and the look-away descent are exempt: they are the wearer's attention, not a score. A band change never demotes a gaze target instantly; it waits for the look-away.
+10. **Placement hints.** Zone, preferred side, and whether the item may enter the focus zone (only a glance on the gaze target, for at most 4 s). The overlay does the geometry.
+11. **Log.** Append every decision, including holds, with its signals and band. A "show" for the budget and the evals is a decision with action `show` at glance level or above; pips and ground safety text are not shows.
+
+Notifications have fixed behaviors (see `docs/scenarios.md`): a text shows at glance at the next safe moment; social accumulates on the held glyph and surfaces once when stopped; a call shows at the edge during a walk but never in a crossing; app updates batch under whatever is open.
+
+## 5. The ask glance
+
+There is no intent inference. The scenario sets the goal. The one place the brain asks is Just walking: once the wearer has dwelt on two food glances (kinds `food` and `cafe` both count), the next time the band is Stopped it offers one line at the edge, "Hungry? · Find lunch · No". It asks when the wearer can answer, never while moving. Yes switches the goal to hungry for the rest of the walk; no suppresses the question for the walk.
+
+## 6. Determinism and the clock
+
+The brain takes `t` from the snapshot, never from `Date.now()`. No `Math.random()` anywhere in the package. Two runs of the same walk produce identical logs. That is what makes the eval suite and the inspector's replay possible.
+
+## 7. The log
+
+```ts
+interface LogEntry { t: number; decision: Decision; snapshotRef: number }
+```
+
+Snapshots are stored at 10 Hz for the walk (a ninety-second walk is small). The inspector scrubs this log; the eval suite scores it. Export is JSON.
+
+## 8. Config
+
+All thresholds above live in `config.ts` with defaults and are overridable per scenario, so evals can test a rule in isolation. The walking-rule numbers are the ones in `docs/walking-rules.md`; if the build changes one, change it there too and say so in `STATUS.md`.
+
+## 9. Not in v1
+
+Learning across walks, real sensor input, face recognition of any kind, real data feeds, any model call. Privacy is a rule, not a feature: people are never identified; "someone is talking to you" is the most the brain knows.

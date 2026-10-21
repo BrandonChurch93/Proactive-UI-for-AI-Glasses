@@ -1,0 +1,369 @@
+<title>Lumen Component Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: scene list on the left, the sunlit stage on the right, one rule under the stage. Lumen tokens carried over from the derby. */
+:root{
+  --bg:#0f1114; --bg-2:#16191e; --fg:#e9ebee; --fg-2:#9aa1ab; --fg-3:#5d646e; --rule:#262b32; --brand:#f0b429;
+  --font-ui:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif; --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --card-font:"Figtree","Helvetica Neue",Arial,sans-serif;
+  --surface:rgba(18,24,32,.46);--surface-hi:rgba(18,24,32,.62);--surface-ink:#0f1318;
+  --edge:rgba(255,255,255,.22);--edge-strong:rgba(255,255,255,.72);
+  --ink:#fbfbfa;--ink-2:rgba(251,251,250,.74);--voice:#ffd27a;--pip:#ffd27a;--go:#8fe3b0;--stop:#ff8a76;
+  --blur:blur(18px) saturate(1.4);--radius:7px;
+  color-scheme:dark;
+}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 18px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.02em}
+h1 small{display:block;font-weight:400;color:var(--fg-2);font-size:12.5px;margin-top:3px}
+.play{font:inherit;font-size:12.5px;font-weight:500;color:#15120a;background:var(--brand);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.layout{display:grid;grid-template-columns:232px 1fr;gap:12px;align-items:start}
+.scenes{display:flex;flex-direction:column;gap:4px;background:var(--bg-2);border:1px solid var(--rule);border-radius:10px;padding:6px;max-height:clamp(420px,64vh,760px);overflow:auto}
+.scenes button{font:inherit;text-align:left;font-size:13px;color:var(--fg-2);background:transparent;border:0;border-radius:7px;padding:9px 10px;cursor:pointer;display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:baseline}
+.scenes button b{font-weight:500;color:var(--fg)}
+.scenes button i{font-style:normal;font-family:var(--font-mono);font-size:10.5px;color:var(--fg-3)}
+.scenes button[aria-pressed="true"]{background:#2a3039;color:var(--fg)}
+.scenes button:hover:not([aria-pressed="true"]){color:var(--fg);background:#1e2329}
+.stage{position:relative;height:clamp(420px,64vh,760px);border-radius:10px;overflow:hidden;background:#9fb6cc;border:1px solid var(--rule);isolation:isolate;min-width:0}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ground{pointer-events:none}
+.dim{position:absolute;inset:0;background:rgba(10,14,20,0);pointer-events:none}
+.world{position:absolute;inset:0;pointer-events:none;font-family:var(--card-font);color:var(--ink)}
+.world svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.pip{fill:var(--pip);stroke:rgba(0,0,0,.35);stroke-width:1;opacity:0}
+.ring{fill:none;stroke:var(--pip);stroke-width:1.2;opacity:0}
+.leader{fill:none;stroke:var(--edge-strong);stroke-width:1.25;stroke-linecap:round;opacity:0}
+.pane{position:absolute;left:0;top:0;opacity:0;padding:9px 11px 10px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);font-size:13.5px;line-height:1.3;will-change:transform,opacity}
+.pane.g{white-space:nowrap;display:flex;flex-direction:column;gap:2px;font-weight:500}
+.pane .fact{font-weight:400;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pane .why{font-size:11.5px;color:var(--voice);font-weight:400}
+.pane.c{width:214px;font-weight:400}
+.pane.c .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pane.c .name{font-weight:500;font-size:15px;text-wrap:balance}
+.pane.c .meta{margin-top:3px;font-size:12px;color:var(--ink-2)}
+.pane.c .live{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;font-variant-numeric:tabular-nums}
+.pane.c .live i{width:6px;height:6px;border-radius:50%;background:var(--go);box-shadow:0 0 0 3px rgba(143,227,176,.22);flex:none}
+.pane.c .why{margin-top:8px;padding-top:7px;border-top:1px solid var(--edge)}
+.pane.c .orig{font-size:12px;color:var(--ink-2);font-style:italic}
+.pane.c .trans{font-size:14px;font-weight:500;margin-top:4px}
+.stops{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px;font-size:12.5px}
+.stops li{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:baseline;color:var(--ink-2)}
+.stops li b{font-weight:500;color:var(--ink)}
+.stops li i{font-style:normal;font-family:var(--font-mono);font-size:10.5px;color:var(--voice)}
+.stops li s{color:var(--ink-2);text-decoration:line-through;opacity:.6}
+.stops li em{font-style:normal;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+.view{position:absolute;inset:0;pointer-events:none;font-family:var(--card-font);color:var(--ink)}
+.toast{position:absolute;right:16px;bottom:16px;width:min(300px,calc(100% - 32px));opacity:0;padding:10px 12px 11px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);pointer-events:auto}
+.toast .from{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2)}
+.toast .from b{color:var(--ink);font-weight:500}
+.toast .body{margin-top:4px;font-size:13.5px}
+.toast .acts{display:flex;gap:8px;margin-top:9px}
+.toast .acts button,.ask .acts button{font:inherit;font-size:12px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.08);border:1px solid var(--edge);border-radius:999px;padding:5px 11px;cursor:pointer}
+.toast .acts button.primary,.ask .acts button.primary{background:var(--ink);color:var(--surface-ink);border-color:var(--ink)}
+.strip{position:absolute;opacity:0;padding:6px 10px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);font-size:12px;color:var(--ink-2);white-space:nowrap;display:flex;gap:8px;align-items:center}
+.strip b{color:var(--ink);font-weight:500}
+.strip i{font-style:normal;font-family:var(--font-mono);font-size:10.5px;color:var(--voice)}
+.ask{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:min(340px,calc(100% - 32px));opacity:0;padding:12px 14px 13px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);pointer-events:auto}
+.ask .q{font-size:15px;font-weight:500;color:var(--voice)}
+.ask .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.held{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:12px;color:var(--voice);opacity:0;letter-spacing:.02em}
+.held i{width:9px;height:9px;border-radius:2px;background:var(--voice);transform:rotate(45deg);box-shadow:0 0 0 3px rgba(255,210,122,.22)}
+.follow{position:absolute;left:16px;bottom:42px;font-size:12.5px;color:var(--voice);opacity:0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);padding:6px 10px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);white-space:nowrap}
+.walk{position:absolute;left:52%;bottom:9%;transform:translateX(-50%) perspective(420px) rotateX(58deg);transform-origin:center bottom;font-family:var(--font-mono);color:#f3f4f6;text-shadow:0 1px 6px rgba(0,0,0,.45);font-size:30px;letter-spacing:.14em;font-weight:500;opacity:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+.walk b{font-weight:500;color:var(--go)}
+.walk.wait b{color:var(--stop)}
+.map{position:absolute;right:16px;bottom:16px;width:150px;height:150px;opacity:0;border-radius:var(--radius);background:var(--surface-hi);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.map svg{width:100%;height:100%;display:block}
+.map .lbl{position:absolute;left:9px;top:7px;font-size:10.5px;color:var(--ink-2);letter-spacing:.04em}
+.turncue{position:absolute;opacity:0;white-space:nowrap;font-size:13.5px;font-weight:500;display:flex;flex-direction:column;gap:2px;padding:7px 10px 8px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.turncue .fact{font-weight:400;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.intro{position:absolute;inset:0;pointer-events:auto;cursor:pointer;font-family:var(--card-font);color:var(--ink)}
+.plate{position:absolute;inset:0;background:#07090c;opacity:1}
+.intro .text{position:absolute;left:7%;right:7%;top:50%;transform:translateY(-50%);max-width:680px;display:flex;flex-direction:column;gap:13px}
+.intro .wt{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--voice);opacity:0}
+.intro h2{margin:0;font-size:clamp(28px,4.2vw,50px);font-weight:500;line-height:1.02;letter-spacing:-.02em;text-wrap:balance;opacity:0}
+.intro .line{font-size:clamp(14px,1.5vw,18px);line-height:1.35;color:var(--ink-2);opacity:0;max-width:44ch}
+.intro .line b{color:var(--ink);font-weight:500}
+.intro .how{display:grid;gap:6px;font-size:14px;color:var(--ink-2);padding:10px 14px;border-radius:var(--radius);background:rgba(255,255,255,.05);border:1px solid var(--edge);max-width:560px}
+.intro .how div{opacity:0;display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:baseline}
+.intro .how i{font-style:normal;font-family:var(--font-mono);font-size:11px;color:var(--voice)}
+.intro .q{font-size:16px;font-weight:500;color:var(--voice);opacity:0}
+.intro .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;opacity:0;max-width:640px}
+.intro .choices button{font:inherit;text-align:left;color:var(--ink);background:rgba(255,255,255,.07);border:1px solid var(--edge);border-radius:var(--radius);padding:9px 12px 10px;pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.intro .choices button b{font-size:15px;font-weight:500}
+.intro .choices button span{font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.intro .choices button.primary{background:rgba(255,210,122,.14);border-color:var(--voice)}
+.intro .choices button:hover{background:rgba(255,255,255,.12)}
+@media (max-width:760px){.intro .choices{grid-template-columns:1fr}.intro .how{display:none}}
+.intro .skip{position:absolute;right:16px;bottom:14px;font-family:var(--font-mono);font-size:11px;color:var(--ink-2);opacity:0;letter-spacing:.06em}
+.ihint{position:absolute;right:14px;top:12px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;color:rgba(255,255,255,.55);background:rgba(10,14,20,.45);border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:3px 7px;opacity:0}
+.focus{position:absolute;left:33.3%;top:30%;width:33.4%;height:40%;border:1px dashed rgba(255,120,110,.8);border-radius:10px;pointer-events:none;display:none}
+.focus::after{content:"Focus zone · nothing persistent";position:absolute;left:8px;bottom:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:rgba(255,160,150,.95)}
+.stage.showfocus .focus{display:block}
+.toggle{font:inherit;font-size:12.5px;font-weight:500;color:var(--fg-2);background:var(--bg-2);border:1px solid var(--rule);border-radius:8px;padding:8px 12px;cursor:pointer}
+.toggle[aria-pressed="true"]{color:var(--fg);border-color:#4a5262}
+.hdr-acts{display:flex;gap:8px;align-items:center}
+.caption{position:absolute;left:50%;top:12px;transform:translateX(-50%);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#fff;opacity:.8;text-shadow:0 1px 6px rgba(0,0,0,.6);white-space:nowrap}
+.note{font-size:13px;color:var(--fg-2);line-height:1.45;max-width:72ch;min-height:2.9em}
+.note b{color:var(--fg);font-weight:600}
+button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+@media (max-width:760px){
+  .layout{grid-template-columns:1fr}
+  .scenes{flex-direction:row;overflow-x:auto;max-height:none;padding:5px}
+  .scenes button{white-space:nowrap;grid-template-columns:auto;gap:2px}
+  .scenes button i{display:none}
+  .stage{height:clamp(340px,56vh,520px)}
+  .pane.c{width:190px}
+  .walk{font-size:24px}
+}
+</style>
+
+<header>
+  <h1>Lumen Component Study<small>The remaining glasses components in the Lumen language, each as a live scene over the same block.</small></h1>
+  <div class="hdr-acts"><button type="button" class="toggle" id="focusBtn" aria-pressed="false">Show focus zone</button><button type="button" class="play" id="play">Play this scene</button></div>
+</header>
+
+<div class="layout">
+  <nav class="scenes" id="scenes" aria-label="Scenes"></nav>
+  <div class="stage" id="stage">
+    <canvas id="street" aria-label="A sunlit Midtown avenue."></canvas>
+    <canvas id="ground" aria-hidden="true"></canvas>
+    <div class="dim" id="dim"></div>
+    <div class="world" id="world">
+      <svg id="lines"><circle class="ring" id="ring" r="6"></circle><circle class="pip" id="pip" r="4"></circle><circle class="pip" id="pip2" r="3"></circle><circle class="pip" id="pip3" r="3"></circle><path class="leader" id="leader" d=""></path></svg>
+      <div class="pane g" id="glance"><span class="n"></span><span class="fact"></span><span class="why"></span></div>
+      <div class="pane c" id="card"></div>
+      <div class="turncue" id="turncue"><span>Left on 47th</span><span class="fact">2 min · 160 m</span></div>
+      <div class="strip" id="strip"><b>Package delivered</b><span>Front desk · 1 more</span><i>batched</i></div>
+    </div>
+    <div class="view">
+      <div class="toast" id="toast"><div class="from"><b id="tfrom">Maya</b><span id="tkind">Text · now</span></div><div class="body" id="tbody">Running 10 late, order me the usual?</div><div class="acts"><button type="button" class="primary">Reply</button><button type="button">Later</button></div></div>
+      <div class="pane g" id="askg" style="position:absolute"><span class="n">Hungry?</span><span class="fact">yes · no</span><span class="why">Not sure what you're after</span></div>
+      <div class="toast" id="call"><div class="from"><b>Maya</b><span>Calling</span></div><div class="body">Mobile · 2 min ago she texted</div><div class="acts"><button type="button" class="primary">Answer</button><button type="button">Decline</button></div></div>
+      <div class="held" id="held"><i></i><span>Held <b id="heldn"></b></span></div>
+      <div class="follow" id="follow">Held that while you crossed. Still want it?</div>
+      <div class="walk" id="walk"><b id="walkw">WALK</b> <span id="count">12</span></div>
+      <div class="map" id="map"><span class="lbl">Next turn</span><svg viewBox="0 0 150 150" aria-hidden="true">
+        <g fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.14)"><rect x="12" y="12" width="46" height="46" rx="2"/><rect x="92" y="12" width="46" height="46" rx="2"/><rect x="12" y="92" width="46" height="46" rx="2"/><rect x="92" y="92" width="46" height="46" rx="2"/></g>
+        <path id="mroute" d="M75 150 L75 75 L12 75" fill="none" stroke="#ffd27a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle id="mdot" cx="75" cy="140" r="4" fill="#fff"/><circle cx="14" cy="75" r="4" fill="none" stroke="#ffd27a" stroke-width="2"/>
+      </svg></div>
+    </div>
+    <div class="focus" aria-hidden="true"></div>
+    <div class="ihint" id="ihint">I · INSPECTOR</div>
+    <div class="intro" id="intro">
+      <div class="plate" id="plate"></div>
+      <div class="text">
+        <div class="wt">A UX study in when an assistant should speak, and when it should stay quiet</div>
+        <h2>Proactive UI for AI Glasses</h2>
+        <div class="line" id="l1">A simulated city wired into an AI brain that decides what to show you, how much, and when to stay quiet, as you walk toward a goal.</div>
+        <div class="how" id="how"><div><i>LOOK</i><span>Drag to turn your head. The walk is on rails.</span></div><div><i>DWELL</i><span>Hold your gaze on anything that lights up and it opens.</span></div><div><i>PINCH</i><span>Click to expand or choose. Esc to dismiss.</span></div><div><i>I</i><span>Open the inspector: every decision the brain made, the reasons, and the evals.</span></div></div>
+        <div class="q" id="q">What are you up to?</div>
+        <div class="choices" id="choices"><button type="button" class="primary"><b>Hungry</b><span>Find a place and get there.</span></button><button type="button"><b>Errands</b><span>Three stops, one route.</span></button><button type="button"><b>Just walking</b><span>See what it does when you want nothing.</span></button></div>
+      </div>
+      <div class="skip" id="skip">CLICK TO SKIP</div>
+    </div>
+    <div class="caption" id="caption"></div>
+  </div>
+</div>
+<p class="note" id="note"></p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const stage=$('#stage'),cv=$('#street'),ctx=cv.getContext('2d'),gc=$('#ground'),gx=gc.getContext('2d');
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;if(reduced)gsap.globalTimeline.timeScale(20);
+
+/* ---------- Street ---------- */
+let W=0,H=0,VP={x:0,y:0},F=0,DPR=1;const EYE=1.68,CAMX=8.4;
+function P(x,y,z){const s=F/z;return{x:VP.x+(x-CAMX)*s,y:VP.y-(y-EYE)*s};}
+function quad(c,a,b,cc,d,fill){c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(cc.x,cc.y);c.lineTo(d.x,d.y);c.closePath();c.fillStyle=fill;c.fill();}
+const sh=(c,k)=>{const m=c.match(/\d+/g).map(Number);return `rgb(${m.map(v=>Math.max(0,Math.min(255,Math.round(v*k)))).join(',')})`;};
+function facade(side,z0,z1,h,base,win,lit,store){
+  const x=side*12.2;quad(ctx,P(x,0,z0),P(x,0,z1),P(x,h,z1),P(x,h,z0),base);
+  const floors=Math.floor((h-5)/3.6),bays=Math.max(1,Math.round((z1-z0)/2.9));
+  for(let f=0;f<floors;f++){const y0=5.6+f*3.6,y1=y0+2.2;quad(ctx,P(x,y0-.5,z0),P(x,y0-.5,z1),P(x,y0-.38,z1),P(x,y0-.38,z0),sh(base,lit?.9:.85));
+    for(let b=0;b<bays;b++){const zz0=z0+(b+.3)*(z1-z0)/bays,zz1=z0+(b+.76)*(z1-z0)/bays;
+      quad(ctx,P(x,y0-.06,zz0-.06),P(x,y0-.06,zz1+.06),P(x,y1+.06,zz1+.06),P(x,y1+.06,zz0-.06),sh(base,lit?1.12:1.06));
+      quad(ctx,P(x,y0,zz0),P(x,y0,zz1),P(x,y1,zz1),P(x,y1,zz0),win);
+      if(((f*7+b*3)%5)<2)quad(ctx,P(x,y0+.9,zz0),P(x,y0+.9,zz1),P(x,y1,zz1),P(x,y1,zz0),lit?'rgba(214,206,186,.55)':'rgba(120,124,132,.45)');
+      quad(ctx,P(x,y0-.12,zz0-.1),P(x,y0-.12,zz1+.1),P(x,y0,zz1+.1),P(x,y0,zz0-.1),sh(base,lit?1.18:1.08));}}
+  quad(ctx,P(x,5.1,z0),P(x,5.1,z1),P(x,5.5,z1),P(x,5.5,z0),sh(base,lit?1.08:.92));
+  quad(ctx,P(x,5.5,z0),P(x,5.5,z1),P(x,5.65,z1),P(x,5.65,z0),'rgba(0,0,0,.15)');
+  quad(ctx,P(x,0,z0),P(x,0,z1),P(x,4.9,z1),P(x,4.9,z0),store);
+  quad(ctx,P(x,.6,z0+.3),P(x,.6,z1-.3),P(x,3.3,z1-.3),P(x,3.3,z0+.3),lit?'rgb(26,30,36)':'rgb(18,21,26)');
+}
+function drawStreet(){
+  DPR=Math.min(devicePixelRatio||1,2);const r=stage.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);
+  for(const c of [cv,gc]){c.width=W*DPR;c.height=H*DPR;}ctx.setTransform(DPR,0,0,DPR,0,0);gx.setTransform(DPR,0,0,DPR,0,0);
+  VP={x:W*.5,y:H*.56};F=H*.58;
+  const sky=ctx.createLinearGradient(0,0,0,VP.y);sky.addColorStop(0,'#5f8fc6');sky.addColorStop(.7,'#a9c3dc');sky.addColorStop(1,'#d9e2ea');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  const NZ=1.2;const road=ctx.createLinearGradient(0,H,0,VP.y);road.addColorStop(0,'#86878a');road.addColorStop(1,'#aab0b6');
+  quad(ctx,P(-7,0,NZ),P(7,0,NZ),P(7,0,900),P(-7,0,900),road);
+  const walkR=ctx.createLinearGradient(0,H,0,VP.y);walkR.addColorStop(0,'#cfcabd');walkR.addColorStop(1,'#d8d4cb');
+  quad(ctx,P(7,0,NZ),P(12.2,0,NZ),P(12.2,0,900),P(7,0,900),walkR);quad(ctx,P(-12.2,0,NZ),P(-7,0,NZ),P(-7,0,900),P(-12.2,0,900),'#9a9893');
+  for(let z=NZ;z<160;z+=1.6)quad(ctx,P(7.3,0,z),P(12.2,0,z),P(12.2,0,z+.04),P(7.3,0,z+.04),'rgba(70,66,60,.28)');
+  quad(ctx,P(7,0,NZ),P(7.3,0,NZ),P(7.3,.14,900),P(7,.14,900),'#b9b4a8');quad(ctx,P(7,.14,NZ),P(7.3,.14,NZ),P(7.3,.14,900),P(7,.14,900),'#e2ddd2');
+  quad(ctx,P(-7.25,0,NZ),P(-7,0,NZ),P(-7,0,900),P(-7.25,0,900),'#8d8b86');
+  for(let z=3;z<400;z+=9)quad(ctx,P(-.12,0,z),P(.12,0,z),P(.12,0,z+3),P(-.12,0,z+3),'rgba(240,238,228,.8)');
+  for(let z=5;z<400;z+=9){quad(ctx,P(-3.5,0,z),P(-3.3,0,z),P(-3.3,0,z+3),P(-3.5,0,z+3),'rgba(240,238,228,.55)');quad(ctx,P(3.3,0,z),P(3.5,0,z),P(3.5,0,z+3),P(3.3,0,z+3),'rgba(240,238,228,.55)');}
+  for(let x=-6.6;x<6.6;x+=1.2)quad(ctx,P(x,0,30),P(x+.6,0,30),P(x+.6,0,34),P(x,0,34),'rgba(244,242,236,.85)');
+  for(let z=6;z<200;z+=11)quad(ctx,P(8.1,0,z),P(9.3,0,z),P(9.3,0,z+1.2),P(8.1,0,z+1.2),'rgb(70,58,46)');
+  for(let z=10;z<260;z+=24){const lx=7.75;quad(ctx,P(lx-.08,0,z),P(lx+.08,0,z),P(lx+.08,8.4,z),P(lx-.08,8.4,z),'rgb(42,44,46)');quad(ctx,P(lx-1.9,8.25,z),P(lx+.06,8.3,z),P(lx+.06,8.42,z),P(lx-1.9,8.37,z),'rgb(42,44,46)');}
+  const right=[[0.6,20,36,'rgb(216,200,166)'],[20,34,52,'rgb(196,178,146)'],[34,48,44,'rgb(224,210,184)'],[48,66,70,'rgb(190,182,170)'],[66,90,58,'rgb(206,194,176)'],[90,130,90,'rgb(178,172,164)'],[130,200,76,'rgb(186,184,180)'],[200,320,110,'rgb(170,172,176)'],[320,600,95,'rgb(160,168,178)']];
+  const left=[[0.6,22,40,'rgb(98,96,104)'],[22,38,58,'rgb(88,90,100)'],[38,54,48,'rgb(106,102,106)'],[54,74,72,'rgb(84,88,98)'],[74,100,60,'rgb(96,98,108)'],[100,140,96,'rgb(92,98,112)'],[140,210,78,'rgb(104,110,124)'],[210,330,112,'rgb(112,120,136)'],[330,600,100,'rgb(124,134,150)']];
+  for(let i=right.length-1;i>=0;i--){const [a,b,h,c]=right[i];facade(1,a,b,h,c,'rgba(34,40,52,.82)',true,i===0?'rgb(58,46,40)':i===1?'rgb(30,38,44)':'rgb(44,44,48)');}
+  for(let i=left.length-1;i>=0;i--){const [a,b,h,c]=left[i];facade(-1,a,b,h,c,'rgba(22,26,34,.85)',false,i===0?'rgb(34,34,40)':i===1?'rgb(24,30,32)':'rgb(30,30,34)');}
+  quad(ctx,P(12.2,3.3,8),P(12.2,3.3,18),P(10.9,2.75,18),P(10.9,2.75,8),'rgb(142,34,30)');
+  quad(ctx,P(-12.2,3.3,9),P(-12.2,3.3,19),P(-10.9,2.75,19),P(-10.9,2.75,9),'rgb(26,52,42)');
+  quad(ctx,P(12.21,4.0,8.6),P(12.21,4.0,17.4),P(12.21,4.8,17.4),P(12.21,4.8,8.6),'rgb(246,228,184)');
+  quad(ctx,P(12.21,4.0,21),P(12.21,4.0,31),P(12.21,4.8,31),P(12.21,4.8,21),'rgb(40,110,80)');
+  quad(ctx,P(-12.21,4.0,9.6),P(-12.21,4.0,18.4),P(-12.21,4.8,18.4),P(-12.21,4.8,9.6),'rgb(224,218,206)');
+  quad(ctx,P(-12.21,4.0,24),P(-12.21,4.0,36),P(-12.21,5.2,36),P(-12.21,5.2,24),'rgb(120,40,36)');
+  quad(ctx,P(-7,0,6),P(1.5,0,6),P(5,0,70),P(-7,0,70),'rgba(30,38,58,.28)');
+  for(const z of [11,17.5,24,42,49]){const c=['#1b1d21','#e9e8e3','#f2b51d','#3a4455','#c8c3b7'][Math.floor(z)%5];quad(ctx,P(5.2,0,z),P(6.9,0,z),P(6.9,0,z+4.6),P(5.2,0,z+4.6),'rgba(0,0,0,.22)');quad(ctx,P(5.3,.35,z),P(6.8,.35,z),P(6.8,1.35,z+4.6),P(5.3,1.35,z+4.6),c);quad(ctx,P(5.45,1.35,z+.9),P(6.65,1.35,z+.9),P(6.65,1.95,z+3.4),P(5.45,1.95,z+3.4),'rgb(22,26,32)');}
+  const hz=ctx.createRadialGradient(VP.x,VP.y,10,VP.x,VP.y,W*.62);hz.addColorStop(0,'rgba(206,218,230,.62)');hz.addColorStop(.35,'rgba(206,218,230,.22)');hz.addColorStop(1,'rgba(206,218,230,0)');ctx.fillStyle=hz;ctx.fillRect(0,0,W,H);
+  const vg=ctx.createRadialGradient(VP.x,VP.y,W*.3,VP.x,VP.y,W*.95);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(10,14,20,.42)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
+
+/* ---------- Ground layer: route, turn arc, destination, curb paint ---------- */
+const G={route:0,dest:0,arc:0,reroute:0};
+const ROUTE=[[9.6,1.4],[9.6,30.5]];
+function routePts(prog,alt){
+  const pts=[];const total=prog;
+  const a=[9.6,1.4],b=[9.6,30.8],c=[-9.4,34.6],d=[-9.4,60];
+  const segs=alt?[[a,b],[b,c],[c,d]]:[[a,b],[b,c]];
+  const lens=segs.map(([p,q])=>Math.hypot(q[0]-p[0],q[1]-p[1]));const L=lens.reduce((x,y)=>x+y,0);let left=total*L;
+  for(let i=0;i<segs.length;i++){const [p,q]=segs[i];const n=Math.max(2,Math.ceil(lens[i]/1.2));for(let k=0;k<=n;k++){const t=k/n;const dist=t*lens[i];if(dist>left){pts.push([p[0]+(q[0]-p[0])*(left/lens[i]),p[1]+(q[1]-p[1])*(left/lens[i])]);return pts;}pts.push([p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t]);}left-=lens[i];}
+  return pts;
+}
+function drawGround(){
+  gx.clearRect(0,0,W,H);
+  if(G.route>0){
+    const pts=routePts(G.route,G.reroute>0);
+    const band=(hw,color,amul)=>{for(let i=1;i<pts.length;i++){const [x0,z0]=pts[i-1],[x1,z1]=pts[i];let dx=x1-x0,dz=z1-z0;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;const nx=-dz*hw,nz=dx*hw;const fade=Math.max(0,1-(z1-1)/52);
+      quad(gx,P(x0+nx,.01,z0+nz),P(x0-nx,.01,z0-nz),P(x1-nx,.01,z1-nz),P(x1+nx,.01,z1+nz),color(amul*fade));}};
+    band(.46,a=>`rgba(255,214,130,${a})`,.55);
+    band(.14,a=>`rgba(255,246,222,${a})`,.55);
+  }
+  if(G.arc>0){gx.save();gx.strokeStyle=`rgba(255,214,130,${.9*G.arc})`;gx.lineWidth=Math.max(1.5,.4*F/30);gx.lineCap='round';gx.beginPath();const n=14;for(let k=0;k<=n*G.arc;k++){const t=k/n;const x=9.6-Math.sin(t*Math.PI/2)*2.4,z=30.8+(1-Math.cos(t*Math.PI/2))*2.4;const p=P(x,0,z);k?gx.lineTo(p.x,p.y):gx.moveTo(p.x,p.y);}gx.stroke();gx.restore();}
+  if(G.dest>0){const z=36,x=-11.2;const base=P(x,0,z),top=P(x,26*G.dest,z);const w=Math.max(6,1.6*F/z);const g=gx.createLinearGradient(0,base.y,0,top.y);g.addColorStop(0,`rgba(255,214,130,${.7*G.dest})`);g.addColorStop(.6,`rgba(255,214,130,${.18*G.dest})`);g.addColorStop(1,'rgba(255,214,130,0)');gx.fillStyle=g;gx.fillRect(base.x-w/2,top.y,w,base.y-top.y);
+    gx.fillStyle=`rgba(255,214,130,${.9*G.dest})`;gx.beginPath();gx.ellipse(base.x,base.y,w*.9,w*.32,0,0,7);gx.fill();}
+}
+
+/* ---------- Elements ---------- */
+const pip=$('#pip'),pip2=$('#pip2'),pip3=$('#pip3'),ring=$('#ring'),leader=$('#leader'),glance=$('#glance'),card=$('#card'),turncue=$('#turncue'),strip=$('#strip'),toast=$('#toast'),call=$('#call'),askg=$('#askg'),intro=$('#intro'),plate=$('#plate'),ihint=$('#ihint'),held=$('#held'),follow=$('#follow'),walk=$('#walk'),map=$('#map'),dim=$('#dim'),caption=$('#caption'),note=$('#note');
+const T={snap:.12,quick:.22,base:.32,open:.42};const eo='power3.out',ei='power2.in',eg='power1.inOut';
+function setPip(el,w){const p=P(w[0],w[1],w[2]);el.setAttribute('cx',p.x);el.setAttribute('cy',p.y);return p;}
+const FZ=()=>({x0:W/3,x1:W*2/3,y0:H*.3,y1:H*.7});
+function placePane(el,anchor,toward,dy=30,allowCenter=false){const w=el.offsetWidth,h=el.offsetHeight;let x=anchor.x+toward*18;if(toward<0)x-=w;let y=anchor.y-h-dy;
+  x=Math.max(10,Math.min(W-w-10,x));y=Math.max(10,Math.min(H-h-10,y));
+  if(!allowCenter){const f=FZ();const hits=()=>x<f.x1+8&&x+w>f.x0-8&&y<f.y1+8&&y+h>f.y0-8;
+    if(hits()){const side=anchor.x<W/2?-1:1;x=side<0?f.x0-8-w:f.x1+8;x=Math.max(10,Math.min(W-w-10,x));if(hits()){y=f.y0-8-h;if(y<10)y=f.y1+8;}}}
+  gsap.set(el,{x,y});return{x,y,w,h};}
+function setLeader(a,b){leader.setAttribute('d',`M${a.x},${a.y} Q${(a.x+b.x)/2},${Math.min(a.y,b.y)-8} ${b.x},${b.y}`);const L=leader.getTotalLength();leader.style.strokeDasharray=L;leader.style.strokeDashoffset=L;return L;}
+function mark(tl,el,at=0){tl.fromTo(el,{attr:{r:0},opacity:0},{attr:{r:4},opacity:1,duration:T.quick,ease:eo},at);if(!reduced&&el===pip)tl.fromTo(ring,{attr:{r:4},opacity:.9},{attr:{r:22},opacity:0,duration:.5,ease:'power2.out'},at+.04);}
+function bloom(tl,el,at=0,dur=T.base){tl.fromTo(el,{opacity:0,scale:.94,filter:'blur(6px)',yPercent:5},{opacity:1,scale:1,filter:'blur(0px)',yPercent:0,duration:dur,ease:eo,immediateRender:false},at);const kids=el.querySelectorAll(':scope > *');if(kids.length)tl.fromTo(kids,{opacity:0,y:4},{opacity:1,y:0,duration:T.quick,stagger:.04,ease:eo},at+.1);}
+function fold(tl,el,at=0){tl.to(el,{opacity:0,scale:.97,filter:'blur(3px)',duration:T.quick,ease:ei},at);}
+function drawLeader(tl,at=0){tl.set(leader,{opacity:1},at);tl.to(leader,{strokeDashoffset:0,duration:T.base,ease:'power2.inOut'},at);}
+function cardHTML(h){card.innerHTML=h;}
+function glanceSet(n,f,w){glance.querySelector('.n').textContent=n;glance.querySelector('.fact').textContent=f;glance.querySelector('.why').textContent=w;}
+function recede(tl,els,at=0){tl.to(els,{opacity:.14,y:'+=12',filter:'saturate(.2)',duration:T.quick,ease:eg},at);tl.to([pip,pip2,pip3],{attr:{r:2.5},duration:T.quick},at);tl.fromTo(held,{opacity:0,x:-8},{opacity:1,x:0,duration:T.base,ease:eo},at+.12);}
+function comeBack(tl,els,at=0){tl.to(els,{opacity:1,y:'-=12',filter:'saturate(1)',duration:T.base,ease:eo},at);tl.to(pip,{attr:{r:4},duration:T.base},at);tl.to(held,{opacity:0,x:-6,duration:T.quick,ease:ei},at+.2);}
+function glanceScene(tl,w,n,f,why,capText,toward=1,at=.2,hold=3.6,tone){const a=setPip(pip,w);mark(tl,pip,at);glanceSet(n,f,why);if(tone)glance.style.setProperty('--voice',tone);tl.add(()=>{placePane(glance,a,toward,24);},at+.35);bloom(tl,glance,at+.4);if(capText)cap(tl,capText,at+.4);if(hold){fold(tl,glance,at+.4+hold);tl.to(pip,{opacity:0,duration:T.quick},at+.5+hold);}}
+function cap(tl,text,at=0){tl.add(()=>{caption.textContent=text;},at);tl.fromTo(caption,{opacity:0},{opacity:.8,duration:T.quick},at);}
+function reset(){
+  gsap.killTweensOf(G);
+  gsap.set([glance,card,turncue,strip,toast,call,askg,held,follow,walk,map,leader,ihint],{opacity:0,clearProps:'filter,scale,transform,yPercent'});gsap.set(intro,{opacity:0,pointerEvents:'none'});gsap.set(plate,{opacity:1});gsap.set(intro.querySelectorAll('.wt,h2,.line,.how,.how div,.q,.choices,.skip'),{opacity:0,clearProps:'transform'});
+  gsap.set([pip,pip2,pip3],{opacity:0,attr:{r:4},clearProps:'filter'});gsap.set(ring,{opacity:0});
+  gsap.set(dim,{background:'rgba(10,14,20,0)',backdropFilter:'blur(0px)'});
+  Object.assign(G,{route:0,dest:0,arc:0,reroute:0});drawGround();
+  walk.classList.remove('wait');$('#walkw').textContent='WALK';$('#count').textContent='12';$('#heldn').textContent='';
+  caption.textContent='';glance.style.removeProperty('--voice');
+}
+
+/* ---------- Scenes ---------- */
+const SCENES=[
+{id:'title',name:'Title screen',tag:'open',note:'<b>Title screen.</b> Over the live street, in the glasses language. Sets the setting, says how to use it, asks the one question. Skippable with a click; picking a choice starts the walk.',
+ run(tl){gsap.set(intro,{opacity:1,pointerEvents:'auto'});tl.add(()=>{intro.style.pointerEvents='none';},8.7);tl.set(plate,{opacity:.72},0);const up=(sel,at,d=T.open)=>tl.fromTo(sel,{opacity:0,y:10,filter:'blur(6px)'},{opacity:1,y:0,filter:'blur(0px)',duration:d,ease:eo},at);
+   up('#intro h2',.3);up('#intro .wt',.5,T.base);up('#l1',.9);tl.to(plate,{opacity:.72,duration:1.6,ease:eg},1.0);tl.fromTo('#skip',{opacity:0},{opacity:.7,duration:T.base},1.4);
+   up('#how',2.4);tl.fromTo('#how div',{opacity:0,y:8},{opacity:1,y:0,duration:T.base,stagger:.16,ease:eo},2.6);
+   up('#q',4.6);up('#choices',4.9);
+   tl.to('#choices button:first-child',{scale:1.03,duration:.14,yoyo:true,repeat:1},7.6);
+   tl.to(intro.querySelectorAll('.text > *'),{opacity:0,y:-8,filter:'blur(4px)',duration:T.base,stagger:.03,ease:ei},8.6);tl.to('#skip',{opacity:0,duration:T.quick},8.6);
+   tl.to(plate,{opacity:0,duration:.9,ease:eg},8.8);tl.fromTo(ihint,{opacity:0},{opacity:1,duration:T.base},9.6);
+   const a=setPip(pip,[12.2,4.4,15.5]);mark(tl,pip,10.2);cap(tl,'Walking · first pip',10.2);}},
+{id:'askg',name:'Ask glance',tag:'edge',note:'<b>Ask glance.</b> The brain is unsure of your goal, so it asks with one line at the edge of view. Two choices. Looking away for three seconds dismisses it. It never enters the focus zone.',
+ run(tl){const a=P(12.2,2.4,9);tl.add(()=>{placePane(askg,a,1,0);},.3);bloom(tl,askg,.4);cap(tl,'Low confidence on intent',.4);fold(tl,askg,4.2);}},
+{id:'route',name:'Route and turn',tag:'ground',note:'<b>Route on the pavement.</b> Draws on from the feet, fades out ahead so it never reads as a wire. The turn is an arc painted at the corner plus one glance line in the world. No arrows in the air.',
+ run(tl){tl.to(G,{route:1,duration:1.4,ease:'power2.out',onUpdate:drawGround},.2);tl.to(G,{arc:1,duration:.5,ease:eo,onUpdate:drawGround},1.3);const a=P(9.6,1.2,30.8);tl.add(()=>{const r=placePane(turncue,a,-1,10);setLeader(a,{x:r.x<a.x?r.x+r.w:r.x,y:r.y+r.h/2});},1.5);drawLeader(tl,1.5);bloom(tl,turncue,1.6);cap(tl,'Left on 47th · 160 m',1.6);}},
+{id:'map',name:'Map tile',tag:'view',note:'<b>Map tile.</b> Only for a turn the wearer cannot see, or on request. Slides into the lower corner, holds for the turn, leaves. The route stays on the ground the whole time.',
+ run(tl){G.route=1;G.arc=1;drawGround();const a=P(9.6,1.2,30.8);const r=placePane(turncue,a,-1,10);setLeader(a,{x:r.x<a.x?r.x+r.w:r.x,y:r.y+r.h/2});gsap.set(leader,{opacity:1,strokeDashoffset:0});gsap.set(turncue,{opacity:1});cap(tl,'Turn behind the corner · map shown',0);tl.fromTo(map,{opacity:0,y:18,scale:.96,filter:'blur(6px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:T.open,ease:eo},.4);tl.fromTo('#mroute',{strokeDasharray:300,strokeDashoffset:300},{strokeDashoffset:0,duration:.8,ease:'power2.inOut'},.6);tl.to('#mdot',{attr:{cy:80},duration:2.4,ease:'none'},.8);tl.to(map,{opacity:0,y:12,filter:'blur(4px)',duration:T.quick,ease:ei},3.6);}},
+{id:'arrive',name:'Arrival',tag:'ground',note:'<b>Destination marker.</b> A column of light at the door, visible over the buildings when far, settling into a pip at the entrance when near. The route folds back to the feet on arrival.',
+ run(tl){G.route=1;G.reroute=1;drawGround();tl.to(G,{dest:1,duration:.9,ease:eo,onUpdate:drawGround},.2);cap(tl,'Goldie\'s Counter · 80 m',.3);tl.to(G,{dest:.08,duration:1.2,ease:eg,onUpdate:drawGround},2.2);const a=setPip(pip,[-12.2,4.4,36]);mark(tl,pip,2.8);glanceSet('Goldie\'s Counter','Table\'s ready · inside on the left','Held for you');tl.add(()=>{placePane(glance,a,1,28);},2.9);bloom(tl,glance,3);tl.to(G,{route:0,duration:.8,ease:ei,onUpdate:drawGround},3.2);}},
+{id:'msg-glance',name:'Message · at a red light',tag:'view',note:'<b>Message at glance level.</b> Arrives while stopped at a light, so the brain shows it now. Sender, one line, two actions. Enters from the screen edge; messages are the one thing allowed to.',
+ run(tl){walk.classList.add('wait');$('#walkw').textContent='WAIT';$('#count').textContent='18';tl.fromTo(walk,{opacity:0},{opacity:1,duration:T.base,ease:eo},.1);tl.add(()=>{$('#tfrom').textContent='Maya';$('#tkind').textContent='Text · now';$('#tbody').textContent='Running 10 late, order me the usual?';},.9);tl.fromTo(toast,{opacity:0,x:24,filter:'blur(6px)'},{opacity:1,x:0,filter:'blur(0px)',duration:T.base,ease:eo},1);tl.fromTo(toast.querySelectorAll(':scope > *'),{opacity:0,y:4},{opacity:1,y:0,duration:T.quick,stagger:.05},1.1);cap(tl,'Stopped at a light · safe to show',1.1);}},
+{id:'msg-held',name:'Message · held in the crossing',tag:'gate',note:'<b>Message held.</b> Arrives mid-crossing. Nothing shows; the held glyph gains a count. At the curb, one line asks whether to read it. The reason always waits for the curb.',
+ run(tl){cardHTML('<div class="row"><span class="name">Goldie\'s Counter</span><span class="rating">★ 4.6</span></div><div class="meta">Deli · $ · 40 m</div><div class="live"><i></i>3 min wait · 9 seats open</div><div class="why">Short wait, on your side of the street</div>');const a=setPip(pip,[12.2,4.4,15.5]);gsap.set(pip,{opacity:1});const c=placePane(card,a,1,34);const L=setLeader(a,{x:c.x,y:c.y+c.h});gsap.set(leader,{opacity:1,strokeDashoffset:0});gsap.set(card,{opacity:1});
+   tl.fromTo(walk,{opacity:0},{opacity:1,duration:T.base,ease:eo},.3);cap(tl,'Foot leaves the curb · recede',.3);recede(tl,[card,leader],.4);
+   tl.add(()=>{$('#heldn').textContent='1';},1.6);tl.fromTo('#heldn',{scale:1.6,opacity:0},{scale:1,opacity:1,duration:T.quick,ease:eo},1.6);cap(tl,'A message arrives · nothing shows',1.6);
+   tl.to(walk,{opacity:0,duration:T.quick,ease:ei},3.2);cap(tl,'Far curb · return',3.2);comeBack(tl,[card,leader],3.3);tl.add(()=>{card.querySelector('.why').textContent='Held that while you crossed';},3.5);tl.fromTo(card.querySelector('.why'),{opacity:0},{opacity:1,duration:T.quick},3.52);
+   tl.add(()=>{follow.textContent='One message came in. Read it?';},3.8);bloom(tl,follow,3.8);}},
+{id:'msg-batch',name:'Message · batched under a card',tag:'world',note:'<b>Batched.</b> An app update arrives while a card is open. It tucks under the card as a slim strip, counted, never stacked above. Opens only if asked.',
+ run(tl){cardHTML('<div class="row"><span class="name">Goldie\'s Counter</span><span class="rating">★ 4.6</span></div><div class="meta">Deli · $ · 40 m</div><div class="live"><i></i>3 min wait · 9 seats open</div><div class="why">Short wait, on your side of the street</div>');const a=setPip(pip,[12.2,4.4,15.5]);gsap.set(pip,{opacity:1});const c=placePane(card,a,1,34);setLeader(a,{x:c.x,y:c.y+c.h});gsap.set(leader,{opacity:1,strokeDashoffset:0});gsap.set(card,{opacity:1});
+   tl.add(()=>{gsap.set(strip,{x:c.x,y:c.y+c.h+8});},.8);tl.fromTo(strip,{opacity:0,y:c.y+c.h-2,filter:'blur(4px)'},{opacity:1,y:c.y+c.h+8,filter:'blur(0px)',duration:T.quick,ease:eo},.9);cap(tl,'Reading the card · batched beneath',.9);}},
+{id:'reminder',name:'Reminder at a place',tag:'world',note:'<b>Reminder.</b> Unfolds from the pharmacy sign as you pass. It was not a stop; the brain added it because the place and the task lined up. The reason says why in one line.',
+ run(tl){const a=setPip(pip,[12.2,4.4,26]);mark(tl,pip,.2);glanceSet('Pharmacy','Prescription\'s ready here · open till 9','On your way, no detour');tl.add(()=>{placePane(glance,a,1,26);},.6);bloom(tl,glance,.7);cap(tl,'Passing the pharmacy',.7);}},
+{id:'reroute',name:'Errands · reroute',tag:'world',note:'<b>Reroute.</b> The second stop is closed. The brain says so, reorders, and the route redraws. The wearer sees the decision happen, not just the result.',
+ run(tl){G.route=1;drawGround();cardHTML('<div class="row"><span class="name">Three stops</span><span class="rating">22 min</span></div><ul class="stops"><li><i>1</i><b>Dry cleaner</b><em>4 min</em></li><li><i>2</i><b>Hardware</b><em>9 min</em></li><li><i>3</i><b>Post office</b><em>9 min</em></li></ul><div class="why">Shortest loop that ends near home</div>');const a=setPip(pip,[9.6,1.2,30.8]);gsap.set(pip,{opacity:1,attr:{r:3}});placePane(card,a,-1,20);bloom(tl,card,.2);cap(tl,'Hardware closed early · reordering',1.6);
+   tl.add(()=>{const li=card.querySelectorAll('.stops li');li[1].innerHTML='<i>·</i><s>Hardware</s><em>closed</em>';li[2].innerHTML='<i>2</i><b>Post office</b><em>9 min</em>';card.querySelector('.why').textContent='Hardware closed at 10. Post office first, then back past it tomorrow.';card.querySelector('.rating').textContent='13 min';},1.7);
+   tl.fromTo(card.querySelectorAll('.stops li, .why, .rating'),{opacity:.4},{opacity:1,duration:T.base,stagger:.05},1.7);
+   tl.to(G,{route:0,duration:.5,ease:ei,onUpdate:drawGround},1.8);tl.add(()=>{G.reroute=1;},2.3);tl.to(G,{route:1,duration:1.2,ease:'power2.out',onUpdate:drawGround},2.35);}},
+{id:'crossing',name:'Crossing state',tag:'ground',note:'<b>Crossing state.</b> Painted at the curb line eight meters out: one word and a countdown, nothing else new appears. In the roadway only this and the held glyph stay at full strength.',
+ run(tl){cardHTML('<div class="row"><span class="name">Goldie\'s Counter</span><span class="rating">★ 4.6</span></div><div class="meta">Deli · $ · 40 m</div><div class="live"><i></i>3 min wait · 9 seats open</div><div class="why">Short wait, on your side of the street</div>');const a=setPip(pip,[12.2,4.4,15.5]);gsap.set(pip,{opacity:1});const c=placePane(card,a,1,34);setLeader(a,{x:c.x,y:c.y+c.h});gsap.set(leader,{opacity:1,strokeDashoffset:0});gsap.set(card,{opacity:1});
+   tl.fromTo(walk,{opacity:0},{opacity:1,duration:T.base,ease:eo},.3);cap(tl,'Eight meters from the curb',.3);let n=12;const tick=()=>{n=Math.max(1,n-1);$('#count').textContent=n;};for(let i=1;i<=6;i++)tl.add(tick,.3+i);recede(tl,[card,leader],2.2);cap(tl,'In the roadway',2.2);tl.to(walk,{opacity:0,duration:T.quick,ease:ei},5.4);comeBack(tl,[card,leader],5.5);cap(tl,'Far curb',5.5);}},
+{id:'translate',name:'Sign translation',tag:'world',note:'<b>Translation.</b> Gaze dwell on a sign in another language. The original fades, the reading settles in, with one line in the brain\'s voice saying what it did. Pure gaze trigger, no goal needed.',
+ run(tl){const a=setPip(pip,[-12.2,4.6,30]);mark(tl,pip,.2);tl.to(pip,{attr:{r:5.5},filter:'drop-shadow(0 0 6px #ffd27a)',duration:.6,ease:'sine.inOut'},.5);cardHTML('<div class="orig">Trattoria da Lia · cucina casalinga · aperto fino alle 23</div><div class="trans">Home cooking · open until 11 PM</div><div class="why">Read from Italian</div>');tl.add(()=>{placePane(card,a,1,22);},1.1);bloom(tl,card,1.2);tl.to(card.querySelector('.orig'),{opacity:.45,duration:.4},2);cap(tl,'Looking at the sign',1.2);}},
+{id:'landmark',name:'Landmark card',tag:'world',note:'<b>Landmark.</b> Look at an old building, get one line of what it is and one live fact. Just walking is where this lives; it never appears unless the wearer looks.',
+ run(tl){const a=setPip(pip,[-12.2,4.8,30]);mark(tl,pip,.2);tl.to(pip,{attr:{r:5.5},filter:'drop-shadow(0 0 6px #ffd27a)',duration:.6,ease:'sine.inOut'},.5);cardHTML('<div class="row"><span class="name">Grace Theater</span><span class="rating">1927</span></div><div class="meta">Vaudeville house turned cinema · landmarked 1981</div><div class="live"><i></i>Last show tonight at 8</div><div class="why">Free to walk in and see the lobby</div>');tl.add(()=>{placePane(card,a,1,24);},1.1);bloom(tl,card,1.2);cap(tl,'Idle · looking at the façade',1.2);}},
+{id:'social',name:'Notification · social',tag:'glyph',note:'<b>Social notifications.</b> Likes and follows are never shown one by one. They count up on the held glyph while you walk, and surface as a single strip only when you stop. Low value by default.',
+ run(tl){tl.fromTo(held,{opacity:0,x:-8},{opacity:1,x:0,duration:T.base,ease:eo},.3);tl.add(()=>{$('#heldn').textContent='1 · social';},.4);cap(tl,'Walking · a like comes in',.4);
+   tl.add(()=>{$('#heldn').textContent='2 · social';},1.6);tl.fromTo('#heldn',{scale:1.4},{scale:1,duration:T.quick},1.6);tl.add(()=>{$('#heldn').textContent='3 · social';},2.5);tl.fromTo('#heldn',{scale:1.4},{scale:1,duration:T.quick},2.5);
+   walk.classList.add('wait');$('#walkw').textContent='WAIT';$('#count').textContent='14';tl.fromTo(walk,{opacity:0},{opacity:1,duration:T.base,ease:eo},3.6);cap(tl,'Stopped at a light · surfaced once',3.6);
+   tl.add(()=>{strip.innerHTML='<b>3 notifications</b><span>2 likes · 1 follow</span><i>later</i>';gsap.set(strip,{x:16,y:H-74});},3.9);tl.fromTo(strip,{opacity:0,y:H-66,filter:'blur(4px)'},{opacity:1,y:H-74,filter:'blur(0px)',duration:T.base,ease:eo},4);tl.to(held,{opacity:0,duration:T.quick},4);}},
+{id:'call',name:'Notification · a call',tag:'view',note:'<b>A call.</b> The one thing that interrupts a walk, never a crossing. Answer and decline at the edge, and the world dims slightly while it rings. Decline folds it instantly.',
+ run(tl){tl.to(dim,{background:'rgba(10,14,20,.16)',duration:T.open,ease:eg},.3);tl.fromTo(call,{opacity:0,x:24,filter:'blur(6px)'},{opacity:1,x:0,filter:'blur(0px)',duration:T.base,ease:eo},.4);tl.fromTo(call.querySelectorAll(':scope > *'),{opacity:0,y:4},{opacity:1,y:0,duration:T.quick,stagger:.05},.5);cap(tl,'Walking · a call beats everything but a crossing',.5);
+   tl.to(call.querySelector('.from span'),{opacity:.35,duration:.5,yoyo:true,repeat:5},.8);}},
+{id:'pace',name:'Pace to signal',tag:'moment',note:'<b>Pace to signal.</b> The brain knows the light cycle and your speed, so it tells you whether to hurry before you can see the countdown. Most people never knew they wanted this.',
+ run(tl){glanceScene(tl,[9.6,1.2,26],'Next two lights','You\'ll make both at this pace','No need to run','Reading the signal cycle',-1);}},
+{id:'bus',name:'Bus at the stop',tag:'moment',note:'<b>Bus at the stop.</b> Shown as you approach a stop, before you can see the bus. Run or stroll, decided for you. Only when it fits the goal.',
+ run(tl){glanceScene(tl,[9.9,2.6,40],'M4 uptown','2 min · next in 11','On your route, stop ahead','Approaching the stop',-1);}},
+{id:'stairs',name:'Which stairs',tag:'moment',note:'<b>Which stairs.</b> A subway has four entrances and only one is on your side of the platform. One line saves the wrong-platform walk.',
+ run(tl){glanceScene(tl,[9.9,2.6,22],'Uptown trains','Use the far entrance · uptown side','Saves the crossover underground','Passing the first stairs',-1);}},
+{id:'closes',name:'Closes soon',tag:'moment',note:'<b>Closes soon.</b> Only for a place that matches your goal. Passing a hardware store on an errand run and it closes in eight minutes is worth one line; passing it on a food run is not.',
+ run(tl){glanceScene(tl,[12.2,4.4,26],'Pharmacy','Closes in 8 min','On your list',"Errands · it's on your list",1);}},
+{id:'closed',name:'Sidewalk closed ahead',tag:'ground',note:'<b>Sidewalk closed.</b> Scaffolding shuts the next block on your side. The route nudges you across here, with one glance saying why. Painted, not announced.',
+ run(tl){tl.to(G,{route:1,duration:1.2,ease:'power2.out',onUpdate:drawGround},.2);glanceScene(tl,[9.6,1.4,30.8],'Cross here','Scaffolding closes the next block on this side','Shorter than going around','Route moved a block early',-1,1.2,0);}},
+{id:'bike',name:'Bike behind you',tag:'safety',note:'<b>Bike behind you.</b> You drift toward the bike lane and a rider is three seconds back. Stop tone, edge of view, gone the moment the rider passes. Safety beats everything but the crossing.',
+ run(tl){glanceScene(tl,[6.9,1.0,4],'Bike','3 s · behind you','Drifting into the lane','Edge of view · stop tone',1,.2,1.8,'#ff8a76');}},
+{id:'idle',name:'Idle glances',tag:'world',note:'<b>Just walking.</b> Three glance lines over a minute, never two at once: a weather turn, a train, something happening nearby. Each fades on its own. Nothing else shows.',
+ run(tl){const spots=[[[9.6,2.2,24],'Rain in 12 min','Awnings the next two blocks','Only if you keep walking'],[[12.2,2.6,42],'Uptown trains','Next in 4 min · then 9','Passing the stairs'],[[-12.2,4.8,30],'Grace Theater','Doors at 7:30 tonight','Two blocks on, if you\'re free']];
+   let t=.2;for(const [w,n,f,why] of spots){const a=setPip(pip,w);const p={...a};tl.add(()=>{setPip(pip,w);glanceSet(n,f,why);placePane(glance,{x:p.x,y:p.y},w[0]>0?1:1,24);},t);mark(tl,pip,t+.05);bloom(tl,glance,t+.35);fold(tl,glance,t+2.6);tl.to(pip,{opacity:0,duration:T.quick},t+2.7);t+=3.2;}cap(tl,'A minute of walking · three glances',.3);}},
+];
+let cur=0,tlCur=null;
+const nav=$('#scenes');
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><span><b>${s.name}</b></span>`;b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>play(i));nav.appendChild(b);});
+function play(i){cur=i;if(tlCur)tlCur.kill();nav.querySelectorAll('button').forEach((b,k)=>b.setAttribute('aria-pressed',String(k===i)));note.innerHTML=SCENES[i].note;reset();tlCur=gsap.timeline();SCENES[i].run(tlCur);}
+$('#play').addEventListener('click',()=>play(cur));
+document.querySelectorAll('.toast button').forEach(b=>b.addEventListener('click',e=>{gsap.to(e.target.closest('.toast'),{opacity:0,scale:.97,filter:'blur(3px)',duration:T.quick,ease:ei});}));
+$('#focusBtn').addEventListener('click',()=>{const on=stage.classList.toggle('showfocus');$('#focusBtn').setAttribute('aria-pressed',String(on));});
+document.querySelectorAll('#choices button').forEach(b=>b.addEventListener('click',()=>{if(tlCur)tlCur.seek(8.6);}));
+intro.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON'&&tlCur&&cur===0&&tlCur.time()<8.6)tlCur.seek(8.6);});
+let rT=0;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{drawStreet();play(cur);},150);});
+document.fonts.ready.then(()=>{drawStreet();play(0);});
+</script>

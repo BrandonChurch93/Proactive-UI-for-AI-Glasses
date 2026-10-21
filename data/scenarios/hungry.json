@@ -1,0 +1,117 @@
+{
+  "_note": "Timed events the sim injects into the WorldSnapshot, plus the scripted reviewer's input (gaze, pinch, choice, lookUp, headScan, ask answers) used by pnpm record, ?still= and the attract loop. The brain never reads this file. Times are seconds from the walk start. A gaze holds until the next gaze event; id null releases it. Positions are n, metres north of the start. Full beat sheet in docs/scenarios.md.",
+  "scenario": "hungry",
+  "route": [
+    "east-sidewalk-north",
+    "cross-avenue-at-corner",
+    "west-sidewalk-south"
+  ],
+  "destination": "mega-burger",
+  "speeds": {
+    "stopped": 0,
+    "stroll": 0.6,
+    "walk": 1.38,
+    "brisk": 1.9
+  },
+  "pace": [
+    {
+      "t": 0,
+      "band": "walk"
+    },
+    {
+      "t": 36,
+      "band": "brisk"
+    },
+    {
+      "t": 58,
+      "band": "stopped",
+      "until": "signal"
+    },
+    {
+      "t": 74,
+      "band": "walk"
+    }
+  ],
+  "beats": [
+    {
+      "t": 14,
+      "kind": "gaze",
+      "id": "mega-burger"
+    },
+    {
+      "t": 22,
+      "kind": "pinch",
+      "id": "mega-burger"
+    },
+    {
+      "t": 30,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 40,
+      "kind": "gaze",
+      "id": "47th-st-station"
+    },
+    {
+      "t": 44,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 58,
+      "kind": "signal",
+      "leg": "avenue",
+      "state": "dont",
+      "secondsLeft": 16
+    },
+    {
+      "t": 58,
+      "kind": "inbox",
+      "type": "text",
+      "id": "maya-usual",
+      "from": "Maya",
+      "text": "Running 10 late, order me the usual?"
+    },
+    {
+      "t": 64,
+      "kind": "gaze",
+      "id": "pocket:mega-burger"
+    },
+    {
+      "t": 64,
+      "kind": "pinch",
+      "id": "pocket:mega-burger"
+    },
+    {
+      "t": 68,
+      "kind": "choice",
+      "id": "mega-burger",
+      "action": "hold-seat"
+    },
+    {
+      "t": 70,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 74,
+      "kind": "crossing",
+      "leg": "avenue",
+      "seconds": 10
+    },
+    {
+      "t": 78,
+      "kind": "inbox",
+      "type": "app",
+      "id": "order-ready",
+      "text": "Order ready",
+      "more": 1
+    },
+    {
+      "t": 94,
+      "kind": "arrive",
+      "id": "mega-burger"
+    }
+  ]
+}

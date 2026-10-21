@@ -1,0 +1,336 @@
+{
+  "_note": "Source of truth for names and intent is docs/world-spec.md section 3. Sides: W west (across from the wearer), E east (the wearer's side), X the cross street. n is metres north of the start along the block. The sim adds lots and world positions.",
+  "places": [
+    {
+      "id": "grace-theater",
+      "name": "Grace Theater",
+      "kind": "theater",
+      "category": "live theater",
+      "side": "W",
+      "anchor": {
+        "height": 6.05
+      },
+      "live": {
+        "lastShow": "8:00",
+        "seatsLeft": 40,
+        "shows": 3
+      },
+      "glance": "Last show tonight at 8",
+      "depth": "shows",
+      "scenarios": [
+        "walking"
+      ],
+      "n": [
+        18,
+        30
+      ],
+      "year": 1927
+    },
+    {
+      "id": "mega-burger",
+      "name": "Mega Burger",
+      "kind": "food",
+      "category": "burgers",
+      "side": "W",
+      "anchor": {
+        "height": 4.6
+      },
+      "live": {
+        "wait": 6,
+        "seats": 4,
+        "price": "$",
+        "rating": 4.3
+      },
+      "glance": "6 min wait · $",
+      "depth": "menu",
+      "scenarios": [
+        "hungry"
+      ],
+      "n": [
+        70,
+        78
+      ]
+    },
+    {
+      "id": "lucky-lanes",
+      "name": "Lucky Lanes",
+      "kind": "venue",
+      "category": "bowling",
+      "side": "W",
+      "anchor": {
+        "height": 5.2
+      },
+      "live": {
+        "lanesOpen": 5,
+        "price": "$12 an hour till 5"
+      },
+      "glance": "Lanes open · $12 an hour till 5",
+      "depth": "lanes",
+      "scenarios": [
+        "walking"
+      ],
+      "n": [
+        44,
+        56
+      ]
+    },
+    {
+      "id": "atlas-books",
+      "name": "Atlas Books",
+      "kind": "shop",
+      "category": "bookshop",
+      "side": "W",
+      "anchor": {
+        "height": 4.4
+      },
+      "live": {
+        "closes": "9:00"
+      },
+      "glance": "Open till 9",
+      "depth": "events",
+      "scenarios": [
+        "walking"
+      ],
+      "n": [
+        60,
+        68
+      ]
+    },
+    {
+      "id": "trattoria-da-lia",
+      "name": "Trattoria da Lia",
+      "kind": "food",
+      "category": "italian",
+      "side": "W",
+      "anchor": {
+        "height": 4.6
+      },
+      "live": {
+        "closes": "11:00",
+        "signLanguage": "it",
+        "sign": "Cucina casalinga · aperto fino alle 23"
+      },
+      "glance": "Home cooking · open until 11 PM",
+      "depth": "menu",
+      "scenarios": [
+        "hungry",
+        "walking"
+      ],
+      "n": [
+        34,
+        42
+      ]
+    },
+    {
+      "id": "pocket-park",
+      "name": "Pocket Park",
+      "kind": "park",
+      "category": "park",
+      "side": "W",
+      "anchor": {
+        "height": 2.2
+      },
+      "live": {
+        "benches": "shade"
+      },
+      "glance": "Benches in the shade",
+      "depth": null,
+      "scenarios": [
+        "hungry",
+        "errands",
+        "walking"
+      ],
+      "n": [
+        80,
+        90
+      ]
+    },
+    {
+      "id": "goldies-counter",
+      "name": "Goldie's Counter",
+      "kind": "food",
+      "category": "deli",
+      "side": "E",
+      "anchor": {
+        "height": 4.4
+      },
+      "live": {
+        "wait": 3,
+        "seats": 9,
+        "price": "$",
+        "rating": 4.6
+      },
+      "glance": "3 min wait · 9 seats",
+      "depth": "menu",
+      "scenarios": [
+        "hungry"
+      ],
+      "n": [
+        10,
+        18
+      ]
+    },
+    {
+      "id": "kathys-cupcakes",
+      "name": "Kathy's Cupcakes",
+      "kind": "cafe",
+      "category": "bakery",
+      "side": "E",
+      "anchor": {
+        "height": 4.2
+      },
+      "live": {
+        "nextBatch": "2:00"
+      },
+      "glance": "Fresh batch at 2",
+      "depth": "flavors",
+      "scenarios": [
+        "hungry",
+        "walking"
+      ],
+      "n": [
+        24,
+        30
+      ]
+    },
+    {
+      "id": "big-bean",
+      "name": "The Big Bean",
+      "kind": "cafe",
+      "category": "coffee",
+      "side": "E",
+      "anchor": {
+        "height": 4.2
+      },
+      "live": {
+        "line": 4,
+        "wait": 5
+      },
+      "glance": "Line of 4 · 5 min",
+      "depth": "menu",
+      "scenarios": [
+        "hungry",
+        "errands"
+      ],
+      "n": [
+        46,
+        52
+      ]
+    },
+    {
+      "id": "main-street-pharmacy",
+      "name": "Main Street Pharmacy",
+      "kind": "service",
+      "category": "pharmacy",
+      "side": "E",
+      "anchor": {
+        "height": 4.4
+      },
+      "live": {
+        "ready": true,
+        "counter": 2,
+        "pickedUp": false
+      },
+      "glance": "Prescription's ready here",
+      "depth": "pickup",
+      "scenarios": [
+        "errands"
+      ],
+      "n": [
+        34,
+        42
+      ]
+    },
+    {
+      "id": "corner-hardware",
+      "name": "Corner Hardware",
+      "kind": "shop",
+      "category": "hardware",
+      "side": "E",
+      "anchor": {
+        "height": 4.4
+      },
+      "live": {
+        "closes": "6:00",
+        "closedEarly": false
+      },
+      "glance": "Open till 6",
+      "depth": "hours",
+      "scenarios": [
+        "errands"
+      ],
+      "n": [
+        68,
+        78
+      ]
+    },
+    {
+      "id": "m4-stop",
+      "name": "M4 stop",
+      "kind": "transit",
+      "category": "bus",
+      "side": "E",
+      "anchor": {
+        "height": 3.2
+      },
+      "live": {
+        "next": 2,
+        "then": 11
+      },
+      "glance": "2 min · next in 11",
+      "depth": "departures",
+      "scenarios": [
+        "errands",
+        "walking"
+      ],
+      "n": [
+        58,
+        58
+      ]
+    },
+    {
+      "id": "47th-st-station",
+      "name": "47th St Station",
+      "kind": "transit",
+      "category": "subway",
+      "side": "E",
+      "anchor": {
+        "height": 3.0
+      },
+      "live": {
+        "uptown": 4,
+        "downtown": 7
+      },
+      "glance": "Uptown trains · 4 min",
+      "depth": "departures",
+      "scenarios": [
+        "hungry",
+        "errands"
+      ],
+      "n": [
+        86,
+        90
+      ]
+    },
+    {
+      "id": "post-office",
+      "name": "Post Office",
+      "kind": "service",
+      "category": "post office",
+      "side": "X",
+      "anchor": {
+        "height": 4.4
+      },
+      "live": {
+        "line": 8,
+        "wait": 12
+      },
+      "glance": "Line of 8 · 12 min",
+      "depth": "hours",
+      "scenarios": [
+        "errands"
+      ],
+      "n": null
+    }
+  ]
+}

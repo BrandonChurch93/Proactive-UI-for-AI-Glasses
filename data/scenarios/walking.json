@@ -1,0 +1,155 @@
+{
+  "_note": "Timed events the sim injects into the WorldSnapshot, plus the scripted reviewer's input (gaze, pinch, choice, lookUp, headScan, ask answers) used by pnpm record, ?still= and the attract loop. The brain never reads this file. Times are seconds from the walk start. A gaze holds until the next gaze event; id null releases it. Positions are n, metres north of the start. Full beat sheet in docs/scenarios.md.",
+  "scenario": "walking",
+  "route": [
+    "east-sidewalk-north",
+    "cross-avenue-at-corner",
+    "pocket-park-bench"
+  ],
+  "destination": "pocket-park",
+  "speeds": {
+    "stopped": 0,
+    "stroll": 0.6,
+    "walk": 1.38,
+    "brisk": 1.9
+  },
+  "pace": [
+    {
+      "t": 0,
+      "band": "walk"
+    },
+    {
+      "t": 8,
+      "band": "stroll"
+    },
+    {
+      "t": 32,
+      "band": "walk"
+    },
+    {
+      "t": 79,
+      "band": "stopped",
+      "until": "signal"
+    },
+    {
+      "t": 85,
+      "band": "walk"
+    }
+  ],
+  "beats": [
+    {
+      "t": 8,
+      "kind": "gaze",
+      "id": "grace-theater"
+    },
+    {
+      "t": 14,
+      "kind": "vehicle",
+      "id": "truck",
+      "lane": "near",
+      "speed": 3.2,
+      "fromN": 5,
+      "toN": 45
+    },
+    {
+      "t": 26,
+      "kind": "gaze",
+      "id": "trattoria-da-lia"
+    },
+    {
+      "t": 29,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 30,
+      "kind": "gaze",
+      "id": "kathys-cupcakes"
+    },
+    {
+      "t": 32,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 38,
+      "kind": "people",
+      "id": "conversation",
+      "count": 2,
+      "onPath": true,
+      "until": 46
+    },
+    {
+      "t": 40,
+      "kind": "inbox",
+      "type": "text",
+      "id": "maya-lunch",
+      "from": "Maya",
+      "text": "Lunch tomorrow?"
+    },
+    {
+      "t": 48,
+      "kind": "inbox",
+      "type": "call",
+      "id": "maya-call",
+      "from": "Maya"
+    },
+    {
+      "t": 51,
+      "kind": "choice",
+      "id": "maya-call",
+      "action": "decline"
+    },
+    {
+      "t": 54,
+      "kind": "lookUp",
+      "seconds": 1.2
+    },
+    {
+      "t": 56,
+      "kind": "gaze",
+      "id": "atlas-books"
+    },
+    {
+      "t": 60,
+      "kind": "gaze",
+      "id": null
+    },
+    {
+      "t": 62,
+      "kind": "lookUp",
+      "seconds": 1.2
+    },
+    {
+      "t": 79,
+      "kind": "signal",
+      "leg": "avenue",
+      "state": "dont",
+      "secondsLeft": 6
+    },
+    {
+      "t": 81,
+      "kind": "ask",
+      "answer": "no",
+      "answerAt": 83
+    },
+    {
+      "t": 85,
+      "kind": "crossing",
+      "leg": "avenue",
+      "seconds": 10
+    },
+    {
+      "t": 86,
+      "kind": "bike",
+      "side": "near",
+      "fromBehind": true,
+      "timeToPath": 2
+    },
+    {
+      "t": 95,
+      "kind": "arrive",
+      "id": "pocket-park"
+    }
+  ]
+}
