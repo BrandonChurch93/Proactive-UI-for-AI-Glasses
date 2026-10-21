@@ -24,7 +24,33 @@ const YAW_ACQUIRE = (3 * Math.PI) / 180;
 const YAW_RELEASE = (6 * Math.PI) / 180;
 const HEAD_LIMIT = Math.PI / 2;
 const PURSUIT_RATE = 6;
+const PURSUIT_SETTLED_RAD = 0.03;
+const PURSUIT_DWELL_MS = 300;
+const PIP_ACQUIRE_PX = 70;
+const FRONT_RELEASE_PX = 40;
+const PIP_RELEASE_PX = 120;
 const PURSUIT_AFTER_DRAG_S = 0.25;
+
+function distanceToQuad(x: number, y: number, q: { x: number; y: number }[]): number {
+  let inside = true;
+  let sign = 0;
+  let best = Infinity;
+  for (let i = 0; i < q.length; i++) {
+    const a = q[i]!;
+    const b = q[(i + 1) % q.length]!;
+    const cross = (b.x - a.x) * (y - a.y) - (b.y - a.y) * (x - a.x);
+    if (cross !== 0) {
+      if (sign === 0) sign = Math.sign(cross);
+      else if (Math.sign(cross) !== sign) inside = false;
+    }
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const l = dx * dx + dy * dy || 1;
+    const u = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l));
+    best = Math.min(best, Math.hypot(x - (a.x + dx * u), y - (a.y + dy * u)));
+  }
+  return inside ? 0 : best;
+}
 
 function angleToSpan(a: number, y0: number, y1: number): number {
   const d0 = angleWrap(a - y0);
@@ -36,7 +62,7 @@ const STEP = 1 / SIM_HZ;
 const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
 const SEED = 47;
-const NEAR_GAZE_M = 30;
+const NEAR_GAZE_M = 70;
 const LIT_GAZE_M = 70;
 
 const clock = gsap.timeline({ autoRemoveChildren: true });
@@ -227,6 +253,8 @@ export class Walk {
     for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') lit.add(d.placement.anchor);
     const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit]);
     const pose = this.sim.cameraPose();
+    const vw = innerWidth;
+    const vh = innerHeight;
     let best: string | null = null;
     let bestOff = Infinity;
     for (const id of ids) {
@@ -234,6 +262,35 @@ export class Walk {
       if (!a || Math.hypot(a.x - eye.x, a.z - eye.z) > (lit.has(id) ? LIT_GAZE_M : NEAR_GAZE_M)) continue;
       const keep = id === cur;
       const place = PLACE_BY_ID.get(id);
+      if (place?.n) {
+        const quad = [
+          { x: a.x, y: 0.3, z: -place.n[0] },
+          { x: a.x, y: 0.3, z: -place.n[1] },
+          { x: a.x, y: a.y + 0.8, z: -place.n[1] },
+          { x: a.x, y: a.y + 0.8, z: -place.n[0] },
+        ].map((c) => this.bridge.project(c));
+        if (quad.every((q) => q.inFront)) {
+          const inside = distanceToQuad(vw / 2, vh / 2, quad);
+          if (inside <= (keep ? FRONT_RELEASE_PX : 0)) {
+            const off = -0.2 + Math.hypot(a.x - eye.x, a.z - eye.z) / 10000;
+            if (off < bestOff) {
+              best = id;
+              bestOff = off;
+            }
+            continue;
+          }
+        }
+      }
+      const pr = this.bridge.project(a);
+      const px = Math.hypot(pr.x - vw / 2, pr.y - vh / 2);
+      if (pr.inFront && px < (keep ? PIP_RELEASE_PX : PIP_ACQUIRE_PX)) {
+        const off = px / 4000 - 0.05;
+        if (off < bestOff) {
+          best = id;
+          bestOff = off;
+        }
+        continue;
+      }
       let y0 = yawToward(pose.pos, a);
       let y1 = y0;
       if (place?.n) {
@@ -267,7 +324,8 @@ export class Walk {
     const toYaw = yawToward(eye, a);
     const toPitch = pitchToward(eye, a);
     const dragging = this.holding || sim.t - this.lookedAt < PURSUIT_AFTER_DRAG_S;
-    if (!this.pursuit || this.pursuit.id !== gaze || dragging) {
+    const settled = Math.abs(angleWrap(sim.head.yaw - worldYaw)) < PURSUIT_SETTLED_RAD && sim.gaze.dwellMs >= PURSUIT_DWELL_MS;
+    if (!this.pursuit || this.pursuit.id !== gaze || dragging || !settled) {
       this.pursuit = { id: gaze, dyaw: angleWrap(worldYaw - toYaw), dpitch: this.head.pitch - toPitch };
       return;
     }

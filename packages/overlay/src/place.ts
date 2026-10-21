@@ -10,6 +10,7 @@ import {
   rectsOverlap,
   type Band,
   type Level,
+  type Align,
   type PlaceInput,
   type Projected,
   type Rect,
@@ -97,7 +98,7 @@ export interface WorldPlace {
 }
 
 interface Config {
-  side: 'left' | 'right';
+  side: Align;
   vertical: 'above' | 'below';
   shrink: number | null;
 }
@@ -164,7 +165,7 @@ export class Placement {
       const side = a.x < vp.w * 0.4 ? 'left' : a.x > vp.w * 0.6 ? 'right' : this.pinned;
       if (side !== this.pinned) {
         this.pinned = side;
-        if (this.cfg) this.cfg = { ...this.cfg, side };
+        if (this.cfg && this.cfg.side !== 'center') this.cfg = { ...this.cfg, side };
         jump = MOVE.pushOut;
       }
     }
@@ -184,7 +185,7 @@ export class Placement {
       ui,
     });
     const near: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
-    const prefer = (): { side: 'left' | 'right'; vertical: 'above' | 'below' } => ({ side: this.cfg?.side ?? near, vertical: this.cfg?.vertical ?? 'above' });
+    const prefer = (): { side: Align; vertical: 'above' | 'below' } => ({ side: this.cfg?.side ?? 'center', vertical: this.cfg?.vertical ?? 'above' });
     let level: Level = req.level;
     if (this.collapsed === 'glance' && LEVEL_RANK[level] > LEVEL_RANK.glance) level = 'glance';
     if (this.step && LEVEL_RANK[this.step] < LEVEL_RANK[level]) {
@@ -218,9 +219,9 @@ export class Placement {
       }
       const fresh = !this.cfg;
       const shrink = Math.abs(placed.scale - distanceScale(req.distance) * ui) > 1e-6 ? placed.scale : null;
-      this.cfg = { side: placed.side, vertical: placed.vertical, shrink };
+      this.cfg = { side: placed.align, vertical: placed.vertical, shrink };
       this.cfgAt = t;
-      res = configRect(inp, placed.side, placed.vertical, scaleOf(this.cfg));
+      res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg));
       if (fresh && this.enterEdge && ctx.band !== 'stopped') this.pinned = a.x < vp.w / 2 ? 'left' : 'right';
       else if (!fresh) jump ??= MOVE.pushOut;
     }
@@ -258,11 +259,8 @@ export class Placement {
       this.kickFrom(t, this.shown, rect, MOVE.pushOut);
     }
     this.shown = rect;
-    const leader = {
-      x: this.cfg!.side === 'left' ? rect.x + rect.w : rect.x,
-      y: this.cfg!.vertical === 'above' ? rect.y + rect.h : rect.y,
-    };
-    const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: this.cfg!.side };
+    const leader = { x: res.leader.x - res.rect.x + rect.x, y: res.leader.y - res.rect.y + rect.y };
+    const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right' };
     if (level !== req.level) placed.collapsed = level;
     return this.remember(placed);
   }
@@ -375,9 +373,10 @@ export class Aside {
       if (!focusOk && rectsOverlap(r, zone)) return false;
       return !ctx.keepOuts.some((k) => rectsOverlap(r, k.rect));
     });
-    if (valid.length === 0) return null;
-    const keep = valid.find((o) => o.dir === this.dir);
-    const best = keep ?? valid.reduce((a, b) => (Math.hypot(a.dx, a.dy) <= Math.hypot(b.dx, b.dy) ? a : b));
+    const near = valid.filter((o) => Math.hypot(o.dx, o.dy) <= Math.max(MOVE.asideMaxPx, home.w * 0.45));
+    if (near.length === 0) return null;
+    const keep = near.find((o) => o.dir === this.dir);
+    const best = keep ?? near.reduce((a, b) => (Math.hypot(a.dx, a.dy) <= Math.hypot(b.dx, b.dy) ? a : b));
     this.dir = best.dir;
     return { dx: best.dx, dy: best.dy };
   }

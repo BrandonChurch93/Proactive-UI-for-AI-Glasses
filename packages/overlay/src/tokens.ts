@@ -54,6 +54,7 @@ export const MOVE = {
   asideIn: 0.22,
   asideOut: 0.32,
   asideHoldMs: 120,
+  asideMaxPx: 90,
   droppedPip: 0.45,
   pushOut: 0.32,
   inward: 0.48,

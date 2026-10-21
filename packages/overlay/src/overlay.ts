@@ -670,7 +670,7 @@ export class Overlay {
             yieldO = y.opacity;
             rect = { x: base.x + a.dx + y.dx, y: base.y + a.dy, w: base.w, h: base.h };
             this.setTrace(it, a.trace && !a.dropped ? a.trace : null, a.opacity);
-            b.corner = { x: placed.side === 'left' ? rect.x + rect.w : rect.x, y: placed.leader.y - placed.rect.y + rect.y };
+            b.corner = { x: placed.leader.x - placed.rect.x + rect.x, y: placed.leader.y - placed.rect.y + rect.y };
             if (pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
           }
         } else {

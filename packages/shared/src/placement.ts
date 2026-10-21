@@ -15,15 +15,18 @@ export interface PlaceInput {
   viewport: Viewport;
   focusOk: boolean;
   keepOuts: readonly Rect[];
-  prefer?: { side: 'left' | 'right'; vertical: 'above' | 'below' };
+  prefer?: { side: Align; vertical: 'above' | 'below' };
   ui?: number;
 }
+
+export type Align = 'left' | 'right' | 'center';
 
 export interface Placed {
   rect: Rect;
   scale: number;
   mode: PlaceMode;
   side: 'left' | 'right';
+  align: Align;
   vertical: 'above' | 'below';
   leader: { x: number; y: number };
   collapsed?: Level;
@@ -47,21 +50,29 @@ export function distanceScale(distance: number): number {
   return clamp(30 / Math.max(0.1, distance), 0.92, 1.2);
 }
 
-function offsets(level: Level): { gap: number; dy: number } {
+function offsets(level: Level, align: Align): { gap: number; dy: number } {
+  if (align === 'center') return { gap: 0, dy: 22 };
   return level === 'glance' ? { gap: 26, dy: 30 } : { gap: 40, dy: 46 };
+}
+
+function leaderOf(r: Rect, align: Align, vertical: 'above' | 'below'): { x: number; y: number } {
+  return {
+    x: align === 'left' ? r.x + r.w : align === 'right' ? r.x : r.x + r.w / 2,
+    y: vertical === 'above' ? r.y + r.h : r.y,
+  };
 }
 
 function candidate(
   inp: PlaceInput,
-  side: 'left' | 'right',
+  side: Align,
   vertical: 'above' | 'below',
   scale: number,
 ): Rect {
   const { anchor } = inp;
   const w = inp.size.w * scale;
   const h = inp.size.h * scale;
-  const { gap, dy } = offsets(inp.level);
-  const x = side === 'left' ? anchor.x - w - gap * scale : anchor.x + gap * scale;
+  const { gap, dy } = offsets(inp.level, side);
+  const x = side === 'left' ? anchor.x - w - gap * scale : side === 'right' ? anchor.x + gap * scale : anchor.x - w / 2;
   const y = vertical === 'above' ? anchor.y - h - dy * scale : anchor.y + dy * scale * 0.8;
   return { x, y, w, h };
 }
@@ -80,8 +91,9 @@ function clampInto(r: Rect, vp: Viewport): Rect {
 
 export const ZONE_GAP = 14;
 
-function pushOutOfZone(r: Rect, zone: Rect, side: 'left' | 'right', anchorY: number, vp: Viewport): Rect {
+function pushOutOfZone(r: Rect, zone: Rect, align: Align, anchorX: number, anchorY: number, vp: Viewport): Rect {
   if (!rectsOverlap(r, zone)) return r;
+  const side = align === 'center' ? (anchorX < vp.w / 2 ? 'left' : 'right') : align;
   const x = side === 'left' ? zone.x - r.w - ZONE_GAP : zone.x + zone.w + ZONE_GAP;
   const y = clamp(anchorY - r.h * 0.62, MARGIN, Math.max(MARGIN, vp.h - MARGIN - r.h));
   return { ...r, x, y };
@@ -89,24 +101,28 @@ function pushOutOfZone(r: Rect, zone: Rect, side: 'left' | 'right', anchorY: num
 
 export function configRect(
   inp: PlaceInput,
-  side: 'left' | 'right',
+  side: Align,
   vertical: 'above' | 'below',
   scale: number,
 ): { rect: Rect; ok: boolean; leader: { x: number; y: number } } {
   const zone = focusRect(inp.band, inp.viewport.w, inp.viewport.h);
-  let r = clampInto(candidate(inp, side, vertical, scale), inp.viewport);
-  if (!inp.focusOk) r = pushOutOfZone(r, zone, side, inp.anchor.y, inp.viewport);
+  const raw = candidate(inp, side, vertical, scale);
+  let r = clampInto(raw, inp.viewport);
+  const pushed = !inp.focusOk && rectsOverlap(r, zone);
+  if (pushed) r = pushOutOfZone(r, zone, side, inp.anchor.x, inp.anchor.y, inp.viewport);
   const ok =
     inView(r, inp.viewport) &&
     (inp.focusOk || !rectsOverlap(r, zone)) &&
-    !(vertical === 'above' && inp.anchor.y - r.h - offsets(inp.level).dy * scale < MARGIN);
-  return { rect: r, ok, leader: { x: side === 'left' ? r.x + r.w : r.x, y: vertical === 'above' ? r.y + r.h : r.y } };
+    !(vertical === 'above' && raw.y < MARGIN - 0.5) &&
+    !(side === 'center' && !pushed && Math.abs(r.x - raw.x) > r.w * 0.35);
+  const align: Align = pushed && side === 'center' ? (inp.anchor.x < inp.viewport.w / 2 ? 'left' : 'right') : side;
+  return { rect: r, ok, leader: leaderOf(r, align, vertical) };
 }
 
 export function placeWorld(inp: PlaceInput): Placed {
   const { anchor, viewport: vp } = inp;
   const near: 'left' | 'right' = anchor.x < vp.w / 2 ? 'left' : 'right';
-  const base = { side: near, vertical: 'above' as const, leader: { x: anchor.x, y: anchor.y } };
+  const base = { side: near, align: near as Align, vertical: 'above' as const, leader: { x: anchor.x, y: anchor.y } };
   const offscreen = !anchor.inFront || anchor.x < -20 || anchor.x > vp.w + 20 || anchor.y < -20 || anchor.y > vp.h + 20;
   if (offscreen) return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'offscreen' };
 
@@ -116,31 +132,30 @@ export function placeWorld(inp: PlaceInput): Placed {
   if (inp.level === 'glance' && edgeFrac < 0.04) collapsed = 'pip';
   if (collapsed === 'pip') return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip', collapsed };
 
-  const zone = focusRect(inp.band, vp.w, vp.h);
   const ui = inp.ui ?? 1;
   const start = distanceScale(inp.distance) * ui;
-  const pref = inp.prefer ?? { side: near, vertical: 'above' as const };
+  const pref = inp.prefer ?? { side: 'center' as const, vertical: 'above' as const };
+  const sideFirst: 'left' | 'right' = pref.side === 'center' ? near : pref.side;
   const other = (s: 'left' | 'right'): 'left' | 'right' => (s === 'left' ? 'right' : 'left');
-  const orders: ['left' | 'right', 'above' | 'below'][] = [
-    [pref.side, pref.vertical],
-    [pref.side, pref.vertical === 'above' ? 'below' : 'above'],
-    [other(pref.side), 'above'],
-    [other(pref.side), 'below'],
+  const flip = (v: 'above' | 'below'): 'above' | 'below' => (v === 'above' ? 'below' : 'above');
+  const all: [Align, 'above' | 'below'][] = [
+    ['center', 'above'],
+    ['center', 'below'],
+    [sideFirst, 'above'],
+    [sideFirst, 'below'],
+    [other(sideFirst), 'above'],
+    [other(sideFirst), 'below'],
   ];
+  const first: [Align, 'above' | 'below'] = [pref.side, pref.vertical];
+  const orders = [first, [first[0], flip(first[1])] as [Align, 'above' | 'below'], ...all.filter(([a]) => a !== first[0])];
   for (const scale of [start, Math.min(start, 0.92 * ui), 0.84 * ui, 0.78 * ui, 0.74 * ui]) {
     for (const [side, vertical] of orders) {
-      let r = candidate(inp, side, vertical, scale);
-      if (vertical === 'above' && r.y < MARGIN) continue;
-      r = clampInto(r, vp);
-      if (!inp.focusOk) r = pushOutOfZone(r, zone, side, inp.anchor.y, inp.viewport);
-      if (!inView(r, vp)) continue;
-      if (!inp.focusOk && rectsOverlap(r, zone)) continue;
+      const c = configRect(inp, side, vertical, scale);
+      if (!c.ok) continue;
+      const r = c.rect;
       if (inp.keepOuts.some((k) => rectsOverlap(r, k))) continue;
-      const leader = {
-        x: side === 'left' ? r.x + r.w : r.x,
-        y: vertical === 'above' ? r.y + r.h : r.y,
-      };
-      const placed: Placed = { rect: r, scale, mode: vertical === 'above' ? 'side' : 'below', side, vertical, leader };
+      const align: Align = side;
+      const placed: Placed = { rect: r, scale, mode: vertical === 'above' ? 'side' : 'below', side: side === 'center' ? near : side, align, vertical, leader: c.leader };
       if (collapsed) placed.collapsed = collapsed;
       return placed;
     }

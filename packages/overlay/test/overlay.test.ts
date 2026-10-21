@@ -113,16 +113,27 @@ describe('rule 8 · the world has right of way', () => {
 
   it('steps aside by the overlap plus 20 px and comes back when clear', () => {
     const aside = new Aside();
-    const ko: KeepOut = { rect: { x: 520, y: 150, w: 120, h: 400 }, kind: 'person', moving: false, id: 'p' };
-    let s = aside.update(card, ctx(0, [ko]), false);
-    for (let t = STEP; t < 0.6; t += STEP) s = aside.update(card, ctx(t, [ko]), false);
+    const pane: Rect = { x: 40, y: 200, w: 292, h: 152 };
+    const ko: KeepOut = { rect: { x: 20, y: 150, w: 60, h: 400 }, kind: 'person', moving: false, id: 'p' };
+    let s = aside.update(pane, ctx(0, [ko]), false);
+    for (let t = STEP; t < 0.6; t += STEP) s = aside.update(pane, ctx(t, [ko]), false);
     expect(s.opacity).toBeCloseTo(MOVE.asideOpacity, 2);
-    const moved: Rect = { ...card, x: card.x + s.dx, y: card.y + s.dy };
+    const moved: Rect = { ...pane, x: pane.x + s.dx, y: pane.y + s.dy };
     expect(rectsOverlap(moved, ko.rect)).toBe(false);
+    expect(Math.abs(s.dx)).toBeCloseTo(60, 0);
     expect(s.trace).not.toBeNull();
-    for (let t = 0.6; t < 1.2; t += STEP) s = aside.update(card, ctx(t, []), false);
+    for (let t = 0.6; t < 1.2; t += STEP) s = aside.update(pane, ctx(t, []), false);
     expect(s.opacity).toBeGreaterThan(0.99);
     expect(Math.hypot(s.dx, s.dy)).toBeLessThan(0.5);
+  });
+
+  it('a person who would need a long slide to clear drops the pane to its light instead', () => {
+    const aside = new Aside();
+    const ko: KeepOut = { rect: { x: 360, y: 150, w: 180, h: 400 }, kind: 'person', moving: false, id: 'p' };
+    let s = aside.update(card, ctx(0, [ko]), false);
+    for (let t = STEP; t < 0.6; t += STEP) s = aside.update(card, ctx(t, [ko]), false);
+    expect(s.dropped).toBe(true);
+    expect(Math.hypot(s.dx, s.dy)).toBeLessThan(1);
   });
 
   it('a moving vehicle dims the pane on the first frame and drops it to a pip when it cannot clear', () => {
