@@ -10,7 +10,19 @@ Rules: plain, warm, short. Sentence case. The brain never apologizes, never expl
 - How: LOOK · Drag to turn your head. The walk is on rails. / DWELL · Hold your gaze on anything that lights up and it opens. Keep looking and it opens further. / PINCH · Click to skip the wait or choose. Esc to dismiss. / I · Open the inspector: every decision the brain made, the reasons, and the evals.
 - Question: What are you up to?
 - Choices: Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing.
-- Skip: CLICK TO SKIP
+- Skip: CLICK TO SKIP (TAP TO SKIP on touch screens)
+- How, on touch screens: LOOK · Drag to turn your head. The walk is on rails. / DWELL · Hold the middle of the view on anything that lights up and it opens. Keep looking and it opens further. / PINCH · Tap to skip the wait or choose. Long-press to dismiss. / I · Tap I · INSPECTOR in the corner: every decision the brain made, the reasons, and the evals.
+- About link: About this project
+- About panel: A browser simulation of a near-future pair of AI glasses on a city walk. / A real-time street is wired into a decision engine that reads your pace, surroundings, attention, goal and attention budget, then decides what to show, how much, when, and when to hold back. / The interface follows walking rules for a person who is moving: it shrinks as you speed up, yields when you check for traffic, saves what you pinched for the next red light, and never covers a face or a moving car. / The brain is a set of rules, not a model. Same walk, same decisions, every time. Press I during a walk to see every decision and its reasons, scrub the walk, and run the evals. / Built by Brandon Church with Three.js, TypeScript and GSAP. / Close
+
+## Screens that cannot show it
+
+- Rotate prompt (a phone held upright): Turn your phone sideways / The glasses see the street wide, and so does this demo.
+- No WebGL: This demo needs a browser with WebGL 2. / Open it on a recent desktop browser, an iPad or a phone held sideways.
+
+## Touch controls (reviewer chrome)
+
+- Pause · Resume
 
 ## Reason lines (max 48 characters)
 

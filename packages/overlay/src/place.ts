@@ -1,5 +1,7 @@
 import {
+  LEVEL_RANK,
   MARGIN,
+  NOMINAL_SIZE,
   configRect,
   distanceScale,
   focusRect,
@@ -69,6 +71,7 @@ export interface FrameCtx {
   vp: Viewport;
   keepOuts: readonly KeepOut[];
   focusOk?: boolean;
+  ui?: number;
 }
 
 export interface PlaceRequest {
@@ -77,6 +80,7 @@ export interface PlaceRequest {
   distance: number;
   size: { w: number; h: number };
   focusOk: boolean;
+  sizeOf?: (level: Level) => { w: number; h: number };
 }
 
 export type PlaceMode = 'pane' | 'pip' | 'edge';
@@ -97,12 +101,15 @@ interface Config {
   shrink: number | null;
 }
 
+const STEP_DOWN: Partial<Record<Level, Level[]>> = { expanded: ['card', 'glance'], card: ['glance'] };
+
 export class Placement {
   private cfg: Config | null = null;
   private cfgAt = -Infinity;
   private shown: Rect | null = null;
   private offSince: number | null = null;
   private collapsed: Level | undefined;
+  private step: Level | undefined;
   private last: WorldPlace | null = null;
   readonly jumpX = new Track(0);
   readonly jumpY = new Track(0);
@@ -161,26 +168,55 @@ export class Placement {
       }
     }
 
-    const inp: PlaceInput = {
-      level: req.level,
+    const ui = ctx.ui ?? 1;
+    const sizeFor = (lv: Level): { w: number; h: number } =>
+      lv === req.level ? req.size : (req.sizeOf?.(lv) ?? NOMINAL_SIZE[lv as 'glance' | 'card' | 'expanded'] ?? NOMINAL_SIZE.glance);
+    const make = (lv: Level): PlaceInput => ({
+      level: lv,
       anchor: a,
       distance: req.distance,
-      size: req.size,
+      size: sizeFor(lv),
       band: ctx.band,
       viewport: vp,
       focusOk: req.focusOk,
       keepOuts: ctx.keepOuts.map((k) => k.rect),
-    };
-    const scaleOf = (c: Config): number => c.shrink ?? distanceScale(req.distance);
+      ui,
+    });
+    const near: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
+    const prefer = (): { side: 'left' | 'right'; vertical: 'above' | 'below' } => ({ side: this.cfg?.side ?? near, vertical: this.cfg?.vertical ?? 'above' });
+    let level: Level = req.level;
+    if (this.collapsed === 'glance' && LEVEL_RANK[level] > LEVEL_RANK.glance) level = 'glance';
+    if (this.step && LEVEL_RANK[this.step] < LEVEL_RANK[level]) {
+      if (t - this.cfgAt > MOVE.hysteresis) {
+        const up = placeWorld({ ...make(level), prefer: prefer() });
+        if (up.mode !== 'pip' && up.mode !== 'offscreen') {
+          this.step = undefined;
+          this.cfg = null;
+        } else level = this.step;
+      } else level = this.step;
+    }
+    let inp = make(level);
+    const scaleOf = (c: Config): number => c.shrink ?? distanceScale(req.distance) * ui;
     let res = this.cfg ? configRect(inp, this.cfg.side, this.cfg.vertical, scaleOf(this.cfg)) : null;
     if (!res || !res.ok) {
-      const near: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
-      const placed = placeWorld({ ...inp, prefer: { side: this.cfg?.side ?? near, vertical: this.cfg?.vertical ?? 'above' } });
+      let placed = placeWorld({ ...inp, prefer: prefer() });
+      if (placed.mode === 'pip' || placed.mode === 'offscreen') {
+        for (const lower of STEP_DOWN[level] ?? []) {
+          const p2 = placeWorld({ ...make(lower), prefer: prefer() });
+          if (p2.mode !== 'pip' && p2.mode !== 'offscreen') {
+            placed = p2;
+            level = lower;
+            this.step = lower;
+            inp = make(lower);
+            break;
+          }
+        }
+      }
       if (placed.mode === 'pip' || placed.mode === 'offscreen') {
         return this.remember({ mode: 'pip', rect: { x: a.x, y: a.y, w: 0, h: 0 }, leader: { x: a.x, y: a.y }, scale: 1, side: near });
       }
       const fresh = !this.cfg;
-      const shrink = Math.abs(placed.scale - distanceScale(req.distance)) > 1e-6 ? placed.scale : null;
+      const shrink = Math.abs(placed.scale - distanceScale(req.distance) * ui) > 1e-6 ? placed.scale : null;
       this.cfg = { side: placed.side, vertical: placed.vertical, shrink };
       this.cfgAt = t;
       res = configRect(inp, placed.side, placed.vertical, scaleOf(this.cfg));
@@ -223,7 +259,7 @@ export class Placement {
       y: this.cfg!.vertical === 'above' ? rect.y + rect.h : rect.y,
     };
     const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: this.cfg!.side };
-    if (this.collapsed) placed.collapsed = this.collapsed;
+    if (level !== req.level) placed.collapsed = level;
     return this.remember(placed);
   }
 

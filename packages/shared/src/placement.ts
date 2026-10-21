@@ -16,6 +16,7 @@ export interface PlaceInput {
   focusOk: boolean;
   keepOuts: readonly Rect[];
   prefer?: { side: 'left' | 'right'; vertical: 'above' | 'below' };
+  ui?: number;
 }
 
 export interface Placed {
@@ -35,6 +36,12 @@ export const NOMINAL_SIZE: Record<'glance' | 'card' | 'expanded', { w: number; h
   card: { w: 292, h: 152 },
   expanded: { w: 392, h: 318 },
 };
+
+export const REFERENCE_VIEW = { w: 1280, h: 800 };
+
+export function uiScale(vp: Viewport): number {
+  return clamp(Math.min(vp.w / REFERENCE_VIEW.w, vp.h / REFERENCE_VIEW.h) * 1.3, 0.74, 1);
+}
 
 export function distanceScale(distance: number): number {
   return clamp(30 / Math.max(0.1, distance), 0.92, 1.2);
@@ -106,7 +113,8 @@ export function placeWorld(inp: PlaceInput): Placed {
   if (collapsed === 'pip') return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip', collapsed };
 
   const zone = focusRect(inp.band, vp.w, vp.h);
-  const start = distanceScale(inp.distance);
+  const ui = inp.ui ?? 1;
+  const start = distanceScale(inp.distance) * ui;
   const pref = inp.prefer ?? { side: near, vertical: 'above' as const };
   const other = (s: 'left' | 'right'): 'left' | 'right' => (s === 'left' ? 'right' : 'left');
   const orders: ['left' | 'right', 'above' | 'below'][] = [
@@ -115,7 +123,7 @@ export function placeWorld(inp: PlaceInput): Placed {
     [other(pref.side), 'above'],
     [other(pref.side), 'below'],
   ];
-  for (const scale of [start, Math.min(start, 0.92), 0.84, 0.78]) {
+  for (const scale of [start, Math.min(start, 0.92 * ui), 0.84 * ui, 0.78 * ui, 0.74 * ui]) {
     for (const [side, vertical] of orders) {
       let r = candidate(inp, side, vertical, scale);
       if (vertical === 'above' && r.y < MARGIN) continue;

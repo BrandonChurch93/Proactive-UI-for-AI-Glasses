@@ -454,6 +454,8 @@
   position: absolute;
   left: 50%;
   bottom: 9%;
+  scale: var(--ui, 1);
+  transform-origin: center bottom;
   transform: translateX(-50%);
   font-size: 15px;
   color: var(--ink);
@@ -475,8 +477,10 @@
 
 .glyph {
   position: absolute;
-  left: 16px;
-  bottom: 16px;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  scale: var(--ui, 1);
+  transform-origin: left bottom;
   display: flex;
   align-items: center;
   gap: 8px;

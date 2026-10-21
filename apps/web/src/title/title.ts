@@ -17,6 +17,23 @@ const HOW: [string, string][] = [
   ['I', 'Open the inspector: every decision the brain made, the reasons, and the evals.'],
 ];
 
+const HOW_TOUCH: [string, string][] = [
+  ['LOOK', 'Drag to turn your head. The walk is on rails.'],
+  ['DWELL', 'Hold the middle of the view on anything that lights up and it opens. Keep looking and it opens further.'],
+  ['PINCH', 'Tap to skip the wait or choose. Long-press to dismiss.'],
+  ['I', 'Tap I · INSPECTOR in the corner: every decision the brain made, the reasons, and the evals.'],
+];
+
+const ABOUT = [
+  'A browser simulation of a near-future pair of AI glasses on a city walk.',
+  'A real-time street is wired into a decision engine that reads your pace, surroundings, attention, goal and attention budget, then decides what to show, how much, when, and when to hold back.',
+  'The interface follows walking rules for a person who is moving: it shrinks as you speed up, yields when you check for traffic, saves what you pinched for the next red light, and never covers a face or a moving car.',
+  'The brain is a set of rules, not a model. Same walk, same decisions, every time. Press I during a walk to see every decision and its reasons, scrub the walk, and run the evals.',
+  'Built by Brandon Church with Three.js, TypeScript and GSAP.',
+];
+
+export const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
 const EASE_OUT = 'power3.out';
 const EASE_IN = 'power2.in';
 
@@ -31,7 +48,7 @@ export class TitleScreen {
   readonly el: HTMLElement;
   private plate: HTMLElement;
   private tl: gsap.core.Timeline | null = null;
-  private parts: { name: HTMLElement; sub: HTMLElement; setting: HTMLElement; how: HTMLElement; rows: HTMLElement[]; q: HTMLElement; choices: HTMLElement; skip: HTMLElement };
+  private parts: { name: HTMLElement; sub: HTMLElement; setting: HTMLElement; how: HTMLElement; rows: HTMLElement[]; q: HTMLElement; choices: HTMLElement; skip: HTMLElement; about: HTMLElement };
   private buttons: HTMLButtonElement[] = [];
   private busy = false;
 
@@ -48,7 +65,7 @@ export class TitleScreen {
     const setting = el('div', css.setting);
     setting.append(el('span', undefined, "You're walking through a big city."), el('span', undefined, 'The AI in your glasses decides what to show you, how much, and when to stay quiet.'));
     const how = el('div', css.how);
-    const rows = HOW.map(([k, v]) => {
+    const rows = (TOUCH ? HOW_TOUCH : HOW).map(([k, v]) => {
       const r = el('div');
       r.append(el('i', undefined, k), el('span', undefined, v));
       how.appendChild(r);
@@ -67,10 +84,42 @@ export class TitleScreen {
       this.buttons.push(b);
       choices.appendChild(b);
     });
-    const skip = el('div', css.skip, 'CLICK TO SKIP');
-    text.append(sub, name, setting, how, q, choices);
-    this.el.append(this.plate, text, skip);
-    this.parts = { name, sub, setting, how, rows, q, choices, skip };
+    const skip = el('div', css.skip, TOUCH ? 'TAP TO SKIP' : 'CLICK TO SKIP');
+    const aboutLink = el('button', css.aboutLink, 'About this project') as HTMLButtonElement;
+    aboutLink.type = 'button';
+    const about = el('div', css.about);
+    about.setAttribute('role', 'dialog');
+    about.setAttribute('aria-label', 'About this project');
+    const card = el('div', css.aboutCard);
+    for (const line of ABOUT) card.appendChild(el('p', undefined, line));
+    const close = el('button', css.aboutClose, 'Close') as HTMLButtonElement;
+    close.type = 'button';
+    card.appendChild(close);
+    about.appendChild(card);
+    about.style.display = 'none';
+    aboutLink.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.skipToChoice();
+      about.style.display = '';
+      gsap.fromTo(card, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.36, ease: EASE_OUT, clearProps: 'filter' });
+      close.focus({ preventScroll: true });
+    });
+    const hideAbout = (e: Event): void => {
+      e.stopPropagation();
+      about.style.display = 'none';
+      aboutLink.focus({ preventScroll: true });
+    };
+    close.addEventListener('click', hideAbout);
+    about.addEventListener('click', (e) => {
+      if (e.target === about) hideAbout(e);
+      else e.stopPropagation();
+    });
+    about.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideAbout(e);
+    });
+    text.append(sub, name, setting, how, q, choices, aboutLink);
+    this.el.append(this.plate, text, skip, about);
+    this.parts = { name, sub, setting, how, rows, q, choices, skip, about: aboutLink };
     this.el.addEventListener('click', () => this.skipToChoice());
     this.el.style.display = 'none';
     parent.appendChild(this.el);
@@ -85,7 +134,7 @@ export class TitleScreen {
     this.el.style.display = '';
     const p = this.parts;
     this.tl?.kill();
-    const reveal = [p.sub, p.name, p.setting, p.how, ...p.rows, p.q, p.choices, p.skip];
+    const reveal = [p.sub, p.name, p.setting, p.how, ...p.rows, p.q, p.choices, p.skip, p.about];
     gsap.set(reveal, { opacity: 0, y: 0, filter: 'none' });
     gsap.set(this.plate, { opacity: 1 });
     const tl = gsap.timeline();
@@ -101,6 +150,7 @@ export class TitleScreen {
     tl.fromTo(p.rows, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.36, stagger: 0.16, ease: EASE_OUT }, 2.6);
     up(p.q, 4.6);
     up(p.choices, 4.9);
+    tl.fromTo(p.about, { opacity: 0 }, { opacity: 1, duration: 0.36 }, 5.3);
     tl.to(p.skip, { opacity: 0, duration: 0.22 }, 5.4);
     this.tl = tl;
     if (atChoice) this.skipToChoice();
@@ -109,7 +159,7 @@ export class TitleScreen {
   skipToChoice(): void {
     if (this.tl && this.tl.progress() < 1) {
       this.tl.progress(1);
-      this.buttons[0]?.focus({ preventScroll: true });
+      if (!TOUCH) this.buttons[0]?.focus({ preventScroll: true });
     }
   }
 
@@ -119,7 +169,7 @@ export class TitleScreen {
     this.tl?.kill();
     const p = this.parts;
     const tl = gsap.timeline();
-    tl.to([p.choices, p.q, p.how, p.setting, p.name, p.sub, p.skip], { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.04 }, 0);
+    tl.to([p.about, p.choices, p.q, p.how, p.setting, p.name, p.sub, p.skip], { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.04 }, 0);
     tl.to(this.plate, { opacity: 1, duration: 0.45, ease: 'power1.inOut' }, 0.1);
     tl.call(() => this.onChoose(id), [], 0.6);
     this.tl = tl;

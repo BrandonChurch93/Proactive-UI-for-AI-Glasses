@@ -2,7 +2,9 @@ import { isShow, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
-import { EndCard, TitleScreen, type EndStats } from './title/title';
+import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
+
+const LONG_PRESS_MS = 550;
 import { Walk } from './walk';
 import type { World } from './world/world';
 
@@ -29,7 +31,11 @@ export class App {
   private soundOn = false;
   private endShown = false;
   private pace = false;
-  private drag: { x: number; y: number; yaw: number; pitch: number; moved: boolean } | null = null;
+  private upright = false;
+  private pausedForRotate = false;
+  private lastDismiss = -Infinity;
+  private press: ReturnType<typeof setTimeout> | null = null;
+  private drag: { x: number; y: number; yaw: number; pitch: number; moved: boolean; pressed: boolean } | null = null;
 
   constructor(
     private world: World,
@@ -45,10 +51,18 @@ export class App {
       () => this.again(),
       (id) => this.choose(id, true),
     );
-    this.chrome = new Chrome(ui, {
-      sound: () => this.toggleSound(),
-      inspector: () => this.inspector?.toggle(),
-    });
+    this.chrome = new Chrome(
+      ui,
+      {
+        sound: () => this.toggleSound(),
+        inspector: () => this.inspector?.toggle(),
+        pause: () => {
+          this.setPaused(!this.walk.paused);
+          return this.walk.paused;
+        },
+      },
+      TOUCH,
+    );
     if (start) {
       this.mode = 'walk';
       this.walk = this.makeWalk(start, Boolean(opts.scripted));
@@ -61,6 +75,22 @@ export class App {
     this.chrome.setInspectorHint(this.mode === 'walk');
     this.pace = Boolean(opts.pace);
     this.bindInput();
+    this.resize();
+  }
+
+  resize(): void {
+    this.walk.sim.viewport = { w: innerWidth, h: innerHeight };
+    const upright = innerWidth < innerHeight && innerWidth < 700;
+    if (upright === this.upright) return;
+    this.upright = upright;
+    this.chrome.setRotate(upright);
+    if (upright) {
+      this.pausedForRotate = !this.walk.paused;
+      this.walk.paused = true;
+    } else if (this.pausedForRotate) {
+      this.pausedForRotate = false;
+      this.walk.paused = false;
+    }
   }
 
   private makeWalk(id: ScenarioId, scripted: boolean): Walk {
@@ -193,30 +223,47 @@ export class App {
     w.setSound(this.ambient.context, live);
   }
 
+  private dismiss(): void {
+    if (this.mode !== 'walk' || performance.now() - this.lastDismiss < 400) return;
+    this.lastDismiss = performance.now();
+    this.walk.dismiss();
+  }
+
   private bindInput(): void {
     const canvas = this.canvas;
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || this.mode !== 'walk') return;
-      this.drag = { x: e.clientX, y: e.clientY, yaw: this.walk.head.yaw, pitch: this.walk.head.pitch, moved: false };
+      this.drag = { x: e.clientX, y: e.clientY, yaw: this.walk.head.yaw, pitch: this.walk.head.pitch, moved: false, pressed: false };
       canvas.setPointerCapture(e.pointerId);
+      if (this.press) clearTimeout(this.press);
+      this.press = setTimeout(() => {
+        const d = this.drag;
+        if (!d || d.moved) return;
+        d.pressed = true;
+        this.dismiss();
+      }, LONG_PRESS_MS);
     });
     canvas.addEventListener('pointermove', (e) => {
       const d = this.drag;
       if (!d) return;
-      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) >= 4) d.moved = true;
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) >= (e.pointerType === 'touch' ? 8 : 4)) d.moved = true;
       if (!d.moved) return;
       const yaw = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, d.yaw + (e.clientX - d.x) * 0.0032));
       const pitch = Math.max(-0.6, Math.min(0.75, d.pitch + (e.clientY - d.y) * 0.0028));
       this.walk.look(yaw, pitch);
     });
     canvas.addEventListener('pointerup', () => {
-      if (this.drag && !this.drag.moved) this.walk.pinch();
+      if (this.press) clearTimeout(this.press);
+      if (this.drag && !this.drag.moved && !this.drag.pressed) this.walk.pinch();
       this.drag = null;
     });
-    canvas.addEventListener('pointercancel', () => (this.drag = null));
+    canvas.addEventListener('pointercancel', () => {
+      if (this.press) clearTimeout(this.press);
+      this.drag = null;
+    });
     canvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      if (this.mode === 'walk') this.walk.dismiss();
+      this.dismiss();
     });
     this.layer.addEventListener('pointerover', (e) => {
       const t = e.target as HTMLElement;
@@ -239,7 +286,7 @@ export class App {
         if (this.inspector?.isOpen && this.end.visible) this.end.hide();
       } else if (e.key === 'Escape') {
         if (this.inspector?.isOpen) this.inspector.close();
-        else this.walk.dismiss();
+        else this.dismiss();
       } else if (e.key === 'Enter') {
         if ((e.target as HTMLElement).closest('button')) return;
         this.walk.pinch();

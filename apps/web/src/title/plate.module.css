@@ -21,3 +21,10 @@
   font-size: clamp(14px, 1.4vw, 17px);
   color: var(--ink-2);
 }
+.note {
+  margin: 28px auto 0;
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}

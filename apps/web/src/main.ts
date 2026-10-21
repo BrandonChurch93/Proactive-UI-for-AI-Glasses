@@ -5,6 +5,8 @@ import { Sim } from '@lumen/sim';
 import { mountPlate } from './title/plate';
 import { World } from './world/world';
 import { App } from './app';
+import { hasWebGL2, mountFallback } from './fallback';
+import { TOUCH } from './title/title';
 import type { Walk } from './walk';
 
 declare global {
@@ -25,8 +27,14 @@ const scenario = params.get('scenario');
 const root = document.getElementById('app')!;
 
 async function boot(): Promise<void> {
+  if (!hasWebGL2()) {
+    mountFallback(root);
+    return;
+  }
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none';
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'A city street seen through the glasses');
   root.appendChild(canvas);
   const layer = document.createElement('div');
   layer.style.cssText = 'position:fixed;inset:0;pointer-events:none';
@@ -35,7 +43,9 @@ async function boot(): Promise<void> {
   root.appendChild(ui);
   const plate = mountPlate(root);
   const first = isScenarioId(scenario) ? scenario : 'walking';
-  const world = new World(canvas, new Sim(first, { viewport: { w: innerWidth, h: innerHeight } }), { still, quality: params.get('quality') === 'fast' ? 'fast' : 'high' });
+  const small = TOUCH && Math.max(innerWidth, innerHeight) < 1100;
+  const quality = params.get('quality') === 'fast' || (!params.get('quality') && small) ? 'fast' : 'high';
+  const world = new World(canvas, new Sim(first, { viewport: { w: innerWidth, h: innerHeight } }), { still, quality });
   window.__world = world;
   world.core.resize(innerWidth, innerHeight);
   await document.fonts.ready;
@@ -57,6 +67,7 @@ async function boot(): Promise<void> {
     isScenarioId(scenario) ? scenario : null,
   );
   window.__app = app;
+  if (params.get('chrome') === '0') app.chrome.el.style.display = 'none';
   window.__walk = () => app.walk;
   plate.remove();
   window.__stats = () => {
@@ -101,7 +112,10 @@ async function boot(): Promise<void> {
     window.__done = true;
     return;
   }
-  addEventListener('resize', () => world.core.resize(innerWidth, innerHeight));
+  addEventListener('resize', () => {
+    world.core.resize(innerWidth, innerHeight);
+    app.resize();
+  });
   const forced = params.get('quality');
   let fpsFrames = 0;
   let fpsTime = 0;

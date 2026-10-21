@@ -13,6 +13,8 @@
   font-family: var(--font-ui);
   font-size: 13px;
   visibility: hidden;
+  -webkit-user-select: text;
+  user-select: text;
   z-index: 40;
   pointer-events: auto;
 }

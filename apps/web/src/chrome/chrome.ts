@@ -6,8 +6,10 @@ export class Chrome {
   private hint: HTMLButtonElement;
   private pace: HTMLElement;
   private pausedEl: HTMLElement;
+  private pauseBtn: HTMLButtonElement;
+  readonly rotate: HTMLElement;
 
-  constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void }) {
+  constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean) {
     this.el = document.createElement('div');
     this.el.className = css.chrome!;
     this.sound = document.createElement('button');
@@ -34,12 +36,33 @@ export class Chrome {
     this.pausedEl = document.createElement('div');
     this.pausedEl.className = css.paused!;
     this.pausedEl.textContent = 'PAUSED · SPACE TO RESUME';
-    this.el.append(this.sound, this.hint, this.pace, this.pausedEl);
+    this.pauseBtn = document.createElement('button');
+    this.pauseBtn.type = 'button';
+    this.pauseBtn.className = `${css.btn} ${css.pause}`;
+    this.pauseBtn.textContent = 'Pause';
+    this.pauseBtn.style.display = 'none';
+    this.pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.setPaused(handlers.pause());
+    });
+    this.touch = touch;
+    this.rotate = document.createElement('div');
+    this.rotate.className = css.rotate!;
+    this.rotate.setAttribute('role', 'alert');
+    this.rotate.innerHTML = '<div><i></i><b>Turn your phone sideways</b><span>The glasses see the street wide, and so does this demo.</span></div>';
+    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
     parent.appendChild(this.el);
   }
 
+  private touch: boolean;
+
   setInspectorHint(visible: boolean): void {
     this.hint.style.display = visible ? '' : 'none';
+    this.pauseBtn.style.display = visible && this.touch ? '' : 'none';
+  }
+
+  setRotate(on: boolean): void {
+    this.rotate.style.display = on ? 'grid' : 'none';
   }
 
   setPace(text: string | null): void {
@@ -48,6 +71,8 @@ export class Chrome {
   }
 
   setPaused(paused: boolean): void {
-    this.pausedEl.style.display = paused ? 'block' : 'none';
+    this.pausedEl.style.display = paused && !this.touch ? 'block' : 'none';
+    this.pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    this.pauseBtn.setAttribute('aria-pressed', String(paused));
   }
 }

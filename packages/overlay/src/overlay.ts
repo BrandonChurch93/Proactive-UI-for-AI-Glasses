@@ -3,6 +3,8 @@ import {
   LEVEL_RANK,
   NOMINAL_SIZE,
   focusRect,
+  uiScale,
+  type Level,
   placeView,
   type Band,
   type BrainFrame,
@@ -253,6 +255,8 @@ export class Overlay {
   private readonly reduced: boolean;
   private readonly handlers: PaneHandlers;
   private snooze = false;
+  private ui = 1;
+  private readonly live: HTMLElement;
   private readonly clock: gsap.core.Timeline | null;
 
   constructor(
@@ -282,7 +286,10 @@ export class Overlay {
     this.focusEl = document.createElement('div');
     this.focusEl.className = s.focusOutline!;
     this.focusEl.dataset.label = 'FOCUS ZONE';
-    this.fixed.append(this.glyphEl, this.focusEl);
+    this.live = document.createElement('div');
+    this.live.className = 'sr';
+    this.live.setAttribute('aria-live', 'polite');
+    this.fixed.append(this.glyphEl, this.focusEl, this.live);
     this.root.append(this.hud, this.fixed);
     parent.appendChild(this.root);
     this.route = new RouteView(bridge);
@@ -470,7 +477,8 @@ export class Overlay {
     if (it.kind === 'view') return lv;
     if (!placed || placed.mode !== 'pane') return 'none';
     if (it.aside.dropped) return 'none';
-    if (placed.collapsed === 'glance' && LEVEL_RANK[lv] > LEVEL_RANK.glance) return 'glance';
+    const c = placed.collapsed;
+    if (c && c !== 'pip' && LEVEL_RANK[lv] > LEVEL_RANK[c]) return c as PaneLevel;
     return lv;
   }
 
@@ -519,6 +527,8 @@ export class Overlay {
     }
     it.cur = null;
     if (want !== 'none') {
+      const c = it.d.content;
+      this.live.textContent = [c.name, c.fact ?? c.live, c.showReason !== false ? c.reason.text : ''].filter(Boolean).join('. ');
       const b = this.build(it, want);
       it.cur = b;
       const big = want === 'card' || want === 'expanded';
@@ -563,7 +573,12 @@ export class Overlay {
       this.lastT = t;
     }
     const keepOuts = this.bridge.keepOuts();
-    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts };
+    const ui = uiScale(vp);
+    if (ui !== this.ui) {
+      this.ui = ui;
+      this.root.style.setProperty('--ui', ui.toFixed(3));
+    }
+    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, ui };
     const yieldSide = this.yieldTracker.update({ t, yawRate: this.yawRate, curbDistance: this.bridge.curbDistance() });
     const gk = this.gateK.v;
     const pipMul = this.snooze ? 0.3 : 1;
@@ -589,7 +604,9 @@ export class Overlay {
           const size = it.cur && it.cur.level === lv ? { w: it.cur.width, h: it.cur.height } : nominal;
           const cam = this.bridge.camera();
           const dist = Math.hypot(anchorPos.x - cam.pos.x, anchorPos.y - cam.pos.y, anchorPos.z - cam.pos.z);
-          placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) }, ctx);
+          const sizeOf = (l: Level): { w: number; h: number } =>
+            it.cur && it.cur.level === l ? { w: it.cur.width, h: it.cur.height } : (NOMINAL_SIZE[l as 'glance' | 'card' | 'expanded'] ?? NOMINAL_SIZE.glance);
+          placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk), sizeOf }, ctx);
           it.placed = placed;
         }
       }
@@ -597,7 +614,8 @@ export class Overlay {
       let home: Rect | null = null;
       if (placed && placed.mode === 'pane' && it.place && LEVEL_RANK[d.level] >= LEVEL_RANK.glance && !it.dying) {
         const sc = placed.scale;
-        const lv = placed.collapsed === 'glance' ? 'glance' : d.level;
+        const c = placed.collapsed;
+        const lv = c && c !== 'pip' && LEVEL_RANK[d.level] > LEVEL_RANK[c] ? c : d.level;
         const size = it.cur && it.cur.level === lv ? { w: it.cur.width, h: it.cur.height } : (NOMINAL_SIZE[lv as 'glance'] ?? NOMINAL_SIZE.glance);
         home = { x: placed.rect.x + it.place.jumpX.at(t), y: placed.rect.y + it.place.jumpY.at(t), w: size.w * sc, h: size.h * sc };
         aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk));
@@ -638,8 +656,9 @@ export class Overlay {
           const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
           const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
-          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.width, h: b.height }, vp, i);
-          if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 - b.height };
+          scale = ui;
+          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.width * ui, h: b.height * ui }, vp, i);
+          if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.height * ui };
           if (b === it.cur) {
             const y = it.yieldS.update(t, yieldSide, rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right');
             yieldO = y.opacity;
@@ -755,7 +774,7 @@ export class Overlay {
       const b = it.cur;
       if (!b || !b.rect || b.opacity < 0.01 || b.level === 'none') continue;
       const r = b.rect;
-      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : 1;
+      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
       panes.push({
         id: it.id,
         level: b.level,
@@ -792,7 +811,7 @@ export class Overlay {
     for (const it of this.items.values()) {
       const r = it.cur?.rect;
       if (!r || !it.cur || it.cur.opacity < 0.3) continue;
-      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : 1;
+      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
       if (x >= r.x && x <= r.x + it.cur.width * sc && y >= r.y && y <= r.y + it.cur.height * sc) return it.id;
     }
     return null;
