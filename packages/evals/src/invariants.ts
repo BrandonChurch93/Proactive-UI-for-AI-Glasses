@@ -51,7 +51,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     rule: 'copy',
     name: 'no em dash in any line the brain produces',
     check: (r) => {
-      for (const e of r.entries) for (const s of strings(e.decision)) if (/[—–]/.test(s)) return `t=${e.t} ${e.decision.id}: ${s}`;
+      for (const e of r.entries) for (const s of strings(e.decision)) if (/[\u2014\u2013]/.test(s)) return `t=${e.t} ${e.decision.id}: ${s}`;
       return null;
     },
   },

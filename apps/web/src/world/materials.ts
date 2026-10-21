@@ -44,8 +44,10 @@ function tex(url: string, srgb: boolean, aniso: number): Promise<THREE.Texture> 
   });
 }
 
-async function pbr(name: string, aniso: number, ao = true): Promise<PbrSet> {
-  const base = `/assets/tex/${name}`;
+const HAS_AO = new Set(['bark014', 'bricks085', 'bricks094', 'concrete044d', 'facade018a', 'facade020a', 'pavingstones136', 'road012a']);
+
+async function pbr(name: string, aniso: number, ao = HAS_AO.has(name)): Promise<PbrSet> {
+  const base = `${import.meta.env.BASE_URL}assets/tex/${name}`;
   const [map, normalMap, roughnessMap, aoMap] = await Promise.all([
     tex(`${base}_color.jpg`, true, aniso),
     tex(`${base}_normal.jpg`, false, aniso),

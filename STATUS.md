@@ -6,13 +6,43 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- Phase: 6 done (polish and proof). Phase 7 (ship) next.
-- Next step: run the refresh ritual, read plan.md Phase 6, then the visual pass against fresh reference screenshots, play all three walks as a stranger twice (inspector open), the doc audit, legibility numbers, the performance pass (world-spec 7; bundle is 1.14 MB, 302 kB gzip), README and LICENSES.
-- Carried into Phase 6 from earlier phases: the M4 bus is a dark slab up close; passers-by still stream past the bench at the end of Just walking; an awning shows its text mirrored from underneath; the delivery truck fills the frame for about three seconds; exposed party walls are blank brick; people are low-poly; interiors could vary more; the fast tier needs a 2021 Air-class budget check.
-- App: apps/web/src/main.ts boots the World and an App (apps/web/src/app.ts: title, end card, chrome, sound, inspector, input). The walk loop is apps/web/src/walk.ts (record and replay of live input, seek, overrides, export). The overlay is packages/overlay, the inspector packages/inspector (store.ts is its whole interface to the app), the Three side of the overlay bridge apps/web/src/bridge.ts.
-- Tools: scripts/play.ts drives a session (wait, click, key, drag, text, eval, shot, download; steps separated by ';;') and fails on console errors; scripts/shots.ts for stills; scripts/decisions.ts prints a walk's decisions; `pnpm eval --file` scores an inspector export; `npx vite preview --port 4173` in apps/web serves the build.
+- Phase: 7 done. The build is complete; the Final section below is the summary for the owner.
+- If anything is picked up again: run the refresh ritual, read Final and the Phase 6 review, then the "Left for the owner" list. Tools: scripts/play.ts (drive a session), scripts/shots.ts (stills, `--query cam=x,y,n,yaw,pitch` for a debug camera), scripts/coldload.ts (cold load to first pip on the build), scripts/perf.ts and perf2.ts (frame cost and its breakdown), scripts/decisions.ts, `pnpm eval --file <export>`.
 - Open decisions: none.
-- Last review verdict: Phase 5 passes its check (see Reviews).
+- Last review verdict: Phase 7 passes its check.
+
+## Final · 2026-10-20
+
+### What was built
+
+- A static site (`pnpm build` writes `apps/web/dist`, 17 MB, relative paths, runs from any file server and from a subpath) of a near-future pair of AI glasses on a ninety-second city walk. It opens on the title screen over the live street with the Just walking attract loop. You choose Hungry, Errands or Just walking, play the walk with your own head and gaze (drag, dwell, click, Esc), and end on a card that reads the walk's own log. The inspector (I) shows every decision with its reasons, scrubs the whole walk, applies logged overrides, shows this build's evals and exports the run.
+- The world (apps/web/src/world, packages/sim): one avenue block and a cross street, hand-authored lots with scanned CC0 materials, interior-mapped windows, designed storefronts and signage for every place, rooftops, fire escapes, ghost signs, rigged CC0 people who walk door to door and wait for the light, CC0 cars in lanes under IDM following and exclusive signal phases, the M4 bus, the delivery truck, the bike, all lit by one sun with real shadows, bloom only on emissives and the light vocabulary.
+- The brain (packages/brain): a deterministic rules policy at 10 Hz, every number in config.ts, every decision logged with a cause and signed reason parts.
+- The overlay (packages/overlay): glass panes, the light vocabulary depth-tested in the scene, the full motion vocabulary on the sim clock, and the geometry of the walking rules (focus zone, edge entry, yielding, stepping aside, backdrop adaptivity, edge folding).
+- The proof: 39 eval suites (869 checks) over the three recorded walks and 36 focused cases, 40 unit tests including the overlay's placement suite over every frame of every walk, an export that round-trips through `pnpm eval --file`.
+
+### What changed from the docs, and why
+
+Each is written into the doc it changes (look for "As built").
+
+- Gaze is the view center, but live acquisition is tolerant in pitch (people look at the shopfront, not the sign's exact point) and the pointer is the gaze over view-zone panes, which have no place in the world. Because the gaze target is centered and the focus zone keeps the middle third clear, a card always sits just outside the zone, joined to its pip by the leader, rather than tucked beside the pip as in reference scene 1.
+- The light vocabulary keeps its 24 m angular size when nearer; the leader's pane end sits at most 6 m from the eye so only its far end can be occluded.
+- The delivery truck uses the inner northbound lane (it filled the whole frame in the curb lane); the beat still happens.
+- The theater dwell frames the marquee about 60 degrees off the walking line, not the reference's 38, because the beat sheet puts the wearer 13 m from it at 0:08.
+- The Errands passerby cannot reach a card that sits above a 4 m sign (heads stay at the horizon), so rule 8 is shown by the truck in Just walking and by its eval case; the step-aside still runs whenever a body or face does reach a pane.
+- View-zone panes do not step aside; they live at the edges by design and have no pip to fall back to.
+- Sound stays off until the Sound control is pressed and is muted behind the title.
+- The high tier uses SMAA and a 3072 shadow map instead of 4x MSAA and 4096 (7.6 to 5.9 ms on the development machine).
+- Scrubbing replays recorded input from zero rather than caching states (exact, and fast: under a quarter of a second for a whole walk).
+- Smaller settled points: arrival anchored at the door, the signal moment on the far signal head, the countdown traveling ahead of the wearer while crossing, Pocket Park's anchor over the lawn, lamps and trees moved off the beats' sightlines, route endings a couple of metres from the doors.
+
+### Left for the owner
+
+- Push and deploy: `pnpm build`, then host `apps/web/dist` anywhere static. Nothing else is needed.
+- The 60 fps budget on a 2021 MacBook Air could not be measured here. On the development machine (M4 Pro) the high tier costs 5.9 ms and the fast tier 5.1 ms; on an M1 Air the high tier will likely run near 24 ms and the automatic fallback after four seconds will move it to the fast tier. Worth one look on that hardware.
+- A cold load to the first pip is 4.0 s at 50 Mbit/s and 7.4 s at 20 Mbit/s. Textures are JPEG because no KTX2 encoder was available; converting them would cut the 20 Mbit/s case.
+- People are the best CC0 rigged characters available from this network (Quaternius via poly.pizza); Google Drive refused the higher-quality Quaternius packs. Swapping them in through `scripts/assets.ts` would raise the world the most.
+- Ghost signs sit high on the party walls where the walk rarely looks, and shop interiors are convincing at a glance but repetitive up close.
 
 ## Reference notes
 
@@ -44,6 +74,11 @@ One entry per phase check: what you compared, what differed from the reference o
 - places.json and the three scenario files load through a validator into typed data; a test checks every scripted id resolves: yes.
 - Black page with the title plate in Instrument Sans: yes, screenshot checked.
 - Check: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm shot` all green.
+
+### Phase 7 · 2026-10-20
+- `pnpm build` clean (typecheck, evals 39/39, Vite): yes.
+- `apps/web/dist` runs from a static file server: yes, served by `python3 -m http.server` from a `/lumen/` subdirectory, title to walk to inspector with no console errors (the build now uses relative paths, and the loader no longer asks for four AO maps that never existed, which the dev server had been masking).
+- Final STATUS entry: yes, above.
 
 ### Phase 6 · 2026-10-20
 - Visual pass on every scripted beat, each beside fresh reference frames (hero, walking-rules scenes, the study's title and arrival). Fixed because of it: the delivery truck filled the whole frame for three seconds (moved to the inner northbound lane, it still passes between the wearer and the marquee); the M4 bus read as a dark slab up close (lit interior with seats, poles, passengers and pillars, a door, lamps, a side sign); an awning showed its lettering mirrored from underneath; a 96 m background tower stood across the cross street east of the corner and was the "blank brick wall" in the Errands corner beat (towers now avoid streets and lots); exposed party walls got period ghost signs and lot-line windows; every shop showed the same bookshelves (interiors now follow the place: counter and menu board, goods, or a lobby with posters); sunlit crosswalk paint bloomed (paint calibrated to 0.58); pedestrians jammed at the park corner because the walkable clamp pinned them at n 84.4 (fixed, plus a wall slide; stalled walker-seconds now 2 to 3 percent); the Just walking end looked at a bare lawn with its glance off view (Pocket Park anchor moved over the park, three trees planted, the last metre turns to face it); the WALK countdown fell behind the wearer during the crossing and was unreadable on white paint (it travels ahead while crossing, on a dark under-glow, 30 percent larger).
@@ -107,6 +142,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-20 · Phase 7 done. The build is finished; see Final.
 - 2026-10-20 · Phase 6 done. Decisions: the truck uses the inner northbound lane (scenarios.md updated); SMAA replaces MSAA in the high tier; ghost signs are invented period ads, no real brands; live gaze is tolerant in pitch; the countdown follows the wearer during a crossing.
 - 2026-10-20 · Phase 5 done. Decisions: sound stays off until the Sound control is pressed, and stays off behind the title (the attract loop is muted); "Walk again" returns to the choice (scenarios.md) while the end card also offers the other two walks directly (copy.md); scrubbing replays from recorded input rather than caching states; `pnpm build` runs the evals first so the inspector always ships this build's report.
 - 2026-10-20 · Phase 4 done. Decisions: the pointer is the gaze only over view-zone panes (they have no place in the world to turn toward); the light vocabulary keeps its hero-distance angular size when nearer; view-zone panes do not step aside; the overlay is driven by the sim clock. Conflicts noted: the Errands passerby cannot reach a card that sits above a 4 m sign (heads stay at the horizon), so the step-aside in that beat never triggers and rule 8 is shown by the truck in Just walking and by its eval case; the Just walking theater dwell frames the marquee about 60° off the walking line rather than the reference's 38°, because the beat sheet puts the wearer 13 m from it at 0:08 and moving the lot would shift every later beat. Docs updated: design-system 3 and 8, overlay-spec 7 (as built), world-spec.

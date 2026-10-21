@@ -45,7 +45,7 @@ function surface(name: string, color: THREE.Color, paint: boolean): { rough: num
 }
 
 async function bake(name: string): Promise<Baked> {
-  const g = await gltfLoader().loadAsync(`/assets/cars/${name}.glb`);
+  const g = await gltfLoader().loadAsync(`${import.meta.env.BASE_URL}assets/cars/${name}.glb`);
   const root = g.scene;
   root.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(root);

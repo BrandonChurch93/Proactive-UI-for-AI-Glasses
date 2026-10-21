@@ -50,7 +50,7 @@ export class PeopleView {
   async load(): Promise<void> {
     this.protos = await Promise.all(
       PEOPLE_MODELS.map(async (name) => {
-        const g = await gltfLoader().loadAsync(`/assets/people/${name}.glb`);
+        const g = await gltfLoader().loadAsync(`${import.meta.env.BASE_URL}assets/people/${name}.glb`);
         const scene = g.scene;
         mergeSkinned(scene);
         scene.traverse((o) => {
