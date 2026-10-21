@@ -6,7 +6,8 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- Phase: 3 done (world, rendered). Phase 4 (overlay) next.
+- 2026-10-20 · Session resumed after compaction, refresh ritual done. In Phase 4: bridge.ts and overlay.module.css written; next panes, motion, placement, overlay controller, Three bridge, wiring.
+- Phase: 3 done (world, rendered). Phase 4 (overlay) in progress.
 - Next step: refresh design-system sections 2 to 7, overlay-spec, walking-rules, copy; screenshot the reference beats (glance, card, expanded, recede, whisper, pocket, yield, drop-to-pip); build packages/overlay (panes, light vocabulary through a scene bridge, motion, placement using packages/shared/src/placement.ts, input model) and wire it in apps/web/src/main.ts (currently a world viewer: ?scenario=&still=1&t= renders the world; live mode has drag-to-look).
 - World code: apps/web/src/world (render.ts post chain, materials.ts, buildings.ts façades and windows, interior.ts window shader, storefront.ts, signs.ts atlas, props.ts, rooftops.ts, vehicles.ts baked instanced cars, people.ts merged skinned people). Assets via scripts/assets.ts. Dev tools: scripts/stats.ts (draw calls), scripts/perf.ts and perf2.ts (frame cost), scripts/probe.ts (HDR values), scripts/evalpage.ts.
 - Where things are: sim in packages/sim/src (layout.ts hand-authored lots and colliders, route.ts, wearer.ts, traffic.ts IDM with signals, people.ts, reviewer.ts scripted head, backdrop.ts sampler, headless.ts placement for record, sim.ts); placement solver in packages/shared/src/placement.ts; brain in packages/brain/src (brain.ts orchestrates; ladder.ts is rule 10; reading.ts rule 2; pocket.ts rules 6 and 7); case synthesizer in packages/shared/src/synth.ts; evals in packages/evals (cases, expectations, invariants.ts, `pnpm eval`).

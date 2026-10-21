@@ -4,6 +4,7 @@ import { isScenarioId } from '@lumen/shared';
 import { Sim } from '@lumen/sim';
 import { mountPlate } from './title/plate';
 import { World } from './world/world';
+import { Walk } from './walk';
 
 declare global {
   interface Window {
@@ -11,6 +12,7 @@ declare global {
     __done?: boolean;
     __stepTo?: (t: number) => Promise<void>;
     __world?: World;
+    __walk?: () => Walk;
     __stats?: () => { calls: number; triangles: number; textures: number; geometries: number };
   }
 }
@@ -33,25 +35,32 @@ async function boot(): Promise<void> {
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block';
   app.appendChild(canvas);
-  let sim = new Sim(scenario, { viewport: { w: innerWidth, h: innerHeight } });
-  const world = new World(canvas, sim, { still, quality: params.get('quality') === 'fast' ? 'fast' : 'high' });
+  const layer = document.createElement('div');
+  layer.style.cssText = 'position:fixed;inset:0;pointer-events:none';
+  app.appendChild(layer);
+  const world = new World(canvas, new Sim(scenario, { viewport: { w: innerWidth, h: innerHeight } }), { still, quality: params.get('quality') === 'fast' ? 'fast' : 'high' });
   window.__world = world;
   world.core.resize(innerWidth, innerHeight);
   await document.fonts.ready;
   await world.load();
   if (params.get('nobloom') === '1') world.core.bloom.enabled = false;
   if (params.get('exposure')) world.core.renderer.toneMappingExposure = Number(params.get('exposure'));
+  const reduced = params.get('reduced') === '1' ? true : undefined;
+  const scripted = still || params.get('scripted') === '1';
+  const make = (): Walk => {
+    const w = new Walk(world, scenario, layer, { scripted, ...(reduced !== undefined ? { reducedMotion: reduced } : {}) });
+    w.overlay.setFocusOutline(params.get('focus') === '1');
+    return w;
+  };
+  let walk = make();
+  window.__walk = () => walk;
   const stepTo = async (t: number): Promise<void> => {
-    if (t < sim.t - 1e-6) {
-      sim = new Sim(scenario, { viewport: { w: innerWidth, h: innerHeight } });
-      world.setSim(sim);
+    if (t < walk.sim.t - 1e-6) {
+      walk.dispose();
+      walk = make();
     }
     const dt = 1 / 60;
-    while (sim.t < t - 1e-6) {
-      sim.step(dt);
-      world.update(dt);
-    }
-    world.update(0);
+    while (walk.sim.t < t - 1e-6) walk.step(dt);
     world.render();
   };
   window.__stats = () => {
@@ -86,24 +95,45 @@ async function boot(): Promise<void> {
     return;
   }
   addEventListener('resize', () => world.core.resize(innerWidth, innerHeight));
-  sim.scripted = false;
-  let drag: { x: number; y: number; yaw: number; pitch: number } | null = null;
+  let drag: { x: number; y: number; yaw: number; pitch: number; moved: boolean } | null = null;
   let headYaw = 0.22;
   let headPitch = 0.04;
+  let paused = false;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, yaw: headYaw, pitch: headPitch };
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, yaw: headYaw, pitch: headPitch, moved: false };
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) return;
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) >= 4) drag.moved = true;
     headYaw = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, drag.yaw + (e.clientX - drag.x) * 0.0032));
     headPitch = Math.max(-0.6, Math.min(0.75, drag.pitch + (e.clientY - drag.y) * 0.0028));
   });
   const end = (): void => {
+    if (drag && !drag.moved) walk.pinch();
     drag = null;
   };
   canvas.addEventListener('pointerup', end);
-  canvas.addEventListener('pointercancel', end);
+  canvas.addEventListener('pointercancel', () => (drag = null));
+  canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    walk.dismiss();
+  });
+  layer.addEventListener('pointerover', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-gaze]');
+    const pane = (e.target as HTMLElement).closest<HTMLElement>('[data-pane]');
+    walk.hoverId = row?.dataset.gaze ?? (pane && pane.dataset.zone === 'view' ? pane.dataset.pane! : null);
+  });
+  layer.addEventListener('pointerout', () => (walk.hoverId = null));
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') walk.dismiss();
+    else if (e.key === 'Enter') walk.pinch();
+    else if (e.key === ' ') {
+      paused = !paused;
+      e.preventDefault();
+    }
+  });
   const forced = params.get('quality');
   let fpsFrames = 0;
   let fpsTime = 0;
@@ -111,6 +141,7 @@ async function boot(): Promise<void> {
   let acc = 0;
   const frame = (now: number): void => {
     const real = (now - last) / 1000;
+    last = now;
     if (!forced && fpsTime < 4 && real < 0.5) {
       fpsTime += real;
       fpsFrames++;
@@ -119,15 +150,17 @@ async function boot(): Promise<void> {
         world.core.resize(innerWidth, innerHeight);
       }
     }
-    sim.live.headYaw = sim.wearer.bodyYaw + headYaw;
-    sim.live.headPitch = headPitch;
-    acc += Math.min(0.1, real);
-    last = now;
-    const dt = 1 / 60;
-    while (acc >= dt) {
-      sim.step(dt);
-      world.update(dt);
-      acc -= dt;
+    if (!paused) {
+      if (!walk.sim.scripted) {
+        walk.sim.live.headYaw = walk.sim.wearer.bodyYaw + headYaw;
+        walk.sim.live.headPitch = headPitch;
+      }
+      acc += Math.min(0.1, real);
+      const dt = 1 / 60;
+      while (acc >= dt) {
+        walk.step(dt);
+        acc -= dt;
+      }
     }
     world.render();
     requestAnimationFrame(frame);

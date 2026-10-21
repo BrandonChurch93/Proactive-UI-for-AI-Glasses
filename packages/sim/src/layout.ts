@@ -261,8 +261,8 @@ export function buildLayout(seed = 47): BlockLayout {
   };
   const curbE = BLOCK.avenueHalf;
   for (const n of [27.5, 40.5, 63.5, 73.5]) prop('tree', curbE + 0.58, n);
-  for (const n of [9.5, 29.5, 46.2, 61.5, 75]) prop('tree', -(curbE + 0.62), n);
-  for (const n of [-10, 14, 38, 66, 82]) prop('lamp', curbE + 0.5, n, Math.PI / 2);
+  for (const n of [9.5, 29.5, 46.2, 56.8, 75]) prop('tree', -(curbE + 0.62), n);
+  for (const n of [-10, 3, 38, 66, 82]) prop('lamp', curbE + 0.5, n, Math.PI / 2);
   for (const n of [-4, 22, 44, 70]) prop('lamp', -(curbE + 0.5), n, -Math.PI / 2);
   prop('hydrant', curbE + 0.45, 8.6);
   prop('hydrant', -(curbE + 0.45), 33.2);

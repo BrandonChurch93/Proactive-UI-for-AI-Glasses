@@ -1151,7 +1151,7 @@ export class Brain {
         component: 'arrival',
         zone: 'world',
         level: 'glance',
-        anchor: e.id,
+        anchor: `door:${e.id}`,
         content: { name: "Seat's held, inside on the left.", reason: r, showReason: false },
         reason: r,
         origin: 'arrival',

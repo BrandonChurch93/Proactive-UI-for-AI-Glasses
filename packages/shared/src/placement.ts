@@ -76,6 +76,22 @@ function pushOutOfZone(r: Rect, zone: Rect, side: 'left' | 'right'): Rect {
   return side === 'left' ? { ...r, x: zone.x - r.w - 10 } : { ...r, x: zone.x + zone.w + 10 };
 }
 
+export function configRect(
+  inp: PlaceInput,
+  side: 'left' | 'right',
+  vertical: 'above' | 'below',
+  scale: number,
+): { rect: Rect; ok: boolean; leader: { x: number; y: number } } {
+  const zone = focusRect(inp.band, inp.viewport.w, inp.viewport.h);
+  let r = clampInto(candidate(inp, side, vertical, scale), inp.viewport);
+  if (!inp.focusOk) r = pushOutOfZone(r, zone, side);
+  const ok =
+    inView(r, inp.viewport) &&
+    (inp.focusOk || !rectsOverlap(r, zone)) &&
+    !(vertical === 'above' && inp.anchor.y - r.h - offsets(inp.level).dy * scale < MARGIN);
+  return { rect: r, ok, leader: { x: side === 'left' ? r.x + r.w : r.x, y: vertical === 'above' ? r.y + r.h : r.y } };
+}
+
 export function placeWorld(inp: PlaceInput): Placed {
   const { anchor, viewport: vp } = inp;
   const near: 'left' | 'right' = anchor.x < vp.w / 2 ? 'left' : 'right';

@@ -1,0 +1,87 @@
+export const T = {
+  snap: 0.12,
+  quick: 0.22,
+  base: 0.36,
+  baseCard: 0.42,
+  open: 0.48,
+  scene: 0.9,
+} as const;
+
+export const EASE = {
+  out: 'power3.out',
+  in: 'power2.in',
+  gate: 'power1.inOut',
+  travel: 'power2.inOut',
+} as const;
+
+export const MOVE = {
+  markPip: 0.5,
+  markAura: 0.9,
+  markAuraDelay: 0.05,
+  gaze: 0.8,
+  flareIn: 0.7,
+  flareInAt: 0.3,
+  flareOutAt: 1.1,
+  flareOut: 0.7,
+  travelGlance: 0.32,
+  travelCard: 0.46,
+  headFade: 0.3,
+  seedGrow: 0.3,
+  revealAt: 0.18,
+  caFrom: 2.4,
+  caAt: 0.34,
+  caDur: 0.7,
+  kidsAt: 0.26,
+  stagger: 0.05,
+  seedFadeAt: 0.5,
+  seedFade: 0.45,
+  dissolveKids: 0.16,
+  dissolveStagger: 0.02,
+  dissolveClipAt: 0.08,
+  dissolveCa: 1.4,
+  dissolveSeedAt: 0.24,
+  retract: 0.3,
+  recede: 0.28,
+  returnS: 0.55,
+  glyphAt: 0.1,
+  yieldOpacity: 0.15,
+  yieldPx: 24,
+  yieldIn: 0.18,
+  yieldOut: 0.32,
+  asideOpacity: 0.3,
+  asidePad: 20,
+  asideIn: 0.22,
+  asideOut: 0.32,
+  asideHoldMs: 120,
+  droppedPip: 0.45,
+  pushOut: 0.32,
+  inward: 0.48,
+  saveRise: 0.25,
+  saveHold: 0.6,
+  whisperHold: 2.5,
+  whisperRise: 8,
+  hysteresis: 1.2,
+  deadBand: 4,
+  offscreenMs: 250,
+  backdropEvery: 0.25,
+  backdropTween: 0.25,
+  routeDraw: 1.2,
+  routeGate: 0.4,
+  columnSettle: 1.2,
+} as const;
+
+export const LIGHT_COLOR = {
+  pip: [2.4, 2.1, 1.5],
+  aura: [1.1, 0.95, 0.7],
+  flare: [2.5, 2.4, 2.1],
+  head: [3, 2.8, 2.3],
+  leader: [2.2, 2.1, 1.9],
+} as const;
+
+export const LIGHT_SIZE = { pip: 0.7, pipGazed: 1.6, aura: 1.8, flareW: 5.0, flareH: 0.32, head: 0.5 } as const;
+
+export const BACKDROP = [
+  { above: 0.6, alpha: 0.78, weight: 500 },
+  { above: 0.4, alpha: 0.66, weight: 400 },
+  { above: -1, alpha: 0.52, weight: 400 },
+] as const;

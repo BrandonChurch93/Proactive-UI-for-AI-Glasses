@@ -1,0 +1,530 @@
+import * as THREE from 'three';
+import { PLACE_BY_ID, nOf, placeDoor, type Box3, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
+import { LANE_BY_ID, nearestS, pointAt, type Sim } from '@lumen/sim';
+import {
+  LIGHT_COLOR,
+  LIGHT_SIZE,
+  leaderPoint,
+  type ColumnHandle,
+  type GroundTextHandle,
+  type KeepOut,
+  type LeaderHandle,
+  type LightHandle,
+  type LightKind,
+  type RouteHandle,
+  type SceneBridge,
+} from '@lumen/overlay';
+
+const LOOKAHEAD = 0.45;
+const PIP_TOWARD_CAMERA = 0.6;
+
+function glowTexture(): THREE.Texture {
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 128;
+  const g = c.getContext('2d')!;
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,255,255,1)');
+  r.addColorStop(0.25, 'rgba(255,236,190,.9)');
+  r.addColorStop(0.6, 'rgba(255,217,138,.25)');
+  r.addColorStop(1, 'rgba(255,217,138,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+
+function flareTexture(): THREE.Texture {
+  const c = document.createElement('canvas');
+  c.width = 512;
+  c.height = 32;
+  const g = c.getContext('2d')!;
+  const r = g.createLinearGradient(0, 0, 512, 0);
+  r.addColorStop(0, 'rgba(255,240,210,0)');
+  r.addColorStop(0.5, 'rgba(255,248,230,1)');
+  r.addColorStop(1, 'rgba(255,240,210,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 12, 512, 8);
+  const v = g.createLinearGradient(0, 0, 0, 32);
+  v.addColorStop(0, 'rgba(0,0,0,1)');
+  v.addColorStop(0.5, 'rgba(0,0,0,0)');
+  v.addColorStop(1, 'rgba(0,0,0,1)');
+  g.globalCompositeOperation = 'destination-out';
+  g.fillStyle = v;
+  g.fillRect(0, 0, 512, 32);
+  return new THREE.CanvasTexture(c);
+}
+
+function columnTexture(): THREE.Texture {
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 256;
+  const g = c.getContext('2d')!;
+  const v = g.createLinearGradient(0, 256, 0, 0);
+  v.addColorStop(0, 'rgba(255,214,130,.7)');
+  v.addColorStop(0.6, 'rgba(255,214,130,.18)');
+  v.addColorStop(1, 'rgba(255,214,130,0)');
+  g.fillStyle = v;
+  g.fillRect(0, 0, 64, 256);
+  g.globalCompositeOperation = 'destination-in';
+  const h = g.createLinearGradient(0, 0, 64, 0);
+  h.addColorStop(0, 'rgba(0,0,0,0)');
+  h.addColorStop(0.5, 'rgba(0,0,0,1)');
+  h.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = h;
+  g.fillRect(0, 0, 64, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+const TONE: Record<'go' | 'warn' | 'stop', string> = { go: '#9ff0bd', warn: '#ffc98a', stop: '#ff8f7a' };
+
+export function groundY(x: number, z: number): number {
+  const n = nOf(z);
+  return Math.abs(x) >= 7 && !(n > 90 && n < 104) ? 0.15 : 0;
+}
+
+export class ThreeBridge implements SceneBridge {
+  readonly group = new THREE.Group();
+  private readonly glow = glowTexture();
+  private readonly flare = flareTexture();
+  private readonly colTex = columnTexture();
+  private readonly tmp = new THREE.Vector3();
+  private readonly fwd = new THREE.Vector3();
+
+  constructor(
+    private cam: THREE.PerspectiveCamera,
+    private sim: Sim,
+  ) {
+    this.group.name = 'overlay-light';
+  }
+
+  setSim(sim: Sim): void {
+    this.sim = sim;
+  }
+
+  viewport(): Viewport {
+    return { w: innerWidth, h: innerHeight };
+  }
+
+  project(v: Vec3): Projected {
+    const cam = this.cam;
+    this.tmp.set(v.x, v.y, v.z);
+    cam.getWorldDirection(this.fwd);
+    const depth = this.tmp.clone().sub(cam.position).dot(this.fwd);
+    this.tmp.project(cam);
+    const vp = this.viewport();
+    return { x: (this.tmp.x * 0.5 + 0.5) * vp.w, y: (-this.tmp.y * 0.5 + 0.5) * vp.h, depth, inFront: depth > 0.05 };
+  }
+
+  unprojectAtDepth(x: number, y: number, depth: number): Vec3 {
+    const vp = this.viewport();
+    const cam = this.cam;
+    const p = new THREE.Vector3((x / vp.w) * 2 - 1, -((y / vp.h) * 2 - 1), 0.5).unproject(cam);
+    const dir = p.sub(cam.position).normalize();
+    cam.getWorldDirection(this.fwd);
+    const k = depth / Math.max(1e-4, dir.dot(this.fwd));
+    return { x: cam.position.x + dir.x * k, y: cam.position.y + dir.y * k, z: cam.position.z + dir.z * k };
+  }
+
+  camera(): { pos: Vec3; yaw: number; pitch: number } {
+    const p = this.sim.cameraPose();
+    return { pos: { x: this.cam.position.x, y: this.cam.position.y, z: this.cam.position.z }, yaw: p.yaw, pitch: p.pitch };
+  }
+
+  anchor(id: string): Vec3 | undefined {
+    if (id.startsWith('column:')) {
+      const p = PLACE_BY_ID.get(id.slice(7));
+      if (!p) return undefined;
+      const d = placeDoor(p);
+      return { x: d.x, y: groundY(d.x, d.z), z: d.z };
+    }
+    return this.sim.anchorOf(id);
+  }
+
+  private rect(b: Box3): Rect | null {
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    let any = false;
+    for (let i = 0; i < 8; i++) {
+      const p = this.project({ x: i & 1 ? b.max.x : b.min.x, y: i & 2 ? b.max.y : b.min.y, z: i & 4 ? b.max.z : b.min.z });
+      if (!p.inFront) continue;
+      any = true;
+      x0 = Math.min(x0, p.x);
+      y0 = Math.min(y0, p.y);
+      x1 = Math.max(x1, p.x);
+      y1 = Math.max(y1, p.y);
+    }
+    const vp = this.viewport();
+    if (!any || x1 < 0 || y1 < 0 || x0 > vp.w || y0 > vp.h) return null;
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+
+  private union(a: Rect | null, b: Rect | null): Rect | null {
+    if (!a) return b;
+    if (!b) return a;
+    const x = Math.min(a.x, b.x);
+    const y = Math.min(a.y, b.y);
+    return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
+  }
+
+  keepOuts(): KeepOut[] {
+    const sim = this.sim;
+    const out: KeepOut[] = [];
+    const eye = this.cam.position;
+    for (const v of sim.traffic.vehicles) {
+      if (v.v < 0.3) continue;
+      const b = sim.traffic.bounds(v);
+      const cx = (b.min.x + b.max.x) / 2;
+      const cz = (b.min.z + b.max.z) / 2;
+      if (Math.hypot(cx - eye.x, cz - eye.z) > 70) continue;
+      const lane = LANE_BY_ID.get(v.lane)!;
+      const dx = lane.dir.x * v.v * LOOKAHEAD;
+      const dz = lane.dir.z * v.v * LOOKAHEAD;
+      const ahead = { min: { x: b.min.x + dx, y: b.min.y, z: b.min.z + dz }, max: { x: b.max.x + dx, y: b.max.y, z: b.max.z + dz } };
+      const r = this.union(this.rect(b), this.rect(ahead));
+      if (r) out.push({ rect: r, kind: 'vehicle', moving: true, id: v.id });
+    }
+    for (const p of sim.people.people) {
+      if (!p.alive || p.spawnAt > sim.t) continue;
+      const d = Math.hypot(p.pos.x - eye.x, p.pos.z - eye.z);
+      if (d > 28) continue;
+      const vx = -Math.sin(p.heading) * p.speed * LOOKAHEAD;
+      const vz = -Math.cos(p.heading) * p.speed * LOOKAHEAD;
+      const box = (ox: number, oz: number, y0: number, y1: number): Box3 => ({
+        min: { x: p.pos.x + ox - 0.3, y: y0, z: p.pos.z + oz - 0.3 },
+        max: { x: p.pos.x + ox + 0.3, y: y1, z: p.pos.z + oz + 0.3 },
+      });
+      const g = groundY(p.pos.x, p.pos.z);
+      const body = this.union(this.rect(box(0, 0, g, g + p.height)), this.rect(box(vx, vz, g, g + p.height)));
+      if (!body || body.h < 30) continue;
+      out.push({ rect: body, kind: 'person', moving: p.speed > 0.2, id: p.id });
+      let dh = Math.atan2(-(eye.x - p.pos.x), -(eye.z - p.pos.z)) - p.heading;
+      while (dh > Math.PI) dh -= Math.PI * 2;
+      while (dh < -Math.PI) dh += Math.PI * 2;
+      if (Math.abs(dh) < 1.1) {
+        const face = this.union(this.rect(box(0, 0, g + p.height - 0.3, g + p.height)), this.rect(box(vx, vz, g + p.height - 0.3, g + p.height)));
+        if (face) out.push({ rect: face, kind: 'face', moving: p.speed > 0.2, id: `${p.id}:face` });
+      }
+    }
+    return out;
+  }
+
+  routePath(to: string, offset: 'center' | 'curb'): Vec3[] {
+    const sim = this.sim;
+    const r = sim.route;
+    const s0 = sim.wearer.s + 0.8;
+    let end = r.length;
+    const place = PLACE_BY_ID.get(to);
+    if (place) {
+      const door = placeDoor(place);
+      const sd = nearestS(r, door);
+      if (sd > s0) end = sd;
+    }
+    const s1 = Math.min(end, s0 + 30);
+    const out: Vec3[] = [];
+    for (let s = s0; s <= s1 + 1e-6; s += 0.5) {
+      const p = pointAt(r, Math.min(s, s1)).pos;
+      let x = p.x;
+      if (offset === 'curb' && Math.abs(x) > 7.2) x = Math.sign(x) * Math.max(7.45, Math.abs(x) - 0.45);
+      out.push({ x, y: groundY(x, p.z) + 0.012, z: p.z });
+    }
+    return out;
+  }
+
+  safetyAnchor(id: string): { pos: Vec3; yaw: number } | undefined {
+    const sim = this.sim;
+    if (id.startsWith('bike:')) {
+      const h = sim.wearer.heading;
+      const x = sim.wearer.pos.x + h.x * 3.2;
+      const z = sim.wearer.pos.z + h.z * 3.2;
+      return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: Math.atan2(-h.x, -h.z) };
+    }
+    const st = sim.route.stops[0];
+    if (!st) return undefined;
+    const a = pointAt(sim.route, st.s).pos;
+    const b = pointAt(sim.route, st.s + 2.4).pos;
+    const dx = b.x - a.x;
+    const dz = b.z - a.z;
+    const l = Math.hypot(dx, dz) || 1;
+    const x = a.x + (dx / l) * 1.9;
+    const z = a.z + (dz / l) * 1.9;
+    return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: Math.atan2(-dx, -dz) };
+  }
+
+  curbDistance(): number {
+    return this.sim.wearer.curbDistance();
+  }
+
+  createLight(kind: LightKind): LightHandle {
+    const mat = new THREE.SpriteMaterial({
+      map: kind === 'flare' ? this.flare : this.glow,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: true,
+      fog: false,
+      opacity: 0,
+    });
+    const c = LIGHT_COLOR[kind];
+    mat.color.setRGB(c[0], c[1], c[2]);
+    const sp = new THREE.Sprite(mat);
+    sp.renderOrder = 20;
+    sp.visible = false;
+    const base = kind === 'pip' ? LIGHT_SIZE.pip : kind === 'aura' ? LIGHT_SIZE.aura : kind === 'head' ? LIGHT_SIZE.head : 1;
+    this.group.add(sp);
+    const cam = this.cam;
+    return {
+      set: (p) => {
+        if (p.pos) {
+          const toCam = new THREE.Vector3(cam.position.x - p.pos.x, cam.position.y - p.pos.y, cam.position.z - p.pos.z);
+          const l = toCam.length();
+          const k = kind === 'head' ? 0 : Math.min(PIP_TOWARD_CAMERA, l * 0.5) / Math.max(l, 1e-3);
+          sp.position.set(p.pos.x + toCam.x * k, p.pos.y + toCam.y * k, p.pos.z + toCam.z * k);
+        }
+        if (p.opacity !== undefined) {
+          mat.opacity = p.opacity;
+          sp.visible = p.opacity > 0.002;
+        }
+        if (kind === 'flare') {
+          if (p.scaleX !== undefined) sp.scale.set(p.scaleX, LIGHT_SIZE.flareH, 1);
+        } else if (p.scale !== undefined) sp.scale.setScalar(base * p.scale);
+        if (p.tint) mat.color.setRGB(c[0] * p.tint[0], c[1] * p.tint[1], c[2] * p.tint[2]);
+      },
+      dispose: () => {
+        this.group.remove(sp);
+        mat.dispose();
+      },
+    };
+  }
+
+  createLeader(): LeaderHandle {
+    const N = 64;
+    const pos = new Float32Array(N * 3);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const c = LIGHT_COLOR.leader;
+    const mat = new THREE.LineBasicMaterial({ color: new THREE.Color(c[0], c[1], c[2]), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: true, fog: false });
+    const line = new THREE.Line(geo, mat);
+    line.frustumCulled = false;
+    line.renderOrder = 21;
+    line.visible = false;
+    this.group.add(line);
+    return {
+      set: ({ from, to, progress, opacity }) => {
+        const n = Math.max(0, Math.min(N, Math.round(progress * (N - 1)) + 1));
+        for (let i = 0; i < N; i++) {
+          const u = (Math.min(i, n - 1) / (N - 1)) * 1;
+          const p = leaderPoint(from, to, Math.min(progress, u));
+          pos[i * 3] = p.x;
+          pos[i * 3 + 1] = p.y;
+          pos[i * 3 + 2] = p.z;
+        }
+        geo.attributes.position!.needsUpdate = true;
+        geo.setDrawRange(0, n);
+        mat.opacity = opacity;
+        line.visible = opacity > 0.002 && progress > 0.001;
+      },
+      dispose: () => {
+        this.group.remove(line);
+        geo.dispose();
+        mat.dispose();
+      },
+    };
+  }
+
+  createRoute(): RouteHandle {
+    const geo = new THREE.BufferGeometry();
+    const mat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.frustumCulled = false;
+    mesh.renderOrder = 15;
+    this.group.add(mesh);
+    const outer = new THREE.Color(1.0, 0.84, 0.51);
+    const core = new THREE.Color(1.0, 0.96, 0.87);
+    return {
+      set: ({ points, opacity, drawn, fadeEnd }) => {
+        const pos: number[] = [];
+        const col: number[] = [];
+        if (points.length >= 2 && opacity > 0.002 && drawn > 0.001) {
+          const cum = [0];
+          for (let i = 1; i < points.length; i++) cum.push(cum[i - 1]! + Math.hypot(points[i]!.x - points[i - 1]!.x, points[i]!.z - points[i - 1]!.z));
+          const total = cum[cum.length - 1]!;
+          const reach = Math.min(total, fadeEnd) * drawn;
+          const ribbon = (hw: number, color: THREE.Color, amul: number): void => {
+            for (let i = 1; i < points.length; i++) {
+              if (cum[i - 1]! > reach) break;
+              const a = points[i - 1]!;
+              let b = points[i]!;
+              let cb = cum[i]!;
+              if (cb > reach) {
+                const k = (reach - cum[i - 1]!) / Math.max(1e-4, cb - cum[i - 1]!);
+                b = { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, z: a.z + (b.z - a.z) * k };
+                cb = reach;
+              }
+              let dx = b.x - a.x;
+              let dz = b.z - a.z;
+              const l = Math.hypot(dx, dz) || 1;
+              dx /= l;
+              dz /= l;
+              const nx = -dz * hw;
+              const nz = dx * hw;
+              const fa = Math.max(0, 1 - cum[i - 1]! / fadeEnd) * Math.min(1, cum[i - 1]! / 1.2 + 0.25);
+              const fb = Math.max(0, 1 - cb / fadeEnd) * Math.min(1, cb / 1.2 + 0.25);
+              const quad = [
+                [a.x + nx, a.y, a.z + nz, fa],
+                [b.x - nx, b.y, b.z - nz, fb],
+                [a.x - nx, a.y, a.z - nz, fa],
+                [a.x + nx, a.y, a.z + nz, fa],
+                [b.x + nx, b.y, b.z + nz, fb],
+                [b.x - nx, b.y, b.z - nz, fb],
+              ];
+              for (const [x, y, z, f] of quad) {
+                pos.push(x!, y!, z!);
+                const k = f! * amul * opacity;
+                col.push(color.r * k, color.g * k, color.b * k);
+              }
+            }
+          };
+          ribbon(0.23, outer, 0.55);
+          ribbon(0.07, core, 0.55);
+        }
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+        mesh.visible = pos.length > 0;
+      },
+      dispose: () => {
+        this.group.remove(mesh);
+        geo.dispose();
+        mat.dispose();
+      },
+    };
+  }
+
+  createColumn(): ColumnHandle {
+    const mat = new THREE.MeshBasicMaterial({ map: this.colTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, side: THREE.DoubleSide, opacity: 0 });
+    mat.color.setRGB(1.5, 1.3, 0.95);
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1).translate(0, 0.5, 0), mat);
+    plane.renderOrder = 16;
+    const discMat = new THREE.MeshBasicMaterial({ map: this.glow, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: 0, polygonOffset: true, polygonOffsetFactor: -2 });
+    discMat.color.setRGB(1.6, 1.35, 0.9);
+    const disc = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6).rotateX(-Math.PI / 2), discMat);
+    disc.renderOrder = 16;
+    const g = new THREE.Group();
+    g.add(plane, disc);
+    g.visible = false;
+    this.group.add(g);
+    const cam = this.cam;
+    return {
+      set: ({ pos, opacity, height }) => {
+        g.position.set(pos.x, pos.y + 0.012, pos.z);
+        plane.scale.set(1, Math.max(0.001, height), 1);
+        plane.rotation.y = Math.atan2(cam.position.x - pos.x, cam.position.z - pos.z);
+        mat.opacity = opacity;
+        discMat.opacity = opacity * 0.9;
+        g.visible = opacity > 0.002;
+      },
+      dispose: () => {
+        this.group.remove(g);
+        mat.dispose();
+        discMat.dispose();
+      },
+    };
+  }
+
+  createGroundText(): GroundTextHandle {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 256;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, opacity: 0, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+    mat.color.setRGB(1.25, 1.25, 1.25);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.7).rotateX(-Math.PI / 2), mat);
+    mesh.renderOrder = 17;
+    mesh.visible = false;
+    this.group.add(mesh);
+    let key = '';
+    const draw = (text: string, tone: 'go' | 'warn' | 'stop', arrow?: 'left' | 'right'): void => {
+      const g = canvas.getContext('2d')!;
+      g.clearRect(0, 0, 1024, 256);
+      g.font = '500 132px "Martian Mono", ui-monospace, monospace';
+      g.textBaseline = 'middle';
+      const spacing = 132 * 0.16;
+      const m = text.match(/^(\D+?)\s*(\d+.*)?$/);
+      const word = m?.[1]?.trim() ?? text;
+      const rest = m?.[2] ?? '';
+      const glyphs: { ch: string; color: string }[] = [];
+      for (const ch of word) glyphs.push({ ch, color: '#fff8ea' });
+      if (rest) {
+        glyphs.push({ ch: ' ', color: '#fff8ea' });
+        for (const ch of rest) glyphs.push({ ch, color: TONE[tone] });
+      }
+      if (tone !== 'go' && !rest) for (const gl of glyphs) gl.color = TONE[tone];
+      if (word.startsWith('BIKE')) for (const gl of glyphs) gl.color = TONE.stop;
+      const widths = glyphs.map((gl) => g.measureText(gl.ch).width + spacing);
+      const arrowW = arrow ? 150 : 0;
+      const total = widths.reduce((a, b) => a + b, 0) - spacing + arrowW;
+      let x = 512 - total / 2;
+      g.shadowColor = 'rgba(255,240,210,.55)';
+      g.shadowBlur = 28;
+      if (arrow === 'left') {
+        drawArrow(g, x + 60, 128, -1, TONE[tone]);
+        x += arrowW;
+      }
+      glyphs.forEach((gl, i) => {
+        g.fillStyle = gl.color;
+        g.shadowColor = gl.color === '#fff8ea' ? 'rgba(255,240,210,.55)' : gl.color;
+        g.fillText(gl.ch, x, 128);
+        x += widths[i]!;
+      });
+      if (arrow === 'right') drawArrow(g, x + 60, 128, 1, TONE[tone]);
+      tex.needsUpdate = true;
+    };
+    return {
+      set: ({ pos, yaw, text, tone, opacity, arrow }) => {
+        const k = `${text}|${tone}|${arrow ?? ''}`;
+        if (k !== key) {
+          key = k;
+          draw(text, tone, arrow);
+        }
+        mesh.position.set(pos.x, pos.y, pos.z);
+        mesh.rotation.set(0, yaw, 0);
+        mat.opacity = opacity;
+        mesh.visible = opacity > 0.002;
+      },
+      dispose: () => {
+        this.group.remove(mesh);
+        tex.dispose();
+        mat.dispose();
+      },
+    };
+  }
+}
+
+function drawArrow(g: CanvasRenderingContext2D, cx: number, cy: number, dir: number, color: string): void {
+  g.save();
+  g.fillStyle = color;
+  g.shadowColor = color;
+  g.beginPath();
+  g.moveTo(cx + dir * 54, cy);
+  g.lineTo(cx - dir * 6, cy - 50);
+  g.lineTo(cx - dir * 6, cy - 18);
+  g.lineTo(cx - dir * 54, cy - 18);
+  g.lineTo(cx - dir * 54, cy + 18);
+  g.lineTo(cx - dir * 6, cy + 18);
+  g.lineTo(cx - dir * 6, cy + 50);
+  g.closePath();
+  g.fill();
+  g.restore();
+}

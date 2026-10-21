@@ -1,4 +1,5 @@
 import {
+  PLACE_BY_ID,
   PLACES,
   SCENARIOS,
   angleOffAxis,
@@ -172,6 +173,12 @@ export class Sim {
   anchorOf = (id: string): Vec3 | undefined => {
     const a = this.anchors.get(id);
     if (a) return a;
+    if (id.startsWith('door:')) {
+      const p = PLACE_BY_ID.get(id.slice(5));
+      if (!p) return undefined;
+      const d = placeDoor(p);
+      return v3(d.x, 2.3, d.z);
+    }
     if (id.startsWith('person:')) {
       const p = this.people.people.find((q) => q.id === id.slice(7));
       return p ? v3(p.pos.x, p.height * 0.78, p.pos.z) : undefined;
@@ -179,7 +186,7 @@ export class Sim {
     if (id.startsWith('signal:')) {
       const st = this.route.stops[0];
       if (!st) return undefined;
-      return st.leg === 'avenue' ? v3(7.6, 2.6, zOf(85.6)) : v3(7.6, 2.6, zOf(90.2));
+      return st.leg === 'avenue' ? v3(-7.6, 3.35, zOf(89.7)) : v3(7.6, 3.35, zOf(104.3));
     }
     if (id === 'scaffolding') return v3(10.9, 4.6, zOf(46));
     return undefined;
