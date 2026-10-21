@@ -164,7 +164,7 @@ export class Sim {
         this.conversation = [`${b.id}-a`, `${b.id}-b`];
       }
       if (b.kind === 'person') {
-        out.push({ id: b.id, path: [{ x: 6.2, n: 89.85 }, { x: 16, n: 89.75 }, { x: 24, n: 89.2 }, { x: 31.5, n: 84.2 }], speed: b.speed, spawnAt: b.t - 1 });
+        out.push({ id: b.id, path: [{ x: 6.2, n: 89.9 }, { x: 16, n: 89.85 }, { x: 24, n: 89.2 }, { x: 31.5, n: 84.2 }], speed: b.speed, spawnAt: b.t - 1 });
       }
     }
     return out;

@@ -17,6 +17,7 @@ import {
 
 const LOOKAHEAD = 0.45;
 const PIP_TOWARD_CAMERA = 0.6;
+const HERO_DISTANCE = 24;
 
 function glowTexture(): THREE.Texture {
   const c = document.createElement('canvas');
@@ -236,8 +237,8 @@ export class ThreeBridge implements SceneBridge {
     const sim = this.sim;
     if (id.startsWith('bike:')) {
       const h = sim.wearer.heading;
-      const x = sim.wearer.pos.x + h.x * 3.2;
-      const z = sim.wearer.pos.z + h.z * 3.2;
+      const x = sim.wearer.pos.x + h.x * 5.5;
+      const z = sim.wearer.pos.z + h.z * 5.5;
       return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: Math.atan2(-h.x, -h.z) };
     }
     const st = sim.route.stops[0];
@@ -274,6 +275,8 @@ export class ThreeBridge implements SceneBridge {
     const base = kind === 'pip' ? LIGHT_SIZE.pip : kind === 'aura' ? LIGHT_SIZE.aura : kind === 'head' ? LIGHT_SIZE.head : 1;
     this.group.add(sp);
     const cam = this.cam;
+    let scale = 1;
+    let scaleX = 1.2;
     return {
       set: (p) => {
         if (p.pos) {
@@ -286,9 +289,11 @@ export class ThreeBridge implements SceneBridge {
           mat.opacity = p.opacity;
           sp.visible = p.opacity > 0.002;
         }
-        if (kind === 'flare') {
-          if (p.scaleX !== undefined) sp.scale.set(p.scaleX, LIGHT_SIZE.flareH, 1);
-        } else if (p.scale !== undefined) sp.scale.setScalar(base * p.scale);
+        if (p.scaleX !== undefined) scaleX = p.scaleX;
+        if (p.scale !== undefined) scale = p.scale;
+        const near = Math.min(1, sp.position.distanceTo(cam.position) / HERO_DISTANCE);
+        if (kind === 'flare') sp.scale.set(scaleX * near, LIGHT_SIZE.flareH * near, 1);
+        else sp.scale.setScalar(base * scale * near);
         if (p.tint) mat.color.setRGB(c[0] * p.tint[0], c[1] * p.tint[1], c[2] * p.tint[2]);
       },
       dispose: () => {
@@ -349,8 +354,8 @@ export class ThreeBridge implements SceneBridge {
     mesh.frustumCulled = false;
     mesh.renderOrder = 15;
     this.group.add(mesh);
-    const outer = new THREE.Color(1.0, 0.84, 0.51);
-    const core = new THREE.Color(1.0, 0.96, 0.87);
+    const outer = new THREE.Color(1.0, 0.72, 0.36);
+    const core = new THREE.Color(1.0, 0.88, 0.62);
     return {
       set: ({ points, opacity, drawn, fadeEnd }) => {
         const pos: number[] = [];
@@ -380,23 +385,28 @@ export class ThreeBridge implements SceneBridge {
               const nz = dx * hw;
               const fa = Math.max(0, 1 - cum[i - 1]! / fadeEnd) * Math.min(1, cum[i - 1]! / 1.2 + 0.25);
               const fb = Math.max(0, 1 - cb / fadeEnd) * Math.min(1, cb / 1.2 + 0.25);
-              const quad = [
-                [a.x + nx, a.y, a.z + nz, fa],
-                [b.x - nx, b.y, b.z - nz, fb],
-                [a.x - nx, a.y, a.z - nz, fa],
-                [a.x + nx, a.y, a.z + nz, fa],
-                [b.x + nx, b.y, b.z + nz, fb],
-                [b.x - nx, b.y, b.z - nz, fb],
-              ];
-              for (const [x, y, z, f] of quad) {
-                pos.push(x!, y!, z!);
-                const k = f! * amul * opacity;
-                col.push(color.r * k, color.g * k, color.b * k);
+              const ca = color.clone().multiplyScalar(fa * amul * opacity);
+              const cb2 = color.clone().multiplyScalar(fb * amul * opacity);
+              const verts: [number, number, number, THREE.Color][] = [];
+              const strip = (s0: number, s1: number, c0a: THREE.Color, c1a: THREE.Color, c0b: THREE.Color, c1b: THREE.Color): void => {
+                const A0: [number, number, number, THREE.Color] = [a.x + nx * s0, a.y, a.z + nz * s0, c0a];
+                const A1: [number, number, number, THREE.Color] = [a.x + nx * s1, a.y, a.z + nz * s1, c1a];
+                const B0: [number, number, number, THREE.Color] = [b.x + nx * s0, b.y, b.z + nz * s0, c0b];
+                const B1: [number, number, number, THREE.Color] = [b.x + nx * s1, b.y, b.z + nz * s1, c1b];
+                verts.push(A0, B1, A1, A0, B0, B1);
+              };
+              const zero = new THREE.Color(0, 0, 0);
+              strip(1, 0, zero, ca, zero, cb2);
+              strip(0, -1, ca, zero, cb2, zero);
+              const quad = verts;
+              for (const [x, y, z, c] of quad) {
+                pos.push(x, y, z);
+                col.push(c.r, c.g, c.b);
               }
             }
           };
-          ribbon(0.23, outer, 0.55);
-          ribbon(0.07, core, 0.55);
+          ribbon(0.23, outer, 0.62);
+          ribbon(0.07, core, 0.4);
         }
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
         geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));

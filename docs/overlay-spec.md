@@ -67,3 +67,14 @@ The expanded view grows in place from the card's position and is placed by the s
 - Every pane passes 4.5:1 for primary text and 3:1 for secondary against the darkest and brightest façades on the block, with backdrop adaptivity applied (test both, and record the sampler's luminance in the test).
 - `prefers-reduced-motion`: travel and flare are skipped, condense becomes a 200 ms fade, recede, return and yield keep their timing (they are safety).
 - Focus is visible on any interactive element; the whole demo is keyboard operable.
+
+## 7. As built
+
+- Gaze: the view center is the gaze point. A pip counts as looked at when the view is within 3.5° of its anchor and stays looked at out to 6° (the same cone the scripted reviewer uses), which is the 28 px of section 4 at the hero distance. Over a view-zone pane (a toast, the pocket's rows) the pointer is the gaze, since those panes have no place in the world to turn toward.
+- Placement is the shared solver in `packages/shared/src/placement.ts`. Hysteresis keeps a pane's side, height and shrink until its configuration stops being valid (it leaves the view or the focus zone covers it), and a 4 px rope dead band follows the anchor without stepping. Content that enters at the edge while moving stays pinned to that edge, following the anchor's height, and moves inward over 480 ms when the band reaches Stopped.
+- Because the gaze target is centered and the focus zone keeps the middle third clear, a card on the thing being looked at always sits just outside the zone, a few hundred pixels from its pip, joined by the leader.
+- Keep-outs carry a 0.45 s lookahead along each mover's velocity. A face or a moving vehicle acts on the first frame; a body after 120 ms. A pane that cannot slide clear (a truck filling the view) dissolves to its pip at 45% and condenses again 300 ms after the way is clear. View-zone panes are exempt from stepping aside: they live at the edges by design and have no pip to fall back to.
+- Each dissolve runs on its own timeline so a newer move on the same anchor never strands a half-dissolved pane.
+- Ground: the route band is a soft-edged ribbon (0.46 m with a 0.14 m core) that draws on from the feet; the safety text lies on the crosswalk 1.9 m past the curb along the crossing, reading in the crossing direction; the bike warning lies 5.5 m ahead of the wearer (nearer than that it falls below the bottom of the view at eye height); the destination column fades as the wearer comes within 14 m of the door and settles to a pip 2.6 m above the door.
+- The arrival line is anchored at the door at head height (`door:<id>`), not the sign, so it is in view when the wearer is at the door.
+- GSAP is driven by the sim clock (`gsap.updateRoot`), so stills, pauses and seeks show exactly the frame the timing implies.

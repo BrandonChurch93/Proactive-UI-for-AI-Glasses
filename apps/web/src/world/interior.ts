@@ -156,7 +156,7 @@ export function interiorMaterial(kind: InteriorKind): THREE.MeshStandardMaterial
           float fres = pow(1.0 - clamp(-vd.z, 0.0, 1.0), 3.0);
           vec3 inner = interior() * (1.0 - 0.75 * fres);
           if (any(isnan(inner)) || any(isinf(inner))) inner = vec3(0.0);
-          totalEmissiveRadiance += clamp(inner, 0.0, 4.0);
+          totalEmissiveRadiance += clamp(inner, 0.0, 0.92);
         }`,
     );
   };

@@ -45,6 +45,7 @@ interface Built {
   fade: { v: number };
   opacity: number;
   off: { x: number; y: number } | null;
+  tl?: gsap.core.Timeline;
 }
 
 interface Item {
@@ -167,7 +168,10 @@ class ColumnView {
     if (!pos) return;
     this.lastPos = pos;
     this.col ??= this.bridge.createColumn();
-    this.col.set({ pos, opacity: this.op.at(t), height: this.height.at(t) });
+    const cam = this.bridge.camera().pos;
+    const near = Math.hypot(pos.x - cam.x, pos.z - cam.z);
+    const fade = Math.min(1, Math.max(0, (near - 4) / 10));
+    this.col.set({ pos, opacity: this.op.at(t) * (0.15 + 0.85 * fade), height: this.height.at(t) });
     const po = this.pipO.at(t);
     if (po > 0.001 || this.pip) {
       this.pip ??= this.bridge.createLight('pip');
@@ -372,7 +376,10 @@ export class Overlay {
   private disposeItem(it: Item): void {
     it.tl?.kill();
     it.gtl?.kill();
-    for (const b of [it.cur, ...it.old]) b?.wrap.remove();
+    for (const b of [it.cur, ...it.old]) {
+      b?.tl?.kill();
+      b?.wrap.remove();
+    }
     it.edge?.remove();
     it.trace?.remove();
     if (it.lights) for (const h of Object.values(it.lights)) (h as { dispose(): void }).dispose();
@@ -487,12 +494,14 @@ export class Overlay {
     let at = 0;
     const world = it.kind === 'world' && it.lights !== null;
     if (prev) {
-      const end = dissolve(tl, this.els(prev), 0, this.reduced, prev.fade);
-      it.old.push(prev);
-      tl.call(() => {
+      const dtl = gsap.timeline();
+      const end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
+      dtl.call(() => {
         prev.wrap.remove();
         it.old = it.old.filter((o) => o !== prev);
       }, [], end + 0.02);
+      prev.tl = dtl;
+      it.old.push(prev);
       at = end;
       it.fromCorner = prev.corner;
     }

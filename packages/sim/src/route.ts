@@ -35,7 +35,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
     legs: [
       [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
-      [AVE_FAR_W, P(-8.5, 86.4), P(-8.6, 78.4), P(-11.2, 77.0)],
+      [AVE_FAR_W, P(-8.5, 86.4), P(-8.6, 78.4), P(-10.5, 76.8)],
     ],
     crossings: [{ leg: 'avenue', afterLeg: 0 }],
   },
@@ -43,7 +43,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
     legs: [
       [P(BLOCK.wearerX, 0), ...SCAFFOLD_DETOUR, ...BUS_DETOUR, P(BLOCK.wearerX, 85.6), P(8.9, 87.6), CROSS_STOP],
       [CROSS_STOP, CROSS_FAR],
-      [CROSS_FAR, P(12.4, BLOCK.crossTo + 2.1), P(POST_OFFICE.door.x - 1.2, POST_OFFICE.door.n - 1.6), P(POST_OFFICE.door.x, POST_OFFICE.door.n - 1.1)],
+      [CROSS_FAR, P(12.4, BLOCK.crossTo + 2.1), P(POST_OFFICE.door.x - 1.2, POST_OFFICE.door.n - 3.4), P(POST_OFFICE.door.x - 0.4, POST_OFFICE.door.n - 2.8)],
     ],
     crossings: [{ leg: 'cross', afterLeg: 0 }],
   },
