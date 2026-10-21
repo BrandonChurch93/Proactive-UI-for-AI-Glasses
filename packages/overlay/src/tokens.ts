@@ -61,6 +61,7 @@ export const MOVE = {
   whisperHold: 2.5,
   whisperRise: 8,
   hysteresis: 1.2,
+  settle: 0.4,
   deadBand: 4,
   offscreenMs: 250,
   backdropEvery: 0.25,

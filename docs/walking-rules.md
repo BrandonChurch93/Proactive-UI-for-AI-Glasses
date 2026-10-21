@@ -36,6 +36,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 - Trigger: a new show while moving.
 - Response: content enters at the edge of the view (outside the focus zone, nearest side) and only moves inward when the band drops to Stopped, over 480 ms ease-out. Stopped content may sit closer to the anchor.
 - Eval: the first frame of any pane while moving is outside the focus zone.
+- As built: "the edge of the view" is read as the edge of the clear zone, not the edge of the screen. The pane enters just outside the focus zone on the anchor's side, level with the anchor. On a large monitor the screen edge was hundreds of pixels from where the wearer was looking, and testers did not see the pane at all.
 
 ## Rule 5 · Head-scan yielding
 

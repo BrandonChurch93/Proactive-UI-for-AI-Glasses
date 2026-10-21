@@ -2,6 +2,7 @@ import {
   LEVEL_RANK,
   MARGIN,
   NOMINAL_SIZE,
+  ZONE_GAP,
   configRect,
   distanceScale,
   focusRect,
@@ -226,14 +227,16 @@ export class Placement {
     const scale = scaleOf(this.cfg!);
     const rect = { ...res.rect };
     if (this.pinned) {
-      rect.x = this.pinned === 'left' ? MARGIN : vp.w - MARGIN - rect.w;
-      if (!req.focusOk && rectsOverlap(rect, focusRect(ctx.band, vp.w, vp.h))) {
-        const zone = focusRect(ctx.band, vp.w, vp.h);
+      const zone = focusRect(ctx.band, vp.w, vp.h);
+      const x = this.pinned === 'left' ? zone.x - rect.w - ZONE_GAP : zone.x + zone.w + ZONE_GAP;
+      rect.x = Math.max(MARGIN, Math.min(vp.w - MARGIN - rect.w, x));
+      if (!req.focusOk && rectsOverlap(rect, zone)) {
         rect.y = this.cfg!.vertical === 'above' ? zone.y - rect.h - 10 : zone.y + zone.h + 10;
-        rect.y = Math.max(MARGIN, Math.min(vp.h - MARGIN - rect.h, rect.y));
-      }
+      } else rect.y = a.y - rect.h * 0.62;
+      rect.y = Math.max(MARGIN, Math.min(vp.h - MARGIN - rect.h, rect.y));
     }
-    if (jump !== null && this.shown) {
+    const resized = this.shown !== null && Math.abs(rect.w - this.shown.w) >= 0.5;
+    if (jump !== null && this.shown && !resized) {
       this.kickFrom(t, this.shown, rect, jump);
     } else if (this.shown && Math.abs(rect.w - this.shown.w) < 0.5) {
       const rope = (target: number, cur: number): number => {
@@ -250,7 +253,7 @@ export class Placement {
         rect.x = nx;
         rect.y = ny;
       }
-    } else if (this.shown && this.last?.mode === 'pane' && Math.hypot(rect.x - this.shown.x, rect.y - this.shown.y) > 40) {
+    } else if (this.shown && !resized && this.last?.mode === 'pane' && Math.hypot(rect.x - this.shown.x, rect.y - this.shown.y) > 40) {
       this.kickFrom(t, this.shown, rect, MOVE.pushOut);
     }
     this.shown = rect;

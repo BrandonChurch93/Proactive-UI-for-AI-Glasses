@@ -78,9 +78,13 @@ function clampInto(r: Rect, vp: Viewport): Rect {
   };
 }
 
-function pushOutOfZone(r: Rect, zone: Rect, side: 'left' | 'right'): Rect {
+export const ZONE_GAP = 14;
+
+function pushOutOfZone(r: Rect, zone: Rect, side: 'left' | 'right', anchorY: number, vp: Viewport): Rect {
   if (!rectsOverlap(r, zone)) return r;
-  return side === 'left' ? { ...r, x: zone.x - r.w - 10 } : { ...r, x: zone.x + zone.w + 10 };
+  const x = side === 'left' ? zone.x - r.w - ZONE_GAP : zone.x + zone.w + ZONE_GAP;
+  const y = clamp(anchorY - r.h * 0.62, MARGIN, Math.max(MARGIN, vp.h - MARGIN - r.h));
+  return { ...r, x, y };
 }
 
 export function configRect(
@@ -91,7 +95,7 @@ export function configRect(
 ): { rect: Rect; ok: boolean; leader: { x: number; y: number } } {
   const zone = focusRect(inp.band, inp.viewport.w, inp.viewport.h);
   let r = clampInto(candidate(inp, side, vertical, scale), inp.viewport);
-  if (!inp.focusOk) r = pushOutOfZone(r, zone, side);
+  if (!inp.focusOk) r = pushOutOfZone(r, zone, side, inp.anchor.y, inp.viewport);
   const ok =
     inView(r, inp.viewport) &&
     (inp.focusOk || !rectsOverlap(r, zone)) &&
@@ -128,7 +132,7 @@ export function placeWorld(inp: PlaceInput): Placed {
       let r = candidate(inp, side, vertical, scale);
       if (vertical === 'above' && r.y < MARGIN) continue;
       r = clampInto(r, vp);
-      if (!inp.focusOk) r = pushOutOfZone(r, zone, side);
+      if (!inp.focusOk) r = pushOutOfZone(r, zone, side, inp.anchor.y, inp.viewport);
       if (!inView(r, vp)) continue;
       if (!inp.focusOk && rectsOverlap(r, zone)) continue;
       if (inp.keepOuts.some((k) => rectsOverlap(r, k))) continue;

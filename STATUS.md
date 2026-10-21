@@ -152,6 +152,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-21 · Owner testing found two problems, both fixed. Cars showed bare rims: the car models split each wheel into a rim and a tire, and baking kept only the first part, so the tires were dropped (wheel parts are now merged per wheel). Panes appeared where nobody was looking: content that entered while walking was pinned to the screen's edge (500 px or more from the gaze on a large monitor), and dragging the view or a head scan flipped panes between levels so fast that the reveal restarted and never finished. Panes now enter just beside the focus zone at the anchor's height, and placement-driven level changes wait 400 ms and pause during a yield. walking-rules 4 and overlay-spec 7 updated.
 - 2026-10-20 · Phase 8 done (mobile, polish, audit). Decisions: phones play in landscape with a rotate prompt upright, tablets both ways; no separate landing page, an About panel on the title instead; the overlay scales with the viewport and steps down a level before falling to a pip.
 - 2026-10-20 · Phase 7 done. The build is finished; see Final.
 - 2026-10-20 · Phase 6 done. Decisions: the truck uses the inner northbound lane (scenarios.md updated); SMAA replaces MSAA in the high tier; ghost signs are invented period ads, no real brands; live gaze is tolerant in pitch; the countdown follows the wearer during a crossing.

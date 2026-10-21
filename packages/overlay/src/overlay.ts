@@ -77,6 +77,8 @@ interface Item {
   born: number;
   condensingUntil: number;
   order: number;
+  decided: Decision['level'] | null;
+  pending: { want: PaneLevel; since: number } | null;
 }
 
 export interface OverlayOptions {
@@ -372,6 +374,8 @@ export class Overlay {
       born: t,
       condensingUntil: 0,
       order: this.order++,
+      decided: null,
+      pending: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -621,8 +625,25 @@ export class Overlay {
         aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk));
       }
       const want = this.paneLevelFor(it, placed);
-      if (want !== it.want) this.transition(it, want, t, placed?.mode === 'edge');
-      else if (it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t);
+      const decided = it.d.level !== it.decided;
+      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || it.want === 'none' && !it.cur && t - it.born < 0.05;
+      if (want !== it.want) {
+        if (urgent) {
+          it.pending = null;
+          it.decided = it.d.level;
+          this.transition(it, want, t, placed?.mode === 'edge');
+        } else if (!it.yieldS.on) {
+          if (!it.pending || it.pending.want !== want) it.pending = { want, since: t };
+          else if (t - it.pending.since >= MOVE.settle) {
+            it.pending = null;
+            this.transition(it, want, t, placed?.mode === 'edge');
+          }
+        }
+      } else {
+        it.pending = null;
+        it.decided = it.d.level;
+      }
+      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t);
       else if (it.cur) it.cur.view.update(d.content);
 
       const lum = this.snap?.env.backdrop[it.id];

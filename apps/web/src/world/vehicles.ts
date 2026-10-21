@@ -54,6 +54,7 @@ async function bake(name: string): Promise<Baked> {
   let front = new THREE.Vector3(0, 0, 1);
   const parts: THREE.BufferGeometry[] = [];
   const wheelParts: { geo: THREE.BufferGeometry; box: THREE.Box3 }[] = [];
+  const wheelGroups = new Map<string, THREE.BufferGeometry[]>();
   let paintMat: THREE.Material | null = null;
   let textured: THREE.Material | undefined;
   root.traverse((o) => {
@@ -105,10 +106,17 @@ async function bake(name: string): Promise<Baked> {
     if (!flat.getAttribute('uv')) flat.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(n * 2), 2));
     flat.clearGroups();
     if (/wheel/i.test(m.name) || /wheel/i.test(m.parent?.name ?? '')) {
-      flat.computeBoundingBox();
-      wheelParts.push({ geo: flat, box: flat.boundingBox!.clone() });
+      const key = /wheel/i.test(m.parent?.name ?? '') ? m.parent!.name : m.name;
+      const list = wheelGroups.get(key) ?? [];
+      list.push(flat);
+      wheelGroups.set(key, list);
     } else parts.push(flat);
   });
+  for (const list of wheelGroups.values()) {
+    const geo = list.length === 1 ? list[0]! : mergeGeometries(list, false)!;
+    geo.computeBoundingBox();
+    wheelParts.push({ geo, box: geo.boundingBox!.clone() });
+  }
   const body = mergeGeometries(parts, false)!;
   const wheels: THREE.Vector3[] = [];
   let wheel: THREE.BufferGeometry | null = null;
