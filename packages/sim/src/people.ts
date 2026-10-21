@@ -129,11 +129,11 @@ export class People {
       }
       case 4: {
         const n = cn();
-        return [W(70, n), W(14, n), W(10.5, n, 'avenue'), W(-10.5, n), W(-60, n)];
+        return [W(70, n), W(14, n), W(rng.range(9.6, 12.4), n, 'avenue'), W(-10.5, n), W(-60, n)];
       }
       case 5: {
         const n = cn();
-        return [W(-60, n), W(-10.5, n, 'avenue'), W(10.5, n), W(70, n)];
+        return [W(-60, n), W(-rng.range(9.6, 12.4), n, 'avenue'), W(10.5, n), W(70, n)];
       }
       case 6: {
         if (avoid.includes('cross')) return [W(-60, cs()), W(-13.5, cs()), W(-11.5, 70)];

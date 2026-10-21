@@ -174,7 +174,7 @@ const CROSS: (LotSpec & { street: 'cross' })[] = [
   { street: 'cross', side: 'N', a0: 56, a1: 83, setback: 0.5, depth: 26, height: 33, style: 'concrete', tint: 1, floorH: 3.6, bayW: 3, cornice: 'thin', kindOf: 'building', storefronts: shop('Kim Deli', 'fascia', '#ffd23f', '#202020') },
   { street: 'cross', side: 'S', a0: 30, a1: 52, setback: 0, depth: 22, height: 26, style: 'brick', tint: 1.05, floorH: 3.4, bayW: 2.6, cornice: 'deep', kindOf: 'building', storefronts: shop('Harbor Wine', 'blade', '#5a1830', '#f4e6c8') },
   { street: 'cross', side: 'S', a0: 52, a1: 83, setback: 0, depth: 22, height: 44, style: 'limestone', tint: 1, floorH: 3.6, bayW: 2.8, cornice: 'deep', kindOf: 'building', storefronts: shop('Ivy Books', 'fascia', '#1c3324', '#e5d8b0') },
-  { street: 'cross', side: 'N', a0: -24, a1: -13, setback: 0, depth: 24, height: 47, style: 'granite', tint: 1, floorH: 3.6, bayW: 2.4, cornice: 'deep', kindOf: 'building', storefronts: shop('Corner Pharmacy', 'channel', '#0f5a3a', '#fff') },
+  { street: 'cross', side: 'N', a0: -24, a1: -13, setback: 0, depth: 24, height: 47, style: 'granite', tint: 1, floorH: 3.6, bayW: 2.4, cornice: 'deep', kindOf: 'building', storefronts: shop('Harlow Drugs', 'channel', '#0f5a3a', '#fff') },
   { street: 'cross', side: 'N', a0: -48, a1: -24, setback: 0, depth: 24, height: 30, style: 'painted', tint: 0.95, floorH: 3.4, bayW: 2.6, cornice: 'thin', kindOf: 'building', storefronts: shop('Rosa Shoes', 'awning', '#8a2b1d', '#f4e8d2', true) },
   { street: 'cross', side: 'N', a0: -83, a1: -48, setback: 0.4, depth: 24, height: 54, style: 'bronze', tint: 1, floorH: 3.9, bayW: 1.8, cornice: 'thin', kindOf: 'building', storefronts: { kind: 'lobby', name: '10 Grand', format: 'channel', color: '#151515', accent: '#d9c8a0' } },
   { street: 'cross', side: 'S', a0: -60, a1: -36, setback: 0, depth: 22, height: 36, style: 'concrete', tint: 1, floorH: 3.6, bayW: 3, cornice: 'thin', kindOf: 'building', storefronts: shop('Grand Hardware', 'fascia', '#3a3f45', '#f0b429') },
@@ -260,8 +260,8 @@ export function buildLayout(seed = 47): BlockLayout {
     props.push(p);
   };
   const curbE = BLOCK.avenueHalf;
-  for (const n of [4.5, 19.5, 31.5, 63.5, 73.5]) prop('tree', curbE + 1.1, n);
-  for (const n of [9.5, 29.5, 46.2, 61.5, 75]) prop('tree', -(curbE + 1.2), n);
+  for (const n of [27.5, 40.5, 63.5, 73.5]) prop('tree', curbE + 0.58, n);
+  for (const n of [9.5, 29.5, 46.2, 61.5, 75]) prop('tree', -(curbE + 0.62), n);
   for (const n of [-10, 14, 38, 66, 82]) prop('lamp', curbE + 0.5, n, Math.PI / 2);
   for (const n of [-4, 22, 44, 70]) prop('lamp', -(curbE + 0.5), n, -Math.PI / 2);
   prop('hydrant', curbE + 0.45, 8.6);
@@ -334,9 +334,9 @@ export function buildLayout(seed = 47): BlockLayout {
 }
 
 export function sunDirection(): Vec3 {
-  const x = -0.62;
-  const y = 0.62;
-  const z = -0.48;
+  const x = -0.52;
+  const y = 0.76;
+  const z = -0.39;
   const l = Math.hypot(x, y, z);
   return v3(x / l, y / l, z / l);
 }

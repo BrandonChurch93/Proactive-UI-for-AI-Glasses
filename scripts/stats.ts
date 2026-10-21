@@ -1,0 +1,12 @@
+import { ensureServer, launch } from './lib/browser';
+const url = process.argv[2]!;
+const server = await ensureServer(url);
+const b = await launch();
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } });
+p.on('pageerror', (e) => console.log('pageerror', e.message));
+p.on('console', (m) => m.type() === 'error' && console.log('console', m.text().slice(0, 300)));
+await p.goto(url);
+await p.waitForFunction(() => window.__done === true, null, { timeout: 60000 });
+console.log(JSON.stringify(await p.evaluate(() => window.__stats!())));
+await b.close();
+await server?.close();

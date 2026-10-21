@@ -127,7 +127,7 @@ async function models(): Promise<void> {
     for (const [name, entry] of Object.entries(table)) {
       const raw = join(RAW, `${entry.id}.glb`);
       await fetchTo(await polyGlb(entry.id), raw);
-      await process(raw, join(ASSETS, kind, `${name}.glb`), 'clips' in entry ? entry.clips : undefined);
+      await process(raw, join(ASSETS, kind, `${name}.glb`), 'clips' in entry ? (entry.clips as Record<string, string>) : undefined);
       console.log(`${kind}/${name}.glb`);
     }
   }
