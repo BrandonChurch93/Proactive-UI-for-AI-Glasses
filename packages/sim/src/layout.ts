@@ -231,8 +231,16 @@ export function buildLayout(seed = 47): BlockLayout {
   ];
 
   const towers: BackgroundTower[] = [];
+  const lotBoxes = lots.map(lotBox);
+  const clear = (x0: number, x1: number, z0: number, z1: number): boolean => {
+    if (x1 > -BLOCK.buildingLine && x0 < BLOCK.buildingLine) return false;
+    if (z0 < zOf(BLOCK.southLineN) && z1 > zOf(BLOCK.northLineN)) return false;
+    return !lotBoxes.some((b) => x0 < b.max.x + 1 && x1 > b.min.x - 1 && z0 < b.max.z + 1 && z1 > b.min.z - 1);
+  };
   const addTower = (x: number, z: number, w: number, d: number, h: number): void => {
-    towers.push({ x0: x - w / 2, x1: x + w / 2, z0: z - d / 2, z1: z + d / 2, height: h, style: rng.pick<FacadeStyle>(['concrete', 'limestone', 'glass', 'granite', 'bronze', 'brick']) });
+    const style = rng.pick<FacadeStyle>(['concrete', 'limestone', 'glass', 'granite', 'bronze', 'brick']);
+    if (!clear(x - w / 2, x + w / 2, z - d / 2, z + d / 2)) return;
+    towers.push({ x0: x - w / 2, x1: x + w / 2, z0: z - d / 2, z1: z + d / 2, height: h, style });
   };
   for (let n = 116; n < 640; n += rng.range(18, 34)) {
     for (const side of [-1, 1]) {

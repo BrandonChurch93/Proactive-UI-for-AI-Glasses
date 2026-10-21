@@ -24,6 +24,7 @@ page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__done === true, null, { timeout: 180_000 });
 for (const t of times) {
+  await page.waitForFunction(() => window.__done === true && typeof window.__stepTo === 'function', null, { timeout: 180_000 });
   await page.evaluate(async (time) => {
     await window.__stepTo!(time);
   }, t);

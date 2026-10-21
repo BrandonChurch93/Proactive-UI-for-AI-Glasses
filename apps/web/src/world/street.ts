@@ -44,7 +44,7 @@ export function buildStreet(mats: MaterialLibrary): THREE.Group {
   }
   bucket.build(group, { cast: false });
 
-  const paint = new THREE.MeshStandardMaterial({ color: 0xe9e7df, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
+  const paint = new THREE.MeshStandardMaterial({ color: 0xc9c6bc, roughness: 0.75, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   const yellow = new THREE.MeshStandardMaterial({ color: 0xd9a92b, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   const marks: { x: number; n: number; w: number; l: number; yellow?: boolean }[] = [];
   const inX = (n: number): boolean => n > BLOCK.crossFrom - 0.5 && n < BLOCK.crossTo + 0.5;

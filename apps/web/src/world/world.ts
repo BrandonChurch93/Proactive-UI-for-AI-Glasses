@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Sim } from '@lumen/sim';
 import { buildBuildings } from './buildings';
+import { buildPartyWalls } from './partywalls';
 import { loadMaterials, type MaterialLibrary } from './materials';
 import { createRenderCore, followSun, type Quality, type RenderCore } from './render';
 import { buildStreet } from './street';
@@ -40,6 +41,8 @@ export class World {
     scene.add(buildStreet(this.mats));
     const b = buildBuildings(this.sim.layout.lots, this.sim.layout.towers, this.mats);
     scene.add(b.group);
+    const pane = new THREE.MeshStandardMaterial({ color: 0x161b22, roughness: 0.08, metalness: 0.6, envMapIntensity: 1.3 });
+    scene.add(buildPartyWalls(this.sim.layout.lots, this.core.renderer, { glass: pane, trim: this.mats.trim.limestone }));
     const atlas = new SignAtlas();
     const sf = buildStorefronts(b.storefronts, this.mats, this.core.renderer, atlas);
     scene.add(sf.group);

@@ -85,10 +85,16 @@ async function boot(): Promise<void> {
     return out;
   };
   if (still) {
+    const cam = params.get('cam')?.split(',').map(Number);
     window.__stepTo = async (t: number) => {
       app.walk.seek(t);
       if (app.title.visible) app.title.skipToChoice();
       world.update(0);
+      if (cam && cam.length === 5) {
+        world.core.camera.position.set(cam[0]!, cam[1]!, -cam[2]!);
+        world.core.camera.rotation.set(cam[4]!, cam[3]!, 0, 'YXZ');
+        world.core.camera.updateMatrixWorld();
+      }
       world.render();
     };
     await window.__stepTo(Number(params.get('t') ?? 0));
