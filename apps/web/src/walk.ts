@@ -3,6 +3,9 @@ import { Brain } from '@lumen/brain';
 import {
   PLACES,
   WALK_SECONDS,
+  angleWrap,
+  pitchToward,
+  yawToward,
   compactSnapshot,
   type BrainFrame,
   type Override,
@@ -16,8 +19,8 @@ import { Overlay } from '@lumen/overlay';
 import { ThreeBridge } from './bridge';
 import type { World } from './world/world';
 
-const ACQUIRE = (3.5 * Math.PI) / 180;
-const RELEASE = (6.0 * Math.PI) / 180;
+const YAW_ACQUIRE = (4 * Math.PI) / 180;
+const YAW_RELEASE = (7 * Math.PI) / 180;
 const STEP = 1 / SIM_HZ;
 const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
@@ -208,11 +211,16 @@ export class Walk {
     for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') range.set(d.placement.anchor, LIT_GAZE_M);
     let best: string | null = null;
     let bestOff = Infinity;
+    const pose = this.sim.cameraPose();
     for (const [id, limitM] of range) {
       const a = this.sim.anchorOf(id);
       if (!a || Math.hypot(a.x - eye.x, a.z - eye.z) > limitM) continue;
-      const off = this.sim.offTarget(a);
-      if (off < (id === cur ? RELEASE : ACQUIRE) && off < bestOff) {
+      const keep = id === cur;
+      const dyaw = Math.abs(angleWrap(yawToward(pose.pos, a) - pose.yaw));
+      const dpitch = pitchToward(pose.pos, a) - pose.pitch;
+      if (dyaw > (keep ? YAW_RELEASE : YAW_ACQUIRE) || dpitch < (keep ? -0.2 : -0.14) || dpitch > (keep ? 0.42 : 0.34)) continue;
+      const off = dyaw + Math.max(0, Math.abs(dpitch - 0.08) - 0.12) * 0.5;
+      if (off < bestOff) {
         best = id;
         bestOff = off;
       }

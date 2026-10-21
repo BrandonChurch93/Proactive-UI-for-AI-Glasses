@@ -152,6 +152,13 @@ export class Placement {
     if (this.pinned && ctx.band === 'stopped') {
       this.pinned = null;
       jump = MOVE.inward;
+    } else if (this.pinned) {
+      const side = a.x < vp.w * 0.4 ? 'left' : a.x > vp.w * 0.6 ? 'right' : this.pinned;
+      if (side !== this.pinned) {
+        this.pinned = side;
+        if (this.cfg) this.cfg = { ...this.cfg, side };
+        jump = MOVE.pushOut;
+      }
     }
 
     const inp: PlaceInput = {
