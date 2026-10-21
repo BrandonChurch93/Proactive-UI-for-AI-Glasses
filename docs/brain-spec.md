@@ -115,6 +115,8 @@ A head-scan near the curb (rule 5) is not a look-away: while the head turns fast
 
 Two conflicts settled in favour of `docs/walking-rules.md`: entering Brisk folds every pane at once, gaze target or not (no panes in Brisk outranks "a band change never demotes a gaze target instantly"); and a card earned by dwell that the wearer looks away from walks down by look-away, not by the band cap, except into Brisk.
 
+The arrival line is anchored at the destination's door at head height (`door:<id>`), not at its sign, so it is in view when the wearer is at the door. A moment tied to a crossing ("No need to run") is anchored on the pedestrian signal across the street, where the wearer is looking.
+
 Notifications have fixed behaviors (see `docs/scenarios.md`): a text shows at glance at the next safe moment; social accumulates on the held glyph and surfaces once when stopped; a call shows at the edge during a walk but never in a crossing; app updates batch under whatever is open.
 
 ## 5. The ask glance
