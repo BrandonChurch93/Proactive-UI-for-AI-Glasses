@@ -205,7 +205,7 @@
     {
      "name": "1:10 · the social strip surfaces once at the light",
      "pass": true,
-     "detail": "t=70.801 show social glance"
+     "detail": "t=71.401 show social glance"
     },
     {
      "name": "1:10 · the Post Office card up on dwell",
@@ -220,7 +220,7 @@
     {
      "name": "1:18 to 1:28 · crossing, everything holds",
      "pass": true,
-     "detail": "2 decisions"
+     "detail": "1 decisions"
     },
     {
      "name": "1:22 · the DM is held",
@@ -240,7 +240,7 @@
     {
      "name": "restraint · shows within the budget",
      "pass": true,
-     "detail": "shows 8, non-gaze 6, holds 5"
+     "detail": "shows 8, non-gaze 6, holds 4"
     }
    ],
    "description": "Recorded walk · 981 snapshots at 10 Hz"
@@ -426,7 +426,7 @@
     {
      "name": "0:40 · the station gives only the whisper line",
      "pass": true,
-     "detail": "t=41.201 show whisper whisper"
+     "detail": "t=41.101 show whisper whisper"
     },
     {
      "name": "0:58 · no need to run",
@@ -441,7 +441,7 @@
     {
      "name": "1:02 · the pocket surfaces with the time available",
      "pass": true,
-     "detail": "t=59.601 surface pocket card"
+     "detail": "t=60.301 surface pocket card"
     },
     {
      "name": "1:04 · pinch opens its card",
@@ -707,7 +707,7 @@
     {
      "name": "1:21 · stopped after two food glances: the ask",
      "pass": true,
-     "detail": "t=80.402 show ask glance"
+     "detail": "t=81.202 show ask glance"
     },
     {
      "name": "1:23 · no",

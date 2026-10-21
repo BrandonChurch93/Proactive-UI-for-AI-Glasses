@@ -40,6 +40,8 @@ Everyday, memorable names. Each place has a glance line and an expanded depth. D
 | 47th St Station | E · 86, stair at the corner | Subway | Uptown trains · 4 min | Next four departures | Hungry, Errands |
 | Post Office | X · north side, 10 m east of the corner | Service | Line of 8 · 12 min | Hours, counter wait | Errands |
 
+As built: the 47th St Station entrance sits along the east building line just before the corner (n 78 to 83) rather than at the corner itself, so the corner stays clear for waiting and crossing; the newsstand stands at n 65 and the M4 shelter at the curb at n 58, with every route stepping behind the shelter as pedestrians do.
+
 Street furniture with no card: bike dock, taxi stand, the garage entrance, the scaffolding over The Big Bean's frontage that narrows the east sidewalk (Errands beat), crosswalks with countdowns, a delivery truck that crawls the near lane on cue (Just walking beat), a newsstand at the corner.
 
 Signage rule: a person's name or a plain descriptor, two or three words. Each roster place gets a designed storefront with its own sign format (marquee, blade, painted brick, awning text, window vinyl, neon). Background shops use five or six formats, never one. Background shop names are invented in the same voice and never repeat a roster name.

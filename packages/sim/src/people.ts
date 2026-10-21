@@ -168,7 +168,7 @@ export class People {
     const idle: [number, number, number, PersonAnim][] = [
       [-11.7, 36.6, Math.PI / 2, 'talk'],
       [-11.0, 37.3, -Math.PI / 2, 'talk'],
-      [11.6, 82.4, -Math.PI / 2, 'idle'],
+      [11.6, 67.4, -Math.PI / 2, 'idle'],
       [-12.35, 80.0, Math.PI / 2, 'sit'],
       [-12.0, 40.4, Math.PI / 2, 'sit'],
       [12.4, 50.6, -Math.PI / 2, 'sit'],

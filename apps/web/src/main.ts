@@ -86,10 +86,42 @@ async function boot(): Promise<void> {
     return;
   }
   addEventListener('resize', () => world.core.resize(innerWidth, innerHeight));
+  sim.scripted = false;
+  let drag: { x: number; y: number; yaw: number; pitch: number } | null = null;
+  let headYaw = 0.22;
+  let headPitch = 0.04;
+  canvas.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, y: e.clientY, yaw: headYaw, pitch: headPitch };
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    headYaw = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, drag.yaw + (e.clientX - drag.x) * 0.0032));
+    headPitch = Math.max(-0.6, Math.min(0.75, drag.pitch + (e.clientY - drag.y) * 0.0028));
+  });
+  const end = (): void => {
+    drag = null;
+  };
+  canvas.addEventListener('pointerup', end);
+  canvas.addEventListener('pointercancel', end);
+  const forced = params.get('quality');
+  let fpsFrames = 0;
+  let fpsTime = 0;
   let last = performance.now();
   let acc = 0;
   const frame = (now: number): void => {
-    acc += Math.min(0.1, (now - last) / 1000);
+    const real = (now - last) / 1000;
+    if (!forced && fpsTime < 4 && real < 0.5) {
+      fpsTime += real;
+      fpsFrames++;
+      if (fpsTime >= 4 && fpsTime / fpsFrames > 1 / 45 && world.core.quality === 'high') {
+        world.core.setQuality('fast');
+        world.core.resize(innerWidth, innerHeight);
+      }
+    }
+    sim.live.headYaw = sim.wearer.bodyYaw + headYaw;
+    sim.live.headPitch = headPitch;
+    acc += Math.min(0.1, real);
     last = now;
     const dt = 1 / 60;
     while (acc >= dt) {

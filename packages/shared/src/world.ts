@@ -27,14 +27,14 @@ export const POST_OFFICE = { x: 19.5, n: BLOCK.northLineN, door: { x: 19.5, n: B
 
 const SPECIAL_ANCHORS: Record<string, (h: number) => Vec3> = {
   'm4-stop': (h) => v3(BLOCK.avenueHalf + 1.1, h, zOf(58)),
-  '47th-st-station': (h) => v3(BLOCK.avenueHalf + 3.3, h, zOf(87.2)),
+  '47th-st-station': (h) => v3(11.7, h, zOf(80.6)),
   'pocket-park': (h) => v3(-(BLOCK.avenueHalf + 4.4), h, zOf(85.6)),
   'post-office': (h) => v3(POST_OFFICE.x, h, zOf(POST_OFFICE.n - 0.3)),
 };
 
 const DOORS: Record<string, Vec3> = {
   'm4-stop': v3(BLOCK.avenueHalf + 1.1, 0, zOf(58)),
-  '47th-st-station': v3(BLOCK.avenueHalf + 3.3, 0, zOf(86.6)),
+  '47th-st-station': v3(11.7, 0, zOf(78.2)),
   'pocket-park': v3(-10.8, 0, zOf(86.2)),
   'post-office': v3(POST_OFFICE.door.x, 0, zOf(POST_OFFICE.door.n)),
   'mega-burger': v3(-12.7, 0, zOf(76.6)),

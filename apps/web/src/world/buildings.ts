@@ -95,6 +95,8 @@ export function buildBuildings(lots: Lot[], towers: BackgroundTower[], mats: Mat
   const shopGlass: WindowInstance[] = [];
   const frames: WindowInstance[] = [];
   const sills: WindowInstance[] = [];
+  const acUnits: WindowInstance[] = [];
+  const escapes: { frame: Frame; u0: number; u1: number; floors: { yb: number; y: number }[] }[] = [];
   const storefronts: BuildingOutput['storefronts'] = [];
 
   const tiled = (style: FacadeStyle, g: THREE.BufferGeometry, off = 0): THREE.BufferGeometry => {
@@ -179,6 +181,7 @@ export function buildBuildings(lots: Lot[], towers: BackgroundTower[], mats: Mat
             kind.push(inst);
             frames.push({ ...inst, d: recess - 0.04 });
             sills.push({ frame: f, u: cu, y: yb - 0.06, w: ww + 0.22, h: 0.12, d: -0.08 });
+            if (kind === windowsHome && seed < 0.13) acUnits.push({ frame: f, u: cu + (seed - 0.065) * ww * 2, y: yb + 0.24, w: Math.min(0.7, ww * 0.62), h: 0.42, d: -0.12 });
             if (l.style === 'limestone' || l.style === 'brick') {
               bucket.add(trimMat, tiled(l.style, frameBox(f, wu0 - 0.1, wu0 + ww + 0.1, yt, yt + 0.22, -0.05, recess), seed));
             }
@@ -189,6 +192,12 @@ export function buildBuildings(lots: Lot[], towers: BackgroundTower[], mats: Mat
           }
         }
         bucket.add(wallMat, tiled(l.style, frameBox(f, 0, W, lastTop, y1, 0, recess), hash(li) * 4));
+        if (l.style === 'brick' && floors >= 3 && fi === 0 && bays >= 3 && l.height < 50) {
+          const b0 = Math.floor(bays / 2) - 1;
+          const list: { yb: number; y: number }[] = [];
+          for (let k = 0; k < floors; k++) list.push({ yb: y0 + k * fh, y: y0 + k * fh + (fh - wh) * 0.58 });
+          escapes.push({ frame: f, u0: edge + bw * b0 + bw * 0.1, u1: edge + bw * (b0 + 2) - bw * 0.1, floors: list });
+        }
       }
       if (hasStore) bucket.add(trimMat, tiled(l.style, frameBox(f, 0, W, sfTop - 0.05, sfTop + 0.32, -0.16, recess)));
       addCornice(bucket, f, l, top, cH, trimMat, wallMat, tiled);
@@ -207,8 +216,35 @@ export function buildBuildings(lots: Lot[], towers: BackgroundTower[], mats: Mat
     cap.translate((t.x0 + t.x1) / 2, t.height + 0.6, (t.z0 + t.z1) / 2);
     bucket.add(mats.trim[style], worldUV(cap, 3, 3));
   }
+  const iron = new THREE.MeshStandardMaterial({ color: 0x1c1d1f, roughness: 0.55, metalness: 0.45 });
+  for (const e of escapes) {
+    const f = e.frame;
+    for (const [k, fl] of e.floors.entries()) {
+      const py = fl.y - 0.05;
+      bucket.add(iron, frameBox(f, e.u0, e.u1, py - 0.05, py, -1.15, 0));
+      bucket.add(iron, frameBox(f, e.u0, e.u1, py + 0.95, py + 1.0, -1.17, -1.12));
+      for (let u = e.u0; u <= e.u1 + 0.01; u += 0.6) bucket.add(iron, frameBox(f, u - 0.012, u + 0.012, py, py + 0.98, -1.16, -1.13));
+      for (const u of [e.u0, e.u1]) bucket.add(iron, frameBox(f, u - 0.02, u + 0.02, py, py + 0.98, -1.15, 0));
+      if (k < e.floors.length - 1) {
+        const next = e.floors[k + 1]!.y - 0.05;
+        const steps = 9;
+        for (let i = 0; i < steps; i++) {
+          const a = i / steps;
+          const u = e.u0 + 0.3 + (e.u1 - e.u0 - 0.9) * a;
+          const yy = py + (next - py) * a;
+          bucket.add(iron, frameBox(f, u, u + 0.24, yy, yy + 0.03, -0.95, -0.35));
+        }
+        bucket.add(iron, frameBox(f, e.u0 + 0.3, e.u1 - 0.6, (py + next) / 2 - 0.02, (py + next) / 2 + 0.02, -0.98, -0.93));
+      }
+    }
+    const last = e.floors[0]!.y - 0.05;
+    bucket.add(iron, frameBox(f, e.u1 - 0.55, e.u1 - 0.5, last - 2.6, last, -0.95, -0.9));
+    bucket.add(iron, frameBox(f, e.u1 - 0.15, e.u1 - 0.1, last - 2.6, last, -0.95, -0.9));
+  }
   bucket.build(group);
 
+  const acMat = new THREE.MeshStandardMaterial({ color: 0xc7c4bb, roughness: 0.6, metalness: 0.25 });
+  group.add(instanced(acUnits.map((a) => ({ ...a, d: -0.05 })), acMat, 'box', true));
   group.add(instanced(windowsOffice, interiorMaterial('office'), 'plane', false));
   group.add(instanced(windowsHome, interiorMaterial('home'), 'plane', false));
   group.add(instanced(frames, mats.white, 'frame', true));
@@ -297,7 +333,7 @@ function instanced(list: WindowInstance[], mat: THREE.Material, unit: keyof type
   list.forEach((w, i) => {
     const p = w.frame.origin.clone().addScaledVector(w.frame.u, w.u).add(new THREE.Vector3(0, w.y, 0)).addScaledVector(w.frame.n, -w.d);
     q.setFromUnitVectors(zAxis, w.frame.n);
-    s.set(w.w, w.h, unit === 'box' ? 0.2 : 1);
+    s.set(w.w, w.h, unit === 'box' ? (w.h > 0.3 ? 0.55 : 0.2) : 1);
     m.compose(p, q, s);
     mesh.setMatrixAt(i, m);
   });

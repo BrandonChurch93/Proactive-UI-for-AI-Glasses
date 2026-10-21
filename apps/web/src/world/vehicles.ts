@@ -300,7 +300,7 @@ export class VehicleView {
       im.receiveShadow = true;
       im.frustumCulled = false;
       this.group.add(im);
-      const wm = new THREE.InstancedMesh(b.wheel, mat, CAPACITY * Math.max(4, b.wheels.length));
+      const wm = new THREE.InstancedMesh(b.wheel, b.textured ?? mat, CAPACITY * Math.max(4, b.wheels.length));
       wm.count = 0;
       wm.castShadow = true;
       wm.frustumCulled = false;
@@ -318,7 +318,7 @@ export class VehicleView {
       const k = 4.75 / b.baked.length;
       const m = new THREE.Matrix4().compose(new THREE.Vector3(p.pos.x, 0, p.pos.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), p.heading), new THREE.Vector3(k, k, k));
       const list = byModel.get(name) ?? [];
-      list.push({ m, c: new THREE.Color(p.color) });
+      list.push({ m, c: this.batches.get(name)!.baked.textured ? new THREE.Color(1, 1, 1) : new THREE.Color(p.color) });
       byModel.set(name, list);
     }
     for (const [name, list] of byModel) {
@@ -392,7 +392,7 @@ export class VehicleView {
       q.setFromAxisAngle(yAxis, heading);
       this.m4.compose(new THREE.Vector3(pos.x, 0, pos.z), q, new THREE.Vector3(k, k, k));
       b.body.setMatrixAt(b.body.count, this.m4);
-      b.body.setColorAt(b.body.count, col.set(v.color));
+      b.body.setColorAt(b.body.count, b.baked.textured ? col.setRGB(1, 1, 1) : col.set(v.color));
       b.body.count++;
       for (const w of b.baked.wheels) {
         if (b.wheelCount >= b.wheels.instanceMatrix.count) break;

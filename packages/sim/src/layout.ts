@@ -269,10 +269,10 @@ export function buildLayout(seed = 47): BlockLayout {
   prop('hydrant', curbE + 0.45, 66.4);
   for (const n of [21.4, 22.6, 23.8]) prop('bollard', curbE + 0.4, n);
   for (const n of [85.2, 86.4]) prop('bollard', curbE + 0.4, n);
-  prop('newsstand', 11.6, 82.8, -Math.PI / 2, v3(2.4, 2.6, 1.6));
-  prop('station-stair', curbE + 3.3, 87.2, 0, v3(2.2, 1.1, 5.2));
+  prop('newsstand', 11.7, 65.2, -Math.PI / 2, v3(2.4, 2.6, 1.6));
+  prop('station-stair', 11.7, 80.6, 0, v3(2.2, 1.1, 5.2));
   prop('bike-dock', -(curbE + 0.9), 52, 0, v3(0.8, 1.1, 9));
-  prop('bus-shelter', curbE + 1.0, 58, 0, v3(1.6, 2.6, 4.2));
+  prop('bus-shelter', curbE + 0.85, 58, 0, v3(1.6, 2.6, 4.2));
   prop('trash', curbE + 0.6, 26.4);
   prop('trash', -(curbE + 0.6), 64.6);
   prop('trash', curbE + 0.6, 79.5);

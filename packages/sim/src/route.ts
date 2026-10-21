@@ -20,9 +20,10 @@ const AVE_FAR_W = P(-(BLOCK.avenueHalf + 0.6), AVENUE_CROSSWALK.n);
 const CROSS_STOP = P(CROSS_CROSSWALK.x, BLOCK.crossFrom - 1.3);
 const CROSS_FAR = P(CROSS_CROSSWALK.x, BLOCK.crossTo + 0.7);
 
-const east = (from: number, to: number): RoutePoint[] => [P(BLOCK.wearerX, from), P(BLOCK.wearerX, to)];
 
-const SCAFFOLD_DETOUR: RoutePoint[] = [P(BLOCK.wearerX, 43.2), P(7.75, 45.4), P(7.75, 52.9), P(BLOCK.wearerX, 55.1)];
+const SCAFFOLD_DETOUR: RoutePoint[] = [P(BLOCK.wearerX, 43.2), P(7.75, 45.4), P(7.75, 52.6)];
+const BUS_DETOUR: RoutePoint[] = [P(9.9, 55.2), P(9.9, 60.8), P(BLOCK.wearerX, 62.6)];
+const eastWithShelter = (to: number): RoutePoint[] => [P(BLOCK.wearerX, 0), P(BLOCK.wearerX, 53.4), ...BUS_DETOUR, P(BLOCK.wearerX, to)];
 
 interface RouteSpec {
   legs: RoutePoint[][];
@@ -32,7 +33,7 @@ interface RouteSpec {
 const SPECS: Record<ScenarioId, RouteSpec> = {
   hungry: {
     legs: [
-      [...east(0, 85.4), P(8.05, 87.0), AVE_STOP_E],
+      [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
       [AVE_FAR_W, P(-8.5, 86.4), P(-8.6, 78.4), P(-11.2, 77.0)],
     ],
@@ -40,7 +41,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
   },
   errands: {
     legs: [
-      [...east(0, 43.2).slice(0, 1), ...SCAFFOLD_DETOUR, P(BLOCK.wearerX, 85.6), P(8.9, 87.6), CROSS_STOP],
+      [P(BLOCK.wearerX, 0), ...SCAFFOLD_DETOUR, ...BUS_DETOUR, P(BLOCK.wearerX, 85.6), P(8.9, 87.6), CROSS_STOP],
       [CROSS_STOP, CROSS_FAR],
       [CROSS_FAR, P(12.4, BLOCK.crossTo + 2.1), P(POST_OFFICE.door.x - 1.2, POST_OFFICE.door.n - 1.6), P(POST_OFFICE.door.x, POST_OFFICE.door.n - 1.1)],
     ],
@@ -48,7 +49,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
   },
   walking: {
     legs: [
-      [...east(0, 85.4), P(8.05, 87.0), AVE_STOP_E],
+      [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
       [AVE_FAR_W, P(-9.0, 87.1), P(-9.7, 86.7)],
     ],

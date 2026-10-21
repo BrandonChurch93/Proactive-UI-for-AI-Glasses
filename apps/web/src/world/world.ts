@@ -7,6 +7,7 @@ import { buildStreet } from './street';
 import { buildStorefronts } from './storefront';
 import { buildProps } from './props';
 import { SignAtlas } from './signs';
+import { buildRooftops } from './rooftops';
 import { VehicleView } from './vehicles';
 import { PeopleView } from './people';
 
@@ -44,6 +45,7 @@ export class World {
     scene.add(sf.group);
     const props = buildProps(this.sim.layout, this.mats, this.core.renderer, this.sim.signal, atlas);
     scene.add(props.group);
+    scene.add(buildRooftops(this.sim.layout.lots, this.mats, atlas));
     scene.add(atlas.build(this.core.renderer));
     this.dynamic.push({ update: (_s, _dt, t) => props.update(t) });
     const vehicles = new VehicleView(this.mats, this.core.renderer);

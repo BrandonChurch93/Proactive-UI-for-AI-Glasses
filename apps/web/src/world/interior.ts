@@ -119,7 +119,7 @@ vec3 interior() {
 
 export function interiorMaterial(kind: InteriorKind): THREE.MeshStandardMaterial {
   const p = PARAMS[kind];
-  const m = new THREE.MeshStandardMaterial({ color: 0x050607, roughness: 0.06, metalness: 0.0, envMapIntensity: 2.2 });
+  const m = new THREE.MeshStandardMaterial({ color: 0x050607, roughness: 0.06, metalness: 0.0, envMapIntensity: kind === 'shop' ? 0.9 : 1.6 });
   m.onBeforeCompile = (shader) => {
     shader.uniforms.uDepth = { value: p.depth };
     shader.uniforms.uLight = { value: p.light };

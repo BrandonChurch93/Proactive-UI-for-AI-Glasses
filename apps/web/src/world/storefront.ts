@@ -211,15 +211,6 @@ export function buildStorefronts(
   return out;
 }
 
-function quad(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3, ru: number): THREE.BufferGeometry {
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute([a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z, d.x, d.y, d.z], 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, ru, 1, ru, 0, 0, 0], 2));
-  g.setIndex([0, 2, 1, 0, 3, 2]);
-  g.computeVertexNormals();
-  return g;
-}
-
 function addAwning(atlas: SignAtlas, f: Frame, W: number, bandBot: number, s: SignStyle): void {
   const proj = 1.5;
   const drop = 0.7;

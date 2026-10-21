@@ -88,10 +88,10 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
   sun.castShadow = true;
   sun.shadow.mapSize.set(4096, 4096);
   const sc = sun.shadow.camera;
-  sc.left = -75;
-  sc.right = 75;
-  sc.top = 75;
-  sc.bottom = -75;
+  sc.left = -58;
+  sc.right = 58;
+  sc.top = 58;
+  sc.bottom = -58;
   sc.near = 1;
   sc.far = 500;
   sun.shadow.bias = -0.00025;
@@ -148,7 +148,7 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
       renderer.setSize(w, h, false);
       composer.setPixelRatio(pr);
       composer.setSize(w, h);
-      bloom.setSize(w * pr, h * pr);
+      bloom.setSize(w * 0.8, h * 0.8);
       camera.aspect = w / h;
       camera.fov = camera.aspect < 0.8 ? 70 : camera.aspect < 1.2 ? 62 : 56;
       camera.updateProjectionMatrix();
