@@ -98,8 +98,8 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
       }
     }
     let level = maxLevel(it.level, maxLevel(earned, 'pip'));
-    if (band === 'brisk') level = 'pip';
-    return { level, via: rank(level) > rank(it.level) ? via : 'hold', gaze: true };
+    if (rank(level) > rank(bandCap(band))) level = bandCap(band);
+    return { level, via: rank(level) > rank(it.level) ? via : rank(level) < rank(it.level) ? 'band' : 'hold', gaze: true };
   }
 
   if (isPane(it.level)) {

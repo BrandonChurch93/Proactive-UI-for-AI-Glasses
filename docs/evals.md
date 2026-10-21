@@ -67,3 +67,5 @@ Every run, case or walk, is also checked against the global invariants in `src/i
 ## 4. Recording
 
 `pnpm record --scenario hungry` runs the sim in Node with no renderer, driving the scripted reviewer, and writes the walk file. Re-record when a scenario script changes. Expectations are hand-written and reviewed; never generated.
+
+As built: recording is deterministic and takes about two seconds for all three walks, so `pnpm eval` re-records the walks before scoring them (pass `--no-record` to score the files on disk). The walk files are build artifacts and are not committed; a walk file stores compact snapshots and the runner rehydrates each place's static copy from `data/places.json`.

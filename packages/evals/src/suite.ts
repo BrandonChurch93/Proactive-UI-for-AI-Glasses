@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { synthesize, type CaseSpec, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
+import { hydrateSnapshot, synthesize, type CaseSpec, type CompactSnapshot, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
 import { withConfig, type ConfigOverride } from '@lumen/brain';
 import { evaluate, type CaseResult, type Expectation } from './expect';
 import { invariants } from './invariants';
@@ -53,7 +53,10 @@ export function listWalks(): { id: string; file: WalkFile }[] {
   return readdirSync(dir)
     .filter((f) => f.endsWith('.walk.json'))
     .sort()
-    .map((f) => ({ id: f.replace('.walk.json', ''), file: readJson<WalkFile>(join(dir, f)) }));
+    .map((f) => {
+      const raw = readJson<Omit<WalkFile, 'snapshots'> & { snapshots: CompactSnapshot[] }>(join(dir, f));
+      return { id: f.replace('.walk.json', ''), file: { ...raw, snapshots: raw.snapshots.map(hydrateSnapshot) } };
+    });
 }
 
 function check(id: string, group: string, r: RunResult, again: RunResult, config?: ConfigOverride, meta: Partial<SuiteResult> = {}): SuiteResult {

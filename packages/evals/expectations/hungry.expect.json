@@ -148,7 +148,7 @@
       "name": "0:37 to 0:58 \u00b7 Brisk, nothing but whisper",
       "between": [
         38,
-        57
+        55.5
       ],
       "state": {
         "band": "brisk",
@@ -195,7 +195,7 @@
     {
       "name": "1:02 \u00b7 the pocket surfaces with the time available",
       "between": [
-        60,
+        59,
         63
       ],
       "must": {

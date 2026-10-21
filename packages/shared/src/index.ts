@@ -6,3 +6,5 @@ export * from './rules';
 export * from './world';
 export * from './signal';
 export * from './synth';
+export * from './placement';
+export * from './compact';

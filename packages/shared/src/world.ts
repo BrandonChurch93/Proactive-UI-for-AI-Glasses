@@ -12,31 +12,48 @@ export const BLOCK = {
   laneX: [1.75, 5.25] as const,
   crossHalf: 7,
   crossCenterN: 97,
-  crosswalkWidth: 3.2,
+  southLineN: 84,
+  northLineN: 110,
 } as const;
 
 export const zOf = (n: number): number => -n;
 export const nOf = (z: number): number => -z;
 
-export const AVENUE_CROSSWALK_N = 88.2;
-export const CROSS_CROSSWALK_X = BLOCK.wearerX + 1.2;
+export const AVENUE_CROSSWALK = { n: 87.6, half: 1.8 } as const;
+export const CROSS_CROSSWALK = { x: 9.6, half: 1.8 } as const;
+export const AVENUE_CROSSWALK_N = AVENUE_CROSSWALK.n;
 
-export const POST_OFFICE = { n: 106.5, x: 22, door: { n: 104.6, x: 22 } } as const;
+export const POST_OFFICE = { x: 19.5, n: BLOCK.northLineN, door: { x: 19.5, n: BLOCK.northLineN - 0.4 } } as const;
+
+const SPECIAL_ANCHORS: Record<string, (h: number) => Vec3> = {
+  'm4-stop': (h) => v3(BLOCK.avenueHalf + 1.1, h, zOf(58)),
+  '47th-st-station': (h) => v3(BLOCK.avenueHalf + 3.3, h, zOf(87.2)),
+  'pocket-park': (h) => v3(-(BLOCK.avenueHalf + 4.4), h, zOf(85.6)),
+  'post-office': (h) => v3(POST_OFFICE.x, h, zOf(POST_OFFICE.n - 0.3)),
+};
+
+const DOORS: Record<string, Vec3> = {
+  'm4-stop': v3(BLOCK.avenueHalf + 1.1, 0, zOf(58)),
+  '47th-st-station': v3(BLOCK.avenueHalf + 3.3, 0, zOf(86.6)),
+  'pocket-park': v3(-10.8, 0, zOf(86.2)),
+  'post-office': v3(POST_OFFICE.door.x, 0, zOf(POST_OFFICE.door.n)),
+  'mega-burger': v3(-12.7, 0, zOf(76.6)),
+  'main-street-pharmacy': v3(12.7, 0, zOf(35.6)),
+};
 
 export function placeAnchor(p: PlaceData): Vec3 {
-  if (p.side === 'X' || p.n === null) return v3(POST_OFFICE.x, p.anchor.height, zOf(POST_OFFICE.n - 1.6));
-  const mid = (p.n[0] + p.n[1]) / 2;
-  if (p.id === 'm4-stop') return v3(BLOCK.avenueHalf + 0.9, p.anchor.height, zOf(mid));
-  if (p.id === '47th-st-station') return v3(BLOCK.avenueHalf + 2.2, p.anchor.height, zOf(87.4));
-  if (p.id === 'pocket-park') return v3(-(BLOCK.avenueHalf + 3.4), p.anchor.height, zOf(85));
+  const special = SPECIAL_ANCHORS[p.id];
+  if (special) return special(p.anchor.height);
+  const n = p.n ?? [0, 0];
+  const mid = (n[0] + n[1]) / 2;
   const x = p.side === 'E' ? BLOCK.buildingLine - 0.25 : -(BLOCK.buildingLine - 0.25);
   return v3(x, p.anchor.height, zOf(mid));
 }
 
 export function placeDoor(p: PlaceData): Vec3 {
-  if (p.side === 'X' || p.n === null) return v3(POST_OFFICE.door.x, 0, zOf(POST_OFFICE.door.n));
+  const d = DOORS[p.id];
+  if (d) return d;
   const a = placeAnchor(p);
-  const x = p.side === 'E' ? BLOCK.buildingLine - 0.4 : -(BLOCK.buildingLine - 0.4);
-  if (p.id === 'm4-stop' || p.id === '47th-st-station' || p.id === 'pocket-park') return v3(a.x, 0, a.z);
+  const x = p.side === 'E' ? BLOCK.buildingLine - 0.3 : -(BLOCK.buildingLine - 0.3);
   return v3(x, 0, a.z);
 }

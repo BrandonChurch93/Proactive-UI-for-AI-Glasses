@@ -88,6 +88,7 @@ interface InboxItem {
   movingS: number;
   stillS: number;
   heldInGate: boolean;
+  reason?: Reason;
 }
 
 interface FollowUp {
@@ -128,7 +129,7 @@ export class Brain {
   private readonly pocket = new Pocket();
   private items = new Map<string, LadderItem>();
   private standing = new Map<string, Decision>();
-  private holdEpisodes = new Map<string, string>();
+  private holdEpisodes = new Map<string, Set<string>>();
   private presented = new Map<string, string>();
   private inbox = new Map<string, InboxItem>();
   private followups: FollowUp[] = [];
@@ -166,6 +167,11 @@ export class Brain {
   };
   private frameEvents: Decision[] = [];
   private pathHeld = new Set<string>();
+  private forcedDown = new Set<string>();
+  private lastTarget: string | null = null;
+  private lastTargetAt = -Infinity;
+  private scanHold: string | null = null;
+  private scanUntil = -Infinity;
   private pocketUp = false;
   private heldGlyph = new Set<string>();
   private announced = new Map<string, string>();
@@ -227,6 +233,7 @@ export class Brain {
     const stoppedFor = this.stoppedSince === null ? 0 : t - this.stoppedSince;
 
     this.updateSnooze(snap, t);
+    this.updateScan(snap, t);
     const gate = computeGates(
       snap,
       { snoozed: this.snoozeUntil !== undefined && t < this.snoozeUntil, budget: this.budget, forceSafety: this.overrides.gate },
@@ -289,7 +296,7 @@ export class Brain {
   }
 
   private updateSnooze(snap: WorldSnapshot, t: number): void {
-    const up = snap.wearer.gaze.pitch > this.cfg.snooze.pitch;
+    const up = snap.wearer.gaze.pitch > this.cfg.snooze.pitch && !snap.wearer.gaze.target;
     if (!up) {
       this.lookUpSince = null;
       this.lookUpArmed = true;
@@ -303,6 +310,19 @@ export class Brain {
       }
     }
     if (this.snoozeUntil !== undefined && t >= this.snoozeUntil) this.snoozeUntil = undefined;
+  }
+
+  private updateScan(snap: WorldSnapshot, t: number): void {
+    const target = snap.wearer.gaze.target;
+    if (target) {
+      this.lastTarget = target;
+      this.lastTargetAt = t;
+    }
+    const scanning = snap.wearer.curbDistance < this.cfg.safety.curbScanM && Math.abs(snap.wearer.gaze.yawRate) > 0.8;
+    if (scanning && this.lastTarget && t - this.lastTargetAt < 2.5) {
+      this.scanHold = this.lastTarget;
+      this.scanUntil = t + 0.8;
+    }
   }
 
   private onGateStart(_t: number): void {
@@ -546,6 +566,7 @@ export class Brain {
         it.lastGazeAt = t;
       } else {
         it.gazeSince = null;
+        if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
       }
       it.wasTarget = isT;
 
@@ -582,6 +603,7 @@ export class Brain {
               other.level = 'glance';
               other.since = t;
               other.stepAt = t;
+              this.forcedDown.add(id);
             }
           }
         }
@@ -606,7 +628,7 @@ export class Brain {
         gaze: isT,
         focusOk: isT && level === 'glance',
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
-        cause: via === 'hold' ? undefined : via,
+        cause: this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),
       };
       if (level === 'none') {
@@ -615,6 +637,23 @@ export class Brain {
         w.remove = true;
       }
       wants.push(w);
+    }
+    const cards = wants.filter((w) => w.component === 'place' && (w.level === 'card' || w.level === 'expanded') && !w.remove);
+    if (cards.length > 1) {
+      const keep = cards.find((w) => w.gaze) ?? cards[0]!;
+      for (const w of cards) {
+        if (w === keep) continue;
+        const e = snap.entities.find((x) => x.id === w.id);
+        const li = this.items.get(w.id);
+        if (!e || !li) continue;
+        li.level = 'glance';
+        li.since = t;
+        li.stepAt = t;
+        w.level = 'glance';
+        w.cause = 'look-away';
+        w.content = this.entityContent(e, 'glance', w.reason, band);
+        w.onCommit = undefined;
+      }
     }
   }
 
@@ -845,11 +884,12 @@ export class Brain {
         };
       } else {
         r =
-          this.gateWasPath(n.id) || it.n.at < t - 1
+          it.reason ??
+          (this.gateWasPath(n.id) || it.n.at < t - 1
             ? reason('social', 'Held for you', parts)
             : band === 'stopped'
               ? reason('world', 'Long red light', parts)
-              : reason('world', 'Clear sidewalk ahead', parts);
+              : reason('world', 'Clear sidewalk ahead', parts));
         content = {
           name: n.from ?? 'Message',
           fact: n.text ?? '',
@@ -870,9 +910,10 @@ export class Brain {
         anchor: anchorFor(n),
         content,
         reason: r,
-        origin: n.type === 'call' ? 'call' : n.type === 'app' ? 'app' : 'message',
+        origin: n.type === 'call' ? 'call' : n.type === 'app' ? (it.heldInGate ? 'followup' : 'app') : 'message',
         timing,
         onCommit: () => {
+          it.reason ??= r;
           if (it.status === 'pending') {
             it.status = 'shown';
             it.shownAt = t;
@@ -932,7 +973,9 @@ export class Brain {
     }
     if (band !== 'stopped') this.pocketUp = false;
     const pinch = snap.wearer.pinch?.target;
+    const openedNow = new Set<string>();
     if (pinch?.startsWith('pocket:') && this.pocket.take(pinch.slice(7))) {
+      openedNow.add(pinch);
       const it = this.item(pinch);
       it.level = 'card';
       it.since = t;
@@ -988,7 +1031,7 @@ export class Brain {
           band,
           target: isT,
           dwellS: snap.wearer.gaze.dwellMs / 1000,
-          pinch: pinch === id,
+          pinch: pinch === id && !openedNow.has(id),
           floor: 'none',
           proactive: false,
           scoreAbove: false,
@@ -1022,6 +1065,7 @@ export class Brain {
         reason: r,
         origin: 'gaze',
         gaze: isT,
+        cause: openedNow.has(id) ? 'pinch' : out.via === 'hold' || out.via === 'score' ? 'dwell' : out.via,
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
         onCommit: () => {
           if (level !== prev) {
@@ -1038,7 +1082,8 @@ export class Brain {
 
   private askWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     if (snap.goal.scenario !== 'walking' || this.goal !== 'walking') return;
-    if (this.ask === 'none' && band === 'stopped' && this.foodGlances.size >= this.cfg.ask.foodGlances) {
+    const stoppedFor = this.stoppedSince === null ? 0 : t - this.stoppedSince;
+    if (this.ask === 'none' && band === 'stopped' && stoppedFor >= this.cfg.pocket.stoppedForS - 1e-9 && this.foodGlances.size >= this.cfg.ask.foodGlances) {
       this.ask = 'open';
       this.askAt = t;
     }
@@ -1073,6 +1118,10 @@ export class Brain {
   }
 
   private followupWants(t: number, wants: Want[]): void {
+    for (const f of this.followups) {
+      if (t < f.until || f.id !== 'followup') continue;
+      for (const it of this.inbox.values()) if (MESSAGE_TYPES.has(it.n.type) && it.heldInGate && it.status === 'pending') it.status = 'done';
+    }
     this.followups = this.followups.filter((f) => t < f.until);
     for (const f of this.followups) {
       wants.push({
@@ -1201,7 +1250,7 @@ export class Brain {
     }
 
     const stops = this.openStops(snap);
-    const routeTo = this.goal === 'errands' && this.stops.length > 0 ? stops[0] : this.destination;
+    const routeTo = this.goal === 'errands' ? stops[0] : this.destination;
     if (routeTo && !this.arrived) {
       const nar = snap.env.sidewalkNarrowsAhead;
       const r = reason('goal', 'On your route', [
@@ -1316,8 +1365,10 @@ export class Brain {
     timing: Timing,
   ): void {
     const key = `${r.kind}|${r.text}|${level}`;
-    if (this.holdEpisodes.get(id) === key) return;
-    this.holdEpisodes.set(id, key);
+    const seen = this.holdEpisodes.get(id) ?? new Set<string>();
+    if (seen.has(key)) return;
+    seen.add(key);
+    this.holdEpisodes.set(id, seen);
     const w: Want = { id, component, zone, level, anchor: id, content: { name: id, reason: r }, reason: r, origin: 'proactive' };
     this.emitEvent(w, 'hold', this.snap.t, timing);
   }
@@ -1386,6 +1437,7 @@ export class Brain {
       const action = this.transition(prev, w);
       const timing = w.timing ?? (gate.safety ? 'after-gate' : 'now');
       const d = this.toDecision(w, action ?? prev?.action ?? 'show', timing);
+      if (action && prev && prev.level === w.level && w.announce !== undefined && w.zone !== 'ground' && w.announce.startsWith('x:')) d.cause = 'choice';
       if (action) {
         this.log.append(t, d, this.snapRef);
         this.frameEvents.push(d);
@@ -1425,6 +1477,7 @@ export class Brain {
 
 
   private transition(prev: Decision | undefined, w: Want): Decision['action'] | null {
+    if (w.announce !== undefined && (!prev || LEVEL_RANK[prev.level] < LEVEL_RANK.whisper)) this.announced.set(w.id, w.announce);
     if (w.component === 'pocket' && !prev) return 'surface';
     if (!prev) return 'show';
     const a = LEVEL_RANK[prev.level];

@@ -111,6 +111,8 @@ Reasons cite only the goal or the world. Never the wearer's body, eyes or habits
 
 As built, the tick returns a `BrainFrame`: the standing decisions (everything on the glass, each the latest decision for its item), this tick's new decisions (the log entries), the gate state, the glyph, the focus zone for the band, the wearer model and the dwell. `overlay.apply` diffs the standing decisions and plays the one-shot moves from the new ones.
 
+A head-scan near the curb (rule 5) is not a look-away: while the head turns faster than 0.8 rad/s within 8 m of a curb, the item last looked at keeps its level and its look-away timer is paused for 0.8 s after the scan. A gaze target is capped at the band's ceiling (card in Walk, nothing above a pip in Brisk) so an expanded view never rides into a walk.
+
 Two conflicts settled in favour of `docs/walking-rules.md`: entering Brisk folds every pane at once, gaze target or not (no panes in Brisk outranks "a band change never demotes a gaze target instantly"); and a card earned by dwell that the wearer looks away from walks down by look-away, not by the band cap, except into Brisk.
 
 Notifications have fixed behaviors (see `docs/scenarios.md`): a text shows at glance at the next safe moment; social accumulates on the held glyph and surfaces once when stopped; a call shows at the edge during a walk but never in a crossing; app updates batch under whatever is open.

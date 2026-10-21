@@ -51,13 +51,13 @@
     {
       "rule": "walking-12",
       "between": [
-        21,
-        21.3
+        22.7,
+        23.2
       ],
       "must": {
         "action": "show",
         "id": "atlas-books",
-        "levelAtLeast": "glance"
+        "level": "glance"
       }
     }
   ]

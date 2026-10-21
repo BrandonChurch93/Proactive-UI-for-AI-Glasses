@@ -81,7 +81,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 ## Rule 12 · Snooze
 
-- Trigger: the wearer looks up (pitch above 0.35 rad) for 1 s.
+- Trigger: the wearer looks up (pitch above 0.35 rad) at nothing in particular for 1 s. Looking up at a sign is attention, not the gesture: with a gaze target the pitch does not count (a shop sign 4 m up and 5 m away is already 0.45 rad).
 - Response: everything folds, the held glyph shows "60 s" and counts down, nothing new is shown except safety until it expires or the wearer looks up again to cancel. The quietest control in the system.
 - Eval: after the gesture, no shows for 60 s except gate-related safety text; the glyph shows the countdown.
 

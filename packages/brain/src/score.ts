@@ -32,6 +32,7 @@ export function isClosed(e: Entity): boolean {
 
 export function goalRelevance(e: Entity, inp: ScoreInput, cfg: Config): number {
   if (inp.destination === e.id) return cfg.score.goalRelevance;
+  if (inp.destination && inp.goal === 'hungry') return 0;
   if (inp.goal === 'errands') {
     return inp.stops.includes(e.id) ? cfg.score.goalRelevance : 0;
   }

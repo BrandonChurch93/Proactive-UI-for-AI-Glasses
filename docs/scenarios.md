@@ -61,6 +61,10 @@ Route: east sidewalk north, the theater across the street near the start, end on
 12. 1:25 · Crossing, 10 s: recede and return, same as always. A bike comes up the bike lane from behind on this side as the wearer steps off: `BIKE · 2 s` on the pavement with its arrow, stop tone, gone when the rider passes.
 13. 1:35 · The bench in Pocket Park at the far corner. Idle glance, never two at once: "Benches in the shade". End of the walk. Fade. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
+## Timing as built
+
+The wearer decelerates into a stop line at 0.9 m/s² rather than stopping dead, so the curb arrivals land within a second of the beat sheet: Hungry reaches the corner at 0:57.6 and the pocket surfaces at 0:59.6 with 14 s on the light; Errands stops at the cross street at 1:10.8; Just walking at 1:18.4. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.
+
 ## Pace script
 
 Every walk carries a pace track in its scenario file: a band per segment, with the sim's speed per band (Stroll 0.6 m/s, Walk 1.38 m/s, Brisk 1.9 m/s, Stopped 0). Default Walk. Hungry: Brisk 0:36 to 0:58, Stopped 0:58 to 1:14. Errands: Stopped 0:24 to 0:29 at the pharmacy, Stopped 1:10 to 1:18 at the corner. Just walking: Stroll 0:08 to 0:32, Stopped 1:19 to 1:25. Speed eases between bands over about a second, and the sim clamps the wearer at a stop line, so the arithmetic of speed × time lands the wearer at the corner (n = 90) within a metre on every walk. The reviewer never controls pace; the inspector shows the band live.

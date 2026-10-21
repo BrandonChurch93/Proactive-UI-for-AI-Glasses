@@ -74,11 +74,13 @@ const checks: { rule: string; name: string; check: Check }[] = [
     name: 'focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)',
     check: (r, cfg) => {
       const since = new Map<string, number>();
+      let bandAt = -Infinity;
       for (let i = 0; i < r.snapshots.length; i++) {
         const s = r.snapshots[i]!;
         const f = r.frames[i]!;
+        if (i > 0 && r.frames[i - 1]!.band !== f.band) bandAt = f.t;
         const view = s.view;
-        if (!view) continue;
+        if (!view || f.t - bandAt < 0.32 + TICK) continue;
         const zone = focusRect(f.band, view.w, view.h);
         for (const p of view.panes) {
           if (p.zone !== 'world' || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;

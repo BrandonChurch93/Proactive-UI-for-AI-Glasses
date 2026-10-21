@@ -1,10 +1,21 @@
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { SCENARIO_IDS, compactSnapshot } from '@lumen/shared';
+import { recordWalk } from './record';
 import { buildReport, writeReport } from './report';
 import { listCases, listWalks, ROOT, runCase, runWalk, type SuiteResult } from './suite';
 
 const argv = process.argv.slice(2);
 const only = argv.includes('--walk') ? argv[argv.indexOf('--walk') + 1] : undefined;
 const verbose = argv.includes('--verbose');
+
+if (!argv.includes('--no-record')) {
+  for (const id of SCENARIO_IDS) {
+    if (only && id !== only) continue;
+    const walk = recordWalk(id);
+    writeFileSync(join(ROOT, 'scenarios', `${id}.walk.json`), JSON.stringify({ ...walk, snapshots: walk.snapshots.map(compactSnapshot) }));
+  }
+}
 
 const suites: SuiteResult[] = [];
 for (const { id, file } of listWalks()) {
