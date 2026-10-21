@@ -15,6 +15,10 @@ Proactive UI for AI Glasses is a browser simulation of a near-future pair of AI 
 
 ![The inspector: every decision with its reasons, a scrubbable timeline, live signals, overrides, evals and export](docs/screenshots/inspector.jpg)
 
+| | |
+| --- | --- |
+| ![On a phone held sideways: the same red light, scaled to the screen](docs/screenshots/phone.jpg) | ![On an iPad held upright: the theater card steps down to fit beside the clear middle](docs/screenshots/ipad.jpg) |
+
 ## Run it
 
 ```

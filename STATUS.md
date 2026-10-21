@@ -6,16 +6,17 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- Phase: 7 done. The build is complete; the Final section below is the summary for the owner.
-- If anything is picked up again: run the refresh ritual, read Final and the Phase 6 review, then the "Left for the owner" list. Tools: scripts/play.ts (drive a session), scripts/shots.ts (stills, `--query cam=x,y,n,yaw,pitch` for a debug camera), scripts/coldload.ts (cold load to first pip on the build), scripts/perf.ts and perf2.ts (frame cost and its breakdown), scripts/decisions.ts, `pnpm eval --file <export>`.
+- Phase: 8 done (mobile, polish, audit). Ready to deploy; the Final section below is the summary for the owner.
+- If anything is picked up again: run the refresh ritual, read Final and the Phase 6 review, then the "Left for the owner" list. Tools: scripts/devices.ts (eleven screens), scripts/engines.ts (Chromium, WebKit, Firefox), scripts/play.ts (drive a session, with tap, press and resize steps), scripts/shots.ts (stills, `--query cam=x,y,n,yaw,pitch` for a debug camera), scripts/coldload.ts (cold load to first pip on the build), scripts/perf.ts and perf2.ts (frame cost and its breakdown), scripts/decisions.ts, `pnpm eval --file <export>`.
 - Open decisions: none.
-- Last review verdict: Phase 7 passes its check.
+- Last review verdict: Phase 8 passes its audit (docs/audit-plan.md, Results).
 
 ## Final · 2026-10-20
 
 ### What was built
 
 - A static site (`pnpm build` writes `apps/web/dist`, 17 MB, relative paths, runs from any file server and from a subpath) of a near-future pair of AI glasses on a ninety-second city walk. It opens on the title screen over the live street with the Just walking attract loop. You choose Hungry, Errands or Just walking, play the walk with your own head and gaze (drag, dwell, click, Esc), and end on a card that reads the walk's own log. The inspector (I) shows every decision with its reasons, scrubs the whole walk, applies logged overrides, shows this build's evals and exports the run.
+- It plays on desktops and laptops of any size, iPads either way up, and phones held sideways (an upright phone is asked to turn), with touch controls, keyboard control throughout, and a screen-reader announcement of what the glasses show.
 - The world (apps/web/src/world, packages/sim): one avenue block and a cross street, hand-authored lots with scanned CC0 materials, interior-mapped windows, designed storefronts and signage for every place, rooftops, fire escapes, ghost signs, rigged CC0 people who walk door to door and wait for the light, CC0 cars in lanes under IDM following and exclusive signal phases, the M4 bus, the delivery truck, the bike, all lit by one sun with real shadows, bloom only on emissives and the light vocabulary.
 - The brain (packages/brain): a deterministic rules policy at 10 Hz, every number in config.ts, every decision logged with a cause and signed reason parts.
 - The overlay (packages/overlay): glass panes, the light vocabulary depth-tested in the scene, the full motion vocabulary on the sim clock, and the geometry of the walking rules (focus zone, edge entry, yielding, stepping aside, backdrop adaptivity, edge folding).
@@ -43,6 +44,8 @@ Each is written into the doc it changes (look for "As built").
 - A cold load to the first pip is 4.0 s at 50 Mbit/s and 7.4 s at 20 Mbit/s. Textures are JPEG because no KTX2 encoder was available; converting them would cut the 20 Mbit/s case.
 - People are the best CC0 rigged characters available from this network (Quaternius via poly.pizza); Google Drive refused the higher-quality Quaternius packs. Swapping them in through `scripts/assets.ts` would raise the world the most.
 - Ghost signs sit high on the party walls where the walk rarely looks, and shop interiors are convincing at a glance but repetitive up close.
+- Once the site has its address, make the two `social.jpg` image tags in `apps/web/index.html` absolute so every link-preview crawler finds the image.
+- Phones were tested in emulation (Chromium with touch, and WebKit) at real phone and iPad sizes, not on physical devices. One pass on a real iPhone and iPad before sharing widely is worth it, mostly for frame rate.
 
 ## Reference notes
 
@@ -74,6 +77,13 @@ One entry per phase check: what you compared, what differed from the reference o
 - places.json and the three scenario files load through a validator into typed data; a test checks every scripted id resolves: yes.
 - Black page with the title plate in Instrument Sans: yes, screenshot checked.
 - Check: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm shot` all green.
+
+### Phase 8 · 2026-10-20 · mobile, polish and audit
+- Added by the owner after Phase 7: settle the mobile experience, cover iPad, then a final polish and audit pass until the build is ready to deploy. Plan and results in `docs/audit-plan.md`.
+- Mobile, decided and built: landscape on phones, both orientations on tablets. Measured first: portrait phones leave about 130 px each side of the focus zone, so the glasses interface cannot exist there. A phone held upright now pauses behind a "Turn your phone sideways" prompt and resumes when turned. Every pane, the held glyph and the whisper line scale with the viewport (never below 0.74 of the 1280 × 800 reference), and a pane that cannot fit its level steps down a level before it falls to a pip. The title has a compact layout for short screens; touch gets long-press to dismiss, a Pause control, touch wording in the how-to, and safe-area insets; small touch devices start on the fast tier.
+- Landing page, decided: no separate landing page. The title screen already says what this is, how to use it, and asks one question over the live street. Added an "About this project" panel on the title, link-preview tags with a 1200 × 630 image, an Apple touch icon, and a short page for browsers without WebGL 2.
+- Polish and audit found and fixed: despawned people kept their skeletons' bone textures (about 49 textures per walk); each walk left its light textures behind; a dismiss was logged with cause "dwell"; WebKit warned about unused font preloads; three.js printed shader info logs in Firefox; closing the inspector after scrubbing back from the end card left the walk silently paused; opening the inspector left keyboard focus behind; Just walking and Errands ended before their last beat could be read (every walk now ends four seconds after arrival); the 667 px phone title overflowed and the subtitle ran under the Sound control. Added a lost-context message and audio that suspends when the tab is hidden.
+- Check: the full results are in `docs/audit-plan.md`. Lint, 41 tests, 39/39 eval suites (869 checks) and the build are green; eleven screens and three engines render with no console errors apart from Firefox's own shadow-map note; memory is flat over six rounds; a hand-played export with a dismiss and an override scores 19/19 through `pnpm eval --file`.
 
 ### Phase 7 · 2026-10-20
 - `pnpm build` clean (typecheck, evals 39/39, Vite): yes.
@@ -142,6 +152,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-20 · Phase 8 done (mobile, polish, audit). Decisions: phones play in landscape with a rotate prompt upright, tablets both ways; no separate landing page, an About panel on the title instead; the overlay scales with the viewport and steps down a level before falling to a pip.
 - 2026-10-20 · Phase 7 done. The build is finished; see Final.
 - 2026-10-20 · Phase 6 done. Decisions: the truck uses the inner northbound lane (scenarios.md updated); SMAA replaces MSAA in the high tier; ghost signs are invented period ads, no real brands; live gaze is tolerant in pitch; the countdown follows the wearer during a crossing.
 - 2026-10-20 · Phase 5 done. Decisions: sound stays off until the Sound control is pressed, and stays off behind the title (the attract loop is muted); "Walk again" returns to the choice (scenarios.md) while the end card also offers the other two walks directly (copy.md); scrubbing replays from recorded input rather than caching states; `pnpm build` runs the evals first so the inspector always ships this build's report.

@@ -57,3 +57,16 @@ Tab hidden and shown mid-walk; resize and rotate mid-walk; rapid scenario switch
 ## 10. Deploy
 
 Built with relative paths; served from a subdirectory by a plain static server with no 404s; `README.md` says how to deploy.
+
+## Results · 2026-10-20
+
+- Mobile: done as decided in section 1. Measured on the device matrix below: phones held sideways place glances, cards and the expanded view (at 0.74 scale); a 667 px phone steps the expanded view down to a glance; iPads place everything in landscape and step expanded to card in portrait; a phone held upright shows the rotate prompt and the walk waits.
+- Automated gate: lint, 41 tests, 39/39 eval suites (869 checks), build all green. All three walks played in real time on the production build to their end cards.
+- Device matrix (`scripts/devices.ts`, title plus three beats each): 390 × 844 phone, 844 × 390 phone, 667 × 375 phone, iPad 1180 × 820 and 820 × 1180, iPad mini 744 × 1133 and 1133 × 744, 1280 × 800, 1024 × 768, 1920 × 1080, 2560 × 1080. No console messages on any of them.
+- Engines (`scripts/engines.ts`): Chromium and WebKit clean; Firefox logs one warning of its own about shadow-map depth comparison, which comes from three.js's shadow maps and is harmless. All three run the walk and render the glass the same.
+- Input and flow: keyboard only from title to end card works (Enter, Tab, I, Esc, Space); focus moves into the inspector and back. Touch: tap to choose, drag to look, long-press dismisses the top pane (and the log now records the cause as dismiss), Pause and Resume, the I · INSPECTOR hint, the About panel, rotating upright and back.
+- Inspector: scrubs forward and back; scrubbing back from the end card and closing the drawer resumes the walk; overrides apply and are logged; export round-trips through `pnpm eval --file`.
+- Memory: six rounds of Walk again leave geometries (122), textures (119) and DOM nodes (134) flat. Fixed on the way: despawned people kept their skeletons' bone textures, and each walk left its light textures behind.
+- Load: first pip 3.9 s at 50 Mbit/s, 7.5 s at 20 Mbit/s.
+- Robustness: tab hidden suspends audio; a lost WebGL context shows a message with Reload; rapid choices are ignored after the first; scrubbing after the end card hides it.
+- Deploy: relative paths, served from a subdirectory by a plain static server with no 404s; link-preview tags and image in place; a no-WebGL page for browsers that cannot run it.
