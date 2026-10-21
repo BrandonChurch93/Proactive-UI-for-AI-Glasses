@@ -227,19 +227,22 @@ export class People {
         const od = Math.hypot(ox, oz);
         if (od < 5.5) {
           const push = (5.5 - od) / 5.5;
-          vx += (ox / (od || 1)) * push * 2.2;
-          vz += (oz / (od || 1)) * push * 2.2;
+          const nx = ox / (od || 1);
+          const nz = oz / (od || 1);
+          const side = vx * nz - vz * nx >= 0 ? 1 : -1;
+          vx += nx * push * 2.2 + nz * side * push * 1.8;
+          vz += nz * push * 2.2 - nx * side * push * 1.8;
           const closing = (vx * -ox + vz * -oz) / (od || 1);
-          if (closing > 0 && od < 3.8) want *= 0.4;
+          if (closing > 0 && od < 3.8) want *= 0.7;
         }
         for (const q of this.people) {
           if (q === p || !q.alive) continue;
           const qx = p.pos.x - q.pos.x;
           const qz = p.pos.z - q.pos.z;
           const qd = Math.hypot(qx, qz);
-          if (qd > 0.01 && qd < 0.9) {
-            vx += (qx / qd) * (0.9 - qd) * 1.5;
-            vz += (qz / qd) * (0.9 - qd) * 1.5;
+          if (qd > 0.01 && qd < 1.15) {
+            vx += (qx / qd) * (1.15 - qd) * 1.8;
+            vz += (qz / qd) * (1.15 - qd) * 1.8;
           }
         }
       }

@@ -453,21 +453,21 @@ export class ThreeBridge implements SceneBridge {
 
   createGroundText(): GroundTextHandle {
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
+    canvas.width = 2048;
     canvas.height = 256;
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = 8;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, opacity: 0, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
     mat.color.setRGB(1.25, 1.25, 1.25);
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.7).rotateX(-Math.PI / 2), mat);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 0.7).rotateX(-Math.PI / 2), mat);
     mesh.renderOrder = 17;
     mesh.visible = false;
     this.group.add(mesh);
     let key = '';
     const draw = (text: string, tone: 'go' | 'warn' | 'stop', arrow?: 'left' | 'right'): void => {
       const g = canvas.getContext('2d')!;
-      g.clearRect(0, 0, 1024, 256);
+      g.clearRect(0, 0, 2048, 256);
       g.font = '500 132px "Martian Mono", ui-monospace, monospace';
       g.textBaseline = 'middle';
       const spacing = 132 * 0.16;
@@ -485,7 +485,7 @@ export class ThreeBridge implements SceneBridge {
       const widths = glyphs.map((gl) => g.measureText(gl.ch).width + spacing);
       const arrowW = arrow ? 150 : 0;
       const total = widths.reduce((a, b) => a + b, 0) - spacing + arrowW;
-      let x = 512 - total / 2;
+      let x = 1024 - total / 2;
       g.shadowColor = 'rgba(255,240,210,.55)';
       g.shadowBlur = 28;
       if (arrow === 'left') {

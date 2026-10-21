@@ -34,7 +34,7 @@ function tone(t: string | undefined): string {
 }
 
 function showsReason(c: Content): boolean {
-  return c.showReason !== false && Boolean(c.reason.text) && c.reason.text !== c.name;
+  return c.showReason !== false && Boolean(c.reason.text) && c.reason.text !== c.name && c.reason.text !== c.fact;
 }
 
 function actions(c: Content, id: string, h: PaneHandlers): HTMLElement | null {
