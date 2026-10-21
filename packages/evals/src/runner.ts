@@ -1,5 +1,5 @@
 import { Brain, type ConfigOverride } from '@lumen/brain';
-import type { BrainFrame, Decision, Glyph, LogEntry, WorldSnapshot } from '@lumen/shared';
+import type { BrainFrame, Decision, Glyph, LogEntry, OverrideEntry, WorldSnapshot } from '@lumen/shared';
 
 export interface FrameItem {
   id: string;
@@ -33,10 +33,18 @@ export interface RunResult {
   brain: Brain;
 }
 
-export function run(id: string, snapshots: WorldSnapshot[], scenario: WorldSnapshot['goal']['scenario'], config?: ConfigOverride): RunResult {
+export function run(
+  id: string,
+  snapshots: WorldSnapshot[],
+  scenario: WorldSnapshot['goal']['scenario'],
+  config?: ConfigOverride,
+  overrides: readonly OverrideEntry[] = [],
+): RunResult {
   const brain = new Brain({ scenario, ...(config ? { config } : {}) });
   const frames: FrameRecord[] = [];
+  let next = 0;
   for (const s of snapshots) {
+    while (next < overrides.length && overrides[next]!.t <= s.t + 1e-9) brain.applyOverride(overrides[next]!.override, overrides[next++]!.t);
     const f = brain.tick(s);
     frames.push({
       t: f.t,

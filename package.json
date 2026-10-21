@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @lumen/web dev",
-    "build": "pnpm typecheck && pnpm --filter @lumen/web build",
+    "build": "pnpm typecheck && pnpm eval && pnpm --filter @lumen/web build",
     "preview": "pnpm --filter @lumen/web preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",

@@ -6,15 +6,13 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- Phase: 4 done (overlay). Phase 5 (app and inspector) next.
-- Next step: run the refresh ritual, then read plan.md Phase 5, inspector-spec.md, copy.md (title screen, end card, reviewer chrome) and reference/lumen-study.html (title, messages, route, arrival). Build: the title screen over the live street with the Just walking attract loop (muted, scripted), the choice, the end card; the Sound button (attach `walk.overlay.sound` and apps/web/src/audio/ambient.ts to one AudioContext); the inspector drawer (timeline, decisions with reasons, signals, overrides through the brain's override API, evals from packages/evals, export); `__done` and `__stepTo` already exist.
-- App today: apps/web/src/main.ts boots a World (apps/web/src/world) and a Walk (apps/web/src/walk.ts: Sim at 60 Hz, Brain at 10 Hz, Overlay every step, GSAP on the sim clock, pane rects fed back to the sim). `?scenario=hungry|errands|walking` runs live (drag to look, click to pinch, right-click or Esc to dismiss, Enter, Space pauses); `&still=1&t=` renders a scripted frame; `&reduced=1`, `&focus=1` (focus-zone outline), `&quality=fast`, `&nobloom=1`. Without a scenario it shows the title plate only.
-- Overlay: packages/overlay/src (bridge.ts interface, overlay.ts controller, panes.ts DOM, overlay.module.css glass, motion.ts GSAP moves, place.ts placement, yield and step-aside as pure tracks, backdrop.ts rule 9, sound.ts, tokens.ts every timing). The Three side of the bridge is apps/web/src/bridge.ts. Tests in packages/overlay/test.
-- Dev tools: scripts/shots.ts (`--scenario --times --query`), scripts/live.ts (live-mode smoke test, fails on console errors), scripts/decisions.ts (print a walk's decisions), scripts/evalpage.ts (evaluate an expression in a still), stats.ts, perf.ts, probe.ts.
-- World code: apps/web/src/world; sim in packages/sim/src; brain in packages/brain/src; evals in packages/evals (`pnpm eval` re-records the walks).
-- Carried to Phase 6: the M4 bus looks like a dark slab up close; the corner crowd bunches; an awning shows mirrored text from underneath; the truck fills the frame for three seconds; exposed party walls; low-poly people; bundle is 986 kB (282 kB gzip), check against world-spec 7.
+- Phase: 5 done (app and inspector). Phase 6 (polish and proof) next.
+- Next step: run the refresh ritual, read plan.md Phase 6, then the visual pass against fresh reference screenshots, play all three walks as a stranger twice (inspector open), the doc audit, legibility numbers, the performance pass (world-spec 7; bundle is 1.14 MB, 302 kB gzip), README and LICENSES.
+- Carried into Phase 6 from earlier phases: the M4 bus is a dark slab up close; passers-by still stream past the bench at the end of Just walking; an awning shows its text mirrored from underneath; the delivery truck fills the frame for about three seconds; exposed party walls are blank brick; people are low-poly; interiors could vary more; the fast tier needs a 2021 Air-class budget check.
+- App: apps/web/src/main.ts boots the World and an App (apps/web/src/app.ts: title, end card, chrome, sound, inspector, input). The walk loop is apps/web/src/walk.ts (record and replay of live input, seek, overrides, export). The overlay is packages/overlay, the inspector packages/inspector (store.ts is its whole interface to the app), the Three side of the overlay bridge apps/web/src/bridge.ts.
+- Tools: scripts/play.ts drives a session (wait, click, key, drag, text, eval, shot, download; steps separated by ';;') and fails on console errors; scripts/shots.ts for stills; scripts/decisions.ts prints a walk's decisions; `pnpm eval --file` scores an inspector export; `npx vite preview --port 4173` in apps/web serves the build.
 - Open decisions: none.
-- Last review verdict: Phase 4 passes its check (see Reviews).
+- Last review verdict: Phase 5 passes its check (see Reviews).
 
 ## Reference notes
 
@@ -46,6 +44,15 @@ One entry per phase check: what you compared, what differed from the reference o
 - places.json and the three scenario files load through a validator into typed data; a test checks every scripted id resolves: yes.
 - Black page with the title plate in Instrument Sans: yes, screenshot checked.
 - Check: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm shot` all green.
+
+### Phase 5 · 2026-10-20
+- Compared the title screen against reference/lumen-study.html scene 01 (fresh screenshot): same layout, type and staging (name, mono subtitle, setting, how-to box, question, three choices, CLICK TO SKIP), over the build's own street instead of the study's.
+- Title screen with the muted Just walking attract loop behind it, scenario choice, end card, "Walk again": yes. The page opens on the name plate while assets load, the street fades up behind the text, a click anywhere skips to the choice, choosing folds the text and the walk starts in about 1.5 s. The end card fades to black and reads the walk's own log ("Just walking · Held 2 things, showed 7"); "Walk again" returns to the choice over the attract loop, the other two scenarios start directly.
+- The walk loop sim, brain, overlay and log with pane rects fed back for the backdrop: yes (apps/web/src/walk.ts).
+- `?scenario=` and `?still=` with `__done` and `__stepTo`: yes, plus `scripted=1`, `reduced=1`, `focus=1`, `pace=1`, and a title still.
+- Inspector drawer: yes. Timeline, Decisions (reason parts, cause, what the reading budget trimmed), Signals (pace, gates, crosswalk, vehicles, attention, budget meter, pocket, snooze, backdrop per pane), Overrides (gate, budget, band, mute social, snooze, focus outline, pace readout, each logged), Evals (this build's report), Export.
+- Check: all three walks played end to end in real time on the production build with no console errors, each ending on its card, quality tier high throughout. The inspector scrubs the whole walk: a jump to 1:02 takes 230 ms, back to 0:20 takes 80 ms. Export round-trips: a scripted Hungry run with a budget override, exported from the browser, scores 19/19 through `pnpm eval --file`, including an exact replay of its decision log. pnpm test 40, pnpm eval 39/39, lint and build green.
+- What playing it caught and I fixed: the inspector drawer stayed off screen (GSAP kept the CSS translate); the overlay's moves were driven by the global GSAP clock, which would have frozen the title, end card and drawer whenever the walk paused (the overlay now has its own detached timeline advanced from the sim clock); in live mode the view center rested on Pocket Park 87 m away and opened its card unasked (live gaze now needs something lit within 70 m or any place within 30 m); the title's mono subtitle wrapped.
 
 ### Phase 4 · 2026-10-20
 - Compared against fresh reference frames (hero t 2, 5, 7, 10.5, 12, 16, 18, 21; walking-rules scenes 0 to 6). The glass, type, live line, hint, expanded rows, whisper line, held glyph, pocket pane and recede read the same; the build's leader and pip are depth-tested and bloomed with the scene, the expanded view grows in place and nothing dims or blurs the world.
@@ -91,6 +98,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-20 · Phase 5 done. Decisions: sound stays off until the Sound control is pressed, and stays off behind the title (the attract loop is muted); "Walk again" returns to the choice (scenarios.md) while the end card also offers the other two walks directly (copy.md); scrubbing replays from recorded input rather than caching states; `pnpm build` runs the evals first so the inspector always ships this build's report.
 - 2026-10-20 · Phase 4 done. Decisions: the pointer is the gaze only over view-zone panes (they have no place in the world to turn toward); the light vocabulary keeps its hero-distance angular size when nearer; view-zone panes do not step aside; the overlay is driven by the sim clock. Conflicts noted: the Errands passerby cannot reach a card that sits above a 4 m sign (heads stay at the horizon), so the step-aside in that beat never triggers and rule 8 is shown by the truck in Just walking and by its eval case; the Just walking theater dwell frames the marquee about 60° off the walking line rather than the reference's 38°, because the beat sheet puts the wearer 13 m from it at 0:08 and moving the lot would shift every later beat. Docs updated: design-system 3 and 8, overlay-spec 7 (as built), world-spec.
 - 2026-10-20 · Kit created. Nothing built yet. Start at docs/plan.md Phase 0.
 - 2026-10-20 · Read every doc in plan order, opened and screenshotted both references, wrote reference notes. Starting Phase 0.

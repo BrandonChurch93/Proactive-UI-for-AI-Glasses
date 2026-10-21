@@ -80,6 +80,7 @@ interface Item {
 export interface OverlayOptions {
   reducedMotion?: boolean;
   handlers?: Partial<PaneHandlers>;
+  clock?: gsap.core.Timeline;
 }
 
 export interface OverlayState {
@@ -252,12 +253,14 @@ export class Overlay {
   private readonly reduced: boolean;
   private readonly handlers: PaneHandlers;
   private snooze = false;
+  private readonly clock: gsap.core.Timeline | null;
 
   constructor(
     private bridge: SceneBridge,
     parent: HTMLElement,
     opts: OverlayOptions = {},
   ) {
+    this.clock = opts.clock ?? null;
     this.reduced = opts.reducedMotion ?? (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.handlers = { choice: opts.handlers?.choice ?? (() => {}), pinch: opts.handlers?.pinch ?? (() => {}) };
     this.root = document.createElement('div');
@@ -284,6 +287,12 @@ export class Overlay {
     parent.appendChild(this.root);
     this.route = new RouteView(bridge);
     this.column = new ColumnView(bridge);
+  }
+
+  private tl(vars?: gsap.TimelineVars): gsap.core.Timeline {
+    const tl = gsap.timeline(vars);
+    this.clock?.add(tl, this.clock.time());
+    return tl;
   }
 
   setFocusOutline(on: boolean): void {
@@ -365,7 +374,7 @@ export class Overlay {
         head: this.bridge.createLight('head'),
         leader: this.bridge.createLeader(),
       };
-      const tl = gsap.timeline();
+      const tl = this.tl();
       mark(tl, it.L, 0);
       it.marked = true;
       this.sound.tick();
@@ -390,10 +399,10 @@ export class Overlay {
     this.receded = on;
     this.gateTl?.kill();
     if (on) {
-      this.gateTl = recede(this.hud, this.gateK);
+      this.gateTl = recede(this.tl(), this.hud, this.gateK);
       this.sound.breathDown();
     } else {
-      this.gateTl = unrecede(this.hud, this.gateK);
+      this.gateTl = unrecede(this.tl(), this.hud, this.gateK);
       this.gateEndAt = t;
     }
   }
@@ -406,15 +415,15 @@ export class Overlay {
       this.glyphShown = true;
       this.glyphLabel.textContent = label;
       this.glyphTl?.kill();
-      this.glyphTl = gsap.timeline().fromTo(this.glyphEl, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: T.base, ease: EASE.out }, this.receded ? MOVE.glyphAt : 0);
+      this.glyphTl = this.tl().fromTo(this.glyphEl, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: T.base, ease: EASE.out }, this.receded ? MOVE.glyphAt : 0);
     } else if (!label && this.glyphShown) {
       this.glyphShown = false;
       this.glyphTl?.kill();
-      this.glyphTl = gsap.timeline().to(this.glyphEl, { opacity: 0, x: -6, duration: T.quick, ease: EASE.in });
+      this.glyphTl = this.tl().to(this.glyphEl, { opacity: 0, x: -6, duration: T.quick, ease: EASE.in });
     } else if (label && label !== prev) {
       const kindChanged = g?.kind !== undefined && this.glyphLabel.dataset.kind !== g.kind;
       if (g?.kind === 'snooze' && !kindChanged) this.glyphLabel.textContent = label;
-      else gsap.timeline().to(this.glyphLabel, { opacity: 0, duration: T.snap, ease: EASE.in }).call(() => {
+      else this.tl().to(this.glyphLabel, { opacity: 0, duration: T.snap, ease: EASE.in }).call(() => {
         this.glyphLabel.textContent = label;
       }).to(this.glyphLabel, { opacity: 1, duration: T.base, ease: EASE.out });
     }
@@ -429,11 +438,11 @@ export class Overlay {
       const el = whisperLine(d.content);
       this.viewLayer.appendChild(el);
       this.whisper = { id: d.id, el, text };
-      gsap.fromTo(el, { opacity: 0, y: MOVE.whisperRise }, { opacity: 1, y: 0, duration: T.base, ease: EASE.out });
+      this.tl().fromTo(el, { opacity: 0, y: MOVE.whisperRise }, { opacity: 1, y: 0, duration: T.base, ease: EASE.out });
     } else if (this.whisper) {
       const el = this.whisper.el;
       this.whisper = null;
-      gsap.to(el, { opacity: 0, duration: T.quick, ease: EASE.in, onComplete: () => el.remove() });
+      this.tl({ onComplete: () => el.remove() }).to(el, { opacity: 0, duration: T.quick, ease: EASE.in });
     }
   }
 
@@ -448,8 +457,7 @@ export class Overlay {
     this.worldLayer.appendChild(el);
     const w = el.offsetWidth;
     gsap.set(el, { x: p.x - w / 2, y: p.y - 30 });
-    gsap
-      .timeline({ onComplete: () => el.remove() })
+    this.tl({ onComplete: () => el.remove() })
       .fromTo(el, { opacity: 0, y: p.y - 24 }, { opacity: 1, y: p.y - 30, duration: MOVE.saveRise, ease: EASE.out })
       .to(el, { opacity: 0, duration: T.quick, ease: EASE.in }, MOVE.saveRise + MOVE.saveHold);
     this.sound.tick();
@@ -489,12 +497,12 @@ export class Overlay {
 
   private transition(it: Item, want: PaneLevel, t: number): void {
     it.tl?.kill();
-    const tl = gsap.timeline();
+    const tl = this.tl();
     const prev = it.cur;
     let at = 0;
     const world = it.kind === 'world' && it.lights !== null;
     if (prev) {
-      const dtl = gsap.timeline();
+      const dtl = this.tl();
       const end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
       dtl.call(() => {
         prev.wrap.remove();
@@ -649,16 +657,16 @@ export class Overlay {
         if (gazedNow && !it.gazed) {
           it.gazed = true;
           it.gtl?.kill();
-          it.gtl = gsap.timeline();
+          it.gtl = this.tl();
           gaze(it.gtl, it.L, 0, this.reduced);
         } else if (!gazedNow && it.gazed) {
           it.gazed = false;
           it.gtl?.kill();
-          it.gtl = gsap.timeline();
+          it.gtl = this.tl();
           ungaze(it.gtl, it.L, 0);
         }
         if (it.dying && it.want === 'none' && !it.cur && it.old.length === 0 && it.L.pip > 0 && !it.gtl?.isActive()) {
-          it.gtl = gsap.timeline();
+          it.gtl = this.tl();
           it.gtl.to(it.L, { pip: 0, aura: 0, flare: 0, duration: T.quick, ease: EASE.in });
         }
         const dropped = it.aside.dropped ? MOVE.droppedPip : 1;

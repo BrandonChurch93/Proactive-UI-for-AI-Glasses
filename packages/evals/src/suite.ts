@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { hydrateSnapshot, synthesize, type CaseSpec, type CompactSnapshot, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
+import { hydrateSnapshot, synthesize, type CaseSpec, type CompactSnapshot, type RunExport, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
 import { withConfig, type ConfigOverride } from '@lumen/brain';
 import { evaluate, type CaseResult, type Expectation } from './expect';
 import { invariants } from './invariants';
@@ -90,4 +90,31 @@ export function runWalk(id: string, file: WalkFile): SuiteResult {
   const a = run(id, file.snapshots, file.scenario);
   const b = run(id, file.snapshots, file.scenario);
   return check(id, 'walks', a, b, undefined, { description: `Recorded walk · ${file.snapshots.length} snapshots at ${file.hz} Hz` });
+}
+
+export function runExport(file: RunExport, name: string): SuiteResult {
+  const snaps = file.snapshots.map(hydrateSnapshot);
+  const a = run(name, snaps, file.scenario, undefined, file.overrides);
+  const b = run(name, snaps, file.scenario, undefined, file.overrides);
+  const replayed = JSON.stringify(a.entries.map((e) => [e.t, e.decision]));
+  const exported = JSON.stringify(file.entries);
+  const results: CaseResult[] = [
+    {
+      name: 'round trip: the runner reproduces the exported decision log',
+      rule: 'determinism',
+      pass: replayed === exported,
+      detail: replayed === exported ? `${file.entries.length} decisions` : `exported ${file.entries.length}, replayed ${a.entries.length}`,
+    },
+    { name: 'determinism: two runs produce identical logs', rule: 'determinism', pass: fingerprint(a) === fingerprint(b), detail: '' },
+    ...invariants(a, withConfig()),
+  ];
+  const exp = file.source === 'scripted' && file.overrides.length === 0 ? loadExpectation(file.scenario) : null;
+  if (exp) results.push(...evaluate(a, exp));
+  return {
+    id: name,
+    group: 'export',
+    pass: results.every((x) => x.pass),
+    results,
+    description: `${file.source} ${file.scenario} run · ${file.snapshots.length} snapshots · ${file.overrides.length} overrides`,
+  };
 }

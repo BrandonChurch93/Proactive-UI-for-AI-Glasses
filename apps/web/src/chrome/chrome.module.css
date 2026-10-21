@@ -1,0 +1,72 @@
+.chrome {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  font-family: var(--font-mono);
+}
+
+.btn {
+  pointer-events: auto;
+  font: inherit;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--chrome-fg-2);
+  background: rgba(14, 18, 22, 0.86);
+  border: 1px solid var(--chrome-rule);
+  border-radius: 5px;
+  padding: 6px 9px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  color: var(--chrome-fg);
+}
+
+.btn[aria-pressed='true'] {
+  color: var(--chrome-accent);
+  border-color: rgba(240, 180, 41, 0.5);
+}
+
+.sound {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.hint {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+}
+
+.pace {
+  position: absolute;
+  right: 14px;
+  bottom: 50px;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--chrome-fg-2);
+  background: rgba(14, 18, 22, 0.86);
+  border: 1px solid var(--chrome-rule);
+  border-radius: 5px;
+  padding: 6px 9px;
+  display: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.paused {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  transform: translateX(-50%);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--chrome-accent);
+  background: rgba(14, 18, 22, 0.86);
+  border: 1px solid var(--chrome-rule);
+  border-radius: 5px;
+  padding: 6px 9px;
+  display: none;
+}

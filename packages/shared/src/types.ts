@@ -313,3 +313,15 @@ export function reasonIsClean(text: string): boolean {
 export function isShow(d: Decision): boolean {
   return d.action === 'show' && d.placement.zone !== 'ground' && LEVEL_RANK[d.level] >= LEVEL_RANK.whisper;
 }
+
+export interface RunExport {
+  version: 1;
+  kind: 'lumen-run';
+  scenario: import('./data').ScenarioId;
+  seed: number;
+  hz: number;
+  source: 'scripted' | 'live';
+  snapshots: import('./compact').CompactSnapshot[];
+  overrides: OverrideEntry[];
+  entries: [number, Decision][];
+}

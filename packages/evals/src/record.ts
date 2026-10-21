@@ -1,13 +1,11 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Brain } from '@lumen/brain';
-import { SCENARIO_IDS, compactSnapshot, isScenarioId, type ScenarioId, type WorldSnapshot } from '@lumen/shared';
+import { SCENARIO_IDS, WALK_SECONDS, compactSnapshot, isScenarioId, type WorldSnapshot } from '@lumen/shared';
 import { Sim, TICK_HZ, headlessView } from '@lumen/sim';
 import { ROOT, type WalkFile } from './suite';
 
-export const WALK_SECONDS: Record<ScenarioId, number> = { hungry: 98, errands: 98, walking: 99 };
-
-export function recordWalk(scenario: ScenarioId, seed = 47): WalkFile {
+export function recordWalk(scenario: WalkFile['scenario'], seed = 47): WalkFile {
   const sim = new Sim(scenario, { seed });
   const brain = new Brain({ scenario });
   const snapshots: WorldSnapshot[] = [];

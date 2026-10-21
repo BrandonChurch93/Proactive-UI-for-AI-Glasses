@@ -29,3 +29,11 @@ Opens as a drawer over the right third of the screen on `I` or the `I · INSPECT
 ## 3. Copy
 
 The inspector speaks plainly and never in the brain's voice. "Held: in the roadway" not "Suppressed for your safety". Column headers are nouns. No em dashes.
+
+## 4. As built
+
+- `mount(root, store, onClose)` takes an `InspectorStore` (packages/inspector/src/store.ts): the frames, snapshots and overrides of the current walk, the eval report bundled at build time, and `seek`, `override`, `setPaused` and `exportRun`. The inspector never imports the sim, the brain or the renderer.
+- The timeline is always visible above the tabs. It spans the whole walk; the part already computed is lighter, shows are accent ticks, holds are short gray ticks, gates and snoozes are shaded spans, messages are diamonds above the track. Drag or click to scrub, arrow keys step a second (shift for five).
+- Scrubbing is a replay, not a cache: the app keeps the reviewer's own input per sim step (head, gaze) and per brain tick (pinches, choices, dismissals, overrides), rebuilds the sim and brain from zero in Node-speed fast mode, and runs only the last 2.5 s with the overlay on so every pane arrives in its true state. A scrub to the end of a walk takes about a quarter of a second. Scrubbing back keeps the known future; touching anything (a drag, a pinch, an override) discards it from that moment on.
+- The Overrides tab also toggles the pace readout (reviewer chrome, off by default).
+- Export writes `{ kind: 'lumen-run', scenario, seed, hz, source, snapshots, overrides, entries }`. `pnpm eval --file <export>` replays the snapshots through a fresh brain with the overrides at their times, checks that it reproduces the exported decision log exactly, runs every invariant, and for an untouched scripted run also the walk's hand-written expectations.

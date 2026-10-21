@@ -127,15 +127,13 @@ export function dissolve(tl: TL, p: PaneEls, at: number, reduced: boolean, fade:
   return at + MOVE.dissolveSeedAt + T.quick;
 }
 
-export function recede(hud: HTMLElement, gateK: { v: number }): TL {
-  const tl = gsap.timeline();
+export function recede(tl: TL, hud: HTMLElement, gateK: { v: number }): TL {
   tl.to(hud, { filter: 'blur(3px) brightness(0.55)', y: 14, scale: 0.985, opacity: 0.38, duration: MOVE.recede, ease: EASE.gate }, 0);
   tl.to(gateK, { v: 0.2, duration: MOVE.recede, ease: EASE.gate }, 0);
   return tl;
 }
 
-export function unrecede(hud: HTMLElement, gateK: { v: number }): TL {
-  const tl = gsap.timeline();
+export function unrecede(tl: TL, hud: HTMLElement, gateK: { v: number }): TL {
   tl.to(hud, { filter: 'blur(0px) brightness(1)', y: 0, scale: 1, opacity: 1, duration: MOVE.returnS, ease: EASE.out, clearProps: 'filter' }, 0);
   tl.to(gateK, { v: 1, duration: MOVE.returnS, ease: EASE.out }, 0);
   return tl;
