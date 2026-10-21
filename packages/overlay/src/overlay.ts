@@ -15,7 +15,7 @@ import {
 } from '@lumen/shared';
 import { BackdropFill } from './backdrop';
 import { leaderPoint, type ColumnHandle, type GroundTextHandle, type KeepOut, type LeaderHandle, type LightHandle, type RouteHandle, type SceneBridge } from './bridge';
-import { condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
+import { batch, condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
 import { buildPane, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
 import { Aside, PaneYield, Placement, Track, Yield, type AsideState, type FrameCtx, type WorldPlace } from './place';
 import { Sound } from './sound';
@@ -495,7 +495,7 @@ export class Overlay {
     return { pane: b.view.el, seed: b.seed, kids: b.view.kids, why: b.view.why, width: b.width };
   }
 
-  private transition(it: Item, want: PaneLevel, t: number): void {
+  private transition(it: Item, want: PaneLevel, t: number, edge = false): void {
     it.tl?.kill();
     const tl = this.tl();
     const prev = it.cur;
@@ -503,7 +503,11 @@ export class Overlay {
     const world = it.kind === 'world' && it.lights !== null;
     if (prev) {
       const dtl = this.tl();
-      const end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
+      let end: number;
+      if (edge) {
+        dtl.to(prev.fade, { v: 0, duration: T.quick, ease: EASE.in });
+        end = T.quick;
+      } else end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
       dtl.call(() => {
         prev.wrap.remove();
         it.old = it.old.filter((o) => o !== prev);
@@ -528,7 +532,8 @@ export class Overlay {
       }
       const held = it.d.reason.text === HELD_LINE && it.d.content.showReason !== false;
       const whyAt = held ? Math.max(0, this.gateEndAt + MOVE.returnS - t) : undefined;
-      const end = condense(tl, this.els(b), at, {
+      const batched = it.d.component === 'strip' && !this.reduced && whyAt === undefined;
+      const end = batched ? batch(tl, this.els(b), at, b.fade) : condense(tl, this.els(b), at, {
         card: big,
         reduced: this.reduced,
         open: want === 'expanded' || it.d.component === 'pocket',
@@ -537,7 +542,7 @@ export class Overlay {
       });
       it.condensingUntil = t + end;
     } else if (world && prev) {
-      retract(tl, it.L, Math.max(0, at - 0.12), this.reduced);
+      retract(tl, it.L, edge ? 0 : Math.max(0, at - 0.12), this.reduced || edge);
     }
     it.want = want;
     it.tl = tl;
@@ -598,7 +603,7 @@ export class Overlay {
         aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk));
       }
       const want = this.paneLevelFor(it, placed);
-      if (want !== it.want) this.transition(it, want, t);
+      if (want !== it.want) this.transition(it, want, t, placed?.mode === 'edge');
       else if (it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t);
       else if (it.cur) it.cur.view.update(d.content);
 

@@ -113,6 +113,14 @@ export function condense(
   return Math.max(end, at + MOVE.seedFadeAt + MOVE.seedFade);
 }
 
+export function batch(tl: TL, p: PaneEls, at: number, fade: { v: number }): number {
+  tl.set(fade, { v: 1 }, at);
+  tl.set(p.pane, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 }, at);
+  tl.set(p.kids, { opacity: 1, y: 0 }, at);
+  tl.fromTo(p.pane, { opacity: 0, y: -8, filter: 'blur(4px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: T.quick, ease: EASE.out, clearProps: 'filter' }, at);
+  return at + T.quick;
+}
+
 export function dissolve(tl: TL, p: PaneEls, at: number, reduced: boolean, fade: { v: number }): number {
   if (reduced) {
     tl.to(fade, { v: 0, duration: 0.2, ease: 'none' }, at);

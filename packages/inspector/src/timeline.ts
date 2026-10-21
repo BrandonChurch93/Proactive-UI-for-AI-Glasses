@@ -37,7 +37,7 @@ export class Timeline {
     this.canvas.tabIndex = 0;
     const legend = document.createElement('div');
     legend.className = s.legend!;
-    legend.innerHTML = `<span><i style="background:${C.show}"></i>Show</span><span><i style="background:${C.hold}"></i>Hold</span><span><i style="background:rgba(233,235,238,.3)"></i>Gate</span><span><i style="background:${C.marker};transform:rotate(45deg) scale(.7)"></i>Message</span>`;
+    legend.innerHTML = `<span style="color:var(--chrome-fg);margin-right:auto">Timeline</span><span><i style="background:${C.show}"></i>Show</span><span><i style="background:${C.hold}"></i>Hold</span><span><i style="background:rgba(233,235,238,.3)"></i>Gate</span><span><i style="background:${C.marker};transform:rotate(45deg) scale(.7)"></i>Message</span>`;
     this.el.append(this.canvas, legend);
     const at = (e: PointerEvent): number => {
       const r = this.canvas.getBoundingClientRect();

@@ -235,7 +235,7 @@ export class ThreeBridge implements SceneBridge {
 
   safetyAnchor(id: string): { pos: Vec3; yaw: number } | undefined {
     const sim = this.sim;
-    if (id.startsWith('bike:')) {
+    if (id.startsWith('bike:') || sim.wearer.state === 'crossing') {
       const h = sim.wearer.heading;
       const x = sim.wearer.pos.x + h.x * 5.5;
       const z = sim.wearer.pos.z + h.z * 5.5;
@@ -460,7 +460,7 @@ export class ThreeBridge implements SceneBridge {
     tex.anisotropy = 8;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, fog: false, opacity: 0, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
     mat.color.setRGB(1.25, 1.25, 1.25);
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 0.7).rotateX(-Math.PI / 2), mat);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 0.9).rotateX(-Math.PI / 2), mat);
     mesh.renderOrder = 17;
     mesh.visible = false;
     this.group.add(mesh);
@@ -486,6 +486,17 @@ export class ThreeBridge implements SceneBridge {
       const arrowW = arrow ? 150 : 0;
       const total = widths.reduce((a, b) => a + b, 0) - spacing + arrowW;
       let x = 1024 - total / 2;
+      const under = g.createRadialGradient(1024, 128, 20, 1024, 128, Math.max(220, total * 0.62));
+      under.addColorStop(0, 'rgba(8,11,16,0.62)');
+      under.addColorStop(0.7, 'rgba(8,11,16,0.4)');
+      under.addColorStop(1, 'rgba(8,11,16,0)');
+      g.save();
+      g.translate(1024, 128);
+      g.scale(1, 0.32);
+      g.translate(-1024, -128);
+      g.fillStyle = under;
+      g.fillRect(0, -200, 2048, 656);
+      g.restore();
       g.shadowColor = 'rgba(255,240,210,.55)';
       g.shadowBlur = 28;
       if (arrow === 'left') {
