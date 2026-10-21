@@ -9,7 +9,7 @@ import { MeshoptEncoder, MeshoptDecoder } from 'meshoptimizer';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ASSETS = join(ROOT, 'apps/web/public/assets');
-const RAW = join(ASSETS, 'raw');
+const RAW = join(ROOT, '.cache', 'assets-raw');
 
 export const TEXTURES: Record<string, string> = {
   bricks085: 'Bricks085',

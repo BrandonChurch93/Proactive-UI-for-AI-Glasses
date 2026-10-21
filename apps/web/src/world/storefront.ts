@@ -7,6 +7,7 @@ import type { MaterialLibrary } from './materials';
 import { muralCanvas, signCanvas, SignAtlas, type AtlasOpts, type SignStyle } from './signs';
 
 interface GlassPane {
+  kind?: number;
   frame: Frame;
   u: number;
   y: number;
@@ -118,6 +119,7 @@ export function buildStorefronts(
       continue;
     }
 
+    const ik = interiorKind(sf);
     if (sf.placeId === 'grace-theater') {
       out.theater = buildTheater(group, bucket, f, W, top, mats, renderer);
       continue;
@@ -143,7 +145,7 @@ export function buildStorefronts(
       bucket.add(dark, frameBox(f, d0 - 0.06, d0, 0, bandBot - 0.12, DEPTH, DEPTH + recess));
       bucket.add(dark, frameBox(f, d1, d1 + 0.06, 0, bandBot - 0.12, DEPTH, DEPTH + recess));
       bucket.add(dark, frameBox(f, d0, d1, bandBot - 0.6, bandBot - 0.12, DEPTH, DEPTH + recess));
-      doorGlass.push({ frame: f, u: doorAt, y: (bandBot - 0.6) / 2, w: doorW - 0.1, h: bandBot - 0.62, d: DEPTH + recess });
+      doorGlass.push({ kind: ik, frame: f, u: doorAt, y: (bandBot - 0.6) / 2, w: doorW - 0.1, h: bandBot - 0.62, d: DEPTH + recess });
       bucket.add(mats.metalDark, frameBox(f, doorAt - 0.02, doorAt + 0.02, 0, bandBot - 0.6, DEPTH + recess - 0.06, DEPTH + recess - 0.02));
       const segs: [number, number][] = [
         [pil, d0 - 0.06],
@@ -156,7 +158,7 @@ export function buildStorefronts(
         const pw = (b - a) / n;
         for (let k = 0; k < n; k++) {
           const u = a + pw * (k + 0.5);
-          glass.push({ frame: f, u, y: (0.52 + bandBot - 0.12) / 2, w: pw - 0.08, h: bandBot - 0.12 - 0.52, d: DEPTH - 0.02 });
+          glass.push({ kind: ik, frame: f, u, y: (0.52 + bandBot - 0.12) / 2, w: pw - 0.08, h: bandBot - 0.12 - 0.52, d: DEPTH - 0.02 });
           if (k > 0) bucket.add(mats.metalDark, frameBox(f, a + pw * k - 0.04, a + pw * k + 0.04, 0.52, bandBot - 0.12, DEPTH - 0.08, DEPTH));
         }
       }
@@ -253,9 +255,23 @@ function glassMesh(list: GlassPane[], mat: THREE.Material): THREE.InstancedMesh 
     mesh.setMatrixAt(i, m4);
   });
   mesh.count = list.length;
+  mesh.geometry.setAttribute('aKind', new THREE.InstancedBufferAttribute(new Float32Array(Math.max(1, list.length)).map((_, i) => list[i]?.kind ?? 0), 1));
   mesh.receiveShadow = true;
   mesh.computeBoundingSphere();
   return mesh;
+}
+
+const COUNTER = /laundr|repair|locksmith|savings|optic|post|pharmac|bank|nails|lanes/i;
+const GOODS = /florist|hats|shoes|books|hardware|grocer|wine|toys/i;
+
+function interiorKind(sf: Storefront): number {
+  const place = sf.placeId ? PLACE_BY_ID.get(sf.placeId) : undefined;
+  const label = `${sf.name ?? ''} ${place?.name ?? ''} ${place?.category ?? ''}`;
+  if (place?.kind === 'theater' || place?.kind === 'venue') return 3;
+  if (place?.kind === 'food' || place?.kind === 'cafe') return 1;
+  if (GOODS.test(label)) return 2;
+  if (COUNTER.test(label) || place?.kind === 'service' || place?.kind === 'transit') return 3;
+  return 0;
 }
 
 function buildTheater(group: THREE.Group, bucket: GeoBucket, f: Frame, W: number, top: number, mats: MaterialLibrary, renderer: THREE.WebGLRenderer): NonNullable<StorefrontOutput['theater']> {
@@ -276,6 +292,7 @@ function buildTheater(group: THREE.Group, bucket: GeoBucket, f: Frame, W: number
     const m4 = new THREE.Matrix4().compose(framePoint(f, W / 2 - 2.4 + k * 1.6, 1.45, DEPTH - 0.01), q, new THREE.Vector3(1.4, 2.7, 1));
     doors.setMatrixAt(k, m4);
   }
+  doors.geometry.setAttribute('aKind', new THREE.InstancedBufferAttribute(new Float32Array(4).fill(3), 1));
   group.add(doors);
 
   const mTop = 5.2;

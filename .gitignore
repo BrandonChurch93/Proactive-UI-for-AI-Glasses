@@ -3,7 +3,7 @@ dist/
 *.log
 .DS_Store
 packages/evals/report/*.html
-apps/web/public/assets/raw/
+.cache/
 test-results/
 shots/
 packages/evals/scenarios/*.walk.json

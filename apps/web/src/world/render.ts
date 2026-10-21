@@ -5,6 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { sunDirection } from '@lumen/sim';
 
 export type Quality = 'high' | 'fast';
@@ -86,7 +87,7 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
 
   const sun = new THREE.DirectionalLight(0xfff1dc, 3.6);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.mapSize.set(3072, 3072);
   const sc = sun.shadow.camera;
   sc.left = -58;
   sc.right = 58;
@@ -123,7 +124,7 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
   scene.environmentIntensity = 0.26;
   pm.dispose();
 
-  const target = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 });
+  const target = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 0 });
   const composer = new EffectComposer(renderer, target);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(4, 4), 0.42, 0.45, 1.02);
@@ -131,6 +132,9 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
   composer.addPass(new OutputPass());
   const grade = new ShaderPass(GradeShader);
   composer.addPass(grade);
+  const smaa = new SMAAPass();
+  smaa.enabled = opts.quality === 'high';
+  composer.addPass(smaa);
 
   const core: RenderCore = {
     sky,
@@ -148,7 +152,7 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
       renderer.setSize(w, h, false);
       composer.setPixelRatio(pr);
       composer.setSize(w, h);
-      bloom.setSize(w * 0.8, h * 0.8);
+      bloom.setSize(w * 0.55, h * 0.55);
       camera.aspect = w / h;
       camera.fov = camera.aspect < 0.8 ? 70 : camera.aspect < 1.2 ? 62 : 56;
       camera.updateProjectionMatrix();
@@ -156,8 +160,8 @@ export function createRenderCore(canvas: HTMLCanvasElement, opts: { still: boole
     },
     setQuality(q: Quality) {
       core.quality = q;
-      target.samples = q === 'high' ? 4 : 0;
-      sun.shadow.mapSize.set(q === 'high' ? 4096 : 2048, q === 'high' ? 4096 : 2048);
+      smaa.enabled = q === 'high';
+      sun.shadow.mapSize.set(q === 'high' ? 3072 : 2048, q === 'high' ? 3072 : 2048);
       sun.shadow.map?.dispose();
       sun.shadow.map = null;
     },

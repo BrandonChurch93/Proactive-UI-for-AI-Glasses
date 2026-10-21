@@ -325,7 +325,9 @@ const UNIT = {
 };
 
 function instanced(list: WindowInstance[], mat: THREE.Material, unit: keyof typeof UNIT, cast: boolean): THREE.InstancedMesh {
-  const mesh = new THREE.InstancedMesh(UNIT[unit], mat, Math.max(1, list.length));
+  const geo = UNIT[unit].clone();
+  geo.setAttribute('aKind', new THREE.InstancedBufferAttribute(new Float32Array(Math.max(1, list.length)), 1));
+  const mesh = new THREE.InstancedMesh(geo, mat, Math.max(1, list.length));
   const m = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const s = new THREE.Vector3();

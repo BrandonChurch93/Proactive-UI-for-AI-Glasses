@@ -12,6 +12,7 @@ const GLSL = `
 varying vec3 vLocalPos;
 varying vec3 vLocalCam;
 varying float vSeed;
+varying float vKind;
 uniform float uDepth;
 uniform float uLight;
 uniform float uDark;
@@ -54,7 +55,8 @@ vec3 interior() {
   float lit = uShop > 0.5 ? 1.0 : step(0.45, h1(vSeed * 7.7));
   vec3 warm = mix(vec3(0.85, 0.9, 1.0), vec3(1.0, 0.86, 0.66), uWarm);
   vec3 wallC = mix(vec3(0.78, 0.76, 0.72), vec3(0.6, 0.66, 0.7), h1(vSeed * 5.3)) * warm;
-  float store = step(0.55, h1(vSeed * 23.0));
+  float store = vKind > 1.5 && vKind < 2.5 ? 1.0 : vKind > 0.5 ? 0.0 : step(0.55, h1(vSeed * 23.0));
+  float lobby = step(2.5, vKind);
   if (uShop > 0.5) wallC = mix(vec3(0.66, 0.52, 0.4), vec3(0.46, 0.5, 0.48), h1(vSeed * 4.1)) * warm;
   vec3 col;
   float shade;
@@ -65,7 +67,14 @@ vec3 interior() {
       vec3 cafe = mix(wallC, vec3(0.22, 0.15, 0.11), step(hp.y, -0.2));
       float board = step(abs(hp.x + 0.18), 0.17) * step(abs(hp.y - 0.24), 0.11);
       float lines = step(0.55, fract(hp.y * 38.0)) * step(abs(hp.x + 0.18), 0.13);
-      cafe = mix(cafe, mix(vec3(0.08), vec3(0.75, 0.72, 0.62), lines * step(abs(hp.y - 0.24), 0.08)), board);
+      cafe = mix(cafe, mix(vec3(0.08), vec3(0.75, 0.72, 0.62), lines * step(abs(hp.y - 0.24), 0.08)), board * (1.0 - lobby));
+      for (int k = 0; k < 2; k++) {
+        float px = k == 0 ? -0.24 : 0.18;
+        float frameM = step(abs(hp.x - px), 0.13) * step(abs(hp.y - 0.12), 0.19);
+        float art = step(abs(hp.x - px), 0.11) * step(abs(hp.y - 0.12), 0.17);
+        vec3 poster = mix(vec3(0.55, 0.12, 0.1), vec3(0.12, 0.2, 0.42), float(k)) * (0.8 + 0.4 * step(0.6, fract((hp.y + float(k)) * 6.0)));
+        cafe = mix(cafe, mix(vec3(0.1, 0.08, 0.06), poster, art), frameM * lobby);
+      }
       col = mix(cafe, hp.y < 0.25 ? goods(hp.xy + 0.5, vSeed) : wallC, store);
     } else {
       float art = step(0.6, h1(vSeed * 11.0)) * step(abs(hp.x - 0.1), 0.18) * step(abs(hp.y + 0.05), 0.14);
@@ -79,7 +88,7 @@ vec3 interior() {
     } else {
       vec2 tile = floor(hp.xz * vec2(4.0, 1.4));
       float chk = mod(tile.x + tile.y, 2.0);
-      col = uShop > 0.5 ? mix(vec3(0.32, 0.3, 0.28), vec3(0.5, 0.48, 0.44), chk) : mix(vec3(0.32, 0.25, 0.2), vec3(0.45, 0.44, 0.42), h1(vSeed * 2.2));
+      col = uShop > 0.5 ? mix(mix(vec3(0.32, 0.3, 0.28), vec3(0.5, 0.48, 0.44), chk), vec3(0.4, 0.1, 0.1), lobby) : mix(vec3(0.32, 0.25, 0.2), vec3(0.45, 0.44, 0.42), h1(vSeed * 2.2));
       shade = 0.6;
     }
   } else {
@@ -133,7 +142,9 @@ export function interiorMaterial(kind: InteriorKind): THREE.MeshStandardMaterial
         `#include <common>
         varying vec3 vLocalPos;
         varying vec3 vLocalCam;
-        varying float vSeed;`,
+        varying float vSeed;
+        varying float vKind;
+        attribute float aKind;`,
       )
       .replace(
         '#include <begin_vertex>',
@@ -145,6 +156,7 @@ export function interiorMaterial(kind: InteriorKind): THREE.MeshStandardMaterial
         #else
           vSeed = 0.5;
         #endif
+        vKind = aKind;
         vLocalPos = position;
         vLocalCam = (inverse(instM) * vec4(cameraPosition, 1.0)).xyz;`,
       );
