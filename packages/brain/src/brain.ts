@@ -128,6 +128,7 @@ export class Brain {
   private readonly pace: Pace;
   private readonly pocket = new Pocket();
   private items = new Map<string, LadderItem>();
+  private dismissedNow = new Set<string>();
   private standing = new Map<string, Decision>();
   private holdEpisodes = new Map<string, Set<string>>();
   private presented = new Map<string, string>();
@@ -214,6 +215,7 @@ export class Brain {
     this.lastT = t;
     this.snapRef++;
     this.frameEvents = [];
+    this.dismissedNow.clear();
     if (snap.goal.scenario && this.snapRef === 0) this.goal = snap.goal.scenario;
     if (snap.goal.destination && !this.destination && snap.goal.scenario === 'errands') {
       this.destination = snap.goal.destination;
@@ -449,6 +451,7 @@ export class Brain {
         .filter((x) => x.placement.zone !== 'ground' && LEVEL_RANK[x.level] >= LEVEL_RANK.glance)
         .sort((a, b) => LEVEL_RANK[b.level] - LEVEL_RANK[a.level])[0]?.id;
     if (!targetId) return;
+    this.dismissedNow.add(targetId);
     const li = this.items.get(targetId);
     if (li && isPane(li.level)) {
       li.level = li.level === 'glance' ? 'pip' : li.level === 'card' ? 'glance' : 'card';
@@ -628,7 +631,7 @@ export class Brain {
         gaze: isT,
         focusOk: isT && level === 'glance',
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
-        cause: this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
+        cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),
       };
       if (level === 'none') {
@@ -1065,7 +1068,7 @@ export class Brain {
         reason: r,
         origin: 'gaze',
         gaze: isT,
-        cause: openedNow.has(id) ? 'pinch' : out.via === 'hold' || out.via === 'score' ? 'dwell' : out.via,
+        cause: this.dismissedNow.has(id) ? 'dismiss' : openedNow.has(id) ? 'pinch' : out.via === 'hold' || out.via === 'score' ? 'dwell' : out.via,
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
         onCommit: () => {
           if (level !== prev) {

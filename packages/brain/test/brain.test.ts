@@ -154,4 +154,13 @@ describe('walking rules, unit level', () => {
     expect(model.budgetUsed).toBe(1);
     expect(model.budget).toBe(cfg.budget.shows - 1);
   });
+
+  it('a dismiss with no target steps the top pane down and logs dismiss as the cause', () => {
+    const brain = new Brain({ scenario: 'hungry' });
+    const events = [];
+    for (const s of synthesize({ id: 'd', scenario: 'hungry', duration: 4, pace: [[0, 1.38]], dismiss: [[3, null]] })) events.push(...brain.tick(s).events);
+    const step = events.find((d) => d.id === 'goldies-counter' && d.action === 'demote');
+    expect(step?.cause).toBe('dismiss');
+    expect(step?.level).toBe('pip');
+  });
 });

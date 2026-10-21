@@ -6,7 +6,10 @@ const raw = arg('steps', 'wait:5000;shot:play.png') ?? '';
 const steps = (raw.includes(';;') ? raw.split(/\s*;;\s*/) : raw.split(';')).filter(Boolean);
 const server = await ensureServer(url);
 const browser = await launch();
-const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1, acceptDownloads: true });
+const w = Number(arg('w', String(VIEWPORT.width)));
+const h = Number(arg('h', String(VIEWPORT.height)));
+const touch = arg('touch') === '1';
+const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: Number(arg('dpr', '1')), acceptDownloads: true, hasTouch: touch, isMobile: touch && Math.min(w, h) < 600 });
 const errors: string[] = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => (m.type() === 'error' || m.type() === 'warning') && errors.push(`${m.type()}: ${m.text()}`));
@@ -28,12 +31,25 @@ for (const s of steps) {
     await page.mouse.move(x1!, y1!, { steps: 24 });
     await page.mouse.up();
   } else if (kind === 'text') await page.getByText(v, { exact: true }).first().click();
+  else if (kind === 'tap') {
+    const [x, y] = v.split(',').map(Number);
+    await page.touchscreen.tap(x!, y!);
+  } else if (kind === 'press') {
+    const [x, y, ms] = v.split(',').map(Number);
+    await page.mouse.move(x!, y!);
+    await page.mouse.down();
+    await page.waitForTimeout(ms ?? 700);
+    await page.mouse.up();
+  } else if (kind === 'size') {
+    const [x, y] = v.split(',').map(Number);
+    await page.setViewportSize({ width: x!, height: y! });
+  }
   else if (kind === 'eval') console.log(JSON.stringify(await page.evaluate(v)));
   else if (kind === 'download') {
     const [dl] = await Promise.all([page.waitForEvent('download'), page.getByText('Export this run').click()]);
     await dl.saveAs(v);
     console.log('saved', v);
-  }
+  } else throw new Error(`unknown step ${kind}`);
 }
 await browser.close();
 await server?.close();
