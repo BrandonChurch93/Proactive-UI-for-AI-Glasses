@@ -46,7 +46,7 @@
       "t": 14,
       "kind": "vehicle",
       "id": "truck",
-      "lane": "near",
+      "lane": "far",
       "speed": 3.2,
       "fromN": 5,
       "toN": 45

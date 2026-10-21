@@ -49,7 +49,7 @@ Route: east sidewalk north, the theater across the street near the start, end on
 
 1. 0:00 to 0:08 · Nothing. A pip or two on things the wearer looks at. Nothing else.
 2. 0:08 · The wearer slows to Stroll and dwells on the Grace Theater marquee ahead across the street, the composition of `reference/hero-block.html`: glance, card, then the expanded view on continued dwell, grown in place: "Tonight · three shows · box office till 9", "Hold two for 8:00" and "Not now". Nothing happens to the world behind it. (Rule 10.)
-3. 0:16 · Still at Stroll, still on the marquee. A delivery truck crawls up the near lane from 10 m behind and passes between the wearer and the marquee from about 0:17 to 0:22. The expanded view cannot clear it, drops to a dimmed pip, and returns when the truck has passed. (Rule 8.)
+3. 0:16 · Still at Stroll, still on the marquee. A delivery truck crawls up the inner northbound lane from 10 m behind and passes between the wearer and the marquee from about 0:17 to 0:22. The expanded view cannot clear it, drops to a dimmed pip, and returns when the truck has passed. (Rule 8.)
 4. 0:26 · Gaze on the Trattoria da Lia sign ahead across the street, in Italian: translation card ("Home cooking · open until 11 PM", "Read from Italian"). The look moves on at 0:29, before the card would expand. First food glance.
 5. 0:30 · Gaze on Kathy's Cupcakes beside the wearer: a glance, "Fresh batch at 2", that is all; the look moves on at 0:32, before the card dwell, and the glance walks down. Second food glance. (Rule 10.)
 6. 0:32 · Back to Walk.

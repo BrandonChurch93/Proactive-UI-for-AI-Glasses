@@ -51,7 +51,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
     legs: [
       [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
-      [AVE_FAR_W, P(-9.0, 87.1), P(-9.7, 86.7)],
+      [AVE_FAR_W, P(-8.0, 86.6), P(-8.9, 86.1)],
     ],
     crossings: [{ leg: 'avenue', afterLeg: 0 }],
   },

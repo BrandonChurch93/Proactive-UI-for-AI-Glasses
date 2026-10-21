@@ -168,6 +168,60 @@ function bodyMaterial(): THREE.MeshStandardMaterial {
   return m;
 }
 
+function blueMDark(): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({ color: 0x1b1e22, roughness: 0.5, metalness: 0.4 });
+}
+
+function busInterior(renderer: THREE.WebGLRenderer): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 2048;
+  c.height = 208;
+  const g = c.getContext('2d')!;
+  const sky = g.createLinearGradient(0, 0, 0, 208);
+  sky.addColorStop(0, '#c9d2d8');
+  sky.addColorStop(0.35, '#8d9aa4');
+  sky.addColorStop(1, '#3b444c');
+  g.fillStyle = sky;
+  g.fillRect(0, 0, 2048, 208);
+  g.fillStyle = 'rgba(255,248,226,0.85)';
+  g.fillRect(0, 6, 2048, 7);
+  let seed = 11;
+  const rnd = (): number => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (let x = 40; x < 2048; x += 118) {
+    g.fillStyle = '#23324f';
+    g.beginPath();
+    g.roundRect(x, 118, 64, 90, 10);
+    g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.08)';
+    g.fillRect(x + 6, 124, 52, 6);
+  }
+  for (let i = 0; i < 9; i++) {
+    const x = 60 + rnd() * 1900;
+    const tone = ['#2c2621', '#5b3d2e', '#8a6a52', '#3a2d28'][Math.floor(rnd() * 4)]!;
+    g.fillStyle = ['#2f4f6f', '#6b2f2f', '#3d3d3d', '#56603a', '#c4b49a'][Math.floor(rnd() * 5)]!;
+    g.beginPath();
+    g.ellipse(x, 186, 34, 40, 0, Math.PI, 0);
+    g.fill();
+    g.fillStyle = tone;
+    g.beginPath();
+    g.ellipse(x, 120, 17, 21, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.fillStyle = '#e8b830';
+  for (let x = 150; x < 2048; x += 290) g.fillRect(x, 14, 6, 194);
+  g.fillStyle = '#121519';
+  for (let x = 0; x <= 2048; x += 205) g.fillRect(x - 7, 0, 14, 208);
+  g.fillRect(0, 0, 2048, 6);
+  g.fillRect(0, 202, 2048, 6);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  return t;
+}
+
 function buildBus(mats: MaterialLibrary, renderer: THREE.WebGLRenderer): THREE.Group {
   const g = new THREE.Group();
   const L = 12.2;
@@ -176,18 +230,57 @@ function buildBus(mats: MaterialLibrary, renderer: THREE.WebGLRenderer): THREE.G
   const paint = new THREE.MeshStandardMaterial({ color: 0xe9ecef, roughness: 0.35, metalness: 0.3 });
   const blueM = new THREE.MeshStandardMaterial({ color: 0x1d4f9a, roughness: 0.4, metalness: 0.3 });
   const glassM = new THREE.MeshStandardMaterial({ color: 0x0b0e12, roughness: 0.06, metalness: 0.85, envMapIntensity: 1.6 });
+  const inside = busInterior(renderer);
+  const bandM = new THREE.MeshStandardMaterial({ map: inside, emissive: 0xffffff, emissiveMap: inside, emissiveIntensity: 0.32, roughness: 0.16, metalness: 0.12, envMapIntensity: 0.6 });
   const body = new THREE.Mesh(new RoundedBoxGeometry(W, H - 0.35, L, 3, 0.18), paint);
   body.position.y = 0.35 + (H - 0.35) / 2;
   g.add(body);
-  const band = new THREE.Mesh(new THREE.BoxGeometry(W + 0.02, 1.15, L - 0.9), glassM);
-  band.position.set(0, 2.05, -0.2);
-  g.add(band);
-  const windshield = new THREE.Mesh(new THREE.BoxGeometry(W - 0.2, 1.6, 0.04), glassM);
-  windshield.position.set(0, 2.0, -L / 2 - 0.01);
+  const skirt = new THREE.Mesh(new THREE.BoxGeometry(W + 0.01, 0.42, L - 0.3), new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.6, metalness: 0.2 }));
+  skirt.position.set(0, 0.56, 0);
+  g.add(skirt);
+  for (const side of [-1, 1]) {
+    const band = new THREE.Mesh(new THREE.PlaneGeometry(L - 1.0, 1.15), bandM);
+    band.position.set(side * (W / 2 + 0.012), 2.05, 0.1);
+    band.rotation.y = side * (Math.PI / 2);
+    if (side < 0) band.scale.x = -1;
+    g.add(band);
+  }
+  const windshield = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.2, 1.6), bandM);
+  windshield.position.set(0, 2.0, -L / 2 - 0.02);
+  windshield.rotation.y = Math.PI;
   g.add(windshield);
+  const rear = new THREE.Mesh(new THREE.BoxGeometry(W - 0.5, 0.8, 0.04), glassM);
+  rear.position.set(0, 2.3, L / 2 + 0.01);
+  g.add(rear);
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2.3), glassM);
+  door.position.set(W / 2 + 0.016, 1.6, -L / 2 + 1.5);
+  door.rotation.y = Math.PI / 2;
+  g.add(door);
+  const lampM = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff2d6, emissiveIntensity: 1.4 });
+  const tailM = new THREE.MeshStandardMaterial({ color: 0x400000, emissive: 0xff2a1a, emissiveIntensity: 1.2 });
+  for (const x of [-W / 2 + 0.32, W / 2 - 0.32]) {
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.16, 0.04), lampM);
+    head.position.set(x, 0.85, -L / 2 - 0.03);
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.42, 0.04), tailM);
+    tail.position.set(x, 1.0, L / 2 + 0.03);
+    g.add(head, tail);
+  }
+  const ac = new THREE.Mesh(new RoundedBoxGeometry(W - 0.6, 0.32, 3.4, 2, 0.08), paint);
+  ac.position.set(0, H + 0.12, 1.2);
+  g.add(ac);
+  for (const x of [-W / 2 - 0.22, W / 2 + 0.22]) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.5, 0.06), blueMDark());
+    arm.position.set(x, 2.25, -L / 2 + 0.25);
+    g.add(arm);
+  }
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(W + 0.02, 0.32, L - 0.4), blueM);
   stripe.position.set(0, 1.05, 0);
   g.add(stripe);
+  const sideSign = signMaterial(signTexture({ text: 'M4', sub: 'MADISON AV', bg: '#0b0b0b', fg: '#ffb43a', w: 1.1, h: 0.3, font: 'ui' }, renderer, 260), { emissive: 1.6 });
+  const ss = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.3), sideSign);
+  ss.position.set(W / 2 + 0.02, 2.82, -L / 2 + 2.6);
+  ss.rotation.y = Math.PI / 2;
+  g.add(ss);
   const dest = signMaterial(signTexture({ text: 'M4  MADISON AV', bg: '#0b0b0b', fg: '#ffb43a', w: 1.9, h: 0.28, font: 'ui' }, renderer, 260), { emissive: 1.8 });
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.28), dest);
   sign.position.set(0, 2.92, -L / 2 - 0.03);

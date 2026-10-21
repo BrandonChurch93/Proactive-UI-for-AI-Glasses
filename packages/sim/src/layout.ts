@@ -286,6 +286,12 @@ export function buildLayout(seed = 47): BlockLayout {
   prop('no-standing', curbE + 0.35, 52.5);
   for (const n of [79.6, 82.4]) prop('bench', -12.35, n, Math.PI / 2);
   prop('bench', -10.6, 86.4, Math.PI);
+  for (const [x, n] of [
+    [-16.6, 80.6],
+    [-22.4, 82.3],
+    [-27.4, 80.2],
+  ] as const)
+    prop('tree', x, n);
   for (const [x, n, r] of [
     [curbE + 0.4, 85.6, Math.PI],
     [-(curbE + 0.4), 89.8, Math.PI / 2],

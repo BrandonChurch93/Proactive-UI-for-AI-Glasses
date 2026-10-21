@@ -40,8 +40,14 @@ export function walkable(p: Vec3): Vec3 {
     const sx = Math.sign(p.x) || 1;
     return v3(sx * Math.min(12.7, Math.max(7.4, ax)), 0, p.z);
   }
-  if (n < 89.7) return ax < 7.4 ? v3((Math.sign(p.x) || 1) * 7.4, 0, p.z) : v3(p.x, 0, -Math.min(89.6, Math.max(84.4, n)));
-  if (n > 104.3) return ax < 7.4 && n < 110 ? v3((Math.sign(p.x) || 1) * 7.4, 0, p.z) : v3(p.x, 0, -Math.min(109.6, Math.max(104.4, n)));
+  if (n < 89.7) {
+    if (ax < 7.4) return v3((Math.sign(p.x) || 1) * 7.4, 0, p.z);
+    return ax <= 12.7 ? v3(p.x, 0, -Math.min(89.6, n)) : v3(p.x, 0, -Math.min(89.6, Math.max(84.4, n)));
+  }
+  if (n > 104.3) {
+    if (ax < 7.4 && n < 110) return v3((Math.sign(p.x) || 1) * 7.4, 0, p.z);
+    return ax <= 12.7 ? v3(p.x, 0, -Math.max(104.4, n)) : v3(p.x, 0, -Math.min(109.6, Math.max(104.4, n)));
+  }
   return p;
 }
 
@@ -249,8 +255,25 @@ export class People {
       const vl = Math.hypot(vx, vz) || 1;
       const speed = Math.min(vl, want * 1.15);
       const step = Math.min(speed * dt, Math.max(d, speed * dt));
+      const before = p.pos;
       p.pos = v3(p.pos.x + (vx / vl) * step, 0, p.pos.z + (vz / vl) * step);
       if (!p.scripted) this.keepClear(p, wearer, wearerMoving);
+      if (!p.scripted && step > 1e-4) {
+        const gain = Math.hypot(tx - before.x, tz - before.z) - Math.hypot(tx - p.pos.x, tz - p.pos.z);
+        if (gain < step * 0.3) {
+          const slides = [v3(before.x + Math.sign(dx) * step, 0, before.z), v3(before.x, 0, before.z + Math.sign(dz) * step)].map((c) => walkable(c));
+          let best = p.pos;
+          let bestGain = gain;
+          for (const c of slides) {
+            const g = Math.hypot(tx - before.x, tz - before.z) - Math.hypot(tx - c.x, tz - c.z);
+            if (g > bestGain + 1e-6 && Math.hypot(c.x - wearer.x, c.z - wearer.z) >= 3.2) {
+              best = c;
+              bestGain = g;
+            }
+          }
+          p.pos = best;
+        }
+      }
       p.speed = speed;
       p.anim = 'walk';
       const target = Math.atan2(-(vx / vl), -(vz / vl));

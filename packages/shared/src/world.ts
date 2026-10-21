@@ -28,7 +28,7 @@ export const POST_OFFICE = { x: 19.5, n: BLOCK.northLineN, door: { x: 19.5, n: B
 const SPECIAL_ANCHORS: Record<string, (h: number) => Vec3> = {
   'm4-stop': (h) => v3(BLOCK.avenueHalf + 1.1, h, zOf(58)),
   '47th-st-station': (h) => v3(11.7, h, zOf(80.6)),
-  'pocket-park': (h) => v3(-(BLOCK.avenueHalf + 4.4), h, zOf(85.6)),
+  'pocket-park': (h) => v3(-(BLOCK.avenueHalf + 7.8), h, zOf(81.6)),
   'post-office': (h) => v3(POST_OFFICE.x, h, zOf(POST_OFFICE.n - 0.3)),
 };
 

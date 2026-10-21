@@ -236,7 +236,11 @@ function addAwning(atlas: SignAtlas, f: Frame, W: number, bandBot: number, s: Si
   atlas.add(c, [P(0.3, yTop - drop, -proj), P(W - 0.3, yTop - drop, -proj), P(W - 0.3, yTop, 0), P(0.3, yTop, 0)], { rough: 0.92, doubleSided: true });
   atlas.add(c, [P(0.3, yTop - drop - 0.3, -proj), P(0.3, yTop - 0.3, 0), P(0.3, yTop, 0), P(0.3, yTop - drop, -proj)], { rough: 0.92, doubleSided: true });
   atlas.add(c, [P(W - 0.3, yTop - 0.3, 0), P(W - 0.3, yTop - drop - 0.3, -proj), P(W - 0.3, yTop - drop, -proj), P(W - 0.3, yTop, 0)], { rough: 0.92, doubleSided: true });
-  onFace(atlas, f, 0.3, W - 0.3, yTop - drop - 0.3, yTop - drop, -proj, signCanvas(s, 300), { rough: 0.9, doubleSided: true });
+  onFace(atlas, f, 0.3, W - 0.3, yTop - drop - 0.3, yTop - drop, -proj, signCanvas(s, 300), { rough: 0.9 });
+  const yb = yTop - drop - 0.3;
+  const yt = yTop - drop;
+  const d = -proj + 0.012;
+  atlas.add(c, [P(W - 0.3, yb, d), P(0.3, yb, d), P(0.3, yt, d), P(W - 0.3, yt, d)], { rough: 0.92 });
 }
 
 function glassMesh(list: GlassPane[], mat: THREE.Material): THREE.InstancedMesh {
