@@ -28,3 +28,13 @@
   line-height: 1.5;
   color: var(--ink-2);
 }
+.reload {
+  margin-top: 16px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 250, 236, 0.18);
+  border-radius: var(--radius);
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}

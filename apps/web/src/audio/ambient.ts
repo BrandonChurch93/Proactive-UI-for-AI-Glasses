@@ -63,6 +63,12 @@ export class Ambient {
     return this.on;
   }
 
+  pause(hidden: boolean): void {
+    if (!this.ctx) return;
+    if (hidden) void this.ctx.suspend();
+    else if (this.on) void this.ctx.resume();
+  }
+
   get context(): AudioContext | null {
     return this.on ? this.ctx : null;
   }

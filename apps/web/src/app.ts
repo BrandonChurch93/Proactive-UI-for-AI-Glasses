@@ -76,6 +76,7 @@ export class App {
     this.pace = Boolean(opts.pace);
     this.bindInput();
     this.resize();
+    document.addEventListener('visibilitychange', () => this.ambient.pause(document.hidden));
   }
 
   resize(): void {
@@ -142,7 +143,12 @@ export class App {
   private mountInspector(): void {
     this.inspector?.dispose();
     this.inspector = mount(this.ui, this.store(this.walk), () => {
-      if (this.walk.ended && !this.end.visible) this.showEnd();
+      if (this.walk.ended) {
+        if (!this.end.visible) this.showEnd();
+      } else if (this.endShown) {
+        this.endShown = false;
+        this.setPaused(false);
+      } else this.setPaused(this.walk.paused);
     });
   }
 

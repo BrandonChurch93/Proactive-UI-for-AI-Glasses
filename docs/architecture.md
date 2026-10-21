@@ -52,7 +52,7 @@ The sim is seeded. The clock is the sim's, never wall time. Scripted beats are d
 - `pnpm record --scenario hungry` runs the sim and brain in Node with no renderer, fixed dt, driving the scripted reviewer from the scenario file, and writes the walk file for evals. There is no browser record mode.
 - `?still=1&scenario=hungry&t=42` renders one frame at a walk time for screenshots, sets `window.__done = true` when the frame is drawn, and exposes `window.__stepTo(t)` so one browser session can render many frames. In still mode the scripted reviewer drives input.
 - `?quality=fast|high` forces the quality tier.
-- As built, also: `&scripted=1` plays a walk with the scripted reviewer in real time; `&reduced=1` forces reduced motion; `&focus=1` and `&pace=1` turn on the focus-zone outline and the pace readout; `?still=1` with no scenario renders the title screen over the attract loop at `t`. Without a scenario the app opens on the title screen.
+- As built, also: `&scripted=1` plays a walk with the scripted reviewer in real time; `&reduced=1` forces reduced motion; `&focus=1` and `&pace=1` turn on the focus-zone outline and the pace readout; `?still=1` with no scenario renders the title screen over the attract loop at `t`; `&chrome=0` hides the reviewer chrome (used for the social image); `&cam=x,y,n,yaw,pitch` places a debug camera in a still. Without a scenario the app opens on the title screen.
 - As built: the overlay's GSAP moves run on their own detached timeline, advanced from the sim clock every step, so they stop when the walk pauses and replay exactly on a scrub, while the title, end card and inspector animate on wall time.
 
 ## Performance

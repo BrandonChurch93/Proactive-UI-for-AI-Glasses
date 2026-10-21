@@ -82,6 +82,7 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
 
   let isOpen = false;
   let resumeOnClose = false;
+  let returnFocus: HTMLElement | null = null;
   let tween: gsap.core.Tween | null = null;
 
   const refresh = (): void => {
@@ -121,6 +122,8 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
       tween = gsap.fromTo(drawer, mobile ? { yPercent: 100, xPercent: 0 } : { xPercent: 100, yPercent: 0 }, { xPercent: 0, yPercent: 0, duration: 0.36, ease: 'power3.out' });
       refresh();
       requestAnimationFrame(refresh);
+      returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      play.focus({ preventScroll: true });
     },
     close() {
       if (!isOpen) return;
@@ -129,6 +132,7 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
       const mobile = matchMedia('(max-width: 760px)').matches;
       tween = gsap.to(drawer, { ...(mobile ? { yPercent: 100 } : { xPercent: 100 }), duration: 0.22, ease: 'power2.in', onComplete: () => drawer.classList.remove(s.open!) });
       if (resumeOnClose) store.setPaused(false);
+      if (drawer.contains(document.activeElement)) returnFocus?.focus({ preventScroll: true });
       onClose?.();
     },
     toggle() {

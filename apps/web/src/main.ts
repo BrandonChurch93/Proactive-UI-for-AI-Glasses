@@ -5,7 +5,7 @@ import { Sim } from '@lumen/sim';
 import { mountPlate } from './title/plate';
 import { World } from './world/world';
 import { App } from './app';
-import { hasWebGL2, mountFallback } from './fallback';
+import { hasWebGL2, mountFallback, mountLost } from './fallback';
 import { TOUCH } from './title/title';
 import type { Walk } from './walk';
 
@@ -33,6 +33,11 @@ async function boot(): Promise<void> {
   }
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none';
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    mountLost(root);
+  });
+  canvas.addEventListener('webglcontextrestored', () => location.reload());
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', 'A city street seen through the glasses');
   root.appendChild(canvas);

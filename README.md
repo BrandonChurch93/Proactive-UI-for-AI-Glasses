@@ -27,6 +27,12 @@ No keys, no environment variables, no server, no model calls. `apps/web/dist` ru
 
 In the demo: drag to turn your head (the walk is on rails), hold the center of your view on anything that lights up to open it, keep looking to open it further, click to skip the wait or choose, right-click or Esc to dismiss, Space to pause, I for the inspector. `?scenario=hungry|errands|walking` skips the title; add `&scripted=1` to watch the scripted reviewer play the walk.
 
+On touch screens: drag to look, tap to choose, long-press to dismiss, and Pause and I · INSPECTOR sit in the corners. Phones play in landscape (an upright phone is asked to turn); iPads play either way. Browsers without WebGL 2 get a short page saying what this is.
+
+## Deploy
+
+`pnpm build` writes `apps/web/dist` with relative paths, so it works at a domain root or under a subpath (GitHub Pages, Netlify, Vercel, any static host). Link previews use `social.jpg`; some crawlers want an absolute URL, so once the site has its address, put it in front of `social.jpg` in the two image tags in `apps/web/index.html`.
+
 ## How the brain works
 
 The brain (`packages/brain`) is a rules policy, not a model. Ten times a second it takes a `WorldSnapshot` (pace, gaze and dwell, the crosswalk and its signal, nearby vehicles and people, social context, the goal, the inbox, the wearer's attention budget) and returns decisions: show, hold, promote, demote, dismiss, save or surface, each with a level (pip, glance, card, expanded, whisper), a timing, a placement hint and a reason made of signed parts.
@@ -68,6 +74,8 @@ The center of the project is `docs/walking-rules.md`.
 `pnpm eval` is the real test suite (`packages/evals`, `docs/evals.md`). It records the three walks headless in Node (the sim and the brain, no renderer), then scores them and 36 focused cases (one per walking rule, the gates, notifications, proactive moments) against hand-written expectations: what must happen in each time window, what must not, show limits, and the brain's state frame by frame. Every run also checks global invariants: every reason cites an allowed kind and never the wearer's body, eyes or habits; no em dash anywhere; every decision in a crossing is a hold; the focus zone stays clear on the overlay's own pane rects; the budget meter matches the show count; two runs produce identical logs. The report lands in `packages/evals/report/latest.json` and the inspector's Evals tab shows it.
 
 The inspector's Export writes a run (snapshots, overrides, decision log) in the eval format. `pnpm eval --file <export>` replays it through a fresh brain, checks that it reproduces the exported decisions exactly, and runs every invariant on it, so a session someone played by hand can be scored like a scripted one.
+
+`scripts/devices.ts` renders the title and three beats on eleven screens from a 390 px phone to a 2560 px ultrawide, `scripts/engines.ts` runs Chromium, WebKit and Firefox, and `scripts/play.ts` drives a session step by step; all three fail on any console error.
 
 `pnpm test` runs the lean unit tests, including the overlay's placement suite over every frame of all three walks, the yield and step-aside timings, and legibility against the brightest and darkest façades.
 

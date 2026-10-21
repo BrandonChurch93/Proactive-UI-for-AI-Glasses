@@ -214,6 +214,8 @@ Rules:
 6. Edge: a card within 8% of the edge collapses to glance; a glance within 4% collapses to pip. Content whose anchor leaves the view folds to the edge light and returns when the wearer looks back. The head turns a full 180 degrees.
 7. While moving, new content enters at the edge (walking rule 4) and moves inward only when the band drops to Stopped, over 480 ms ease-out.
 
+As built, smaller screens: sizes above are at the reference view of 1280 × 800. On a smaller view every pane, the held glyph and the whisper line scale by `clamp(1.3 × min(w / 1280, h / 800), 0.74, 1)` on top of the distance scale, so a landscape phone runs at 0.74 and anything from a 1024 × 640 laptop up runs at 1. A pane that cannot be placed at its level steps down a level (expanded to card to glance) before it falls back to a pip, and steps back up when there is room again. Phones held upright get a prompt to turn sideways instead of the street; tablets work both ways.
+
 ## 6. Components
 
 | Component | Zone | Levels | Notes |

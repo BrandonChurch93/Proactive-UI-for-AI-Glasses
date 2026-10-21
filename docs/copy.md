@@ -19,6 +19,7 @@ Rules: plain, warm, short. Sentence case. The brain never apologizes, never expl
 
 - Rotate prompt (a phone held upright): Turn your phone sideways / The glasses see the street wide, and so does this demo.
 - No WebGL: This demo needs a browser with WebGL 2. / Open it on a recent desktop browser, an iPad or a phone held sideways.
+- Lost graphics context: The graphics card let go of the street. / Reload
 
 ## Touch controls (reviewer chrome)
 
