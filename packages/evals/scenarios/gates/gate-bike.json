@@ -1,0 +1,25 @@
+{
+  "id": "gate-bike",
+  "rule": "gates",
+  "scenario": "walking",
+  "duration": 10,
+  "description": "A bike coming up behind on this side is a gate, and its warning lives on the pavement.",
+  "startN": 40,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "vehicles": [
+    {
+      "from": 4,
+      "to": 6,
+      "id": "bike",
+      "kind": "bike",
+      "timeToPath": 2,
+      "fromBehind": true,
+      "wearerSide": true
+    }
+  ]
+}

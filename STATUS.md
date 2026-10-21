@@ -6,8 +6,9 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- Phase: 0 done. Phase 1 (brain and evals) next.
-- Next step: Phase 1 refresh (walking-rules, brain-spec, evals, scenarios, copy), then types in packages/shared, then the brain.
+- Phase: 1 done (brain and evals). Phase 2 (sim, headless) next.
+- Next step: refresh world-spec, scenarios, data; build packages/sim (block layout from packages/shared/src/world.ts, wearer on rails with the pace track and stop-line clamp, traffic with signals from packages/shared/src/signal.ts, scripted beats, backdrop sampler), then `pnpm record` writing packages/evals/scenarios/{hungry,errands,walking}.walk.json. The walk expectations already exist in packages/evals/expectations.
+- Where things are: brain in packages/brain/src (brain.ts orchestrates; ladder.ts is rule 10; reading.ts rule 2; pocket.ts rules 6 and 7); case synthesizer in packages/shared/src/synth.ts; evals in packages/evals (cases, expectations, invariants.ts, `pnpm eval`).
 - Open decisions: none.
 - Last review verdict: none yet.
 
@@ -42,8 +43,20 @@ One entry per phase check: what you compared, what differed from the reference o
 - Black page with the title plate in Instrument Sans: yes, screenshot checked.
 - Check: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm shot` all green.
 
+### Phase 1 · 2026-10-20
+- Types from the brain spec in packages/shared: yes, extended with what the brain needed and the spec implied (dismiss, choice, curb distance, crosswalk toWalk, the overlay's pane rects, a decision `cause`, the BrainFrame output).
+- Pace, gates, candidates, score, ladder, reading budget, pocket, timing, hysteresis, log, config: yes, one module each, every number in config.ts.
+- Notification behaviours and the ask glance: yes (texts, DMs, calls, social count and strip, app updates batched or followed up, curb follow-up, ask after two dwelt food glances).
+- Eval harness: yes. 36 suites: 19 walking-rule cases (every rule 1 to 13 has a case and an expectation file; rules 5, 8, 9 are owned by the overlay tests for geometry), 4 gates, 7 notifications, 6 moments, plus hand-written expectations for the three full walks. Every run also passes 17 global invariants. Report in packages/evals/report/latest.json and latest.html.
+- Unit tests: 17, lean: pace hysteresis, one per gate, rule-level units, the hand-written 30 s Hungry script, determinism.
+- Check: the hand-written 30 s Hungry script reproduces the beat sheet to the tick (glance 2.0, fold 4.5, Mega Burger glance 14.8, card 16.4, save 22.0, walk down 31.1 and 32.3). `pnpm eval` 36/36, 743/743 checks. typecheck, lint, test green.
+- What the first eval run caught and I fixed: a pip-to-glance promotion 0.4 s after the pip broke the 1.2 s hysteresis (fixed by settling before promotion and moving the quiet start to 0.8 s so the glance still lands at 0:02); hold episodes collapsed across levels so a snoozed glance never logged (keyed by level now); content marked presented at show time folded a live glance after 1.2 s (marked at fold time now).
+
 ## Log
 
 - 2026-10-20 · Kit created. Nothing built yet. Start at docs/plan.md Phase 0.
 - 2026-10-20 · Read every doc in plan order, opened and screenshotted both references, wrote reference notes. Starting Phase 0.
+- 2026-10-20 · Phase 1 done. Decisions: pips skip the band surcharge (a pip asks nothing of the reader) so the beat sheet's four pips bloom; value is calibrated around 1 with good options toward 2; a cafe is a .6 match for Hungry; content is never repeated proactively until its live data changes; the quiet start is 0.8 s; Brisk folds every pane at once (walking rules outrank the gaze-target grace); ground items are never shows; a person on the path means within 2 m of the path line and up to 12 m ahead, which is what the Just walking beat needs. All written into brain-spec.md.
+- 2026-10-20 · Conflict noted: scenarios.md had Goldie's showing "3 min wait · 9 seats" in Walk; rule 2 caps a walking glance at three words and one number, so the build shows "3 min wait". Walking rules win; scenarios.md updated.
+- 2026-10-20 · Copy added: card lines, short walking forms, world reasons and expanded views for all 14 places, in data/places.json and summarised in copy.md.
 - 2026-10-20 · Phase 0 done. Decisions: TypeScript 6.0.3 (the newest typescript-eslint supports); Playwright drives the installed Google Chrome so WebGL runs on the Metal GPU, falling back to bundled Chromium; markdown is excluded from Prettier so the docs keep their authored form.

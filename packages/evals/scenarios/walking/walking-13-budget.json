@@ -1,0 +1,33 @@
+{
+  "id": "walking-13-budget",
+  "rule": "walking-13",
+  "scenario": "hungry",
+  "duration": 40,
+  "description": "With a budget of one show, Goldie's spends it; a text that arrives next holds on the budget; a dwell still shows.",
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "gaze": [
+    [
+      30,
+      "47th-st-station"
+    ]
+  ],
+  "config": {
+    "budget": {
+      "shows": 1
+    }
+  },
+  "inbox": [
+    {
+      "t": 10,
+      "id": "maya-lunch",
+      "type": "text",
+      "from": "Maya",
+      "text": "Lunch tomorrow?"
+    }
+  ]
+}

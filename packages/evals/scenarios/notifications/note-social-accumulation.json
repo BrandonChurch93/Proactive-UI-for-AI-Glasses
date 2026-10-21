@@ -1,0 +1,38 @@
+{
+  "id": "note-social-accumulation",
+  "rule": "notifications",
+  "scenario": "errands",
+  "duration": 20,
+  "description": "Social is never shown one by one: a count on the glyph while walking, one strip at the next stop.",
+  "startN": 40,
+  "pace": [
+    [
+      0,
+      1.38
+    ],
+    [
+      12,
+      0
+    ]
+  ],
+  "inbox": [
+    {
+      "t": 2,
+      "id": "s1",
+      "type": "social",
+      "count": 1
+    },
+    {
+      "t": 5,
+      "id": "s2",
+      "type": "social",
+      "count": 1
+    },
+    {
+      "t": 8,
+      "id": "s3",
+      "type": "social",
+      "count": 1
+    }
+  ]
+}

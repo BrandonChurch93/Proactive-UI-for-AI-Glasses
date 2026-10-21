@@ -11,7 +11,34 @@ export type Leg = 'avenue' | 'cross';
 export type SignalState = 'walk' | 'flash' | 'dont';
 export type LiveValue = number | string | boolean;
 
-export interface PlaceData {
+export interface DepthRow {
+  key?: string;
+  title: string;
+  sub?: string;
+  value?: string;
+  tone?: 'go' | 'warn' | 'stop';
+  now?: boolean;
+}
+
+export interface DepthPayload {
+  sub: string;
+  yearLabel?: string;
+  rows: DepthRow[];
+  actions: { id: string; label: string; primary?: boolean }[];
+  note?: string;
+  after?: Record<string, string>;
+}
+
+export interface PlaceCopy {
+  card: { meta: string; live: string; year?: string };
+  short: string;
+  reasons: { goal?: string; world?: string };
+  expanded: DepthPayload | null;
+  liveLines?: Record<string, string>;
+  translate?: boolean;
+}
+
+export interface PlaceData extends PlaceCopy {
   id: string;
   name: string;
   kind: EntityKind;
@@ -120,6 +147,14 @@ function validatePlace(raw: unknown, i: number): PlaceData {
     fail(where, 'n must be [from, to] or null');
   }
   if (!Array.isArray(raw.scenarios)) fail(where, 'scenarios must be an array');
+  if (!isRecord(raw.card) || typeof raw.card.meta !== 'string' || typeof raw.card.live !== 'string') {
+    fail(where, 'card needs meta and live');
+  }
+  if (typeof raw.short !== 'string') fail(where, 'short must be a string');
+  if (!isRecord(raw.reasons)) fail(where, 'reasons must be an object');
+  for (const r of Object.values(raw.reasons)) {
+    if (typeof r !== 'string' || r.length > 48) fail(where, `reason over 48 characters: ${String(r)}`);
+  }
   return raw as unknown as PlaceData;
 }
 

@@ -1,0 +1,41 @@
+{
+  "walk": "gate-bike",
+  "cases": [
+    {
+      "rule": "gates",
+      "between": [
+        4,
+        6
+      ],
+      "state": {
+        "safety": true,
+        "has": "safety:bike"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        4,
+        4.1
+      ],
+      "must": {
+        "action": "show",
+        "id": "safety:bike",
+        "zone": "ground",
+        "nameIs": "BIKE",
+        "factIs": "2 s"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        6.2,
+        8
+      ],
+      "state": {
+        "safety": false,
+        "hasNot": "safety:bike"
+      }
+    }
+  ]
+}

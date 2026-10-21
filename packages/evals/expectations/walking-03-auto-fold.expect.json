@@ -1,0 +1,42 @@
+{
+  "walk": "walking-03-auto-fold",
+  "cases": [
+    {
+      "rule": "walking-3",
+      "between": [
+        1.5,
+        2.6
+      ],
+      "must": {
+        "action": "show",
+        "id": "goldies-counter",
+        "level": "glance"
+      }
+    },
+    {
+      "rule": "walking-3",
+      "between": [
+        4.3,
+        4.8
+      ],
+      "must": {
+        "action": "demote",
+        "id": "goldies-counter",
+        "level": "pip",
+        "cause": "auto-fold"
+      }
+    },
+    {
+      "rule": "walking-3",
+      "between": [
+        4.8,
+        8
+      ],
+      "state": {
+        "level": {
+          "goldies-counter": "pip"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "walk": "walking-08-right-of-way",
+  "cases": [
+    {
+      "rule": "walking-8",
+      "between": [
+        4,
+        6
+      ],
+      "stateSome": {
+        "level": {
+          "grace-theater": "expanded"
+        }
+      }
+    },
+    {
+      "rule": "walking-8",
+      "between": [
+        6,
+        11
+      ],
+      "state": {
+        "safety": false,
+        "level": {
+          "grace-theater": "expanded"
+        }
+      }
+    }
+  ],
+  "owner": "overlay"
+}

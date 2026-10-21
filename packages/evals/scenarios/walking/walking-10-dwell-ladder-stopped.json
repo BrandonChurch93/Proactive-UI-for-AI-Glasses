@@ -1,0 +1,24 @@
+{
+  "id": "walking-10-dwell-ladder-stopped",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 8,
+  "description": "With no pinch, a 4.4 s dwell in Stopped ends at expanded.",
+  "startN": 10,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "grace-theater"
+    ],
+    [
+      5.4,
+      null
+    ]
+  ]
+}

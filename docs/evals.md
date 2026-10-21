@@ -38,6 +38,14 @@ An expectation:
 }
 ```
 
+### Cases and expectations, as built
+
+A case file (`scenarios/{gates,notifications,moments,walking}/*.json`) is a compact script the runner expands into 10 Hz snapshots (`synthesize` in `packages/shared/src/synth.ts`): a scenario, a duration, a start position, and timed tracks for speed, gaze, pinch, choice, dismiss, pitch, yaw, crossing, signal phase, inbox, people, vehicles, live data, stops and sidewalk changes. A recorded walk (`scenarios/*.walk.json`) is the full snapshot sequence from `pnpm record`.
+
+An expectation case is one of: `must` (some decision in the window matches; with `all: true`, every decision outside the ground layer matches), `mustNot`, `max` and `min` (`shows`, `nonGazeShows`, `holds`), `state` (every brain frame in the window matches: band, safety, snooze, glyph, has, hasNot, level per item, levelsAtMost, pocket) and `stateSome`. Windows are half-open `[from, to)`. Match fields: action, id, idPrefix, level, levelAtLeast, levelAtMost, reasonKind, reasonText, band, timing, zone, component, cause, gaze, secondsAtLeast, nameIs, factIs, factIncludes, showReason, enter, focusOk.
+
+Every run, case or walk, is also checked against the global invariants in `src/invariants.ts`: reasons (kind, length, banned words), no em dash, gates, focus zone (from the overlay's pane rects in recorded walks), reading budget, auto-fold, peripheral entry, the pocket save and surface, the dwell ladder, whisper, snooze, budget and meter, hysteresis, message timing, nobody on the path, placement hints, and determinism (two runs, identical logs). Rules 5, 8 and 9 are geometry and light: their brain-side contract is a case here, and their measured check lives in the overlay's placement and legibility tests.
+
 ## 2. What is scored
 
 - **Gates.** During any crossing or vehicle threat, every world-zone decision is a hold with `reasonKind: gate`. Zero tolerance.

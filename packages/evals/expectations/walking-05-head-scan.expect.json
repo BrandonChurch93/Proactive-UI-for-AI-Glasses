@@ -1,0 +1,30 @@
+{
+  "walk": "walking-05-head-scan",
+  "cases": [
+    {
+      "rule": "walking-5",
+      "between": [
+        4.9,
+        8
+      ],
+      "mustNot": {
+        "id": "47th-st-station",
+        "action": [
+          "demote",
+          "dismiss"
+        ]
+      }
+    },
+    {
+      "rule": "walking-5",
+      "between": [
+        4.9,
+        8
+      ],
+      "state": {
+        "has": "47th-st-station"
+      }
+    }
+  ],
+  "owner": "overlay"
+}

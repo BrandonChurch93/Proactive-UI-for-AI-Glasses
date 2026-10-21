@@ -1,0 +1,29 @@
+{
+  "walk": "note-text-walking",
+  "cases": [
+    {
+      "rule": "notifications",
+      "between": [
+        3,
+        3.1
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-lunch",
+        "timing": "next-pause",
+        "enter": "edge"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        6.9,
+        7.2
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "maya-lunch"
+      }
+    }
+  ]
+}

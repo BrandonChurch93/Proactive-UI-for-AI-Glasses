@@ -1,0 +1,62 @@
+{
+  "walk": "gate-crossing",
+  "cases": [
+    {
+      "rule": "gates",
+      "between": [
+        5,
+        15
+      ],
+      "must": {
+        "action": "hold",
+        "all": true,
+        "reasonKind": "gate"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        8,
+        8.1
+      ],
+      "must": {
+        "action": "hold",
+        "id": "order-ready",
+        "timing": "after-gate"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        8.1,
+        15
+      ],
+      "state": {
+        "safety": true,
+        "glyph": "Held"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        15,
+        17
+      ],
+      "must": {
+        "action": "show",
+        "id": "order-ready",
+        "reasonText": "Held that while you crossed"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        5,
+        15
+      ],
+      "state": {
+        "has": "safety:signal"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "moment-which-stairs",
+  "rule": "moments",
+  "scenario": "hungry",
+  "duration": 6,
+  "description": "Brisk toward the corner: a dwell on the station gives the whisper line.",
+  "startN": 56,
+  "pace": [
+    [
+      0,
+      1.9
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "47th-st-station"
+    ]
+  ]
+}

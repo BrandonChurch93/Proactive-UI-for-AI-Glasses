@@ -1,0 +1,37 @@
+{
+  "walk": "walking-10b-dwell-ladder-walk",
+  "cases": [
+    {
+      "rule": "walking-10",
+      "between": [
+        3.35,
+        3.55
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "card",
+        "band": "walk"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        0,
+        8
+      ],
+      "mustNot": {
+        "level": "expanded"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "at": 5.3,
+      "state": {
+        "level": {
+          "grace-theater": "card"
+        }
+      }
+    }
+  ]
+}

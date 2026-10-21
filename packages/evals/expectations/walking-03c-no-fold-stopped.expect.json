@@ -1,0 +1,17 @@
+{
+  "walk": "walking-03c-no-fold-stopped",
+  "cases": [
+    {
+      "rule": "walking-3",
+      "between": [
+        2.5,
+        12
+      ],
+      "state": {
+        "level": {
+          "goldies-counter": "glance"
+        }
+      }
+    }
+  ]
+}

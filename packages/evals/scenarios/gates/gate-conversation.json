@@ -1,0 +1,27 @@
+{
+  "id": "gate-conversation",
+  "rule": "gates",
+  "scenario": "walking",
+  "duration": 16,
+  "description": "Someone talking to the wearer: messages and everything but safety hold; the follow-up waits until they are free.",
+  "startN": 20,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "conversation": [
+    2,
+    10
+  ],
+  "inbox": [
+    {
+      "t": 4,
+      "id": "maya-lunch",
+      "type": "text",
+      "from": "Maya",
+      "text": "Lunch tomorrow?"
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "walk": "walking",
+  "cases": [
+    {
+      "name": "0:00 to 0:08 \u00b7 nothing",
+      "between": [
+        0,
+        8
+      ],
+      "max": {
+        "shows": 0
+      }
+    },
+    {
+      "name": "0:08 \u00b7 the marquee, glance on dwell",
+      "between": [
+        8.4,
+        10.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "grace-theater",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    },
+    {
+      "name": "0:09 \u00b7 card at Stroll",
+      "between": [
+        9.4,
+        12
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "card",
+        "band": "stroll"
+      }
+    },
+    {
+      "name": "0:11 \u00b7 expanded in place on continued dwell",
+      "between": [
+        11.4,
+        14.5
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "expanded",
+        "band": "stroll"
+      }
+    },
+    {
+      "name": "0:17 to 0:22 \u00b7 the truck passes; not a gate, the level holds (the overlay drops it to a pip)",
+      "between": [
+        17,
+        22
+      ],
+      "state": {
+        "safety": false,
+        "level": {
+          "grace-theater": "expanded"
+        }
+      }
+    },
+    {
+      "name": "0:26 \u00b7 Trattoria da Lia, translated",
+      "between": [
+        26.3,
+        28
+      ],
+      "must": {
+        "action": "show",
+        "id": "trattoria-da-lia",
+        "level": "glance"
+      }
+    },
+    {
+      "name": "0:27 \u00b7 its card, read from Italian",
+      "between": [
+        27.3,
+        29
+      ],
+      "must": {
+        "action": "promote",
+        "id": "trattoria-da-lia",
+        "level": "card",
+        "reasonText": "Read from Italian"
+      }
+    },
+    {
+      "name": "0:29 \u00b7 the look moves on before it would expand",
+      "between": [
+        26,
+        34
+      ],
+      "mustNot": {
+        "id": "trattoria-da-lia",
+        "level": "expanded"
+      }
+    },
+    {
+      "name": "0:30 \u00b7 Kathy's, a glance and that is all",
+      "between": [
+        30.3,
+        32
+      ],
+      "must": {
+        "action": "show",
+        "id": "kathys-cupcakes",
+        "level": "glance"
+      }
+    },
+    {
+      "name": "0:32 \u00b7 no card for Kathy's",
+      "between": [
+        30,
+        36
+      ],
+      "mustNot": {
+        "id": "kathys-cupcakes",
+        "level": "card"
+      }
+    },
+    {
+      "name": "0:38 \u00b7 two people on the path: bare pips",
+      "between": [
+        38.5,
+        45.5
+      ],
+      "state": {
+        "levelsAtMost": "pip"
+      }
+    },
+    {
+      "name": "0:40 \u00b7 the text waits behind them",
+      "between": [
+        40,
+        40.3
+      ],
+      "must": {
+        "action": "hold",
+        "id": "maya-lunch",
+        "reasonKind": "social"
+      }
+    },
+    {
+      "name": "0:46 \u00b7 passed, the text at the edge",
+      "between": [
+        45.5,
+        47.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-lunch",
+        "reasonText": "Held for you"
+      }
+    },
+    {
+      "name": "0:48 \u00b7 a call at the view edge",
+      "between": [
+        48,
+        48.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-call",
+        "component": "call",
+        "zone": "view"
+      }
+    },
+    {
+      "name": "0:51 \u00b7 decline folds it",
+      "between": [
+        51,
+        51.3
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "maya-call"
+      }
+    },
+    {
+      "name": "0:55 \u00b7 look up: snooze with the countdown",
+      "between": [
+        55,
+        56.6
+      ],
+      "stateSome": {
+        "snooze": true,
+        "glyph": "60 s"
+      }
+    },
+    {
+      "name": "0:56 \u00b7 Atlas Books held, snoozed",
+      "between": [
+        56,
+        58.5
+      ],
+      "must": {
+        "action": "hold",
+        "id": "atlas-books",
+        "reasonText": "Snoozed"
+      }
+    },
+    {
+      "name": "0:56 to 1:02 \u00b7 nothing shows",
+      "between": [
+        55.5,
+        62
+      ],
+      "max": {
+        "shows": 0
+      }
+    },
+    {
+      "name": "1:03 \u00b7 looking up again cancels",
+      "between": [
+        63.6,
+        66
+      ],
+      "state": {
+        "snooze": false
+      }
+    },
+    {
+      "name": "1:03 \u00b7 Mega Burger passes; nothing is looked at, nothing shows",
+      "between": [
+        63,
+        79
+      ],
+      "mustNot": {
+        "id": "mega-burger",
+        "action": "show"
+      }
+    },
+    {
+      "name": "1:21 \u00b7 stopped after two food glances: the ask",
+      "between": [
+        79.5,
+        82.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "ask",
+        "nameIs": "Hungry?"
+      }
+    },
+    {
+      "name": "1:23 \u00b7 no",
+      "between": [
+        83,
+        83.3
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "ask"
+      }
+    },
+    {
+      "name": "1:25 to 1:35 \u00b7 crossing, everything holds",
+      "between": [
+        85,
+        95
+      ],
+      "must": {
+        "action": "hold",
+        "all": true,
+        "reasonKind": "gate",
+        "allowNone": true
+      }
+    },
+    {
+      "name": "1:26 \u00b7 BIKE on the pavement",
+      "between": [
+        85.5,
+        88.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "safety:bike",
+        "zone": "ground",
+        "nameIs": "BIKE"
+      }
+    },
+    {
+      "name": "1:35 \u00b7 the bench, benches in the shade",
+      "between": [
+        94.5,
+        98
+      ],
+      "must": {
+        "action": "show",
+        "id": "pocket-park",
+        "level": "glance"
+      }
+    },
+    {
+      "name": "restraint \u00b7 at most four non-gaze items",
+      "between": [
+        0,
+        98
+      ],
+      "max": {
+        "nonGazeShows": 4,
+        "shows": 9
+      }
+    }
+  ]
+}

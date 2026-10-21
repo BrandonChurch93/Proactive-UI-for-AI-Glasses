@@ -1,0 +1,251 @@
+{
+  "walk": "errands",
+  "cases": [
+    {
+      "name": "0:02 \u00b7 three stops in one card, in the order chosen",
+      "between": [
+        0.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "errands",
+        "nameIs": "Three stops \u00b7 one route",
+        "reasonText": "In order along the way"
+      }
+    },
+    {
+      "name": "0:02 \u00b7 the route draws",
+      "between": [
+        0.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "route",
+        "zone": "ground"
+      }
+    },
+    {
+      "name": "0:06 \u00b7 the card folds to the route while walking",
+      "between": [
+        5,
+        8
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "errands"
+      }
+    },
+    {
+      "name": "0:24 \u00b7 the pharmacy unfolds from the sign",
+      "between": [
+        24.5,
+        26.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "main-street-pharmacy",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    },
+    {
+      "name": "0:25 \u00b7 its card",
+      "between": [
+        25,
+        27.5
+      ],
+      "must": {
+        "action": "promote",
+        "id": "main-street-pharmacy",
+        "level": "card",
+        "band": "stopped"
+      }
+    },
+    {
+      "name": "0:28 \u00b7 picked up, the errands card returns with the stop ticked",
+      "between": [
+        28,
+        28.5
+      ],
+      "must": {
+        "action": [
+          "show",
+          "promote"
+        ],
+        "id": "errands",
+        "nameIs": "Two to go"
+      }
+    },
+    {
+      "name": "0:28 \u00b7 the route redraws",
+      "between": [
+        28,
+        28.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "route"
+      }
+    },
+    {
+      "name": "0:34 \u00b7 scaffolding: one glance says why",
+      "between": [
+        33.5,
+        37
+      ],
+      "must": {
+        "action": "show",
+        "id": "scaffolding",
+        "nameIs": "Scaffolding ahead",
+        "reasonText": "Scaffolding ahead. Keep to the curb."
+      }
+    },
+    {
+      "name": "0:40 \u00b7 the bus is held at pip, not on the goal",
+      "between": [
+        40,
+        46
+      ],
+      "mustNot": {
+        "id": "m4-stop",
+        "levelAtLeast": "glance"
+      }
+    },
+    {
+      "name": "0:46 \u00b7 hardware closed early, said and redrawn",
+      "between": [
+        46,
+        46.5
+      ],
+      "must": {
+        "action": [
+          "show",
+          "promote"
+        ],
+        "id": "errands",
+        "reasonText": "Hardware closed early. One stop left."
+      }
+    },
+    {
+      "name": "0:52 to 1:10 \u00b7 social never one by one",
+      "between": [
+        52,
+        70
+      ],
+      "mustNot": {
+        "action": "show",
+        "component": "strip"
+      }
+    },
+    {
+      "name": "0:58 \u00b7 three on the glyph",
+      "between": [
+        58.3,
+        70
+      ],
+      "state": {
+        "glyph": "3 \u00b7 social"
+      }
+    },
+    {
+      "name": "1:10 \u00b7 the social strip surfaces once at the light",
+      "between": [
+        70,
+        74
+      ],
+      "must": {
+        "action": "show",
+        "id": "social",
+        "nameIs": "3 notifications",
+        "factIs": "later"
+      }
+    },
+    {
+      "name": "1:10 \u00b7 the Post Office card up on dwell",
+      "between": [
+        70,
+        74
+      ],
+      "must": {
+        "action": "promote",
+        "id": "post-office",
+        "level": "card"
+      }
+    },
+    {
+      "name": "1:12 \u00b7 head scans and a passerby change no level",
+      "between": [
+        72,
+        78
+      ],
+      "mustNot": {
+        "id": "post-office",
+        "action": [
+          "demote",
+          "dismiss"
+        ]
+      }
+    },
+    {
+      "name": "1:18 to 1:28 \u00b7 crossing, everything holds",
+      "between": [
+        78,
+        88
+      ],
+      "must": {
+        "action": "hold",
+        "all": true,
+        "reasonKind": "gate"
+      }
+    },
+    {
+      "name": "1:22 \u00b7 the DM is held",
+      "between": [
+        82,
+        82.3
+      ],
+      "must": {
+        "action": "hold",
+        "id": "jules-tonight",
+        "timing": "after-gate"
+      }
+    },
+    {
+      "name": "1:28 \u00b7 one message came in",
+      "between": [
+        88,
+        90
+      ],
+      "must": {
+        "action": "show",
+        "id": "followup",
+        "nameIs": "One message came in.",
+        "reasonText": "Held that while you crossed"
+      }
+    },
+    {
+      "name": "1:35 \u00b7 the Post Office card with its line",
+      "between": [
+        93,
+        97
+      ],
+      "stateSome": {
+        "level": {
+          "post-office": "card"
+        }
+      }
+    },
+    {
+      "name": "restraint \u00b7 shows within the budget",
+      "between": [
+        0,
+        95
+      ],
+      "max": {
+        "shows": 9
+      }
+    }
+  ]
+}

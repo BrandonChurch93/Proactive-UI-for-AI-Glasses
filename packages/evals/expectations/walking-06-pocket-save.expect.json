@@ -1,0 +1,43 @@
+{
+  "walk": "walking-06-pocket-save",
+  "cases": [
+    {
+      "rule": "walking-6",
+      "between": [
+        5.95,
+        6.05
+      ],
+      "must": {
+        "action": "save",
+        "id": "mega-burger",
+        "reasonKind": "pocket"
+      }
+    },
+    {
+      "rule": "walking-6",
+      "between": [
+        6,
+        10
+      ],
+      "mustNot": {
+        "id": "mega-burger",
+        "action": [
+          "show",
+          "promote"
+        ],
+        "levelAtLeast": "expanded"
+      }
+    },
+    {
+      "rule": "walking-6",
+      "between": [
+        6.1,
+        10
+      ],
+      "state": {
+        "glyph": "Pocket 1",
+        "pocket": 1
+      }
+    }
+  ]
+}

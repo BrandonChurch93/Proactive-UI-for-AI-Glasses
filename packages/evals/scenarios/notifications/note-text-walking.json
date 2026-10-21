@@ -1,0 +1,23 @@
+{
+  "id": "note-text-walking",
+  "rule": "notifications",
+  "scenario": "walking",
+  "duration": 10,
+  "description": "A text on a clear sidewalk while walking shows at the next safe moment, timed next-pause, and folds after 4 s.",
+  "startN": 10,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "inbox": [
+    {
+      "t": 3,
+      "id": "maya-lunch",
+      "type": "text",
+      "from": "Maya",
+      "text": "Lunch tomorrow?"
+    }
+  ]
+}

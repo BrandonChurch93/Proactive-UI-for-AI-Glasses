@@ -1,0 +1,28 @@
+{
+  "id": "walking-08-right-of-way",
+  "rule": "walking-8",
+  "scenario": "walking",
+  "duration": 14,
+  "description": "Stepping aside and dropping to a pip are the overlay's moves, asserted in the overlay placement tests. The brain's contract: a passing vehicle with no time-to-path is not a gate and the expanded view keeps its level.",
+  "startN": 10,
+  "pace": [
+    [
+      0,
+      0.6
+    ]
+  ],
+  "gaze": [
+    [
+      0,
+      "grace-theater"
+    ]
+  ],
+  "vehicles": [
+    {
+      "from": 6,
+      "to": 11,
+      "id": "truck",
+      "kind": "truck"
+    }
+  ]
+}

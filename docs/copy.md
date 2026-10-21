@@ -31,6 +31,10 @@ Allowed kinds: goal, world, gate, budget, social, edge, pace, pocket.
 - Snoozed (gate)
 - Scaffolding ahead. Keep to the curb.
 
+Added in the build (world and goal reasons for places and moments, each under 48 characters): Seats left for tonight · Open late · Lanes open now · Reading tonight at 7 · Counter seats open · Baked on site · Short line · Open till 9 · Stairs at the corner · Last stop · Counter open till 5 · End of the walk · Benches in the shade · Bus at the stop · Closed early today · Long red light · Clear sidewalk ahead · Lunch spots on this block · Seat held · Someone on the path
+
+Log-only reasons (the inspector shows them; the wearer never does): Held: crossing · Held: in the roadway · Held: vehicle near the path · Held: attention budget spent · Counted on the glyph · Batched with what is open · Walk signal · Wait for the walk signal · Bike in the lane
+
 Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, habit, noticed you, walking fast, slow down, you were.
 
 ## Safety text (pavement)
@@ -74,6 +78,12 @@ See `docs/world-spec.md` section 3 and `data/places.json`; the roster is the sou
 - Deli: Hold a seat · Not now / Seat held. Follow the route, 40 m.
 - Errands card: Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / after the pickup: Two to go / 1 Hardware · 2 Post Office / after the closure: Hardware closed early. One stop left. / 1 Post Office
 - Pharmacy stop: Prescription's ready here · counter 2 / Picked up
+
+## Cards and expanded views for every place
+
+Card lines (meta, live, year), the short walking form, and the expanded view (sub line, rows, two actions, the line after a choice) live in `data/places.json` and are the source for these. Highlights: Mega Burger · Burgers · $ · open late · 6 min wait · 4 seats open · Hold a seat · Not now. Lucky Lanes · Bowling · twelve lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Tonight at Atlas · Poetry reading · Save the reading. Trattoria da Lia · Menu · read from Italian · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Today's flavors · Brown butter · Save me one. The Big Bean · Order ahead · skip the line · Ordered. Ready in 5 min. M4 stop · Next four buses · Remind me at 11. 47th St Station · Next four departures · Route me there. Post Office · Counter · open till 5 · Take a number.
+
+Short walking forms (used when a glance must fit three words and a number): Last show at 8 · 6 min wait · Lanes open · Open till 9 · Home cooking · Shaded benches · 3 min wait · Fresh batch at 2 · Line of 4 · Prescription's ready · Open till 6 · 2 min · uptown 4 min · Line of 8
 
 ## Arrival and end
 

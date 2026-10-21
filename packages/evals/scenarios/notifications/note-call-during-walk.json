@@ -1,0 +1,29 @@
+{
+  "id": "note-call-during-walk",
+  "rule": "notifications",
+  "scenario": "walking",
+  "duration": 12,
+  "description": "A call interrupts a walk at the view edge, world untouched; decline folds it.",
+  "startN": 30,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "inbox": [
+    {
+      "t": 2,
+      "id": "maya-call",
+      "type": "call",
+      "from": "Maya"
+    }
+  ],
+  "choice": [
+    [
+      5,
+      "maya-call",
+      "decline"
+    ]
+  ]
+}

@@ -1,0 +1,4811 @@
+{
+ "version": 1,
+ "totals": {
+  "suites": 36,
+  "passed": 36,
+  "cases": 743,
+  "casesPassed": 743
+ },
+ "byGroup": {
+  "gates": {
+   "suites": 4,
+   "passed": 4
+  },
+  "notifications": {
+   "suites": 7,
+   "passed": 7
+  },
+  "moments": {
+   "suites": 6,
+   "passed": 6
+  },
+  "walking": {
+   "suites": 19,
+   "passed": 19
+  }
+ },
+ "suites": [
+  {
+   "id": "gate-bike",
+   "group": "gates",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[4, 6) state {\"safety\":true,\"has\":\"safety:bike\"}",
+     "pass": true,
+     "detail": "20 frames",
+     "rule": "gates"
+    },
+    {
+     "name": "[4, 4.1) must {\"action\":\"show\",\"id\":\"safety:bike\",\"zone\":\"ground\",\"nameIs\":\"BIKE\",\"factIs\":\"2 s\"}",
+     "pass": true,
+     "detail": "t=4 show safety:bike glance",
+     "rule": "gates"
+    },
+    {
+     "name": "[6.2, 8) state {\"safety\":false,\"hasNot\":\"safety:bike\"}",
+     "pass": true,
+     "detail": "18 frames",
+     "rule": "gates"
+    }
+   ],
+   "rule": "gates",
+   "description": "A bike coming up behind on this side is a gate, and its warning lives on the pavement."
+  },
+  {
+   "id": "gate-budget-empty",
+   "group": "gates",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 3) must {\"action\":\"hold\",\"id\":\"goldies-counter\",\"reasonKind\":\"budget\"}",
+     "pass": true,
+     "detail": "t=2 hold goldies-counter glance",
+     "rule": "gates"
+    },
+    {
+     "name": "[3, 3.2) must {\"action\":\"show\",\"id\":\"maya-call\",\"component\":\"call\"}",
+     "pass": true,
+     "detail": "t=3 show maya-call card",
+     "rule": "gates"
+    },
+    {
+     "name": "[4.7, 5) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "pass": true,
+     "detail": "t=4.8 show kathys-cupcakes glance",
+     "rule": "gates"
+    }
+   ],
+   "rule": "gates",
+   "description": "Budget at zero: proactive content holds; a call and a dwell still come through."
+  },
+  {
+   "id": "gate-conversation",
+   "group": "gates",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[4, 4.1) must {\"action\":\"hold\",\"id\":\"maya-lunch\",\"reasonKind\":\"social\",\"reasonText\":\"When you're free\"}",
+     "pass": true,
+     "detail": "t=4 hold maya-lunch glance",
+     "rule": "gates"
+    },
+    {
+     "name": "[4, 10) mustNot {\"action\":\"show\",\"id\":\"maya-lunch\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "gates"
+    },
+    {
+     "name": "[10, 10.2) must {\"action\":\"show\",\"id\":\"maya-lunch\",\"level\":\"glance\"}",
+     "pass": true,
+     "detail": "t=10 show maya-lunch glance",
+     "rule": "gates"
+    }
+   ],
+   "rule": "gates",
+   "description": "Someone talking to the wearer: messages and everything but safety hold; the follow-up waits until they are free."
+  },
+  {
+   "id": "gate-crossing",
+   "group": "gates",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[5, 15) must {\"action\":\"hold\",\"all\":true,\"reasonKind\":\"gate\"}",
+     "pass": true,
+     "detail": "1 decisions",
+     "rule": "gates"
+    },
+    {
+     "name": "[8, 8.1) must {\"action\":\"hold\",\"id\":\"order-ready\",\"timing\":\"after-gate\"}",
+     "pass": true,
+     "detail": "t=8 hold order-ready glance",
+     "rule": "gates"
+    },
+    {
+     "name": "[8.1, 15) state {\"safety\":true,\"glyph\":\"Held\"}",
+     "pass": true,
+     "detail": "69 frames",
+     "rule": "gates"
+    },
+    {
+     "name": "[15, 17) must {\"action\":\"show\",\"id\":\"order-ready\",\"reasonText\":\"Held that while you crossed\"}",
+     "pass": true,
+     "detail": "t=15 show order-ready glance",
+     "rule": "gates"
+    },
+    {
+     "name": "[5, 15) state {\"has\":\"safety:signal\"}",
+     "pass": true,
+     "detail": "100 frames",
+     "rule": "gates"
+    }
+   ],
+   "rule": "gates",
+   "description": "In the roadway everything holds; arrivals are counted on the glyph and come back at the far curb."
+  },
+  {
+   "id": "note-call-during-walk",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[2, 2.1) must {\"action\":\"show\",\"id\":\"maya-call\",\"component\":\"call\",\"zone\":\"view\",\"band\":\"walk\"}",
+     "pass": true,
+     "detail": "t=2 show maya-call card",
+     "rule": "notifications"
+    },
+    {
+     "name": "[5, 5.1) must {\"action\":\"dismiss\",\"id\":\"maya-call\"}",
+     "pass": true,
+     "detail": "t=5 dismiss maya-call card",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A call interrupts a walk at the view edge, world untouched; decline folds it."
+  },
+  {
+   "id": "note-call-in-crossing",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[5, 5.1) must {\"action\":\"hold\",\"id\":\"maya-call\",\"reasonKind\":\"gate\"}",
+     "pass": true,
+     "detail": "t=5 hold maya-call card",
+     "rule": "notifications"
+    },
+    {
+     "name": "[2, 12) mustNot {\"action\":\"show\",\"id\":\"maya-call\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A call never interrupts a crossing."
+  },
+  {
+   "id": "note-dm-in-crossing",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[8, 8.1) must {\"action\":\"hold\",\"id\":\"jules-tonight\",\"timing\":\"after-gate\",\"reasonKind\":\"gate\"}",
+     "pass": true,
+     "detail": "t=8 hold jules-tonight glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[14, 14.2) must {\"action\":\"show\",\"id\":\"followup\",\"nameIs\":\"One message came in.\",\"factIs\":\"Read it?\",\"reasonText\":\"Held that while you crossed\"}",
+     "pass": true,
+     "detail": "t=14 show followup glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[17, 17.2) must {\"action\":\"show\",\"id\":\"jules-tonight\",\"component\":\"toast\"}",
+     "pass": true,
+     "detail": "t=17 show jules-tonight glance",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A DM in the crossing is held, counted, and offered at the far curb."
+  },
+  {
+   "id": "note-social-accumulation",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[8.1, 12) state {\"glyph\":\"3 · social\"}",
+     "pass": true,
+     "detail": "39 frames",
+     "rule": "notifications"
+    },
+    {
+     "name": "[0, 12.5) mustNot {\"action\":\"show\",\"component\":\"strip\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "notifications"
+    },
+    {
+     "name": "[12.5, 13.3) must {\"action\":\"show\",\"id\":\"social\",\"nameIs\":\"3 notifications\",\"factIs\":\"later\"}",
+     "pass": true,
+     "detail": "t=12.6 show social glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[13.3, 20) max {\"shows\":0}",
+     "pass": true,
+     "detail": "shows 0, non-gaze 0, holds 0",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "Social is never shown one by one: a count on the glyph while walking, one strip at the next stop."
+  },
+  {
+   "id": "note-text-at-light",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"maya-usual\",\"component\":\"toast\",\"zone\":\"view\",\"level\":\"glance\",\"timing\":\"now\"}",
+     "pass": true,
+     "detail": "t=3 show maya-usual glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[10.9, 11.2) must {\"action\":\"dismiss\",\"id\":\"maya-usual\"}",
+     "pass": true,
+     "detail": "t=11 dismiss maya-usual glance",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A text at a red light shows now, as a glance toast at the edge."
+  },
+  {
+   "id": "note-text-behind-people",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[2, 2.1) must {\"action\":\"hold\",\"id\":\"maya-lunch\",\"reasonKind\":\"social\",\"timing\":\"next-pause\"}",
+     "pass": true,
+     "detail": "t=2 hold maya-lunch glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[1.6, 7) state {\"levelsAtMost\":\"pip\"}",
+     "pass": true,
+     "detail": "54 frames",
+     "rule": "notifications"
+    },
+    {
+     "name": "[7, 7.2) must {\"action\":\"show\",\"id\":\"maya-lunch\",\"reasonText\":\"Held for you\"}",
+     "pass": true,
+     "detail": "t=7 show maya-lunch glance",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "Two people on the path ahead: their pips stay bare and a text waits until they are passed."
+  },
+  {
+   "id": "note-text-walking",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"maya-lunch\",\"timing\":\"next-pause\",\"enter\":\"edge\"}",
+     "pass": true,
+     "detail": "t=3 show maya-lunch glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "[6.9, 7.2) must {\"action\":\"dismiss\",\"id\":\"maya-lunch\"}",
+     "pass": true,
+     "detail": "t=7 dismiss maya-lunch glance",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A text on a clear sidewalk while walking shows at the next safe moment, timed next-pause, and folds after 4 s."
+  },
+  {
+   "id": "moment-bike",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"safety:bike\",\"zone\":\"ground\",\"nameIs\":\"BIKE\",\"factIs\":\"2 s\"}",
+     "pass": true,
+     "detail": "t=3 show safety:bike glance",
+     "rule": "moments"
+    },
+    {
+     "name": "[5.1, 6) state {\"hasNot\":\"safety:bike\"}",
+     "pass": true,
+     "detail": "9 frames",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Bike behind on this side as the wearer steps off: BIKE · 2 s on the pavement, stop tone, with its direction."
+  },
+  {
+   "id": "moment-bus",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[0.9, 2.5) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"pip\"}",
+     "pass": true,
+     "detail": "t=1 show m4-stop pip",
+     "rule": "moments"
+    },
+    {
+     "name": "[1.5, 6) mustNot {\"id\":\"m4-stop\",\"levelAtLeast\":\"glance\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "moments"
+    },
+    {
+     "name": "[6.7, 7) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"glance\",\"factIs\":\"2 min\"}",
+     "pass": true,
+     "detail": "t=6.8 show m4-stop glance",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Bus at the stop, not on the goal: held at pip; a glance only when looked at."
+  },
+  {
+   "id": "moment-closed-early",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[0.7, 1.2) must {\"action\":\"show\",\"id\":\"errands\",\"nameIs\":\"Two to go\"}",
+     "pass": true,
+     "detail": "t=0.8 show errands card",
+     "rule": "moments"
+    },
+    {
+     "name": "[10, 10.2) must {\"action\":[\"show\",\"promote\"],\"id\":\"errands\",\"reasonText\":\"Hardware closed early. One stop left.\"}",
+     "pass": true,
+     "detail": "t=10 show errands card",
+     "rule": "moments"
+    },
+    {
+     "name": "[10, 10.2) must {\"action\":\"show\",\"id\":\"route\",\"zone\":\"ground\"}",
+     "pass": true,
+     "detail": "t=10 show route glance",
+     "rule": "moments"
+    },
+    {
+     "name": "[13.9, 14.2) must {\"action\":\"dismiss\",\"id\":\"errands\"}",
+     "pass": true,
+     "detail": "t=14 dismiss errands card",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Hardware closes early: the brain says so, drops the stop and redraws the route."
+  },
+  {
+   "id": "moment-pace-to-signal",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3.8, 5.6) must {\"action\":\"show\",\"id\":\"need-to-run\",\"nameIs\":\"No need to run\",\"reasonKind\":\"pace\"}",
+     "pass": true,
+     "detail": "t=4.4 show need-to-run glance",
+     "rule": "moments"
+    },
+    {
+     "name": "[0, 3.6) mustNot {\"id\":\"need-to-run\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Rushing to a light that turns red anyway: \"No need to run\" at the curb."
+  },
+  {
+   "id": "moment-sidewalk-closed",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"scaffolding\",\"nameIs\":\"Scaffolding ahead\",\"reasonText\":\"Scaffolding ahead. Keep to the curb.\"}",
+     "pass": true,
+     "detail": "t=3 show scaffolding glance",
+     "rule": "moments"
+    },
+    {
+     "name": "[3, 12) mustNot {\"id\":\"scaffolding\",\"showReason\":true}",
+     "pass": true,
+     "detail": "",
+     "rule": "moments"
+    },
+    {
+     "name": "[5.4, 5.8) must {\"action\":[\"demote\",\"dismiss\"],\"id\":\"scaffolding\"}",
+     "pass": true,
+     "detail": "t=5.5 dismiss scaffolding glance",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Scaffolding narrows the sidewalk: the route band shifts to the curb and one glance says why."
+  },
+  {
+   "id": "moment-which-stairs",
+   "group": "moments",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.7, 2) must {\"action\":\"show\",\"id\":\"whisper\",\"nameIs\":\"47th St Station\",\"factIs\":\"uptown 4 min\"}",
+     "pass": true,
+     "detail": "t=1.8 show whisper whisper",
+     "rule": "moments"
+    }
+   ],
+   "rule": "moments",
+   "description": "Brisk toward the corner: a dwell on the station gives the whisper line."
+  },
+  {
+   "id": "walking-01-focus-zone",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"focusOk\":false}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-1"
+    },
+    {
+     "name": "[3, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"gaze\":true,\"focusOk\":true}",
+     "pass": true,
+     "detail": "t=3.8 show kathys-cupcakes glance",
+     "rule": "walking-1"
+    },
+    {
+     "name": "[4.5, 6) must {\"id\":\"kathys-cupcakes\",\"level\":\"card\",\"focusOk\":false}",
+     "pass": true,
+     "detail": "t=4.6 promote kathys-cupcakes card",
+     "rule": "walking-1"
+    }
+   ],
+   "rule": "walking-1",
+   "description": "Placement hints: only a glance on the gaze target may enter the focus zone. The geometry is checked on recorded walks and in the overlay placement tests."
+  },
+  {
+   "id": "walking-02-reading-budget",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"walk\",\"factIs\":\"3 min wait\",\"showReason\":false}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-2"
+    },
+    {
+     "name": "[0, 6) mustNot {\"level\":[\"card\",\"expanded\"],\"zone\":\"world\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-2"
+    }
+   ],
+   "rule": "walking-2",
+   "description": "Walk: the reason line leaves the glass and the second fact is dropped to fit three words and a number."
+  },
+  {
+   "id": "walking-02b-reading-stopped",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"stopped\",\"factIs\":\"3 min wait · 9 seats\",\"showReason\":true}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-2"
+    }
+   ],
+   "rule": "walking-2",
+   "description": "Stopped: nothing is trimmed; the glance carries both facts and its reason line."
+  },
+  {
+   "id": "walking-03-auto-fold",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\"}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-3"
+    },
+    {
+     "name": "[4.3, 4.8) must {\"action\":\"demote\",\"id\":\"goldies-counter\",\"level\":\"pip\",\"cause\":\"auto-fold\"}",
+     "pass": true,
+     "detail": "t=4.5 demote goldies-counter pip",
+     "rule": "walking-3"
+    },
+    {
+     "name": "[4.8, 8) state {\"level\":{\"goldies-counter\":\"pip\"}}",
+     "pass": true,
+     "detail": "32 frames",
+     "rule": "walking-3"
+    }
+   ],
+   "rule": "walking-3",
+   "description": "A proactive glance folds itself after 2.5 s in Walk."
+  },
+  {
+   "id": "walking-03b-auto-fold-stroll",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"stroll\"}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-3"
+    },
+    {
+     "name": "[2.6, 5.8) state {\"level\":{\"goldies-counter\":\"glance\"}}",
+     "pass": true,
+     "detail": "32 frames",
+     "rule": "walking-3"
+    },
+    {
+     "name": "[5.8, 6.3) must {\"action\":\"demote\",\"id\":\"goldies-counter\",\"cause\":\"auto-fold\"}",
+     "pass": true,
+     "detail": "t=6 demote goldies-counter pip",
+     "rule": "walking-3"
+    }
+   ],
+   "rule": "walking-3",
+   "description": "In Stroll the limit is 4 s."
+  },
+  {
+   "id": "walking-03c-no-fold-stopped",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[2.5, 12) state {\"level\":{\"goldies-counter\":\"glance\"}}",
+     "pass": true,
+     "detail": "95 frames",
+     "rule": "walking-3"
+    }
+   ],
+   "rule": "walking-3",
+   "description": "Stopped has no limit."
+  },
+  {
+   "id": "walking-04-peripheral-entry",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"enter\":\"edge\"}",
+     "pass": true,
+     "detail": "t=2 show goldies-counter glance",
+     "rule": "walking-4"
+    },
+    {
+     "name": "[10, 12) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"enter\":\"anchor\",\"band\":\"stopped\"}",
+     "pass": true,
+     "detail": "t=10.8 show kathys-cupcakes glance",
+     "rule": "walking-4"
+    }
+   ],
+   "rule": "walking-4",
+   "description": "Panes that appear while moving enter at the edge; once stopped they may sit at the anchor."
+  },
+  {
+   "id": "walking-05-head-scan",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[4.9, 8) mustNot {\"id\":\"47th-st-station\",\"action\":[\"demote\",\"dismiss\"]}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-5"
+    },
+    {
+     "name": "[4.9, 8) state {\"has\":\"47th-st-station\"}",
+     "pass": true,
+     "detail": "31 frames",
+     "rule": "walking-5"
+    }
+   ],
+   "rule": "walking-5",
+   "description": "Head-scan yielding is the overlay's move (opacity .15 within 200 ms, back within 400 ms), asserted in the overlay placement tests. The brain's contract: a scan near the curb changes no level and dismisses nothing."
+  },
+  {
+   "id": "walking-06-pocket-save",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[5.95, 6.05) must {\"action\":\"save\",\"id\":\"mega-burger\",\"reasonKind\":\"pocket\"}",
+     "pass": true,
+     "detail": "t=6 save mega-burger card",
+     "rule": "walking-6"
+    },
+    {
+     "name": "[6, 10) mustNot {\"id\":\"mega-burger\",\"action\":[\"show\",\"promote\"],\"levelAtLeast\":\"expanded\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-6"
+    },
+    {
+     "name": "[6.1, 10) state {\"glyph\":\"Pocket 1\",\"pocket\":1}",
+     "pass": true,
+     "detail": "39 frames",
+     "rule": "walking-6"
+    }
+   ],
+   "rule": "walking-6",
+   "description": "Pinch on the gaze target while walking saves it; nothing opens; the glyph shows the pocket."
+  },
+  {
+   "id": "walking-07-pocket-surface",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[5, 5.3) must {\"action\":\"surface\",\"id\":\"pocket\",\"secondsAtLeast\":12}",
+     "pass": true,
+     "detail": "t=5.1 surface pocket card",
+     "rule": "walking-7"
+    },
+    {
+     "name": "[0, 12) mustNot {\"action\":\"surface\",\"band\":\"walk\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-7"
+    }
+   ],
+   "rule": "walking-7",
+   "description": "Stopped for 2 s at a red light with 12 s or more to the walk: the pocket surfaces with the time available."
+  },
+  {
+   "id": "walking-07b-pocket-short-light",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[0, 10) mustNot {\"action\":\"surface\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-7"
+    },
+    {
+     "name": "[5, 9) state {\"glyph\":\"Pocket 1\"}",
+     "pass": true,
+     "detail": "40 frames",
+     "rule": "walking-7"
+    }
+   ],
+   "rule": "walking-7",
+   "description": "Under 6 s of light left: the pocket waits for the next pause."
+  },
+  {
+   "id": "walking-08-right-of-way",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[4, 6) stateSome {\"level\":{\"grace-theater\":\"expanded\"}}",
+     "pass": true,
+     "detail": "t=4",
+     "rule": "walking-8"
+    },
+    {
+     "name": "[6, 11) state {\"safety\":false,\"level\":{\"grace-theater\":\"expanded\"}}",
+     "pass": true,
+     "detail": "50 frames",
+     "rule": "walking-8"
+    }
+   ],
+   "rule": "walking-8",
+   "description": "Stepping aside and dropping to a pip are the overlay's moves, asserted in the overlay placement tests. The brain's contract: a passing vehicle with no time-to-path is not a gate and the expanded view keeps its level."
+  },
+  {
+   "id": "walking-09-backdrop",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.5, 4) must {\"id\":\"goldies-counter\",\"level\":\"card\"}",
+     "pass": true,
+     "detail": "t=1.6 promote goldies-counter card",
+     "rule": "walking-9"
+    },
+    {
+     "name": "[5.5, 8) must {\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
+     "pass": true,
+     "detail": "t=5.6 promote trattoria-da-lia card",
+     "rule": "walking-9"
+    }
+   ],
+   "rule": "walking-9",
+   "description": "Backdrop adaptivity is applied by the overlay from the sim's sampled luminance; contrast is measured in the legibility test. The brain's contract: the cards it opens on the lit east façade and the shadowed west façade are the same decision whatever the backdrop."
+  },
+  {
+   "id": "walking-10-dwell-ladder-stopped",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.75, 1.95) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "pass": true,
+     "detail": "t=1.8 show grace-theater glance",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[2.55, 2.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
+     "pass": true,
+     "detail": "t=2.6 promote grace-theater card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[4.55, 4.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\"}",
+     "pass": true,
+     "detail": "t=4.6 promote grace-theater expanded",
+     "rule": "walking-10"
+    },
+    {
+     "name": "@5.3 state {\"level\":{\"grace-theater\":\"expanded\"}}",
+     "pass": true,
+     "detail": "1 frames",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "With no pinch, a 4.4 s dwell in Stopped ends at expanded."
+  },
+  {
+   "id": "walking-10b-dwell-ladder-walk",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[3.35, 3.55) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
+     "pass": true,
+     "detail": "t=3.4 promote grace-theater card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[0, 8) mustNot {\"level\":\"expanded\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-10"
+    },
+    {
+     "name": "@5.3 state {\"level\":{\"grace-theater\":\"card\"}}",
+     "pass": true,
+     "detail": "1 frames",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "The same 4.4 s dwell in Walk ends at card."
+  },
+  {
+   "id": "walking-10c-look-away",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[6.45, 6.75) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"card\",\"cause\":\"look-away\"}",
+     "pass": true,
+     "detail": "t=6.5 demote grace-theater card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[7.65, 7.95) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"look-away\"}",
+     "pass": true,
+     "detail": "t=7.7 demote grace-theater glance",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[8.85, 9.15) must {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
+     "pass": true,
+     "detail": "t=8.9 demote grace-theater pip",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "Looking away walks back down one level every 1.2 s."
+  },
+  {
+   "id": "walking-11-whisper",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.7, 2) must {\"action\":\"show\",\"id\":\"whisper\",\"level\":\"whisper\",\"band\":\"brisk\",\"nameIs\":\"47th St Station\",\"factIs\":\"uptown 4 min\"}",
+     "pass": true,
+     "detail": "t=1.8 show whisper whisper",
+     "rule": "walking-11"
+    },
+    {
+     "name": "[4.2, 4.4) must {\"action\":\"dismiss\",\"id\":\"whisper\"}",
+     "pass": true,
+     "detail": "t=4.3 dismiss whisper whisper",
+     "rule": "walking-11"
+    },
+    {
+     "name": "[0, 8) mustNot {\"zone\":\"world\",\"levelAtLeast\":\"glance\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-11"
+    }
+   ],
+   "rule": "walking-11",
+   "description": "Brisk: a dwell gives one captioned line at the bottom edge, never a pane."
+  },
+  {
+   "id": "walking-12-snooze",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[4, 4.1) state {\"snooze\":true,\"glyph\":\"60 s\"}",
+     "pass": true,
+     "detail": "1 frames",
+     "rule": "walking-12"
+    },
+    {
+     "name": "[6.7, 7) must {\"action\":\"hold\",\"id\":\"atlas-books\",\"reasonText\":\"Snoozed\"}",
+     "pass": true,
+     "detail": "t=6.8 hold atlas-books glance",
+     "rule": "walking-12"
+    },
+    {
+     "name": "[4.1, 21) mustNot {\"action\":[\"show\",\"promote\"],\"zone\":\"world\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-12"
+    },
+    {
+     "name": "[21.2, 22) state {\"snooze\":false}",
+     "pass": true,
+     "detail": "8 frames",
+     "rule": "walking-12"
+    },
+    {
+     "name": "[21, 21.3) must {\"action\":\"show\",\"id\":\"atlas-books\",\"levelAtLeast\":\"glance\"}",
+     "pass": true,
+     "detail": "t=21 show atlas-books card",
+     "rule": "walking-12"
+    }
+   ],
+   "rule": "walking-12",
+   "description": "Look up for a second: everything folds and nothing but safety shows for 60 s; look up again to cancel."
+  },
+  {
+   "id": "walking-13-budget",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[10, 10.1) must {\"action\":\"hold\",\"id\":\"maya-lunch\",\"reasonKind\":\"budget\"}",
+     "pass": true,
+     "detail": "t=10 hold maya-lunch glance",
+     "rule": "walking-13"
+    },
+    {
+     "name": "[30.7, 31) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "pass": true,
+     "detail": "t=30.8 show 47th-st-station glance",
+     "rule": "walking-13"
+    }
+   ],
+   "rule": "walking-13",
+   "description": "With a budget of one show, Goldie's spends it; a text that arrives next holds on the budget; a dwell still shows."
+  }
+ ]
+}

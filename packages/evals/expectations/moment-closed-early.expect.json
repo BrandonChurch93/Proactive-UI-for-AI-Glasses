@@ -1,0 +1,55 @@
+{
+  "walk": "moment-closed-early",
+  "cases": [
+    {
+      "rule": "moments",
+      "between": [
+        0.7,
+        1.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "errands",
+        "nameIs": "Two to go"
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        10,
+        10.2
+      ],
+      "must": {
+        "action": [
+          "show",
+          "promote"
+        ],
+        "id": "errands",
+        "reasonText": "Hardware closed early. One stop left."
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        10,
+        10.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "route",
+        "zone": "ground"
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        13.9,
+        14.2
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "errands"
+      }
+    }
+  ]
+}

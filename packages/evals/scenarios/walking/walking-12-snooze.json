@@ -1,0 +1,38 @@
+{
+  "id": "walking-12-snooze",
+  "rule": "walking-12",
+  "scenario": "walking",
+  "duration": 26,
+  "description": "Look up for a second: everything folds and nothing but safety shows for 60 s; look up again to cancel.",
+  "startN": 50,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "pitch": [
+    [
+      3,
+      0.5
+    ],
+    [
+      4.3,
+      0
+    ],
+    [
+      20,
+      0.5
+    ],
+    [
+      21.3,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      6,
+      "atlas-books"
+    ]
+  ]
+}

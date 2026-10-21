@@ -1,0 +1,42 @@
+{
+  "walk": "walking-11-whisper",
+  "cases": [
+    {
+      "rule": "walking-11",
+      "between": [
+        1.7,
+        2.0
+      ],
+      "must": {
+        "action": "show",
+        "id": "whisper",
+        "level": "whisper",
+        "band": "brisk",
+        "nameIs": "47th St Station",
+        "factIs": "uptown 4 min"
+      }
+    },
+    {
+      "rule": "walking-11",
+      "between": [
+        4.2,
+        4.4
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "whisper"
+      }
+    },
+    {
+      "rule": "walking-11",
+      "between": [
+        0,
+        8
+      ],
+      "mustNot": {
+        "zone": "world",
+        "levelAtLeast": "glance"
+      }
+    }
+  ]
+}

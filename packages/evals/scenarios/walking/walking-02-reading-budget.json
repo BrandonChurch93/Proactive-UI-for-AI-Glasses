@@ -1,0 +1,13 @@
+{
+  "id": "walking-02-reading-budget",
+  "rule": "walking-2",
+  "scenario": "hungry",
+  "duration": 6,
+  "description": "Walk: the reason line leaves the glass and the second fact is dropped to fit three words and a number.",
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ]
+}

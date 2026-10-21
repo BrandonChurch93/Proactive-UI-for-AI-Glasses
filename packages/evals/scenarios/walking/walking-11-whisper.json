@@ -1,0 +1,24 @@
+{
+  "id": "walking-11-whisper",
+  "rule": "walking-11",
+  "scenario": "hungry",
+  "duration": 8,
+  "description": "Brisk: a dwell gives one captioned line at the bottom edge, never a pane.",
+  "startN": 50,
+  "pace": [
+    [
+      0,
+      1.9
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "47th-st-station"
+    ],
+    [
+      6,
+      null
+    ]
+  ]
+}

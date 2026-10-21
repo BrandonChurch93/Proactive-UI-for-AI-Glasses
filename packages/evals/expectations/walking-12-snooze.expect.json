@@ -1,0 +1,64 @@
+{
+  "walk": "walking-12-snooze",
+  "cases": [
+    {
+      "rule": "walking-12",
+      "between": [
+        4,
+        4.1
+      ],
+      "state": {
+        "snooze": true,
+        "glyph": "60 s"
+      }
+    },
+    {
+      "rule": "walking-12",
+      "between": [
+        6.7,
+        7.0
+      ],
+      "must": {
+        "action": "hold",
+        "id": "atlas-books",
+        "reasonText": "Snoozed"
+      }
+    },
+    {
+      "rule": "walking-12",
+      "between": [
+        4.1,
+        21
+      ],
+      "mustNot": {
+        "action": [
+          "show",
+          "promote"
+        ],
+        "zone": "world"
+      }
+    },
+    {
+      "rule": "walking-12",
+      "between": [
+        21.2,
+        22
+      ],
+      "state": {
+        "snooze": false
+      }
+    },
+    {
+      "rule": "walking-12",
+      "between": [
+        21,
+        21.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "atlas-books",
+        "levelAtLeast": "glance"
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "walking-01-focus-zone",
+  "rule": "walking-1",
+  "scenario": "hungry",
+  "duration": 8,
+  "description": "Placement hints: only a glance on the gaze target may enter the focus zone. The geometry is checked on recorded walks and in the overlay placement tests.",
+  "startN": 4,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      3,
+      "kathys-cupcakes"
+    ],
+    [
+      7,
+      null
+    ]
+  ]
+}

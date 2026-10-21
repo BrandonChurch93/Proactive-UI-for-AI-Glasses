@@ -1,0 +1,41 @@
+{
+  "walk": "gate-conversation",
+  "cases": [
+    {
+      "rule": "gates",
+      "between": [
+        4,
+        4.1
+      ],
+      "must": {
+        "action": "hold",
+        "id": "maya-lunch",
+        "reasonKind": "social",
+        "reasonText": "When you're free"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        4,
+        10
+      ],
+      "mustNot": {
+        "action": "show",
+        "id": "maya-lunch"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        10,
+        10.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-lunch",
+        "level": "glance"
+      }
+    }
+  ]
+}

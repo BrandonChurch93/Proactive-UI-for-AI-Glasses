@@ -1,0 +1,40 @@
+{
+  "walk": "note-text-behind-people",
+  "cases": [
+    {
+      "rule": "notifications",
+      "between": [
+        2,
+        2.1
+      ],
+      "must": {
+        "action": "hold",
+        "id": "maya-lunch",
+        "reasonKind": "social",
+        "timing": "next-pause"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        1.6,
+        7
+      ],
+      "state": {
+        "levelsAtMost": "pip"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        7,
+        7.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-lunch",
+        "reasonText": "Held for you"
+      }
+    }
+  ]
+}

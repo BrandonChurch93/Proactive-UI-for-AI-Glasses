@@ -1,0 +1,27 @@
+{
+  "id": "moment-sidewalk-closed",
+  "rule": "moments",
+  "scenario": "errands",
+  "duration": 12,
+  "description": "Scaffolding narrows the sidewalk: the route band shifts to the curb and one glance says why.",
+  "startN": 30,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "stops": {
+    "t": 0,
+    "ids": [
+      "main-street-pharmacy",
+      "corner-hardware",
+      "post-office"
+    ]
+  },
+  "narrows": {
+    "t": 3,
+    "fromN": 46,
+    "toN": 52
+  }
+}

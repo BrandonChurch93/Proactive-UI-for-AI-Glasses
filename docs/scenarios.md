@@ -17,7 +17,7 @@ Scripts live in `data/scenarios/*.json` as timed events the sim injects into the
 
 Route: east sidewalk north to the corner, cross the avenue, a few steps back south to Mega Burger. Destination: a seat.
 
-1. 0:02 · Pips bloom on Goldie's Counter, Kathy's Cupcakes, Trattoria da Lia and Mega Burger. The brain shows one glance, the best fit: Goldie's, "3 min wait · 9 seats". The reason, "Short wait, on your side of the street", is in the log and not on the glass, because the band is Walk and the reading budget drops the reason line first (Rule 2). The glance enters at the edge (Rule 4) and, not being looked at, folds itself at 0:05 (Rule 3).
+1. 0:02 · Pips bloom on Goldie's Counter, Kathy's Cupcakes, Trattoria da Lia and Mega Burger. The brain shows one glance, the best fit: Goldie's, "3 min wait" (in Walk the reading budget allows three words and one number, so the second fact "9 seats" is dropped by rule; Stopped would show both). The reason, "Short wait, on your side of the street", is in the log and not on the glass, because the band is Walk and the reading budget drops the reason line first (Rule 2). The glance enters at the edge (Rule 4) and, not being looked at, folds itself at 0:05 (Rule 3).
 2. 0:14 · Dwell on Mega Burger across the street, 50 m ahead, climbs the ladder: glance at 0.8 s, card at 1.6 s more because the band is Walk. One thing at a time. (Rule 10.)
 3. 0:22 · The wearer pinches the Mega Burger card while walking. Nothing opens; "Saved" at the pip, the held glyph reads Pocket 1. (Rule 6.)
 4. 0:30 · Look away. The card walks back down a level every 1.2 s and is gone. (Rule 10.)

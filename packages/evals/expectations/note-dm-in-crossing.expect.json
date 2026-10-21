@@ -1,0 +1,44 @@
+{
+  "walk": "note-dm-in-crossing",
+  "cases": [
+    {
+      "rule": "notifications",
+      "between": [
+        8,
+        8.1
+      ],
+      "must": {
+        "action": "hold",
+        "id": "jules-tonight",
+        "timing": "after-gate",
+        "reasonKind": "gate"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        14,
+        14.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "followup",
+        "nameIs": "One message came in.",
+        "factIs": "Read it?",
+        "reasonText": "Held that while you crossed"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        17,
+        17.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "jules-tonight",
+        "component": "toast"
+      }
+    }
+  ]
+}

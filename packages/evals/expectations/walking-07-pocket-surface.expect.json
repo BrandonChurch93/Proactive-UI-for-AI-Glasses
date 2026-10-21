@@ -1,0 +1,28 @@
+{
+  "walk": "walking-07-pocket-surface",
+  "cases": [
+    {
+      "rule": "walking-7",
+      "between": [
+        5.0,
+        5.3
+      ],
+      "must": {
+        "action": "surface",
+        "id": "pocket",
+        "secondsAtLeast": 12
+      }
+    },
+    {
+      "rule": "walking-7",
+      "between": [
+        0,
+        12
+      ],
+      "mustNot": {
+        "action": "surface",
+        "band": "walk"
+      }
+    }
+  ]
+}

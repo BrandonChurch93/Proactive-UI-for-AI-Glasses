@@ -1,0 +1,313 @@
+{
+  "walk": "hungry",
+  "cases": [
+    {
+      "name": "0:00 to 0:01 \u00b7 nothing before the street has faded up",
+      "between": [
+        0,
+        0.8
+      ],
+      "max": {
+        "shows": 0
+      }
+    },
+    {
+      "name": "0:02 \u00b7 one glance, the best fit, reason in the log only",
+      "between": [
+        1.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "goldies-counter",
+        "level": "glance",
+        "band": "walk",
+        "factIs": "3 min wait",
+        "showReason": false
+      }
+    },
+    {
+      "name": "0:02 \u00b7 pips bloom on the food places",
+      "between": [
+        0.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "mega-burger",
+        "level": "pip"
+      }
+    },
+    {
+      "name": "0:05 \u00b7 not looked at, it folds itself",
+      "between": [
+        4,
+        5.5
+      ],
+      "must": {
+        "action": "demote",
+        "id": "goldies-counter",
+        "cause": "auto-fold"
+      }
+    },
+    {
+      "name": "0:00 to 0:10 \u00b7 no card",
+      "between": [
+        0,
+        10
+      ],
+      "mustNot": {
+        "level": "card"
+      }
+    },
+    {
+      "name": "0:14 \u00b7 dwell on Mega Burger gives the glance",
+      "between": [
+        14,
+        16
+      ],
+      "must": {
+        "action": "show",
+        "id": "mega-burger",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    },
+    {
+      "name": "0:16 \u00b7 the card after 1.6 s more, because the band is Walk",
+      "between": [
+        15.5,
+        18.5
+      ],
+      "must": {
+        "action": "promote",
+        "id": "mega-burger",
+        "level": "card",
+        "band": "walk"
+      }
+    },
+    {
+      "name": "0:22 \u00b7 pinch while walking saves",
+      "between": [
+        21.9,
+        22.4
+      ],
+      "must": {
+        "action": "save",
+        "id": "mega-burger"
+      }
+    },
+    {
+      "name": "0:22 \u00b7 nothing opens",
+      "between": [
+        22,
+        30
+      ],
+      "mustNot": {
+        "id": "mega-burger",
+        "level": "expanded"
+      }
+    },
+    {
+      "name": "0:22 to 0:58 \u00b7 Pocket 1 on the glyph",
+      "between": [
+        22.5,
+        57
+      ],
+      "state": {
+        "glyph": "Pocket 1"
+      }
+    },
+    {
+      "name": "0:31 \u00b7 look away, down a level",
+      "between": [
+        30.5,
+        32
+      ],
+      "must": {
+        "action": "demote",
+        "id": "mega-burger",
+        "level": "glance",
+        "cause": "look-away"
+      }
+    },
+    {
+      "name": "0:32 \u00b7 and down again",
+      "between": [
+        31.7,
+        33.5
+      ],
+      "must": {
+        "action": "demote",
+        "id": "mega-burger",
+        "level": "pip",
+        "cause": "look-away"
+      }
+    },
+    {
+      "name": "0:37 to 0:58 \u00b7 Brisk, nothing but whisper",
+      "between": [
+        38,
+        57
+      ],
+      "state": {
+        "band": "brisk",
+        "levelsAtMost": "whisper"
+      }
+    },
+    {
+      "name": "0:40 \u00b7 the station gives only the whisper line",
+      "between": [
+        40,
+        43
+      ],
+      "must": {
+        "action": "show",
+        "id": "whisper",
+        "nameIs": "47th St Station",
+        "factIs": "uptown 4 min"
+      }
+    },
+    {
+      "name": "0:58 \u00b7 no need to run",
+      "between": [
+        57,
+        61
+      ],
+      "must": {
+        "action": "show",
+        "id": "need-to-run",
+        "nameIs": "No need to run"
+      }
+    },
+    {
+      "name": "0:58 \u00b7 the text from Maya at the next safe moment",
+      "between": [
+        57,
+        61
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-usual",
+        "component": "toast"
+      }
+    },
+    {
+      "name": "1:02 \u00b7 the pocket surfaces with the time available",
+      "between": [
+        60,
+        63
+      ],
+      "must": {
+        "action": "surface",
+        "id": "pocket",
+        "secondsAtLeast": 6
+      }
+    },
+    {
+      "name": "1:04 \u00b7 pinch opens its card",
+      "between": [
+        63.9,
+        65.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "pocket:mega-burger",
+        "level": "card"
+      }
+    },
+    {
+      "name": "1:06 \u00b7 held gaze expands it in place",
+      "between": [
+        65.5,
+        68
+      ],
+      "must": {
+        "action": "promote",
+        "id": "pocket:mega-burger",
+        "level": "expanded"
+      }
+    },
+    {
+      "name": "1:08 \u00b7 hold a seat, the route draws",
+      "between": [
+        68,
+        69
+      ],
+      "must": {
+        "action": "show",
+        "id": "route",
+        "zone": "ground"
+      }
+    },
+    {
+      "name": "1:14 to 1:24 \u00b7 crossing, everything holds",
+      "between": [
+        74,
+        84
+      ],
+      "must": {
+        "action": "hold",
+        "all": true,
+        "reasonKind": "gate"
+      }
+    },
+    {
+      "name": "1:18 \u00b7 the app update is held",
+      "between": [
+        78,
+        78.3
+      ],
+      "must": {
+        "action": "hold",
+        "id": "order-ready",
+        "timing": "after-gate"
+      }
+    },
+    {
+      "name": "1:24 \u00b7 far curb, the held update arrives with its reason",
+      "between": [
+        84,
+        88
+      ],
+      "must": {
+        "action": "show",
+        "id": "order-ready",
+        "level": "glance",
+        "reasonText": "Held that while you crossed"
+      }
+    },
+    {
+      "name": "1:26 \u00b7 the destination column at the door",
+      "between": [
+        87,
+        93
+      ],
+      "stateSome": {
+        "has": "destination"
+      }
+    },
+    {
+      "name": "1:34 \u00b7 arrival",
+      "between": [
+        93,
+        98
+      ],
+      "must": {
+        "action": "show",
+        "id": "arrival",
+        "nameIs": "Seat's held, inside on the left."
+      }
+    },
+    {
+      "name": "restraint \u00b7 shows within the budget",
+      "between": [
+        0,
+        90
+      ],
+      "max": {
+        "shows": 9
+      }
+    }
+  ]
+}

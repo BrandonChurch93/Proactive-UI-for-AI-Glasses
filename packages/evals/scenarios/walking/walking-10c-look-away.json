@@ -1,0 +1,24 @@
+{
+  "id": "walking-10c-look-away",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 12,
+  "description": "Looking away walks back down one level every 1.2 s.",
+  "startN": 10,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "grace-theater"
+    ],
+    [
+      5.4,
+      null
+    ]
+  ]
+}

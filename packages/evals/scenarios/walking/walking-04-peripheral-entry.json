@@ -1,0 +1,23 @@
+{
+  "id": "walking-04-peripheral-entry",
+  "rule": "walking-4",
+  "scenario": "hungry",
+  "duration": 16,
+  "description": "Panes that appear while moving enter at the edge; once stopped they may sit at the anchor.",
+  "pace": [
+    [
+      0,
+      1.38
+    ],
+    [
+      8,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      10,
+      "kathys-cupcakes"
+    ]
+  ]
+}

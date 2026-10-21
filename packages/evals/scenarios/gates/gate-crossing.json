@@ -1,0 +1,38 @@
+{
+  "id": "gate-crossing",
+  "rule": "gates",
+  "scenario": "hungry",
+  "duration": 20,
+  "description": "In the roadway everything holds; arrivals are counted on the glyph and come back at the far curb.",
+  "startN": 86,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      0,
+      "mega-burger"
+    ]
+  ],
+  "crossing": [
+    5,
+    15
+  ],
+  "signal": {
+    "at": 5,
+    "state": "walk",
+    "secondsLeft": 18
+  },
+  "inbox": [
+    {
+      "t": 8,
+      "id": "order-ready",
+      "type": "app",
+      "text": "Order ready",
+      "more": 1
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "walking-03-auto-fold",
+  "rule": "walking-3",
+  "scenario": "hungry",
+  "duration": 8,
+  "description": "A proactive glance folds itself after 2.5 s in Walk.",
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "moment-bike",
+  "rule": "moments",
+  "scenario": "walking",
+  "duration": 8,
+  "description": "Bike behind on this side as the wearer steps off: BIKE \u00b7 2 s on the pavement, stop tone, with its direction.",
+  "startN": 86,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "crossing": [
+    2,
+    8
+  ],
+  "signal": {
+    "at": 2,
+    "state": "walk",
+    "secondsLeft": 18
+  },
+  "vehicles": [
+    {
+      "from": 3,
+      "to": 5,
+      "id": "bike",
+      "kind": "bike",
+      "timeToPath": 2,
+      "fromBehind": true,
+      "wearerSide": true
+    }
+  ]
+}

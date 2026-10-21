@@ -1,0 +1,28 @@
+{
+  "walk": "moment-pace-to-signal",
+  "cases": [
+    {
+      "rule": "moments",
+      "between": [
+        3.8,
+        5.6
+      ],
+      "must": {
+        "action": "show",
+        "id": "need-to-run",
+        "nameIs": "No need to run",
+        "reasonKind": "pace"
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        0,
+        3.6
+      ],
+      "mustNot": {
+        "id": "need-to-run"
+      }
+    }
+  ]
+}

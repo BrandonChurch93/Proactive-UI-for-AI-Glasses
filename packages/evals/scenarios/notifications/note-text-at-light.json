@@ -1,0 +1,28 @@
+{
+  "id": "note-text-at-light",
+  "rule": "notifications",
+  "scenario": "hungry",
+  "duration": 12,
+  "description": "A text at a red light shows now, as a glance toast at the edge.",
+  "startN": 86,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "signal": {
+    "at": 0,
+    "state": "dont",
+    "secondsLeft": 16
+  },
+  "inbox": [
+    {
+      "t": 3,
+      "id": "maya-usual",
+      "type": "text",
+      "from": "Maya",
+      "text": "Running 10 late, order me the usual?"
+    }
+  ]
+}

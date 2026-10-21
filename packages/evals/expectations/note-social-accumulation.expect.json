@@ -1,0 +1,49 @@
+{
+  "walk": "note-social-accumulation",
+  "cases": [
+    {
+      "rule": "notifications",
+      "between": [
+        8.1,
+        12
+      ],
+      "state": {
+        "glyph": "3 \u00b7 social"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        0,
+        12.5
+      ],
+      "mustNot": {
+        "action": "show",
+        "component": "strip"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        12.5,
+        13.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "social",
+        "nameIs": "3 notifications",
+        "factIs": "later"
+      }
+    },
+    {
+      "rule": "notifications",
+      "between": [
+        13.3,
+        20
+      ],
+      "max": {
+        "shows": 0
+      }
+    }
+  ]
+}

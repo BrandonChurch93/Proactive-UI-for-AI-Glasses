@@ -1,0 +1,14 @@
+{
+  "id": "walking-02b-reading-stopped",
+  "rule": "walking-2",
+  "scenario": "hungry",
+  "duration": 5,
+  "description": "Stopped: nothing is trimmed; the glance carries both facts and its reason line.",
+  "startN": 4,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ]
+}

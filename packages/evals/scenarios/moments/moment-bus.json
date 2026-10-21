@@ -1,0 +1,37 @@
+{
+  "id": "moment-bus",
+  "rule": "moments",
+  "scenario": "errands",
+  "duration": 10,
+  "description": "Bus at the stop, not on the goal: held at pip; a glance only when looked at.",
+  "startN": 40,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "stops": {
+    "t": 0,
+    "ids": [
+      "main-street-pharmacy",
+      "corner-hardware",
+      "post-office"
+    ]
+  },
+  "live": [
+    {
+      "t": 1,
+      "id": "m4-stop",
+      "set": {
+        "busAtStop": true
+      }
+    }
+  ],
+  "gaze": [
+    [
+      6,
+      "m4-stop"
+    ]
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "walk": "walking-10-dwell-ladder-stopped",
+  "cases": [
+    {
+      "rule": "walking-10",
+      "between": [
+        1.75,
+        1.95
+      ],
+      "must": {
+        "action": "show",
+        "id": "grace-theater",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        2.55,
+        2.75
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "card"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        4.55,
+        4.75
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "expanded"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "at": 5.3,
+      "state": {
+        "level": {
+          "grace-theater": "expanded"
+        }
+      }
+    }
+  ]
+}

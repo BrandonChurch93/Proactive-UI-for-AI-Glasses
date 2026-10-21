@@ -1,0 +1,30 @@
+{
+  "walk": "walking-04-peripheral-entry",
+  "cases": [
+    {
+      "rule": "walking-4",
+      "between": [
+        1.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "goldies-counter",
+        "enter": "edge"
+      }
+    },
+    {
+      "rule": "walking-4",
+      "between": [
+        10,
+        12
+      ],
+      "must": {
+        "action": "show",
+        "id": "kathys-cupcakes",
+        "enter": "anchor",
+        "band": "stopped"
+      }
+    }
+  ]
+}

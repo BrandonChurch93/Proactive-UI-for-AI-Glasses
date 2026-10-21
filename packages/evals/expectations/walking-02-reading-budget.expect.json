@@ -1,0 +1,34 @@
+{
+  "walk": "walking-02-reading-budget",
+  "cases": [
+    {
+      "rule": "walking-2",
+      "between": [
+        1.5,
+        3
+      ],
+      "must": {
+        "action": "show",
+        "id": "goldies-counter",
+        "level": "glance",
+        "band": "walk",
+        "factIs": "3 min wait",
+        "showReason": false
+      }
+    },
+    {
+      "rule": "walking-2",
+      "between": [
+        0,
+        6
+      ],
+      "mustNot": {
+        "level": [
+          "card",
+          "expanded"
+        ],
+        "zone": "world"
+      }
+    }
+  ]
+}

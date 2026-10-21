@@ -1,0 +1,25 @@
+{
+  "walk": "walking-07b-pocket-short-light",
+  "cases": [
+    {
+      "rule": "walking-7",
+      "between": [
+        0,
+        10
+      ],
+      "mustNot": {
+        "action": "surface"
+      }
+    },
+    {
+      "rule": "walking-7",
+      "between": [
+        5,
+        9
+      ],
+      "state": {
+        "glyph": "Pocket 1"
+      }
+    }
+  ]
+}

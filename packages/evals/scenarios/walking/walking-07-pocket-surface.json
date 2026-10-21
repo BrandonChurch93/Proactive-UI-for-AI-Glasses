@@ -1,0 +1,35 @@
+{
+  "id": "walking-07-pocket-surface",
+  "rule": "walking-7",
+  "scenario": "hungry",
+  "duration": 12,
+  "description": "Stopped for 2 s at a red light with 12 s or more to the walk: the pocket surfaces with the time available.",
+  "startN": 84,
+  "pace": [
+    [
+      0,
+      1.38
+    ],
+    [
+      2.5,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      0.9,
+      "mega-burger"
+    ]
+  ],
+  "pinch": [
+    [
+      1.5,
+      "mega-burger"
+    ]
+  ],
+  "signal": {
+    "at": 3,
+    "state": "dont",
+    "secondsLeft": 16
+  }
+}

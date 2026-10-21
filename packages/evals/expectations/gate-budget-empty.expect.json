@@ -1,0 +1,42 @@
+{
+  "walk": "gate-budget-empty",
+  "cases": [
+    {
+      "rule": "gates",
+      "between": [
+        1.5,
+        3
+      ],
+      "must": {
+        "action": "hold",
+        "id": "goldies-counter",
+        "reasonKind": "budget"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        3,
+        3.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-call",
+        "component": "call"
+      }
+    },
+    {
+      "rule": "gates",
+      "between": [
+        4.7,
+        5
+      ],
+      "must": {
+        "action": "show",
+        "id": "kathys-cupcakes",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    }
+  ]
+}

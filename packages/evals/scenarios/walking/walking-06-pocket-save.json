@@ -1,0 +1,26 @@
+{
+  "id": "walking-06-pocket-save",
+  "rule": "walking-6",
+  "scenario": "hungry",
+  "duration": 10,
+  "description": "Pinch on the gaze target while walking saves it; nothing opens; the glyph shows the pocket.",
+  "startN": 20,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "gaze": [
+    [
+      1.6,
+      "mega-burger"
+    ]
+  ],
+  "pinch": [
+    [
+      6,
+      "mega-burger"
+    ]
+  ]
+}

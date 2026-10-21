@@ -1,0 +1,39 @@
+{
+  "id": "note-dm-in-crossing",
+  "rule": "notifications",
+  "scenario": "errands",
+  "duration": 20,
+  "description": "A DM in the crossing is held, counted, and offered at the far curb.",
+  "startN": 86,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "crossing": [
+    4,
+    14
+  ],
+  "signal": {
+    "at": 4,
+    "state": "walk",
+    "secondsLeft": 18
+  },
+  "inbox": [
+    {
+      "t": 8,
+      "id": "jules-tonight",
+      "type": "dm",
+      "from": "Jules",
+      "text": "Still on for tonight?"
+    }
+  ],
+  "choice": [
+    [
+      17,
+      "followup",
+      "read"
+    ]
+  ]
+}

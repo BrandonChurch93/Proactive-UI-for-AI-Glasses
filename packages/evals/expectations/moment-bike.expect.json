@@ -1,0 +1,29 @@
+{
+  "walk": "moment-bike",
+  "cases": [
+    {
+      "rule": "moments",
+      "between": [
+        3,
+        3.1
+      ],
+      "must": {
+        "action": "show",
+        "id": "safety:bike",
+        "zone": "ground",
+        "nameIs": "BIKE",
+        "factIs": "2 s"
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        5.1,
+        6
+      ],
+      "state": {
+        "hasNot": "safety:bike"
+      }
+    }
+  ]
+}

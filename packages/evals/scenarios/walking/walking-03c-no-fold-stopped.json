@@ -1,0 +1,14 @@
+{
+  "id": "walking-03c-no-fold-stopped",
+  "rule": "walking-3",
+  "scenario": "hungry",
+  "duration": 12,
+  "description": "Stopped has no limit.",
+  "startN": 4,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "walking-07b-pocket-short-light",
+  "rule": "walking-7",
+  "scenario": "hungry",
+  "duration": 10,
+  "description": "Under 6 s of light left: the pocket waits for the next pause.",
+  "startN": 84,
+  "pace": [
+    [
+      0,
+      1.38
+    ],
+    [
+      2.5,
+      0
+    ]
+  ],
+  "gaze": [
+    [
+      0.9,
+      "mega-burger"
+    ]
+  ],
+  "pinch": [
+    [
+      1.5,
+      "mega-burger"
+    ]
+  ],
+  "signal": {
+    "at": 3,
+    "state": "dont",
+    "secondsLeft": 7
+  }
+}

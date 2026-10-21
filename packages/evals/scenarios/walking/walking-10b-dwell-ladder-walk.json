@@ -1,0 +1,23 @@
+{
+  "id": "walking-10b-dwell-ladder-walk",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 8,
+  "description": "The same 4.4 s dwell in Walk ends at card.",
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "grace-theater"
+    ],
+    [
+      5.4,
+      null
+    ]
+  ]
+}

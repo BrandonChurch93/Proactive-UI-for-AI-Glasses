@@ -1,0 +1,45 @@
+{
+  "walk": "walking-10c-look-away",
+  "cases": [
+    {
+      "rule": "walking-10",
+      "between": [
+        6.45,
+        6.75
+      ],
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
+        "level": "card",
+        "cause": "look-away"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        7.65,
+        7.95
+      ],
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
+        "level": "glance",
+        "cause": "look-away"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        8.85,
+        9.15
+      ],
+      "must": {
+        "id": "grace-theater",
+        "action": [
+          "demote",
+          "dismiss"
+        ]
+      }
+    }
+  ]
+}

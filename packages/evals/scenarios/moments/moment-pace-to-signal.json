@@ -1,0 +1,23 @@
+{
+  "id": "moment-pace-to-signal",
+  "rule": "moments",
+  "scenario": "hungry",
+  "duration": 10,
+  "description": "Rushing to a light that turns red anyway: \"No need to run\" at the curb.",
+  "startN": 80,
+  "pace": [
+    [
+      0,
+      1.9
+    ],
+    [
+      3.8,
+      0
+    ]
+  ],
+  "signal": {
+    "at": 3,
+    "state": "dont",
+    "secondsLeft": 16
+  }
+}

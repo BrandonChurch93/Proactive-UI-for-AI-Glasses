@@ -1,0 +1,13 @@
+{
+  "id": "walking-03b-auto-fold-stroll",
+  "rule": "walking-3",
+  "scenario": "hungry",
+  "duration": 9,
+  "description": "In Stroll the limit is 4 s.",
+  "pace": [
+    [
+      0,
+      0.6
+    ]
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "note-call-in-crossing",
+  "rule": "notifications",
+  "scenario": "walking",
+  "duration": 16,
+  "description": "A call never interrupts a crossing.",
+  "startN": 86,
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "crossing": [
+    2,
+    12
+  ],
+  "signal": {
+    "at": 2,
+    "state": "walk",
+    "secondsLeft": 18
+  },
+  "inbox": [
+    {
+      "t": 5,
+      "id": "maya-call",
+      "type": "call",
+      "from": "Maya"
+    }
+  ]
+}

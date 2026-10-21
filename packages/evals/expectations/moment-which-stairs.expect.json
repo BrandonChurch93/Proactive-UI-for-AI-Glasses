@@ -1,0 +1,18 @@
+{
+  "walk": "moment-which-stairs",
+  "cases": [
+    {
+      "rule": "moments",
+      "between": [
+        1.7,
+        2
+      ],
+      "must": {
+        "action": "show",
+        "id": "whisper",
+        "nameIs": "47th St Station",
+        "factIs": "uptown 4 min"
+      }
+    }
+  ]
+}

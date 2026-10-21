@@ -24,7 +24,59 @@
         18,
         30
       ],
-      "year": 1927
+      "year": 1927,
+      "card": {
+        "meta": "Live theater · landmarked 1981",
+        "live": "Last show 8:00 · 40 seats left",
+        "year": "1927"
+      },
+      "short": "Last show at 8",
+      "reasons": {
+        "world": "Seats left for tonight"
+      },
+      "expanded": {
+        "sub": "Tonight · three shows · box office till 9",
+        "yearLabel": "EST 1927",
+        "rows": [
+          {
+            "key": "5:30",
+            "title": "The Winter Guest",
+            "sub": "Drama · 2 h 10",
+            "value": "12 seats",
+            "tone": "warn"
+          },
+          {
+            "key": "8:00",
+            "title": "Night Market",
+            "sub": "New musical · 1 h 50",
+            "value": "40 seats",
+            "tone": "go",
+            "now": true
+          },
+          {
+            "key": "10:30",
+            "title": "Late Set",
+            "sub": "Improv · 60 min",
+            "value": "Plenty",
+            "tone": "go"
+          }
+        ],
+        "actions": [
+          {
+            "id": "hold-two",
+            "label": "Hold two for 8:00",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "note": "I'll hold them till 7:40, no charge if you don't make it.",
+        "after": {
+          "hold-two": "Two held for 8:00 · I'll walk you there at 7:35."
+        }
+      }
     },
     {
       "id": "mega-burger",
@@ -49,7 +101,52 @@
       "n": [
         70,
         78
-      ]
+      ],
+      "card": {
+        "meta": "Burgers · $ · open late",
+        "live": "6 min wait · 4 seats open",
+        "year": "EST 1994"
+      },
+      "short": "6 min wait",
+      "reasons": {
+        "goal": "Across the street, on your way",
+        "world": "Open late"
+      },
+      "expanded": {
+        "sub": "Counter and booths · open till 1",
+        "yearLabel": "EST 1994",
+        "rows": [
+          {
+            "key": "$9.50",
+            "title": "The Mega",
+            "sub": "Double patty · cheddar"
+          },
+          {
+            "key": "$7",
+            "title": "Classic",
+            "sub": "Single patty · pickles"
+          },
+          {
+            "key": "$3.50",
+            "title": "Fries",
+            "sub": "Hand cut · sea salt"
+          }
+        ],
+        "actions": [
+          {
+            "id": "hold-seat",
+            "label": "Hold a seat",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "hold-seat": "Seat held. Follow the route, across and back."
+        }
+      }
     },
     {
       "id": "lucky-lanes",
@@ -72,7 +169,57 @@
       "n": [
         44,
         56
-      ]
+      ],
+      "card": {
+        "meta": "Bowling · twelve lanes",
+        "live": "5 lanes open · $12 an hour till 5",
+        "year": "EST 1958"
+      },
+      "short": "Lanes open",
+      "reasons": {
+        "world": "Lanes open now"
+      },
+      "expanded": {
+        "sub": "Lanes right now",
+        "yearLabel": "EST 1958",
+        "rows": [
+          {
+            "key": "1 to 4",
+            "title": "League play",
+            "sub": "Till 6",
+            "value": "Booked",
+            "tone": "warn"
+          },
+          {
+            "key": "5 to 9",
+            "title": "Walk in",
+            "sub": "$12 an hour till 5",
+            "value": "Open",
+            "tone": "go"
+          },
+          {
+            "key": "10 to 12",
+            "title": "Party",
+            "sub": "From 4",
+            "value": "Booked",
+            "tone": "warn"
+          }
+        ],
+        "actions": [
+          {
+            "id": "book",
+            "label": "Book a lane",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "book": "Lane 6 is yours at 3:30."
+        }
+      }
     },
     {
       "id": "atlas-books",
@@ -94,7 +241,46 @@
       "n": [
         60,
         68
-      ]
+      ],
+      "card": {
+        "meta": "Bookshop · new and used",
+        "live": "Open till 9",
+        "year": "EST 1972"
+      },
+      "short": "Open till 9",
+      "reasons": {
+        "world": "Reading tonight at 7"
+      },
+      "expanded": {
+        "sub": "Tonight at Atlas · open till 9",
+        "yearLabel": "EST 1972",
+        "rows": [
+          {
+            "key": "7:00",
+            "title": "Poetry reading",
+            "sub": "Upstairs · free"
+          },
+          {
+            "key": "8:15",
+            "title": "Book club",
+            "sub": "Open to all"
+          }
+        ],
+        "actions": [
+          {
+            "id": "save-reading",
+            "label": "Save the reading",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "save-reading": "Saved. I'll remind you at 6:45."
+        }
+      }
     },
     {
       "id": "trattoria-da-lia",
@@ -119,7 +305,53 @@
       "n": [
         34,
         42
-      ]
+      ],
+      "card": {
+        "meta": "Home cooking · open until 11 PM",
+        "live": "Open until 11 PM",
+        "year": "DAL 1986"
+      },
+      "short": "Home cooking",
+      "reasons": {
+        "goal": "On your route",
+        "world": "Read from Italian"
+      },
+      "translate": true,
+      "expanded": {
+        "sub": "Menu · read from Italian",
+        "yearLabel": "DAL 1986",
+        "rows": [
+          {
+            "key": "$16",
+            "title": "Cacio e pepe",
+            "sub": "Cheese and black pepper"
+          },
+          {
+            "key": "$19",
+            "title": "Lasagne della nonna",
+            "sub": "Grandma's lasagne"
+          },
+          {
+            "key": "$8",
+            "title": "Tiramisù",
+            "sub": "Coffee and mascarpone"
+          }
+        ],
+        "actions": [
+          {
+            "id": "hold-table",
+            "label": "Hold a table",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "hold-table": "Table held for two."
+        }
+      }
     },
     {
       "id": "pocket-park",
@@ -143,7 +375,17 @@
       "n": [
         80,
         90
-      ]
+      ],
+      "card": {
+        "meta": "Park · shade and benches",
+        "live": "Benches in the shade"
+      },
+      "short": "Shaded benches",
+      "reasons": {
+        "goal": "End of the walk",
+        "world": "Benches in the shade"
+      },
+      "expanded": null
     },
     {
       "id": "goldies-counter",
@@ -168,7 +410,52 @@
       "n": [
         10,
         18
-      ]
+      ],
+      "card": {
+        "meta": "Deli · $ · counter seating",
+        "live": "3 min wait · 9 seats open",
+        "year": "EST 1961"
+      },
+      "short": "3 min wait",
+      "reasons": {
+        "goal": "Short wait, on your side of the street",
+        "world": "Counter seats open"
+      },
+      "expanded": {
+        "sub": "Counter seating · open till 4",
+        "yearLabel": "EST 1961",
+        "rows": [
+          {
+            "key": "$14",
+            "title": "Pastrami on rye",
+            "sub": "Hot · deli mustard"
+          },
+          {
+            "key": "$7",
+            "title": "Matzo ball soup",
+            "sub": "Cup or bowl"
+          },
+          {
+            "key": "$4",
+            "title": "Egg cream",
+            "sub": "Chocolate"
+          }
+        ],
+        "actions": [
+          {
+            "id": "hold-seat",
+            "label": "Hold a seat",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "hold-seat": "Seat held. Follow the route, 40 m."
+        }
+      }
     },
     {
       "id": "kathys-cupcakes",
@@ -191,7 +478,53 @@
       "n": [
         24,
         30
-      ]
+      ],
+      "card": {
+        "meta": "Bakery · cupcakes and coffee",
+        "live": "Fresh batch at 2:00",
+        "year": "EST 2009"
+      },
+      "short": "Fresh batch at 2",
+      "reasons": {
+        "goal": "On your route",
+        "world": "Baked on site"
+      },
+      "expanded": {
+        "sub": "Today's flavors",
+        "yearLabel": "EST 2009",
+        "rows": [
+          {
+            "key": "$4",
+            "title": "Brown butter",
+            "sub": "Fresh at 2"
+          },
+          {
+            "key": "$4",
+            "title": "Lemon poppy",
+            "sub": "In the case"
+          },
+          {
+            "key": "$4",
+            "title": "Double chocolate",
+            "value": "Sold out",
+            "tone": "stop"
+          }
+        ],
+        "actions": [
+          {
+            "id": "save-one",
+            "label": "Save me one",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "save-one": "One brown butter, held at the counter."
+        }
+      }
     },
     {
       "id": "big-bean",
@@ -215,7 +548,49 @@
       "n": [
         46,
         52
-      ]
+      ],
+      "card": {
+        "meta": "Coffee · espresso bar",
+        "live": "Line of 4 · 5 min",
+        "year": "EST 2014"
+      },
+      "short": "Line of 4",
+      "reasons": {
+        "goal": "On your route",
+        "world": "Short line"
+      },
+      "expanded": {
+        "sub": "Order ahead · skip the line",
+        "yearLabel": "EST 2014",
+        "rows": [
+          {
+            "key": "$4.25",
+            "title": "Cortado"
+          },
+          {
+            "key": "$5",
+            "title": "Cold brew"
+          },
+          {
+            "key": "$5.75",
+            "title": "Oat latte"
+          }
+        ],
+        "actions": [
+          {
+            "id": "order",
+            "label": "Order ahead",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "order": "Ordered. Ready in 5 min."
+        }
+      }
     },
     {
       "id": "main-street-pharmacy",
@@ -239,7 +614,50 @@
       "n": [
         34,
         42
-      ]
+      ],
+      "card": {
+        "meta": "Pharmacy · open till 9",
+        "live": "Prescription's ready here · counter 2"
+      },
+      "short": "Prescription's ready",
+      "reasons": {
+        "goal": "On your route",
+        "world": "Open till 9"
+      },
+      "liveLines": {
+        "pickedUp": "Picked up"
+      },
+      "expanded": {
+        "sub": "Pickup · counter 2",
+        "rows": [
+          {
+            "key": "Now",
+            "title": "Counter 2",
+            "sub": "Ready, no line",
+            "value": "Ready",
+            "tone": "go"
+          },
+          {
+            "key": "Hours",
+            "title": "Open till 9",
+            "sub": "Pharmacist on till 8"
+          }
+        ],
+        "actions": [
+          {
+            "id": "paid",
+            "label": "Pay ahead",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "paid": "Paid. Show the code at counter 2."
+        }
+      }
     },
     {
       "id": "corner-hardware",
@@ -262,7 +680,48 @@
       "n": [
         68,
         78
-      ]
+      ],
+      "card": {
+        "meta": "Hardware · keys cut",
+        "live": "Open till 6"
+      },
+      "short": "Open till 6",
+      "reasons": {
+        "goal": "On your route",
+        "world": "Open till 6"
+      },
+      "liveLines": {
+        "closedEarly": "Closed early today"
+      },
+      "expanded": {
+        "sub": "Hours · aisles",
+        "rows": [
+          {
+            "key": "Aisle 4",
+            "title": "Picture hooks",
+            "sub": "Bottom shelf"
+          },
+          {
+            "key": "Hours",
+            "title": "Open till 6",
+            "sub": "Keys cut till 5"
+          }
+        ],
+        "actions": [
+          {
+            "id": "hold-item",
+            "label": "Hold it at the till",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "hold-item": "Held at the till under your name."
+        }
+      }
     },
     {
       "id": "m4-stop",
@@ -286,7 +745,50 @@
       "n": [
         58,
         58
-      ]
+      ],
+      "card": {
+        "meta": "Bus · uptown",
+        "live": "M4 · 2 min · next in 11"
+      },
+      "short": "2 min",
+      "reasons": {
+        "world": "Bus at the stop"
+      },
+      "expanded": {
+        "sub": "Next four buses",
+        "rows": [
+          {
+            "key": "2 min",
+            "title": "M4 uptown"
+          },
+          {
+            "key": "11 min",
+            "title": "M4 uptown"
+          },
+          {
+            "key": "19 min",
+            "title": "M4 uptown"
+          },
+          {
+            "key": "27 min",
+            "title": "M4 uptown"
+          }
+        ],
+        "actions": [
+          {
+            "id": "remind",
+            "label": "Remind me at 11",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "remind": "I'll tell you when it's 3 min out."
+        }
+      }
     },
     {
       "id": "47th-st-station",
@@ -310,7 +812,51 @@
       "n": [
         86,
         90
-      ]
+      ],
+      "card": {
+        "meta": "Subway · stairs at the corner",
+        "live": "Uptown trains · 4 min"
+      },
+      "short": "uptown 4 min",
+      "reasons": {
+        "goal": "Stairs at the corner",
+        "world": "Stairs at the corner"
+      },
+      "expanded": {
+        "sub": "Next four departures",
+        "rows": [
+          {
+            "key": "4 min",
+            "title": "Uptown"
+          },
+          {
+            "key": "7 min",
+            "title": "Downtown"
+          },
+          {
+            "key": "10 min",
+            "title": "Uptown"
+          },
+          {
+            "key": "13 min",
+            "title": "Downtown"
+          }
+        ],
+        "actions": [
+          {
+            "id": "route",
+            "label": "Route me there",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "route": "Stairs on your right at the corner."
+        }
+      }
     },
     {
       "id": "post-office",
@@ -330,7 +876,45 @@
       "scenarios": [
         "errands"
       ],
-      "n": null
+      "n": null,
+      "card": {
+        "meta": "Post office · counter service",
+        "live": "Line of 8 · 12 min"
+      },
+      "short": "Line of 8",
+      "reasons": {
+        "goal": "Last stop",
+        "world": "Counter open till 5"
+      },
+      "expanded": {
+        "sub": "Counter · open till 5",
+        "rows": [
+          {
+            "key": "Now",
+            "title": "Line of 8",
+            "sub": "About 12 min"
+          },
+          {
+            "key": "Hours",
+            "title": "Open till 5",
+            "sub": "Pickup window till 6"
+          }
+        ],
+        "actions": [
+          {
+            "id": "number",
+            "label": "Take a number",
+            "primary": true
+          },
+          {
+            "id": "not-now",
+            "label": "Not now"
+          }
+        ],
+        "after": {
+          "number": "You're number 9. I'll tell you at the door."
+        }
+      }
     }
   ]
 }

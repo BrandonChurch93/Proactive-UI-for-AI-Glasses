@@ -1,0 +1,28 @@
+{
+  "walk": "walking-09-backdrop",
+  "cases": [
+    {
+      "rule": "walking-9",
+      "between": [
+        1.5,
+        4
+      ],
+      "must": {
+        "id": "goldies-counter",
+        "level": "card"
+      }
+    },
+    {
+      "rule": "walking-9",
+      "between": [
+        5.5,
+        8
+      ],
+      "must": {
+        "id": "trattoria-da-lia",
+        "level": "card"
+      }
+    }
+  ],
+  "owner": "overlay"
+}

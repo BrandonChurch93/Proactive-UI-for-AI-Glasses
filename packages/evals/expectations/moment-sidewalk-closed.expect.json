@@ -1,0 +1,43 @@
+{
+  "walk": "moment-sidewalk-closed",
+  "cases": [
+    {
+      "rule": "moments",
+      "between": [
+        3,
+        3.1
+      ],
+      "must": {
+        "action": "show",
+        "id": "scaffolding",
+        "nameIs": "Scaffolding ahead",
+        "reasonText": "Scaffolding ahead. Keep to the curb."
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        3,
+        12
+      ],
+      "mustNot": {
+        "id": "scaffolding",
+        "showReason": true
+      }
+    },
+    {
+      "rule": "moments",
+      "between": [
+        5.4,
+        5.8
+      ],
+      "must": {
+        "action": [
+          "demote",
+          "dismiss"
+        ],
+        "id": "scaffolding"
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "note-text-behind-people",
+  "rule": "notifications",
+  "scenario": "walking",
+  "duration": 12,
+  "description": "Two people on the path ahead: their pips stay bare and a text waits until they are passed.",
+  "startN": 30,
+  "pace": [
+    [
+      0,
+      1.38
+    ]
+  ],
+  "people": [
+    {
+      "from": 1,
+      "to": 7,
+      "id": "a",
+      "aheadM": 6,
+      "onPath": true
+    },
+    {
+      "from": 1,
+      "to": 7,
+      "id": "b",
+      "aheadM": 6.6,
+      "onPath": true
+    }
+  ],
+  "inbox": [
+    {
+      "t": 2,
+      "id": "maya-lunch",
+      "type": "text",
+      "from": "Maya",
+      "text": "Lunch tomorrow?"
+    }
+  ]
+}

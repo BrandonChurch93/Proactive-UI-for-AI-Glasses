@@ -1,0 +1,30 @@
+{
+  "walk": "walking-13-budget",
+  "cases": [
+    {
+      "rule": "walking-13",
+      "between": [
+        10,
+        10.1
+      ],
+      "must": {
+        "action": "hold",
+        "id": "maya-lunch",
+        "reasonKind": "budget"
+      }
+    },
+    {
+      "rule": "walking-13",
+      "between": [
+        30.7,
+        31
+      ],
+      "must": {
+        "action": "show",
+        "id": "47th-st-station",
+        "level": "glance",
+        "cause": "dwell"
+      }
+    }
+  ]
+}
