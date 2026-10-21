@@ -201,7 +201,7 @@ export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioData>> = {
 
 export const SCENARIO_IDS: readonly ScenarioId[] = ['hungry', 'errands', 'walking'];
 
-export const WALK_SECONDS: Record<ScenarioId, number> = { hungry: 98, errands: 98, walking: 99 };
+export const WALK_SECONDS: Record<ScenarioId, number> = { hungry: 98, errands: 100, walking: 102 };
 
 export function isScenarioId(v: unknown): v is ScenarioId {
   return v === 'hungry' || v === 'errands' || v === 'walking';
