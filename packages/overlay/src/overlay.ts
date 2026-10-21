@@ -538,7 +538,7 @@ export class Overlay {
       const big = want === 'card' || want === 'expanded';
       if (world) {
         const dur = big ? MOVE.travelCard : MOVE.travelGlance;
-        const tStart = !prev && t - it.born < 0.05 ? 0.35 : at;
+        const tStart = !prev && t - it.born < 0.05 ? 0.35 : Math.min(at, MOVE.travelOverlap);
         at = travel(tl, it.L, tStart, dur, Boolean(prev && it.fromCorner), this.reduced);
         if (big) tl.call(() => this.sound.breathUp(want === 'expanded'), [], tStart + dur / 2);
       } else if (big || it.d.component === 'pocket') {

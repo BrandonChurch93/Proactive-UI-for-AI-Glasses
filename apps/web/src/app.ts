@@ -240,6 +240,7 @@ export class App {
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || this.mode !== 'walk') return;
       this.drag = { x: e.clientX, y: e.clientY, yaw: this.walk.head.yaw, pitch: this.walk.head.pitch, moved: false, pressed: false };
+      this.walk.holding = true;
       canvas.setPointerCapture(e.pointerId);
       if (this.press) clearTimeout(this.press);
       this.press = setTimeout(() => {
@@ -259,11 +260,13 @@ export class App {
       this.walk.look(yaw, pitch);
     });
     canvas.addEventListener('pointerup', () => {
+      this.walk.holding = false;
       if (this.press) clearTimeout(this.press);
       if (this.drag && !this.drag.moved && !this.drag.pressed) this.walk.pinch();
       this.drag = null;
     });
     canvas.addEventListener('pointercancel', () => {
+      this.walk.holding = false;
       if (this.press) clearTimeout(this.press);
       this.drag = null;
     });

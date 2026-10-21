@@ -36,7 +36,19 @@
       "must": {
         "id": "kathys-cupcakes",
         "level": "card",
-        "focusOk": false
+        "gaze": true,
+        "focusOk": true
+      }
+    },
+    {
+      "rule": "walking-1",
+      "between": [
+        7,
+        8
+      ],
+      "mustNot": {
+        "id": "kathys-cupcakes",
+        "focusOk": true
       }
     }
   ]

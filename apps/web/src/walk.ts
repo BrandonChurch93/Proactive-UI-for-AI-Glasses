@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { Brain } from '@lumen/brain';
 import {
   PLACES,
+  PLACE_BY_ID,
   WALK_SECONDS,
   angleWrap,
   pitchToward,
@@ -19,8 +20,18 @@ import { Overlay } from '@lumen/overlay';
 import { ThreeBridge } from './bridge';
 import type { World } from './world/world';
 
-const YAW_ACQUIRE = (4 * Math.PI) / 180;
-const YAW_RELEASE = (7 * Math.PI) / 180;
+const YAW_ACQUIRE = (3 * Math.PI) / 180;
+const YAW_RELEASE = (6 * Math.PI) / 180;
+const HEAD_LIMIT = Math.PI / 2;
+const PURSUIT_RATE = 6;
+const PURSUIT_AFTER_DRAG_S = 0.25;
+
+function angleToSpan(a: number, y0: number, y1: number): number {
+  const d0 = angleWrap(a - y0);
+  const d1 = angleWrap(a - y1);
+  if (Math.sign(d0) !== Math.sign(d1) && Math.abs(d0) + Math.abs(d1) < Math.PI) return 0;
+  return Math.min(Math.abs(d0), Math.abs(d1));
+}
 const STEP = 1 / SIM_HZ;
 const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
@@ -75,6 +86,9 @@ export class Walk {
   private arrivedAt: number | null = null;
   private listeners = new Set<() => void>();
   private focusOutline: boolean;
+  private pursuit: { id: string; dyaw: number; dpitch: number } | null = null;
+  private lookedAt = -Infinity;
+  holding = false;
   private sound: { ctx: AudioContext | null; enabled: boolean } = { ctx: null, enabled: false };
 
   constructor(
@@ -193,6 +207,7 @@ export class Walk {
     if (this.opts.scripted) return;
     if (this.stepIndex < this.inputs.length && (Math.abs(yaw - this.head.yaw) > 1e-4 || Math.abs(pitch - this.head.pitch) > 1e-4)) this.diverge();
     this.head = { yaw, pitch };
+    this.lookedAt = this.sim.t;
   }
 
   override(o: Override): void {
@@ -208,25 +223,58 @@ export class Walk {
     if (this.hoverId) return this.hoverId;
     const cur = this.sim.gaze.target;
     const eye = this.sim.wearer.pos;
-    const range = new Map<string, number>(PLACES.map((p) => [p.id, NEAR_GAZE_M]));
-    for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') range.set(d.placement.anchor, LIT_GAZE_M);
+    const lit = new Set<string>();
+    for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') lit.add(d.placement.anchor);
+    const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit]);
+    const pose = this.sim.cameraPose();
     let best: string | null = null;
     let bestOff = Infinity;
-    const pose = this.sim.cameraPose();
-    for (const [id, limitM] of range) {
+    for (const id of ids) {
       const a = this.sim.anchorOf(id);
-      if (!a || Math.hypot(a.x - eye.x, a.z - eye.z) > limitM) continue;
+      if (!a || Math.hypot(a.x - eye.x, a.z - eye.z) > (lit.has(id) ? LIT_GAZE_M : NEAR_GAZE_M)) continue;
       const keep = id === cur;
-      const dyaw = Math.abs(angleWrap(yawToward(pose.pos, a) - pose.yaw));
-      const dpitch = pitchToward(pose.pos, a) - pose.pitch;
-      if (dyaw > (keep ? YAW_RELEASE : YAW_ACQUIRE) || dpitch < (keep ? -0.2 : -0.14) || dpitch > (keep ? 0.42 : 0.34)) continue;
-      const off = dyaw + Math.max(0, Math.abs(dpitch - 0.08) - 0.12) * 0.5;
+      const place = PLACE_BY_ID.get(id);
+      let y0 = yawToward(pose.pos, a);
+      let y1 = y0;
+      if (place?.n) {
+        y0 = yawToward(pose.pos, { x: a.x, y: a.y, z: -place.n[0] });
+        y1 = yawToward(pose.pos, { x: a.x, y: a.y, z: -place.n[1] });
+      }
+      const dyaw = angleToSpan(pose.yaw, y0, y1);
+      const flat = Math.hypot(a.x - pose.pos.x, a.z - pose.pos.z);
+      const top = Math.atan2(a.y + 0.8 - pose.pos.y, flat);
+      const bottom = Math.atan2(0.9 - pose.pos.y, flat);
+      const dpitch = pose.pitch > top ? pose.pitch - top : pose.pitch < bottom ? bottom - pose.pitch : 0;
+      if (dyaw > (keep ? YAW_RELEASE : YAW_ACQUIRE) || dpitch > (keep ? 0.2 : 0.12)) continue;
+      const off = dyaw + dpitch + Math.abs(angleWrap(yawToward(pose.pos, a) - pose.yaw)) * 0.02 - (keep ? 0.02 : 0);
       if (off < bestOff) {
         best = id;
         bestOff = off;
       }
     }
     return best;
+  }
+
+  private pursue(gaze: string | null): void {
+    const sim = this.sim;
+    const a = gaze && !gaze.includes(':') ? sim.anchorOf(gaze) : undefined;
+    if (!gaze || !a) {
+      this.pursuit = null;
+      return;
+    }
+    const eye = sim.wearer.pos;
+    const worldYaw = sim.wearer.bodyYaw + this.head.yaw;
+    const toYaw = yawToward(eye, a);
+    const toPitch = pitchToward(eye, a);
+    const dragging = this.holding || sim.t - this.lookedAt < PURSUIT_AFTER_DRAG_S;
+    if (!this.pursuit || this.pursuit.id !== gaze || dragging) {
+      this.pursuit = { id: gaze, dyaw: angleWrap(worldYaw - toYaw), dpitch: this.head.pitch - toPitch };
+      return;
+    }
+    const k = Math.min(1, STEP * PURSUIT_RATE);
+    const yaw = Math.max(-HEAD_LIMIT, Math.min(HEAD_LIMIT, angleWrap(toYaw + this.pursuit.dyaw - sim.wearer.bodyYaw)));
+    const pitch = Math.max(-0.6, Math.min(0.75, toPitch + this.pursuit.dpitch));
+    this.head = { yaw: this.head.yaw + angleWrap(yaw - this.head.yaw) * k, pitch: this.head.pitch + (pitch - this.head.pitch) * k };
   }
 
   step(): void {
@@ -238,6 +286,7 @@ export class Walk {
     if (!sim.scripted) {
       let inp = this.inputs[this.stepIndex];
       if (!inp) {
+        this.pursue(sim.gaze.target);
         inp = { yaw: sim.wearer.bodyYaw + this.head.yaw, pitch: this.head.pitch, gaze: this.liveGaze() };
         this.inputs[this.stepIndex] = inp;
       }

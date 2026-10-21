@@ -629,7 +629,7 @@ export class Brain {
         scored: sc,
         distance: e.distance,
         gaze: isT,
-        focusOk: isT && level === 'glance',
+        focusOk: isT,
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
         cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),

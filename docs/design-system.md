@@ -157,7 +157,7 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Retract** (the light returns to the pip). Head on; leader 1 → 0 over 300 ms `power2.in`; head off.
 
-**Promote** glance → card: dissolve the glance, then travel to the card corner (460 ms), then condense the card (420 ms). The light never disappears between the two; it travels.
+**Promote** glance → card: dissolve the glance, then travel to the card corner (460 ms), then condense the card (420 ms). The light never disappears between the two; it travels. As built, the travel starts 200 ms into the dissolve rather than after it, so a promotion reads as one move and the card arrives about a quarter second sooner.
 
 **Open** card → expanded: the card grows in place into the expanded view, anchored where it was, pushed clear of the focus zone, over `t-open`. Same condense mechanics on the new content. Nothing happens to the world. No dim, no blur, no depth of field.
 

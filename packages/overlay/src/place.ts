@@ -226,6 +226,7 @@ export class Placement {
     }
     const scale = scaleOf(this.cfg!);
     const rect = { ...res.rect };
+    if (this.pinned && req.focusOk) this.pinned = null;
     if (this.pinned) {
       const zone = focusRect(ctx.band, vp.w, vp.h);
       const x = this.pinned === 'left' ? zone.x - rect.w - ZONE_GAP : zone.x + zone.w + ZONE_GAP;

@@ -25,6 +25,7 @@ export const MOVE = {
   flareOut: 0.7,
   travelGlance: 0.32,
   travelCard: 0.46,
+  travelOverlap: 0.2,
   headFade: 0.3,
   seedGrow: 0.3,
   revealAt: 0.18,

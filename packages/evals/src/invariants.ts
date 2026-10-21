@@ -71,9 +71,8 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-1',
-    name: 'focus zone: no persistent world pane intersects the zone for its band (gaze glance up to 4 s)',
-    check: (r, cfg) => {
-      const since = new Map<string, number>();
+    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at',
+    check: (r) => {
       let bandAt = -Infinity;
       for (let i = 0; i < r.snapshots.length; i++) {
         const s = r.snapshots[i]!;
@@ -84,16 +83,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const zone = focusRect(f.band, view.w, view.h);
         for (const p of view.panes) {
           if (p.zone !== 'world' || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
-          if (!rectsOverlap(p.rect, zone)) {
-            since.delete(p.id);
-            continue;
-          }
-          if (p.gaze && p.level === 'glance') {
-            const t0 = since.get(p.id) ?? s.t;
-            since.set(p.id, t0);
-            if (s.t - t0 > cfg.ladder.gazeFocusMaxS + TICK) return `t=${s.t} gaze glance ${p.id} in zone over 4 s`;
-            continue;
-          }
+          if (!rectsOverlap(p.rect, zone) || p.gaze) continue;
           return `t=${s.t} ${p.id} ${p.level} in the ${f.band} zone`;
         }
       }
@@ -342,13 +332,13 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'placement',
-    name: 'every show carries a zone, a preference and its band; only a gaze glance may enter the focus zone',
+    name: 'every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone',
     check: (r) => {
       for (const e of r.entries) {
         const d = e.decision;
         if (d.action !== 'show') continue;
         if (!d.placement.zone || !d.placement.prefer || !d.band) return `t=${e.t} ${d.id} missing placement hints`;
-        if (d.placement.focusOk && !(d.level === 'glance' && d.gaze)) return `t=${e.t} ${d.id} ${d.level} allowed in the focus zone`;
+        if (d.placement.focusOk && !d.gaze) return `t=${e.t} ${d.id} ${d.level} allowed in the focus zone`;
       }
       return null;
     },

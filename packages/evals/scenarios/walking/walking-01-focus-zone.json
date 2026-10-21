@@ -3,7 +3,7 @@
   "rule": "walking-1",
   "scenario": "hungry",
   "duration": 8,
-  "description": "Placement hints: only a glance on the gaze target may enter the focus zone. The geometry is checked on recorded walks and in the overlay placement tests.",
+  "description": "Placement hints: only the pane on the thing being looked at may enter the focus zone, and only while it is looked at. The geometry is checked on recorded walks and in the overlay placement tests.",
   "startN": 4,
   "pace": [
     [
