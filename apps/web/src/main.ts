@@ -113,6 +113,7 @@ async function boot(): Promise<void> {
       }
       world.render();
     };
+    await document.fonts.ready;
     await window.__stepTo(Number(params.get('t') ?? 0));
     window.__done = true;
     return;

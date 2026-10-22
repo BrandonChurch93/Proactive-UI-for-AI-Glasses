@@ -10,8 +10,7 @@
       "must": {
         "action": "show",
         "id": "maya-lunch",
-        "timing": "next-pause",
-        "enter": "edge"
+        "timing": "next-pause"
       }
     },
     {

@@ -81,7 +81,7 @@ if (probes) {
     const walk = window.__app.walk; walk.paused = true;
     const sim = walk.sim; const o = walk.overlay;
     const vp = { w: innerWidth, h: innerHeight };
-    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [] };
+    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {} };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
     while (walk.t < walk.duration - 0.02 && !walk.ended) {
@@ -103,9 +103,11 @@ if (probes) {
         }
         const c = it.cur;
         if (it.kind !== 'world' || !c || !c.rect || c.opacity < 0.5 || it.want === 'none') continue;
+        const k0 = c.view.kids[0]; if (!k0 || Number(getComputedStyle(k0).opacity) < 0.5) continue;
         const a = walk.bridge.anchor(it.d.placement.anchor); if (!a) continue;
-        const pr = walk.bridge.project(a); if (!pr.inFront) continue;
+        const pr = walk.bridge.project(a); if (!pr.inFront || pr.x < 0 || pr.x > vp.w || pr.y < 0 || pr.y > vp.h) continue;
         m.paneFrames++;
+        m.per[it.id] = (m.per[it.id] || 0) + 1;
         const r = c.rect;
         const dx = Math.max(r.x - pr.x, 0, pr.x - (r.x + r.w)); const dy = Math.max(r.y - pr.y, 0, pr.y - (r.y + r.h));
         const ratio = Math.hypot(dx, dy) / r.w;
@@ -126,7 +128,7 @@ if (probes) {
     }
     return { m, log: walk.overlayLog, t: walk.t };
   })()`)) as {
-    m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[] };
+    m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number> };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
   };
@@ -144,7 +146,7 @@ if (probes) {
     if (levelChange) {
       const list = changes.get(e.id) ?? [];
       const climb = /dwell|pinch/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
-      const world = e.kind === 'drop' || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
+      const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
       list.push({ t: e.t, exempt: climb || world || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
       changes.set(e.id, list);
     }
@@ -170,10 +172,11 @@ if (probes) {
   console.log(`bar ${scenario} ${w}x${h} live, ${m.frames} frames to ${out.t.toFixed(1)} s`);
   console.log(`  level changes inside 2.5 s (not gate, dismiss, look-away, dwell climb, right of way): ${fast.length}${fast.length ? `  ${fast.slice(0, 6).join('; ')}` : ''}`);
   console.log(`  most births per item per life: ${maxBirths} (${maxBirthsAt})`);
-  console.log(`  pane edge farther than 1.0 x its width from its pip: ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
+  console.log(`  pane edge farther than 1.0 x its width from its pip (pip in view): ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
   console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
   console.log(`  largest keep-out: ${(100 * m.keepW).toFixed(0)}% x ${(100 * m.keepH).toFixed(0)}% of the view`);
   console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt}` : ''}`);
+  if (process.argv.includes('--per')) console.log(`  pane frames per item: ${JSON.stringify(m.per)}`);
   console.log(`  promotions while the pane was not visible: ${m.hiddenPromotes.length}${m.hiddenPromotes.length ? `  ${JSON.stringify(m.hiddenPromotes.slice(0, 6))}` : ''}`);
 }
 console.log(`  console errors: ${errors.length}${errors.length ? `\n${errors.slice(0, 5).join('\n')}` : ''}`);

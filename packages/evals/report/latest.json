@@ -59,7 +59,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -77,7 +77,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -275,7 +275,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -293,7 +293,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -516,7 +516,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -534,7 +534,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -762,7 +762,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -780,7 +780,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -897,7 +897,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -915,7 +915,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1032,7 +1032,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1050,7 +1050,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1167,7 +1167,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1185,7 +1185,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1314,7 +1314,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1332,7 +1332,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1443,7 +1443,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1461,7 +1461,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1572,7 +1572,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1590,7 +1590,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1707,7 +1707,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1725,7 +1725,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1848,7 +1848,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1866,7 +1866,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1977,7 +1977,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1995,7 +1995,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2112,7 +2112,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2130,7 +2130,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2196,7 +2196,7 @@
      "detail": ""
     },
     {
-     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"maya-lunch\",\"timing\":\"next-pause\",\"enter\":\"edge\"}",
+     "name": "[3, 3.1) must {\"action\":\"show\",\"id\":\"maya-lunch\",\"timing\":\"next-pause\"}",
      "pass": true,
      "detail": "t=3 show maya-lunch glance",
      "rule": "notifications"
@@ -2241,7 +2241,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2259,7 +2259,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2370,7 +2370,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2388,7 +2388,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2505,7 +2505,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2523,7 +2523,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2646,7 +2646,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2664,7 +2664,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2775,7 +2775,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2793,7 +2793,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2910,7 +2910,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2928,7 +2928,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3033,7 +3033,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3051,7 +3051,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3174,7 +3174,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3192,7 +3192,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3303,7 +3303,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3321,7 +3321,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3426,7 +3426,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3444,7 +3444,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3561,7 +3561,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3579,7 +3579,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3696,7 +3696,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3714,7 +3714,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3819,7 +3819,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3837,7 +3837,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3903,20 +3903,20 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"enter\":\"edge\"}",
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\"}",
      "pass": true,
      "detail": "t=2 show goldies-counter glance",
      "rule": "walking-4"
     },
     {
-     "name": "[10, 12) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"enter\":\"anchor\",\"band\":\"stopped\"}",
+     "name": "[10, 12) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"band\":\"stopped\"}",
      "pass": true,
      "detail": "t=10.8 show kathys-cupcakes glance",
      "rule": "walking-4"
     }
    ],
    "rule": "walking-4",
-   "description": "Panes that appear while moving enter at the edge; once stopped they may sit at the anchor."
+   "description": "A new pane is born at its placed position with the condense move, beside or above its light. While moving it is outside the focus zone unless it is the thing being looked at; the geometry is checked on the recorded walks and in the overlay placement test."
   },
   {
    "id": "walking-05-head-scan",
@@ -3948,7 +3948,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3966,7 +3966,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4077,7 +4077,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4095,7 +4095,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4212,7 +4212,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4230,7 +4230,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4341,7 +4341,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4359,7 +4359,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4470,7 +4470,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4488,7 +4488,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4599,7 +4599,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4617,7 +4617,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4728,7 +4728,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4746,7 +4746,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4869,7 +4869,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4887,7 +4887,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5004,7 +5004,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5022,7 +5022,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5139,7 +5139,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5157,7 +5157,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5274,7 +5274,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5292,7 +5292,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5421,7 +5421,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5439,7 +5439,7 @@
      "detail": ""
     },
     {
-     "name": "peripheral entry: every pane that appears while moving is placed to enter at the edge",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
      "rule": "walking-4",
      "pass": true,
      "detail": ""

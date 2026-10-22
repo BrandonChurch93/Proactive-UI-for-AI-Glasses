@@ -1350,7 +1350,6 @@ export class Brain {
   }
 
   private toDecision(w: Want, action: Decision['action'], timing: Timing): Decision {
-    const moving = this.bandNow !== 'stopped';
     const d: Decision = {
       id: w.id,
       action,
@@ -1361,7 +1360,6 @@ export class Brain {
         anchor: w.anchor,
         zone: w.zone,
         prefer: w.zone === 'ground' ? 'below' : 'side',
-        enter: moving && w.zone !== 'ground' ? 'edge' : 'anchor',
         focusOk: w.focusOk === true,
       },
       content: w.content,

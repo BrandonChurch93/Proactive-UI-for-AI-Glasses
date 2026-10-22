@@ -34,7 +34,6 @@ export interface Match {
   factIs?: string | null;
   factIncludes?: string;
   showReason?: boolean;
-  enter?: 'edge' | 'anchor';
   focusOk?: boolean;
   all?: boolean;
   allowNone?: boolean;
@@ -102,7 +101,6 @@ export function matches(d: Decision, m: Match): boolean {
   if (m.factIs !== undefined && (d.content.fact ?? null) !== m.factIs) return false;
   if (m.factIncludes !== undefined && !(d.content.fact ?? '').includes(m.factIncludes)) return false;
   if (m.showReason !== undefined && Boolean(d.content.showReason) !== m.showReason) return false;
-  if (m.enter !== undefined && d.placement.enter !== m.enter) return false;
   if (m.focusOk !== undefined && Boolean(d.placement.focusOk) !== m.focusOk) return false;
   return true;
 }

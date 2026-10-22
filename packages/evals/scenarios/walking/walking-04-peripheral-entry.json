@@ -3,7 +3,7 @@
   "rule": "walking-4",
   "scenario": "hungry",
   "duration": 16,
-  "description": "Panes that appear while moving enter at the edge; once stopped they may sit at the anchor.",
+  "description": "A new pane is born at its placed position with the condense move, beside or above its light. While moving it is outside the focus zone unless it is the thing being looked at; the geometry is checked on the recorded walks and in the overlay placement test.",
   "pace": [
     [
       0,

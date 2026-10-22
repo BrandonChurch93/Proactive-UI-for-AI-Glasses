@@ -97,7 +97,7 @@ Rules:
 
 ### Spacing and radius
 
-Pane padding: glance 8px 13px 9px; card 12px 15px 11px; expanded 15px 17px 14px. Internal gaps 4px, 9px, 10px. Leader offset from anchor: 26px to a glance, 40px to a card at reference scale.
+Pane padding: glance 8px 13px 9px; card 12px 15px 11px; expanded 15px 17px 14px. Internal gaps 4px, 9px, 10px. Gap from the light to the pane: 24 px beside it, 22 px above or below it, at reference scale.
 
 ## 3. The light vocabulary (rendered in the scene, bloomed)
 
@@ -199,20 +199,20 @@ Synthesized, no files. Off by default, one button turns it on.
 ## 5. Placement
 
 Zones:
-- World zone (pips, glances, cards, expanded view): projected from 3D anchors every frame. Scale with distance: `scale = clamp(30 / distance, .92, 1.2)`.
+- World zone (pips, glances, cards, expanded view): projected from 3D anchors every frame. Scale with distance: `scale = clamp(22 / distance, .78, 1)`: full size at 22 m and nearer, a smaller label beyond.
 - Ground zone (route, turn arc, destination marker, safety text): painted on the pavement in perspective.
 - View zone (held glyph, message toasts, map tile, the ask glance, reviewer chrome): fixed in view, edges only.
 
 Rules:
-1. Anchor at sign height for a storefront, chest height for a person. The pane offsets up and toward the nearer screen edge, joined by the leader. As built: the pane is centered above the anchor first (it belongs to the building), offset to a side only when there is no room above or below. When there is no room above, it sits below the anchor instead of pinning to the top edge.
-2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it. The only exception is the pane on the thing being looked at, which sits beside it while it is looked at and leaves the zone on look-away (walking rules, rule 1, as built). When the zone grows, content inside it is pushed out over 320 ms, never cut.
-3. Keep-out: roadway, moving vehicles, people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). A pane that cannot clear them drops to a pip.
+1. Anchor at sign height for a storefront, chest height for a person. The pane sits beside its light on the side away from the center of the view, its near edge 24 px from the light and vertically centered on it, joined by a short straight leader; when that does not fit, centered above the light with its bottom 22 px above it; then centered below. It is never placed over the roadway; with nowhere else to go it sits above its light at the roadway's top edge.
+2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it except the pane on the thing being looked at, which the zone does not apply to. When the zone grows, or the look leaves a pane that sits in it, the pane moves out over 320 ms if it has a place within its own width of its light, and otherwise waits as its light.
+3. Keep-out: roadway, vehicles in traffic (moving or stopped), people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). A pane that cannot clear a mover dims in place and drops to its light when mostly covered.
 4. Calm backdrop: façade over sky over road, never over a bright sign. (The pip may sit above a marquee, never on it: a glow on a glow is invisible.)
 5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it.
-6. Edge: a card within 8% of the edge collapses to glance; a glance within 4% collapses to pip. Content whose anchor leaves the view folds to the edge light and returns when the wearer looks back. The head turns a full 180 degrees.
-7. While moving, new content enters at the edge (walking rule 4) and moves inward only when the band drops to Stopped, over 480 ms ease-out.
+6. Edge: a card that is not being looked at collapses to a glance within 8% of the edge, and a glance to its light within 4%; the pane on the thing being looked at never collapses, it shrinks to 0.74 instead. Content whose anchor leaves the view folds to the edge light and returns in place when the wearer looks back. The head turns a full 180 degrees.
+7. A new pane is born at its placed position with the condense move (walking rule 4); nothing slides in from the edge.
 
-As built, smaller screens: sizes above are at the reference view of 1280 × 800. On a smaller view every pane, the held glyph and the whisper line scale by `clamp(1.3 × min(w / 1280, h / 800), 0.74, 1)` on top of the distance scale, so a landscape phone runs at 0.74 and anything from a 1024 × 640 laptop up runs at 1. A pane that cannot be placed at its level steps down a level (expanded to card to glance) before it falls back to a pip, and steps back up when there is room again. Phones held upright get a prompt to turn sideways instead of the street; tablets work both ways.
+As built, smaller screens: sizes above are at the reference view of 1280 × 800. On a smaller view every pane, the held glyph and the whisper line scale by `clamp(1.3 × min(w / 1280, h / 800), 0.74, 1)` on top of the distance scale, so a landscape phone runs at 0.74 and anything from a 1024 × 640 laptop up runs at 1. A pane that is not being looked at and cannot be placed at its level steps down a level (expanded to card to glance) before it falls back to its light, and steps back up when there is room again; the pane on the thing being looked at shrinks to 0.74 instead and never steps down. Phones held upright get a prompt to turn sideways instead of the street; tablets work both ways.
 
 ## 6. Components
 

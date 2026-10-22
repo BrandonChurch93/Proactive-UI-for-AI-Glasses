@@ -17,8 +17,8 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 - Trigger: every frame, from the pace band.
 - Response: the keep-out zone in the center of the view scales with speed. Stopped: middle 33% of width × 40% of height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. World-zone content is placed outside it; content already inside it when the zone grows is pushed out over 320 ms ease-out, not cut.
-- Eval: in every frame of every walk, no world-zone pane intersects the zone for its current band. The single exception is the pane on the thing being looked at, for as long as it is looked at.
-- As built (changed after owner testing): the exception covers every level on the gaze target, not only a glance for 4 s. Gaze is the center of the view, so the thing being looked at is always inside the zone; pushing its pane out of the zone put the card half a screen away from the store, with the leader running back across the street. The pane on the thing you are looking at now sits beside it. Everything else keeps the zone clear, and the moment the look moves away the pane leaves the zone and walks down by look-away.
+- The pane on the thing being looked at is exempt: gaze is the center of the view, so that thing is always inside the zone, and its pane sits beside it. When the look moves away, the pane leaves the zone over the same 320 ms, or waits as its light if it has no place within its own width of it.
+- Eval: in every frame of every walk, no world-zone pane above 20% opacity intersects the zone for its current band, except the pane being looked at and a pane in its 320 ms move out (after the zone grew or the look left).
 
 ## Rule 2 · Reading budget
 
@@ -32,17 +32,16 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 - Response: it folds on its own (dissolve, retract). Nothing waits to be dismissed while the wearer moves. In Stroll the limit is 4 s; Stopped has no limit; Brisk has no glances to fold. Like every change the wearer did not ask for, it never comes sooner than 2.5 s after the pane's last change of level.
 - Eval: no non-gaze glance persists past its band's limit. Level hysteresis (1.2 s) applies to score-driven changes only, never to the dwell ladder's climbs or the look-away descent.
 
-## Rule 4 · Peripheral entry
+## Rule 4 · Entry
 
-- Trigger: a new show while moving.
-- Response: content enters at the edge of the view (outside the focus zone, nearest side) and only moves inward when the band drops to Stopped, over 480 ms ease-out. Stopped content may sit closer to the anchor.
-- Eval: the first frame of any pane while moving is outside the focus zone.
-- As built: "the edge of the view" is read as the edge of the clear zone, not the edge of the screen. The pane enters just outside the focus zone on the anchor's side, level with the anchor. On a large monitor the screen edge was hundreds of pixels from where the wearer was looking, and testers did not see the pane at all.
+- Trigger: a new show.
+- Response: a new pane is born at its placed position, beside or above its light, with the condense move. It never slides in from the edge of the view. While moving, a pane that is not the thing being looked at is born outside the focus zone, or waits as its light.
+- Eval: the first frame of any pane while moving is outside the focus zone unless it is the thing being looked at.
 
 ## Rule 5 · Head-scan yielding
 
 - Trigger: within 8 m of a curb, the head turns toward a side faster than 0.8 rad/s (the look-left, look-right before crossing).
-- Response: content on that side yields instantly (fade to 15% and slide 24 px outward over 180 ms ease-gate) and returns when the head comes back (320 ms ease-out). The glasses never compete with a safety check.
+- Response: content on that side yields instantly (fade to 15% and slide 24 px outward over 180 ms ease-gate) and returns when the head comes back (320 ms ease-out). Nothing is re-placed during the scan: panes stay with their stores, and one that the scan carries somewhere it could not normally sit yields as well. The glasses never compete with a safety check.
 - Eval: in the scripted head-scan beat, the panes on the scanned side are below 20% opacity within 200 ms of the turn and restored within 400 ms of the return.
 
 ## Rule 6 · The pocket
@@ -59,7 +58,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 ## Rule 8 · The world has right of way
 
-- Trigger: a person or vehicle between the eye and the pane's anchor overlaps the pane's projected bounds for more than 120 ms. Something behind the thing the pane describes is not in its way.
+- Trigger: a person or vehicle (moving, or stopped in traffic like a bus at its stop) between the eye and the pane's anchor overlaps the pane's projected bounds for more than 120 ms. Something behind the thing the pane describes is not in its way.
 - Response: the pane dims to 30% on the first frame and slides away from the overlap by the overlap width plus 20 px over 220 ms, up or down when it can, never along the mover's own path and never further than its own width, leaving a faint trace line to its home position. It returns when clear, over 320 ms ease-out. If it cannot clear, it stays dimmed in place, and drops to its pip only when the mover covers more than 60% of it for 300 ms (a face it cannot clear drops it at once). A dropped pane is hidden, not destroyed: the brain holds its level while it is out of sight, and it condenses back in its own place 300 ms after the way is clear.
 - Eval: in the scripted pedestrian beat, the card's rect never intersects the pedestrian's rect while the card is above 30% opacity; a vehicle covering a pane dims it on the first frame and drops it only after 300 ms above 60% cover.
 

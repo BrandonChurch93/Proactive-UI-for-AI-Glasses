@@ -233,7 +233,6 @@ export interface Decision {
     anchor: string;
     zone: Zone;
     prefer: 'side' | 'above' | 'below';
-    enter?: 'edge' | 'anchor';
     focusOk?: boolean;
   };
   content: Content;

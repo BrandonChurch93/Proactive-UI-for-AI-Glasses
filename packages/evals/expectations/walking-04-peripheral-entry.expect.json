@@ -9,8 +9,7 @@
       ],
       "must": {
         "action": "show",
-        "id": "goldies-counter",
-        "enter": "edge"
+        "id": "goldies-counter"
       }
     },
     {
@@ -22,7 +21,6 @@
       "must": {
         "action": "show",
         "id": "kathys-cupcakes",
-        "enter": "anchor",
         "band": "stopped"
       }
     }

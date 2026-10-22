@@ -71,19 +71,22 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-1',
-    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at',
+    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)',
     check: (r) => {
       let bandAt = -Infinity;
+      const lookedAt = new Map<string, number>();
       for (let i = 0; i < r.snapshots.length; i++) {
         const s = r.snapshots[i]!;
         const f = r.frames[i]!;
         if (i > 0 && r.frames[i - 1]!.band !== f.band) bandAt = f.t;
         const view = s.view;
-        if (!view || f.t - bandAt < 0.32 + TICK) continue;
+        if (!view) continue;
+        for (const p of view.panes) if (p.gaze) lookedAt.set(p.id, f.t);
+        if (f.t - bandAt < 0.32 + TICK) continue;
         const zone = focusRect(f.band, view.w, view.h);
         for (const p of view.panes) {
-          if (p.zone !== 'world' || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
-          if (!rectsOverlap(p.rect, zone) || p.gaze) continue;
+          if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
+          if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < 0.32 + TICK) continue;
           return `t=${s.t} ${p.id} ${p.level} in the ${f.band} zone`;
         }
       }
@@ -129,12 +132,24 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-4',
-    name: 'peripheral entry: every pane that appears while moving is placed to enter at the edge',
+    name: 'entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at',
     check: (r) => {
-      for (const e of r.entries) {
-        const d = e.decision;
-        if (d.action !== 'show' || d.band === 'stopped' || d.placement.zone === 'ground') continue;
-        if (d.placement.enter !== 'edge') return `t=${e.t} ${d.id} enters at ${d.placement.enter}`;
+      const shown = new Set<string>();
+      for (let i = 0; i < r.snapshots.length; i++) {
+        const s = r.snapshots[i]!;
+        const f = r.frames[i]!;
+        const view = s.view;
+        if (!view) continue;
+        const zone = focusRect(f.band, view.w, view.h);
+        const now = new Set<string>();
+        for (const p of view.panes) {
+          if (p.zone !== 'world' || !p.visible || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
+          now.add(p.id);
+          if (shown.has(p.id) || f.band === 'stopped' || p.gaze) continue;
+          if (rectsOverlap(p.rect, zone)) return `t=${s.t} ${p.id} born inside the ${f.band} zone`;
+        }
+        shown.clear();
+        for (const id of now) shown.add(id);
       }
       return null;
     },

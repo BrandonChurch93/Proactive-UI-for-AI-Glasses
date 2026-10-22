@@ -1,5 +1,7 @@
 import {
   Aside,
+  PaneYield,
+  Yield,
   LEVEL_RANK,
   NOMINAL_SIZE,
   Placement,
@@ -51,14 +53,13 @@ export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, max
     out.push(k);
   };
   for (const v of sim.traffic.vehicles) {
-    if (v.v < 0.3) continue;
     const b = sim.traffic.bounds(v);
     if (Math.hypot((b.min.x + b.max.x) / 2 - eye.x, (b.min.z + b.max.z) / 2 - eye.z) > VEHICLE_RANGE_M) continue;
     const lane = LANE_BY_ID.get(v.lane)!;
     const dx = lane.dir.x * v.v * LOOKAHEAD;
     const dz = lane.dir.z * v.v * LOOKAHEAD;
     const ahead = { min: { x: b.min.x + dx, y: b.min.y, z: b.min.z + dz }, max: { x: b.max.x + dx, y: b.max.y, z: b.max.z + dz } };
-    push(both(boxKeepOut(b, proj, vp), boxKeepOut(ahead, proj, vp)), 'vehicle', true, v.id);
+    push(both(boxKeepOut(b, proj, vp), boxKeepOut(ahead, proj, vp)), 'vehicle', v.v >= 0.3, v.id);
   }
   for (const p of sim.people.people) {
     if (!p.alive || p.spawnAt > sim.t) continue;
@@ -100,6 +101,7 @@ const VIEW_SIZE: Record<string, { w: number; h: number }> = {
 interface HeadlessItem {
   place: Placement;
   aside: Aside;
+  yieldS: PaneYield;
   pane: PaneReport | null;
 }
 
@@ -108,6 +110,7 @@ const hidden = (id: string, level: PaneReport['level'], gaze: boolean, by: Hidde
 export class HeadlessView {
   private items = new Map<string, HeadlessItem>();
   private frame: BrainFrame | null = null;
+  private readonly scan = new Yield();
 
   advanceTo(sim: Sim, t: number): void {
     const dt = 1 / SIM_HZ;
@@ -137,13 +140,14 @@ export class HeadlessView {
       anchors.set(d.id, a);
       if (LEVEL_RANK[d.level] >= LEVEL_RANK.glance && d.level !== 'whisper') reach = Math.max(reach, proj(a).depth);
     }
-    const ctx: FrameCtx = { t: sim.t, band: frame.band, vp, keepOuts: keepOuts(sim, proj, vp, pose.pos, reach), ui: uiScale(vp) };
+    const side = this.scan.update({ t: sim.t, yawRate: sim.head.yawRate, curbDistance: sim.wearer.curbDistance() });
+    const ctx: FrameCtx = { t: sim.t, band: frame.band, vp, keepOuts: keepOuts(sim, proj, vp, pose.pos, reach), ui: uiScale(vp), scanning: side !== null };
     for (const d of frame.items) {
       const a = anchors.get(d.id);
       if (!a) continue;
       let it = this.items.get(d.id);
       if (!it) {
-        it = { place: new Placement(d.placement.enter === 'edge'), aside: new Aside(), pane: null };
+        it = { place: new Placement(), aside: new Aside(), yieldS: new PaneYield(), pane: null };
         this.items.set(d.id, it);
       }
       const lv = d.level === 'glance' || d.level === 'card' || d.level === 'expanded' ? d.level : 'glance';
@@ -172,7 +176,9 @@ export class HeadlessView {
         continue;
       }
       const level = placed.collapsed && LEVEL_RANK[placed.collapsed] < LEVEL_RANK[d.level] ? placed.collapsed : d.level;
-      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * 1000) / 1000, gaze, visible: true };
+      const paneSide = home.x + home.w / 2 < vp.w / 2 ? 'left' : 'right';
+      const y = it.yieldS.update(sim.t, placed.stilled ? paneSide : side, paneSide);
+      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx + y.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * y.opacity * 1000) / 1000, gaze, visible: true };
     }
   }
 

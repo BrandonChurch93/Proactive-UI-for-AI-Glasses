@@ -2,7 +2,9 @@ import { gsap } from 'gsap';
 import {
   LEVEL_RANK,
   NOMINAL_SIZE,
+  anchorFactors,
   focusRect,
+  rectsOverlap,
   uiScale,
   type Level,
   placeView,
@@ -51,6 +53,7 @@ interface Built {
   fade: { v: number };
   opacity: number;
   off: { x: number; y: number } | null;
+  watch: ResizeObserver | null;
   tl?: gsap.core.Timeline;
 }
 
@@ -90,6 +93,7 @@ interface Item {
   asideOn: boolean;
   fresh: OverlayEvent[];
   lastMove: OverlayEvent | null;
+  changedAt: number;
 }
 
 export interface OverlayOptions {
@@ -377,7 +381,7 @@ export class Overlay {
       gtl: null,
       L: lightVals(),
       lights: null,
-      place: world ? new Placement(d.placement.enter === 'edge') : null,
+      place: world ? new Placement() : null,
       aside: new Aside(),
       yieldS: new PaneYield(),
       fill: new BackdropFill(),
@@ -401,6 +405,7 @@ export class Overlay {
       asideOn: false,
       fresh: [],
       lastMove: null,
+      changedAt: -Infinity,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -426,6 +431,7 @@ export class Overlay {
     it.gtl?.kill();
     for (const b of [it.cur, it.stash, ...it.old]) {
       b?.tl?.kill();
+      b?.watch?.disconnect();
       b?.wrap.remove();
     }
     it.tl?.kill();
@@ -544,7 +550,9 @@ export class Overlay {
       fade: { v: 1 },
       opacity: 0,
       off: null,
+      watch: null,
     };
+    this.watch(b);
     this.sizeBox(b, level);
     hidePane(this.els(b));
     gsap.set([box, view.el], { opacity: 1 });
@@ -560,6 +568,16 @@ export class Overlay {
     const h = `${b.h.at(this.t).toFixed(1)}px`;
     if (b.box.style.width !== w) b.box.style.width = w;
     if (b.box.style.height !== h) b.box.style.height = h;
+  }
+
+  private watch(b: Built): void {
+    b.watch?.disconnect();
+    if (typeof ResizeObserver === 'undefined') return;
+    const el = b.view.el;
+    b.watch = new ResizeObserver(() => {
+      if (b.view.el === el) this.remeasure(b, this.t);
+    });
+    b.watch.observe(el);
   }
 
   private remeasure(b: Built, t: number): void {
@@ -598,7 +616,7 @@ export class Overlay {
       if (LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') return { kind: 'death', ...brain };
       if (it.aside.dropped) return { kind: 'drop', cause: 'keepout', detail: it.aside.by ?? '' };
       if (!placed || placed.mode === 'edge') return { kind: 'edge', cause: 'offscreen' };
-      return { kind: 'hide', cause: placed.why ?? 'room' };
+      return { kind: 'hide', cause: placed.why ?? 'room', detail: d.placement.focusOk ? '' : 'not looked at' };
     }
     if (it.restored) return { kind: 'birth', cause: 'resume' };
     if (decided) return { kind: 'birth', ...brain };
@@ -625,6 +643,7 @@ export class Overlay {
     b.view = view;
     b.width = view.el.offsetWidth;
     b.height = view.el.offsetHeight;
+    this.watch(b);
     const grow = from !== want;
     const dur = this.reduced ? 0 : want === 'expanded' ? T.open : want === 'card' ? T.baseCard : T.base;
     b.w.go(t, b.width, dur, 'out');
@@ -656,6 +675,7 @@ export class Overlay {
     }
     if (grow && (want === 'card' || want === 'expanded') && LEVEL_RANK[want] > LEVEL_RANK[from]) tl.call(() => this.sound.breathUp(want === 'expanded'), [], 0);
     it.condensingUntil = t + Math.max(end, dur);
+    it.changedAt = t;
     it.want = want;
     it.tl = tl;
     it.off = null;
@@ -700,7 +720,10 @@ export class Overlay {
       } else end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
       dtl.call(() => {
         if (keep) prev.wrap.style.opacity = '0';
-        else prev.wrap.remove();
+        else {
+          prev.watch?.disconnect();
+          prev.wrap.remove();
+        }
         it.old = it.old.filter((o) => o !== prev);
       }, [], end + 0.02);
       prev.tl = dtl;
@@ -744,6 +767,7 @@ export class Overlay {
     it.tl = tl;
     it.off = null;
     it.size = null;
+    it.changedAt = t;
     if (why && (want !== 'none' || prev)) {
       it.why = why;
       it.restored = false;
@@ -759,6 +783,7 @@ export class Overlay {
       b.view.el.replaceWith(view.el);
       gsap.set(view.el, { opacity: 1 });
       b.view = view;
+      this.watch(b);
       b.width = view.el.offsetWidth;
       b.height = view.el.offsetHeight;
       b.w.set(b.width);
@@ -796,8 +821,8 @@ export class Overlay {
       this.ui = ui;
       this.root.style.setProperty('--ui', ui.toFixed(3));
     }
-    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, ui };
     const yieldSide = this.yieldTracker.update({ t, yawRate: this.yawRate, curbDistance: this.bridge.curbDistance() });
+    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, ui, scanning: yieldSide !== null };
     const gk = this.gateK.v;
     const pipMul = this.snooze ? 0.3 : 1;
     const zone = focusRect(this.band, vp.w, vp.h);
@@ -833,8 +858,7 @@ export class Overlay {
       let fx = 0.5;
       let fy = 1;
       if (placed && placed.mode === 'pane' && it.place) {
-        fx = placed.align === 'left' ? 1 : placed.align === 'right' ? 0 : 0.5;
-        fy = placed.vertical === 'below' ? 0 : 1;
+        ({ fx, fy } = anchorFactors(placed.align ?? 'center', placed.vertical ?? 'above'));
         corner = { x: placed.rect.x + placed.rect.w * fx + it.place.jumpX.at(t), y: placed.rect.y + placed.rect.h * fy + it.place.jumpY.at(t) };
       }
       if (placed && placed.mode === 'pane' && corner && LEVEL_RANK[d.level] >= LEVEL_RANK.glance && !it.dying) {
@@ -847,16 +871,17 @@ export class Overlay {
       }
       const want = this.paneLevelFor(it, placed);
       const decided = it.d.level !== it.decided;
-      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
+      const inZone = !d.placement.focusOk && want === 'none' && Boolean(it.cur?.rect && rectsOverlap(it.cur.rect, zone));
+      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || inZone || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
       if (want !== it.want) {
         if (urgent) {
           it.pending = null;
           const why = this.explain(it, placed, want, decided);
           it.decided = it.d.level;
-          this.transition(it, want, t, placed?.mode === 'edge', why);
+          this.transition(it, want, t, placed?.mode === 'edge' || inZone, why);
         } else if (!it.yieldS.on) {
           if (!it.pending || it.pending.want !== want) it.pending = { want, since: t };
-          else if (t - it.pending.since >= MOVE.settle) {
+          else if (t - it.pending.since >= MOVE.settle && t - it.changedAt >= MOVE.minShown) {
             it.pending = null;
             this.transition(it, want, t, placed?.mode === 'edge', this.explain(it, placed, want, false));
           }
@@ -879,7 +904,8 @@ export class Overlay {
         let asideO = 1;
         if (it.kind === 'world') {
           if (b !== it.cur || !placed || placed.mode !== 'pane') {
-            if (b.off && pr) rect = { ...(b.rect ?? { w: 0, h: 0 }), x: pr.x + b.off.x, y: pr.y + b.off.y } as Rect;
+            const nearView = pr && depth > 1 && pr.x > -vp.w * 0.25 && pr.x < vp.w * 1.25 && pr.y > -vp.h * 0.25 && pr.y < vp.h * 1.25;
+            if (b.off && pr && nearView) rect = { ...(b.rect ?? { w: 0, h: 0 }), x: pr.x + b.off.x, y: pr.y + b.off.y } as Rect;
             else if (b.rect) rect = b.rect;
             else continue;
             scale = it.placed?.scale ?? 1;
@@ -891,7 +917,8 @@ export class Overlay {
             const base = { x: at.x - w * fx, y: at.y - h * fy, w, h };
             const a = aside ?? { dx: 0, dy: 0, opacity: 1, dropped: false, active: false, by: null, trace: null };
             asideO = a.opacity;
-            const y = it.yieldS.update(t, yieldSide, base.x + base.w / 2 < vp.w / 2 ? 'left' : 'right');
+            const paneSide = base.x + base.w / 2 < vp.w / 2 ? 'left' : 'right';
+            const y = it.yieldS.update(t, placed.stilled ? paneSide : yieldSide, paneSide);
             yieldO = y.opacity;
             rect = { x: base.x + a.dx + y.dx, y: base.y + a.dy, w: base.w, h: base.h };
             this.setTrace(it, a.trace && !a.dropped ? a.trace : null, a.opacity);
@@ -999,8 +1026,7 @@ export class Overlay {
     const b = it.cur;
     const born = it.fresh.some((e) => e.kind === 'birth');
     if (b && placed?.mode === 'pane' && pr && !born) {
-      const fx = placed.align === 'left' ? 1 : placed.align === 'right' ? 0 : 0.5;
-      const fy = placed.vertical === 'below' ? 0 : 1;
+      const { fx, fy } = anchorFactors(placed.align ?? 'center', placed.vertical ?? 'above');
       const off = { x: placed.rect.x + placed.rect.w * fx - pr.x, y: placed.rect.y + placed.rect.h * fy - pr.y };
       if (it.off && Math.hypot(off.x - it.off.x, off.y - it.off.y) > 40) {
         const cause = placed.moved ?? placed.why ?? 'anchor';

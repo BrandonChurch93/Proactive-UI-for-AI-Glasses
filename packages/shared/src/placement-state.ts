@@ -2,7 +2,7 @@ import type { Projected, Viewport } from './camera';
 import type { Band } from './data';
 import { keepOutsFor, type KeepOut } from './keepout';
 import { MOVE } from './motion-tokens';
-import { MARGIN, NOMINAL_SIZE, ZONE_GAP, configRect, distanceScale, placeWorld, type Align, type PlaceInput } from './placement';
+import { MARGIN, NOMINAL_SIZE, anchorFactors, configRect, distanceScale, placeWorld, type Align, type PlaceInput, type Vertical } from './placement';
 import { focusRect } from './rules';
 import { LEVEL_RANK, type Level } from './types';
 import { rectsOverlap, type Rect } from './vec';
@@ -62,6 +62,7 @@ export interface FrameCtx {
   keepOuts: readonly KeepOut[];
   focusOk?: boolean;
   ui?: number;
+  scanning?: boolean;
 }
 
 export interface PlaceRequest {
@@ -83,17 +84,20 @@ export interface WorldPlace {
   side: 'left' | 'right';
   collapsed?: Level;
   why?: 'collapse' | 'step-down' | 'room';
-  moved?: 'inward' | 'side' | 'replace' | 'clamp' | 'zone' | 'pinned';
+  moved?: 'replace' | 'rope' | 'clamp' | 'zone';
   align?: Align;
-  vertical?: 'above' | 'below';
+  vertical?: Vertical;
   edge?: { x: number; y: number };
   behind?: boolean;
+  stilled?: boolean;
 }
 
 interface Config {
   side: Align;
-  vertical: 'above' | 'below';
+  vertical: Vertical;
   shrink: number | null;
+  push: boolean;
+  pushOff?: { x: number; y: number };
 }
 
 const STEP_DOWN: Partial<Record<Level, Level[]>> = { expanded: ['card', 'glance'], card: ['glance'] };
@@ -102,16 +106,15 @@ export class Placement {
   private cfg: Config | null = null;
   private cfgAt = -Infinity;
   private shown: { x: number; y: number } | null = null;
+  private shownRel: { x: number; y: number } | null = null;
   private shownW = 0;
+  private shownBox: Rect | null = null;
   private offSince: number | null = null;
   private collapsed: Level | undefined;
   private step: Level | undefined;
   private last: WorldPlace | null = null;
   readonly jumpX = new Track(0);
   readonly jumpY = new Track(0);
-  pinned: 'left' | 'right' | null = null;
-
-  constructor(private enterEdge: boolean) {}
 
   reset(): void {
     this.cfg = null;
@@ -130,6 +133,7 @@ export class Placement {
         const left = behind ? a.x > vp.w / 2 : a.x < vp.w / 2;
         const y = Math.max(40, Math.min(vp.h - 40, behind ? vp.h / 2 : a.y));
         this.shown = null;
+        this.shownBox = null;
         this.cfg = null;
         const edge = { x: left ? 6 : vp.w - 6, y };
         return { mode: 'edge', rect: { x: edge.x, y, w: 0, h: 0 }, leader: edge, scale: 1, side: left ? 'left' : 'right', edge, behind };
@@ -140,7 +144,9 @@ export class Placement {
 
     const edgeFrac = Math.min(a.x, vp.w - a.x) / vp.w;
     const big = req.level === 'card' || req.level === 'expanded';
-    if (req.focusOk) {
+    const frozen = Boolean(ctx.scanning) && this.cfg !== null && this.last?.mode === 'pane';
+    if (frozen) this.freezeCollapse();
+    else if (req.focusOk) {
       this.collapsed = undefined;
       this.step = undefined;
     } else if (big) {
@@ -156,22 +162,10 @@ export class Placement {
 
     let jump: number | null = null;
     let moved: WorldPlace['moved'];
-    if (this.pinned && ctx.band === 'stopped') {
-      this.pinned = null;
-      jump = MOVE.inward;
-      moved = 'inward';
-    } else if (this.pinned) {
-      const side = a.x < vp.w * 0.4 ? 'left' : a.x > vp.w * 0.6 ? 'right' : this.pinned;
-      if (side !== this.pinned) {
-        this.pinned = side;
-        if (this.cfg && this.cfg.side !== 'center') this.cfg = { ...this.cfg, side };
-        jump = MOVE.pushOut;
-        moved = 'side';
-      }
-    }
-
     const ui = ctx.ui ?? 1;
-    const rects = keepOutsFor(ctx.keepOuts, a.depth).map((k) => k.rect);
+    const near = keepOutsFor(ctx.keepOuts, a.depth);
+    const rects = near.map((k) => k.rect);
+    const road = near.filter((k) => k.kind === 'roadway').map((k) => k.rect);
     const sizeFor = (lv: Level): { w: number; h: number } =>
       lv === req.level ? req.size : (req.sizeOf?.(lv) ?? NOMINAL_SIZE[lv as 'glance' | 'card' | 'expanded'] ?? NOMINAL_SIZE.glance);
     const make = (lv: Level): PlaceInput => ({
@@ -183,15 +177,20 @@ export class Placement {
       viewport: vp,
       focusOk: req.focusOk,
       keepOuts: rects,
+      road,
       ui,
     });
-    const near: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
-    const prefer = (): { side: Align; vertical: 'above' | 'below' } => ({ side: this.cfg?.side ?? 'center', vertical: this.cfg?.vertical ?? 'above' });
+    const near2: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
+    const prefer = (): { side: Align; vertical: Vertical; push: boolean } | undefined => (this.cfg ? { side: this.cfg.side, vertical: this.cfg.vertical, push: this.cfg.push } : undefined);
+    const withPrefer = (inp: PlaceInput): PlaceInput => {
+      const pf = prefer();
+      return pf ? { ...inp, prefer: pf } : inp;
+    };
     let level: Level = req.level;
     if (this.collapsed === 'glance' && LEVEL_RANK[level] > LEVEL_RANK.glance) level = 'glance';
     if (this.step && LEVEL_RANK[this.step] < LEVEL_RANK[level]) {
       if (t - this.cfgAt > MOVE.hysteresis) {
-        const up = placeWorld({ ...make(level), prefer: prefer() });
+        const up = placeWorld(withPrefer(make(level)));
         if (up.mode !== 'pip' && up.mode !== 'offscreen') {
           this.step = undefined;
           this.cfg = null;
@@ -200,12 +199,14 @@ export class Placement {
     }
     let inp = make(level);
     const scaleOf = (c: Config): number => c.shrink ?? distanceScale(req.distance) * ui;
-    let res = this.cfg ? configRect(inp, this.cfg.side, this.cfg.vertical, scaleOf(this.cfg)) : null;
+    let res = this.cfg ? configRect(inp, this.cfg.side, this.cfg.vertical, scaleOf(this.cfg), this.cfg.push, this.cfg.pushOff) : null;
+    const stilled = Boolean(res && !res.ok && frozen);
+    if (res && stilled) res = { ...res, ok: true };
     if (!res || !res.ok) {
-      let placed = placeWorld({ ...inp, prefer: prefer() });
+      let placed = placeWorld(withPrefer(inp));
       if ((placed.mode === 'pip' || placed.mode === 'offscreen') && !req.focusOk) {
         for (const lower of STEP_DOWN[level] ?? []) {
-          const p2 = placeWorld({ ...make(lower), prefer: prefer() });
+          const p2 = placeWorld(withPrefer(make(lower)));
           if (p2.mode !== 'pip' && p2.mode !== 'offscreen') {
             placed = p2;
             level = lower;
@@ -219,73 +220,88 @@ export class Placement {
       const squeeze = 0.74 * ui;
       const fits = inp.size.w * squeeze <= vp.w - 2 * MARGIN && inp.size.h * squeeze <= vp.h - 2 * MARGIN;
       if (failed && req.focusOk && fits) {
-        const same = this.cfg?.side === 'center' && this.cfg.vertical === 'above' && this.cfg.shrink === squeeze;
+        const same = this.cfg?.side === 'center' && this.cfg.vertical === 'lift' && this.cfg.shrink === squeeze;
         if (!same) {
           if (this.cfg) {
             jump ??= MOVE.pushOut;
             moved ??= 'replace';
           }
-          this.cfg = { side: 'center', vertical: 'above', shrink: squeeze };
+          this.cfg = { side: 'center', vertical: 'lift', shrink: squeeze, push: false };
           this.cfgAt = t;
         }
-        res = configRect(inp, 'center', 'above', squeeze);
+        res = configRect(inp, 'center', 'lift', squeeze);
       } else if (failed) {
-        return this.remember({ mode: 'pip', rect: { x: a.x, y: a.y, w: 0, h: 0 }, leader: { x: a.x, y: a.y }, scale: 1, side: near, why: 'room' });
+        this.shown = null;
+        this.shownBox = null;
+        return this.remember({ mode: 'pip', rect: { x: a.x, y: a.y, w: 0, h: 0 }, leader: { x: a.x, y: a.y }, scale: 1, side: near2, why: 'room' });
       } else {
         const fresh = !this.cfg;
         const shrink = Math.abs(placed.scale - distanceScale(req.distance) * ui) > 1e-6 ? placed.scale : null;
-        this.cfg = { side: placed.align, vertical: placed.vertical, shrink };
+        this.cfg = { side: placed.align, vertical: placed.vertical, shrink, push: placed.push };
+        if (placed.push) this.cfg.pushOff = { x: placed.rect.x - a.x, y: placed.rect.y - a.y };
         this.cfgAt = t;
-        res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg));
-        if (fresh && this.enterEdge && ctx.band !== 'stopped') this.pinned = a.x < vp.w / 2 ? 'left' : 'right';
-        else if (!fresh) {
+        res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg), placed.push, this.cfg.pushOff);
+        if (!fresh) {
           jump ??= MOVE.pushOut;
           moved ??= 'replace';
         }
       }
     }
-    const scale = scaleOf(this.cfg!);
+    const cfg = this.cfg!;
+    const scale = scaleOf(cfg);
     const rect = { ...res.rect };
-    if (this.pinned && req.focusOk) this.pinned = null;
-    if (this.pinned) {
-      const zone = focusRect(ctx.band, vp.w, vp.h);
-      const x = this.pinned === 'left' ? zone.x - rect.w - ZONE_GAP : zone.x + zone.w + ZONE_GAP;
-      rect.x = Math.max(MARGIN, Math.min(vp.w - MARGIN - rect.w, x));
-      if (!req.focusOk && rectsOverlap(rect, zone)) {
-        rect.y = this.cfg!.vertical === 'above' ? zone.y - rect.h - 10 : zone.y + zone.h + 10;
-      } else rect.y = a.y - rect.h * 0.62;
-      rect.y = Math.max(MARGIN, Math.min(vp.h - MARGIN - rect.h, rect.y));
-    }
-    const fx = this.cfg!.side === 'left' ? 1 : this.cfg!.side === 'right' ? 0 : 0.5;
-    const fy = this.cfg!.vertical === 'below' ? 0 : 1;
+    const { fx, fy } = anchorFactors(cfg.side, cfg.vertical);
     const c = { x: rect.x + rect.w * fx, y: rect.y + rect.h * fy };
     const resized = this.shown !== null && Math.abs(rect.w - this.shownW) >= 0.5;
-    if (jump !== null && this.shown && !resized) {
-      this.kickFrom(t, this.shown, c, jump);
+    const zoneNow = focusRect(ctx.band, vp.w, vp.h);
+    const pathClear = (from: Rect): boolean => {
+      const x = Math.min(from.x, rect.x);
+      const y = Math.min(from.y, rect.y);
+      const span = { x, y, w: Math.max(from.x + from.w, rect.x + rect.w) - x, h: Math.max(from.y + from.h, rect.y + rect.h) - y };
+      return req.focusOk || !rectsOverlap(span, zoneNow);
+    };
+    if (jump !== null && this.shown && this.shownBox && !resized && pathClear(this.shownBox)) {
+      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump);
     } else if (this.shown && jump === null) {
-      const rope = (target: number, cur: number): number => {
-        const d = target - cur;
-        if (Math.abs(d) <= MOVE.deadBand) return cur;
-        if (Math.abs(d) > 40) return target;
-        return target - Math.sign(d) * MOVE.deadBand;
-      };
-      const zone = focusRect(ctx.band, vp.w, vp.h);
-      const nx = rope(c.x, this.shown.x);
-      const ny = rope(c.y, this.shown.y);
-      const held = { ...rect, x: nx - rect.w * fx, y: ny - rect.h * fy };
-      if (req.focusOk || !rectsOverlap(held, zone)) {
-        c.x = nx;
-        c.y = ny;
+      const d = Math.hypot(c.x - this.shown.x, c.y - this.shown.y);
+      const rel = this.shownRel ? Math.hypot(c.x - a.x - this.shownRel.x, c.y - a.y - this.shownRel.y) : 0;
+      if (rel > MOVE.ropeJump && this.last?.mode === 'pane' && !resized && !res.held) {
+        this.kickFrom(t, this.shown, c, MOVE.pushOut);
+        moved ??= 'rope';
+      } else {
+        const rope = (target: number, cur: number): number => {
+          const dd = target - cur;
+          if (Math.abs(dd) <= MOVE.deadBand) return cur;
+          return target - Math.sign(dd) * MOVE.deadBand;
+        };
+        const zone = focusRect(ctx.band, vp.w, vp.h);
+        const nx = d > MOVE.ropeJump ? c.x : rope(c.x, this.shown.x);
+        const ny = d > MOVE.ropeJump ? c.y : rope(c.y, this.shown.y);
+        const held = { ...rect, x: nx - rect.w * fx, y: ny - rect.h * fy };
+        if (req.focusOk || !rectsOverlap(held, zone)) {
+          c.x = nx;
+          c.y = ny;
+        }
       }
     }
     this.shown = c;
+    this.shownRel = { x: c.x - a.x, y: c.y - a.y };
     this.shownW = rect.w;
     rect.x = c.x - rect.w * fx;
     rect.y = c.y - rect.h * fy;
-    const leader = { x: res.leader.x - res.rect.x + rect.x, y: res.leader.y - res.rect.y + rect.y };
-    const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', align: this.cfg!.side, vertical: this.cfg!.vertical };
-    moved ??= this.pinned ? 'pinned' : (res.held ?? undefined);
+    this.shownBox = { ...rect };
+    if (!req.focusOk) {
+      const jx = this.jumpX.at(t);
+      const jy = this.jumpY.at(t);
+      if ((jx !== 0 || jy !== 0) && rectsOverlap({ ...rect, x: rect.x + jx, y: rect.y + jy }, zoneNow)) {
+        this.jumpX.set(0);
+        this.jumpY.set(0);
+      }
+    }
+    const placed: WorldPlace = { mode: 'pane', rect, leader: { x: c.x, y: c.y }, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', align: cfg.side, vertical: cfg.vertical };
+    moved ??= res.held ?? undefined;
     if (moved) placed.moved = moved;
+    if (stilled) placed.stilled = true;
     if (level !== req.level) {
       placed.collapsed = level;
       placed.why = this.collapsed === 'glance' && level === 'glance' ? 'collapse' : 'step-down';
@@ -295,6 +311,10 @@ export class Placement {
 
   get placedAt(): number {
     return this.cfgAt;
+  }
+
+  private freezeCollapse(): void {
+    if (this.collapsed === 'pip') this.collapsed = undefined;
   }
 
   private remember(p: WorldPlace): WorldPlace {
@@ -427,5 +447,47 @@ export class Aside {
     const best = keep ?? pool.reduce((a, b) => (Math.hypot(a.dx, a.dy) <= Math.hypot(b.dx, b.dy) ? a : b));
     this.dir = best.dir;
     return { dx: best.dx, dy: best.dy };
+  }
+}
+
+export interface YieldInput {
+  t: number;
+  yawRate: number;
+  curbDistance: number;
+}
+
+export class Yield {
+  private side: 'left' | 'right' | null = null;
+  private lastFast = -Infinity;
+
+  update(inp: YieldInput): 'left' | 'right' | null {
+    const fast = inp.curbDistance < 8 && Math.abs(inp.yawRate) > 0.8;
+    if (fast) {
+      this.side = inp.yawRate > 0 ? 'left' : 'right';
+      this.lastFast = inp.t;
+    } else if (this.side && inp.t - this.lastFast > 0.08) {
+      this.side = null;
+    }
+    return this.side;
+  }
+}
+
+export class PaneYield {
+  private readonly x = new Track(0);
+  private readonly o = new Track(1);
+  on = false;
+
+  update(t: number, side: 'left' | 'right' | null, paneSide: 'left' | 'right'): { dx: number; opacity: number } {
+    const want = side !== null && side === paneSide;
+    if (want && !this.on) {
+      this.on = true;
+      this.x.go(t, paneSide === 'left' ? -MOVE.yieldPx : MOVE.yieldPx, MOVE.yieldIn, 'gate');
+      this.o.go(t, MOVE.yieldOpacity, MOVE.yieldIn, 'gate');
+    } else if (!want && this.on) {
+      this.on = false;
+      this.x.go(t, 0, MOVE.yieldOut, 'out');
+      this.o.go(t, 1, MOVE.yieldOut, 'out');
+    }
+    return { dx: this.x.at(t), opacity: this.o.at(t) };
   }
 }

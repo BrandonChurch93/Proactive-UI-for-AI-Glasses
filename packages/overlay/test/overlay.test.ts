@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Brain } from '@lumen/brain';
-import { FOCUS_ZONE, KEEPOUT, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
+import { FOCUS_ZONE, KEEPOUT, anchorFactors, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
 import { ALBEDO, SHADE, Sim, TICK_HZ, keepOuts } from '@lumen/sim';
 import type { KeepOut } from '../src/bridge';
 import { primaryContrast, secondaryContrast, tierFor } from '../src/backdrop';
@@ -33,7 +33,7 @@ describe('placement on every beat of the three walks', () => {
           if (!a) continue;
           let p = placements.get(d.id);
           if (!p) {
-            p = new Placement(d.placement.enter === 'edge');
+            p = new Placement();
             placements.set(d.id, p);
           }
           const lv = d.level as 'glance' | 'card' | 'expanded';
@@ -196,28 +196,41 @@ describe('keep-outs', () => {
 
 describe('one surface', () => {
   it('a level change grows the pane from the corner its leader meets, which does not move', () => {
-    const p = new Placement(false);
+    const p = new Placement();
     const anchor = { x: 640, y: 520, depth: 14, inFront: true };
     const ctx: FrameCtx = { t: 0, band: 'stroll', vp: VP, keepOuts: [] };
-    const corner = (r: Rect): { x: number; y: number } => ({ x: r.x + r.w / 2, y: r.y + r.h });
+    const corner = (p: { rect: Rect; align?: 'left' | 'right' | 'center'; vertical?: 'above' | 'below' | 'middle' | 'lift' }): { x: number; y: number } => {
+      const { fx, fy } = anchorFactors(p.align ?? 'center', p.vertical ?? 'above');
+      return { x: p.rect.x + p.rect.w * fx, y: p.rect.y + p.rect.h * fy };
+    };
     let a = p.update({ level: 'glance', anchor, distance: 14, size: NOMINAL_SIZE.glance, focusOk: true }, ctx);
     for (let t = STEP; t < 0.5; t += STEP) a = p.update({ level: 'glance', anchor: { ...anchor, y: anchor.y - t * 30 }, distance: 14, size: NOMINAL_SIZE.glance, focusOk: true }, { ...ctx, t });
     const b = p.update({ level: 'card', anchor: { ...anchor, y: anchor.y - 0.5 * 30 }, distance: 14, size: NOMINAL_SIZE.card, focusOk: true }, { ...ctx, t: 0.5 });
-    expect(b.align).toBe('center');
-    expect(Math.hypot(corner(b.rect).x - corner(a.rect).x, corner(b.rect).y - corner(a.rect).y)).toBeLessThan(4);
+    expect([b.align, b.vertical]).toEqual([a.align, a.vertical]);
+    expect(Math.hypot(corner(b).x - corner(a).x, corner(b).y - corner(a).y)).toBeLessThan(4);
   });
 });
 
 describe('rule 1 · the zone grows, content is pushed out over 320 ms, not cut', () => {
+  it('goes back to its light when the larger zone leaves no place within its own width of it', () => {
+    const p = new Placement();
+    const anchor = { x: 640, y: 400, depth: 20, inFront: true };
+    const req = { level: 'glance' as const, anchor, distance: 20, size: NOMINAL_SIZE.glance, focusOk: false };
+    const base: FrameCtx = { t: 0, band: 'stopped', vp: VP, keepOuts: [] };
+    p.update(req, { ...base, t: 0 });
+    expect(p.update(req, { ...base, t: 2, band: 'brisk' }).mode).toBe('pip');
+  });
+
   it('moves a pane that the larger zone covers and animates the jump', () => {
-    const p = new Placement(false);
-    const anchor = { x: 560, y: 380, depth: 20, inFront: true };
+    const p = new Placement();
+    const anchor = { x: 400, y: 380, depth: 20, inFront: true };
     const req = { level: 'glance' as const, anchor, distance: 20, size: NOMINAL_SIZE.glance, focusOk: false };
     const base: FrameCtx = { t: 0, band: 'stopped', vp: VP, keepOuts: [] };
     p.update(req, base);
     p.update(req, { ...base, t: 2, band: 'brisk' });
     const zone = focusRect('brisk', VP.w, VP.h);
     const r = p.update(req, { ...base, t: 2 + 1 / 60, band: 'brisk' });
+    expect(r.mode).toBe('pane');
     expect(rectsOverlap(r.rect, zone)).toBe(false);
     const after = p.update(req, { ...base, t: 2 + MOVE.pushOut + 0.05, band: 'brisk' });
     expect(p.jumpX.at(2 + MOVE.pushOut + 0.05)).toBe(0);
