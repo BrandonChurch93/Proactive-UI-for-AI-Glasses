@@ -83,7 +83,9 @@ export interface WorldPlace {
   side: 'left' | 'right';
   collapsed?: Level;
   why?: 'collapse' | 'step-down' | 'room';
-  moved?: 'inward' | 'side' | 'replace' | 'rope' | 'clamp' | 'zone' | 'pinned';
+  moved?: 'inward' | 'side' | 'replace' | 'clamp' | 'zone' | 'pinned';
+  align?: Align;
+  vertical?: 'above' | 'below';
   edge?: { x: number; y: number };
 }
 
@@ -98,7 +100,8 @@ const STEP_DOWN: Partial<Record<Level, Level[]>> = { expanded: ['card', 'glance'
 export class Placement {
   private cfg: Config | null = null;
   private cfgAt = -Infinity;
-  private shown: Rect | null = null;
+  private shown: { x: number; y: number } | null = null;
+  private shownW = 0;
   private offSince: number | null = null;
   private collapsed: Level | undefined;
   private step: Level | undefined;
@@ -234,10 +237,13 @@ export class Placement {
       } else rect.y = a.y - rect.h * 0.62;
       rect.y = Math.max(MARGIN, Math.min(vp.h - MARGIN - rect.h, rect.y));
     }
-    const resized = this.shown !== null && Math.abs(rect.w - this.shown.w) >= 0.5;
+    const fx = this.cfg!.side === 'left' ? 1 : this.cfg!.side === 'right' ? 0 : 0.5;
+    const fy = this.cfg!.vertical === 'below' ? 0 : 1;
+    const c = { x: rect.x + rect.w * fx, y: rect.y + rect.h * fy };
+    const resized = this.shown !== null && Math.abs(rect.w - this.shownW) >= 0.5;
     if (jump !== null && this.shown && !resized) {
-      this.kickFrom(t, this.shown, rect, jump);
-    } else if (this.shown && Math.abs(rect.w - this.shown.w) < 0.5) {
+      this.kickFrom(t, this.shown, c, jump);
+    } else if (this.shown && jump === null) {
       const rope = (target: number, cur: number): number => {
         const d = target - cur;
         if (Math.abs(d) <= MOVE.deadBand) return cur;
@@ -245,20 +251,20 @@ export class Placement {
         return target - Math.sign(d) * MOVE.deadBand;
       };
       const zone = focusRect(ctx.band, vp.w, vp.h);
-      const nx = rope(rect.x, this.shown.x);
-      const ny = rope(rect.y, this.shown.y);
-      const held = { ...rect, x: nx, y: ny };
+      const nx = rope(c.x, this.shown.x);
+      const ny = rope(c.y, this.shown.y);
+      const held = { ...rect, x: nx - rect.w * fx, y: ny - rect.h * fy };
       if (req.focusOk || !rectsOverlap(held, zone)) {
-        rect.x = nx;
-        rect.y = ny;
+        c.x = nx;
+        c.y = ny;
       }
-    } else if (this.shown && !resized && this.last?.mode === 'pane' && Math.hypot(rect.x - this.shown.x, rect.y - this.shown.y) > 40) {
-      this.kickFrom(t, this.shown, rect, MOVE.pushOut);
-      moved ??= 'rope';
     }
-    this.shown = rect;
+    this.shown = c;
+    this.shownW = rect.w;
+    rect.x = c.x - rect.w * fx;
+    rect.y = c.y - rect.h * fy;
     const leader = { x: res.leader.x - res.rect.x + rect.x, y: res.leader.y - res.rect.y + rect.y };
-    const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right' };
+    const placed: WorldPlace = { mode: 'pane', rect, leader, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', align: this.cfg!.side, vertical: this.cfg!.vertical };
     moved ??= this.pinned ? 'pinned' : (res.held ?? undefined);
     if (moved) placed.moved = moved;
     if (level !== req.level) {
@@ -277,7 +283,7 @@ export class Placement {
     return p;
   }
 
-  private kickFrom(t: number, from: Rect, to: Rect, dur: number): void {
+  private kickFrom(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number): void {
     this.jumpX.set(this.jumpX.at(t) + from.x - to.x);
     this.jumpY.set(this.jumpY.at(t) + from.y - to.y);
     this.jumpX.go(t, 0, dur, 'out');

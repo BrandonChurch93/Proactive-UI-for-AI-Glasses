@@ -240,8 +240,7 @@ export class ThreeBridge implements SceneBridge {
   }
 
   createLeader(): LeaderHandle {
-    const N = 64;
-    const pos = new Float32Array(N * 3);
+    const pos = new Float32Array(6);
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const c = LIGHT_COLOR.leader;
@@ -253,16 +252,9 @@ export class ThreeBridge implements SceneBridge {
     this.group.add(line);
     return {
       set: ({ from, to, progress, opacity }) => {
-        const n = Math.max(0, Math.min(N, Math.round(progress * (N - 1)) + 1));
-        for (let i = 0; i < N; i++) {
-          const u = (Math.min(i, n - 1) / (N - 1)) * 1;
-          const p = leaderPoint(from, to, Math.min(progress, u));
-          pos[i * 3] = p.x;
-          pos[i * 3 + 1] = p.y;
-          pos[i * 3 + 2] = p.z;
-        }
+        const tip = leaderPoint(from, to, progress);
+        pos.set([from.x, from.y, from.z, tip.x, tip.y, tip.z]);
         geo.attributes.position!.needsUpdate = true;
-        geo.setDrawRange(0, n);
         mat.opacity = opacity;
         line.visible = opacity > 0.002 && progress > 0.001;
       },

@@ -11,11 +11,10 @@ export interface LightVals {
   head: number;
   lead: number;
   leadO: number;
-  mix: number;
 }
 
 export function lightVals(): LightVals {
-  return { pip: 0, pipS: 0.2, aura: 0, auraS: 0.5, flare: 0, flareSX: 1.2, head: 0, lead: 0, leadO: 0, mix: 1 };
+  return { pip: 0, pipS: 0.2, aura: 0, auraS: 0.5, flare: 0, flareSX: 1.2, head: 0, lead: 0, leadO: 0 };
 }
 
 export interface PaneEls {
@@ -45,18 +44,13 @@ export function ungaze(tl: TL, L: LightVals, at: number): void {
   tl.to(L, { aura: 0, auraS: 0.5, pipS: 1, flare: 0, duration: T.base, ease: EASE.out }, at);
 }
 
-export function travel(tl: TL, L: LightVals, at: number, dur: number, fromPane: boolean, reduced: boolean): number {
+export function travel(tl: TL, L: LightVals, at: number, dur: number, reduced: boolean): number {
   if (reduced) {
-    tl.set(L, { lead: 1, leadO: 1, mix: 1, head: 0 }, at);
+    tl.set(L, { lead: 1, leadO: 1, head: 0 }, at);
     return at;
   }
-  if (fromPane) {
-    tl.set(L, { lead: 1, leadO: 1, head: 1, mix: 0 }, at);
-    tl.to(L, { mix: 1, duration: dur, ease: EASE.travel }, at);
-  } else {
-    tl.set(L, { lead: 0, leadO: 1, head: 1, mix: 1 }, at);
-    tl.to(L, { lead: 1, duration: dur, ease: EASE.travel }, at);
-  }
+  tl.set(L, { lead: 0, leadO: 1, head: 1 }, at);
+  tl.to(L, { lead: 1, duration: dur, ease: EASE.travel }, at);
   tl.to(L, { head: 0, duration: MOVE.headFade, ease: EASE.in }, at + dur);
   return at + dur;
 }

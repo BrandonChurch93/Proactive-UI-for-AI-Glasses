@@ -189,6 +189,20 @@ describe('keep-outs', () => {
   });
 });
 
+describe('one surface', () => {
+  it('a level change grows the pane from the corner its leader meets, which does not move', () => {
+    const p = new Placement(false);
+    const anchor = { x: 640, y: 520, depth: 14, inFront: true };
+    const ctx: FrameCtx = { t: 0, band: 'stroll', vp: VP, keepOuts: [] };
+    const corner = (r: Rect): { x: number; y: number } => ({ x: r.x + r.w / 2, y: r.y + r.h });
+    let a = p.update({ level: 'glance', anchor, distance: 14, size: NOMINAL_SIZE.glance, focusOk: true }, ctx);
+    for (let t = STEP; t < 0.5; t += STEP) a = p.update({ level: 'glance', anchor: { ...anchor, y: anchor.y - t * 30 }, distance: 14, size: NOMINAL_SIZE.glance, focusOk: true }, { ...ctx, t });
+    const b = p.update({ level: 'card', anchor: { ...anchor, y: anchor.y - 0.5 * 30 }, distance: 14, size: NOMINAL_SIZE.card, focusOk: true }, { ...ctx, t: 0.5 });
+    expect(b.align).toBe('center');
+    expect(Math.hypot(corner(b.rect).x - corner(a.rect).x, corner(b.rect).y - corner(a.rect).y)).toBeLessThan(4);
+  });
+});
+
 describe('rule 1 · the zone grows, content is pushed out over 320 ms, not cut', () => {
   it('moves a pane that the larger zone covers and animates the jump', () => {
     const p = new Placement(false);

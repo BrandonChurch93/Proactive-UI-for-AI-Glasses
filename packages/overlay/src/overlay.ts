@@ -38,13 +38,15 @@ interface Lights {
 
 interface Built {
   view: PaneView;
+  box: HTMLElement;
   wrap: HTMLElement;
   seed: HTMLElement;
   width: number;
   height: number;
+  w: Track;
+  h: Track;
   level: PaneLevel;
   rect: Rect | null;
-  corner: { x: number; y: number } | null;
   fade: { v: number };
   opacity: number;
   off: { x: number; y: number } | null;
@@ -74,7 +76,6 @@ interface Item {
   edgeO: Track;
   trace: HTMLElement | null;
   placed: WorldPlace | null;
-  fromCorner: { x: number; y: number } | null;
   born: number;
   condensingUntil: number;
   order: number;
@@ -385,7 +386,6 @@ export class Overlay {
       edgeO: new Track(0),
       trace: null,
       placed: null,
-      fromCorner: null,
       born: t,
       condensingUntil: 0,
       order: this.order++,
@@ -424,6 +424,7 @@ export class Overlay {
       b?.tl?.kill();
       b?.wrap.remove();
     }
+    it.tl?.kill();
     it.edge?.remove();
     it.trace?.remove();
     if (it.lights) for (const h of Object.values(it.lights)) (h as { dispose(): void }).dispose();
@@ -514,28 +515,67 @@ export class Overlay {
     const view = buildPane({ ...it.d, level: level as Decision['level'] }, level as Decision['level'], this.handlers);
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,opacity';
+    const box = document.createElement('div');
+    box.className = s.pane!;
+    box.dataset.pane = it.d.id;
+    box.dataset.zone = it.d.placement.zone;
     const seed = document.createElement('div');
     seed.className = s.seed!;
-    view.el.style.position = 'relative';
-    wrap.append(view.el, seed);
+    box.appendChild(view.el);
+    wrap.append(box, seed);
     (it.kind === 'world' ? this.worldLayer : this.viewLayer).appendChild(wrap);
     const width = view.el.offsetWidth;
     const height = view.el.offsetHeight;
-    const b: Built = { view, wrap, seed, width, height, level, rect: null, corner: null, fade: { v: 1 }, opacity: 0, off: null };
+    const b: Built = {
+      view,
+      box,
+      wrap,
+      seed,
+      width,
+      height,
+      w: new Track(width),
+      h: new Track(height),
+      level,
+      rect: null,
+      fade: { v: 1 },
+      opacity: 0,
+      off: null,
+    };
+    this.sizeBox(b, level);
     hidePane(this.els(b));
-    gsap.set(view.el, { opacity: 1 });
+    gsap.set([box, view.el], { opacity: 1 });
     return b;
   }
 
-  private els(b: Built): PaneEls {
-    return { pane: b.view.el, seed: b.seed, kids: b.view.kids, why: b.view.why, width: b.width };
+  private sizeBox(b: Built, level: PaneLevel): void {
+    if (b.box.dataset.level !== level) {
+      b.box.dataset.level = level;
+      b.box.classList.toggle(s.expandedPane!, level === 'expanded');
+    }
+    const w = `${b.w.at(this.t).toFixed(1)}px`;
+    const h = `${b.h.at(this.t).toFixed(1)}px`;
+    if (b.box.style.width !== w) b.box.style.width = w;
+    if (b.box.style.height !== h) b.box.style.height = h;
   }
 
-  private paneRect(it: Item, b: Built): Rect | undefined {
+  private remeasure(b: Built, t: number): void {
+    const w = b.view.el.offsetWidth;
+    const h = b.view.el.offsetHeight;
+    if (Math.abs(w - b.width) < 0.5 && Math.abs(h - b.height) < 0.5) return;
+    b.width = w;
+    b.height = h;
+    b.w.go(t, w, this.reduced ? 0 : T.base, 'out');
+    b.h.go(t, h, this.reduced ? 0 : T.base, 'out');
+  }
+
+  private els(b: Built): PaneEls {
+    return { pane: b.box, seed: b.seed, kids: b.view.kids, why: b.view.why, width: b.width };
+  }
+
+  private paneRect(_it: Item, b: Built): Rect | undefined {
     if (!b.rect) return undefined;
-    const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
     const k = (v: number): number => Math.round(v * 10) / 10;
-    return { x: k(b.rect.x), y: k(b.rect.y), w: k(b.width * sc), h: k(b.height * sc) };
+    return { x: k(b.rect.x), y: k(b.rect.y), w: k(b.rect.w), h: k(b.rect.h) };
   }
 
   private note(it: Item, kind: OverlayEvent['kind'], cause: string, detail?: string, rect?: Rect, from?: PaneLevel): void {
@@ -562,11 +602,76 @@ export class Overlay {
     return { kind: 'birth', cause: 'return', detail: it.why?.cause ?? '' };
   }
 
+  private morph(it: Item, b: Built, want: PaneLevel, t: number, from: PaneLevel, why: Item['why'] | undefined): void {
+    it.tl?.kill();
+    const tl = this.tl();
+    gsap.set(b.box, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 });
+    gsap.set(b.seed, { opacity: 0 });
+    b.fade.v = 1;
+    if (it.lights) gsap.set(it.L, { lead: 1, leadO: 1, head: 0 });
+    const old = b.view;
+    tl.to(old.kids, { opacity: 0, filter: 'blur(4px)', duration: MOVE.morphOut, ease: EASE.in }, 0);
+    tl.call(() => old.el.remove(), [], MOVE.morphOut + 0.02);
+    if (old.why) tl.to(old.why, { opacity: 0, duration: MOVE.morphOut, ease: EASE.in }, 0);
+    const view = buildPane({ ...it.d, level: want as Decision['level'] }, want as Decision['level'], this.handlers);
+    b.box.appendChild(view.el);
+    gsap.set(view.el, { opacity: 1 });
+    gsap.set(view.kids, { opacity: 0 });
+    if (view.why) gsap.set(view.why, { opacity: 0 });
+    b.view = view;
+    b.width = view.el.offsetWidth;
+    b.height = view.el.offsetHeight;
+    const grow = from !== want;
+    const dur = this.reduced ? 0 : want === 'expanded' ? T.open : want === 'card' ? T.baseCard : T.base;
+    b.w.go(t, b.width, dur, 'out');
+    b.h.go(t, b.height, dur, 'out');
+    b.level = want;
+    this.sizeBox(b, want);
+    const c = it.d.content;
+    if (grow) this.live.textContent = [c.name, c.fact ?? c.live, c.showReason !== false ? c.reason.text : ''].filter(Boolean).join('. ');
+    const held = it.d.reason.text === HELD_LINE && it.d.content.showReason !== false;
+    const whyAt = held ? Math.max(0, this.gateEndAt + MOVE.returnS - t) : undefined;
+    const kids = whyAt !== undefined && view.why ? view.kids.filter((k) => k !== view.why) : view.kids;
+    let end: number;
+    if (this.reduced) {
+      tl.to(kids, { opacity: 1, duration: 0.2, ease: 'none' }, 0);
+      end = 0.2;
+    } else {
+      tl.fromTo(
+        kids,
+        { opacity: 0, y: -3, filter: 'blur(5px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: T.base, ease: EASE.out, stagger: MOVE.stagger, clearProps: 'filter' },
+        MOVE.morphIn,
+      );
+      end = MOVE.morphIn + T.base + MOVE.stagger * Math.max(0, kids.length - 1);
+    }
+    if (whyAt !== undefined && view.why) {
+      const w = Math.max(end, whyAt);
+      tl.fromTo(view.why, { opacity: 0, filter: 'blur(5px)' }, { opacity: 1, filter: 'blur(0px)', duration: T.base, ease: EASE.out, clearProps: 'filter' }, w);
+      end = w + T.base;
+    }
+    if (grow && (want === 'card' || want === 'expanded') && LEVEL_RANK[want] > LEVEL_RANK[from]) tl.call(() => this.sound.breathUp(want === 'expanded'), [], 0);
+    it.condensingUntil = t + Math.max(end, dur);
+    it.want = want;
+    it.tl = tl;
+    it.off = null;
+    it.size = null;
+    if (why) {
+      it.why = why;
+      it.restored = false;
+      this.note(it, 'resize', why.cause, why.detail, undefined, from);
+    }
+  }
+
   private transition(it: Item, want: PaneLevel, t: number, edge = false, why?: Item['why']): void {
     it.tl?.kill();
     const tl = this.tl();
     const prev = it.cur;
     const from = it.want;
+    if (prev && want !== 'none') {
+      this.morph(it, prev, want, t, from, why);
+      return;
+    }
     const prevRect = prev ? this.paneRect(it, prev) : undefined;
     let at = 0;
     const world = it.kind === 'world' && it.lights !== null;
@@ -584,7 +689,6 @@ export class Overlay {
       prev.tl = dtl;
       it.old.push(prev);
       at = end;
-      it.fromCorner = prev.corner;
     }
     it.cur = null;
     if (want !== 'none') {
@@ -595,8 +699,8 @@ export class Overlay {
       const big = want === 'card' || want === 'expanded';
       if (world) {
         const dur = big ? MOVE.travelCard : MOVE.travelGlance;
-        const tStart = !prev && t - it.born < 0.05 ? 0.35 : Math.min(at, MOVE.travelOverlap);
-        at = travel(tl, it.L, tStart, dur, Boolean(prev && it.fromCorner), this.reduced);
+        const tStart = t - it.born < 0.05 ? 0.35 : 0;
+        at = travel(tl, it.L, tStart, dur, this.reduced);
         if (big) tl.call(() => this.sound.breathUp(want === 'expanded'), [], tStart + dur / 2);
       } else if (big || it.d.component === 'pocket') {
         tl.call(() => this.sound.breathUp(true), [], at);
@@ -685,13 +789,20 @@ export class Overlay {
         }
       }
       let aside: AsideState | null = null;
-      let home: Rect | null = null;
-      if (placed && placed.mode === 'pane' && it.place && LEVEL_RANK[d.level] >= LEVEL_RANK.glance && !it.dying) {
+      let corner: { x: number; y: number } | null = null;
+      let fx = 0.5;
+      let fy = 1;
+      if (placed && placed.mode === 'pane' && it.place) {
+        fx = placed.align === 'left' ? 1 : placed.align === 'right' ? 0 : 0.5;
+        fy = placed.vertical === 'below' ? 0 : 1;
+        corner = { x: placed.rect.x + placed.rect.w * fx + it.place.jumpX.at(t), y: placed.rect.y + placed.rect.h * fy + it.place.jumpY.at(t) };
+      }
+      if (placed && placed.mode === 'pane' && corner && LEVEL_RANK[d.level] >= LEVEL_RANK.glance && !it.dying) {
         const sc = placed.scale;
         const c = placed.collapsed;
         const lv = c && c !== 'pip' && LEVEL_RANK[d.level] > LEVEL_RANK[c] ? c : d.level;
         const size = it.cur && it.cur.level === lv ? { w: it.cur.width, h: it.cur.height } : (NOMINAL_SIZE[lv as 'glance'] ?? NOMINAL_SIZE.glance);
-        home = { x: placed.rect.x + it.place.jumpX.at(t), y: placed.rect.y + it.place.jumpY.at(t), w: size.w * sc, h: size.h * sc };
+        const home = { x: corner.x - size.w * sc * fx, y: corner.y - size.h * sc * fy, w: size.w * sc, h: size.h * sc };
         aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk), depth);
       }
       const want = this.paneLevelFor(it, placed);
@@ -714,8 +825,8 @@ export class Overlay {
         it.pending = null;
         it.decided = it.d.level;
       }
-      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t, false, { kind: 'birth', cause: 'shape' });
-      else if (it.cur) it.cur.view.update(d.content);
+      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t, false, { kind: 'resize', cause: 'shape' });
+      else if (it.cur && it.cur.view.update(d.content)) this.remeasure(it.cur, t);
 
       const lum = this.snap?.env.backdrop[it.id];
       const fill = it.fill.update(t, lum, t < it.condensingUntil);
@@ -734,14 +845,16 @@ export class Overlay {
             scale = it.placed?.scale ?? 1;
           } else {
             scale = placed.scale;
-            const base = { x: home?.x ?? placed.rect.x, y: home?.y ?? placed.rect.y, w: b.width * scale, h: b.height * scale };
-            const a = aside ?? { dx: 0, dy: 0, opacity: 1, dropped: false, active: false, trace: null };
+            const w = b.w.at(t) * scale;
+            const h = b.h.at(t) * scale;
+            const at = corner ?? { x: placed.rect.x + placed.rect.w * fx, y: placed.rect.y + placed.rect.h * fy };
+            const base = { x: at.x - w * fx, y: at.y - h * fy, w, h };
+            const a = aside ?? { dx: 0, dy: 0, opacity: 1, dropped: false, active: false, by: null, trace: null };
             asideO = a.opacity;
             const y = it.yieldS.update(t, yieldSide, base.x + base.w / 2 < vp.w / 2 ? 'left' : 'right');
             yieldO = y.opacity;
             rect = { x: base.x + a.dx + y.dx, y: base.y + a.dy, w: base.w, h: base.h };
             this.setTrace(it, a.trace && !a.dropped ? a.trace : null, a.opacity);
-            b.corner = { x: placed.leader.x - placed.rect.x + rect.x, y: placed.leader.y - placed.rect.y + rect.y };
             if (pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
           }
         } else {
@@ -749,8 +862,8 @@ export class Overlay {
           const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
           scale = ui;
-          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.width * ui, h: b.height * ui }, vp, i);
-          if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.height * ui };
+          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i);
+          if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.h.at(t) * ui };
           if (b === it.cur) {
             const y = it.yieldS.update(t, yieldSide, rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right');
             yieldO = y.opacity;
@@ -763,9 +876,10 @@ export class Overlay {
         if (b === it.cur) paneOpacity = o;
         b.wrap.style.transform = `translate3d(${rect.x.toFixed(1)}px, ${rect.y.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
         b.wrap.style.opacity = o.toFixed(3);
-        b.view.el.style.setProperty('--fill-a', fill.alpha.toFixed(3));
-        b.view.el.style.setProperty('--fill-b', (fill.alpha - 0.04).toFixed(3));
-        b.view.el.style.setProperty('--weight', String(fill.weight));
+        this.sizeBox(b, b.level);
+        b.box.style.setProperty('--fill-a', fill.alpha.toFixed(3));
+        b.box.style.setProperty('--fill-b', (fill.alpha - 0.04).toFixed(3));
+        b.box.style.setProperty('--weight', String(fill.weight));
       }
 
       if (it.lights && anchorPos) {
@@ -790,12 +904,10 @@ export class Overlay {
         it.lights.pip.set({ pos: anchorPos, opacity: Math.min(1, it.L.pip) * lightMul * dropped, scale: it.L.pipS });
         it.lights.aura.set({ pos: anchorPos, opacity: it.L.aura * 0.9 * lightMul * dropped, scale: it.L.auraS });
         it.lights.flare.set({ pos: anchorPos, opacity: it.L.flare * lightMul, scaleX: it.L.flareSX });
-        const target = it.cur?.corner ?? it.old[it.old.length - 1]?.corner ?? it.fromCorner;
-        if (target && it.L.leadO > 0.001) {
-          const from = it.fromCorner ?? target;
-          const cx = from.x + (target.x - from.x) * it.L.mix;
-          const cy = from.y + (target.y - from.y) * it.L.mix;
-          const to = this.bridge.unprojectAtDepth(cx, cy, Math.max(0.5, Math.min(depth * 0.55, 6)));
+        const lr = (it.cur ?? it.old[it.old.length - 1])?.rect;
+        if (lr && pr && it.L.leadO > 0.001) {
+          const m = edgeMidNearest(lr, pr);
+          const to = this.bridge.unprojectAtDepth(m.x, m.y, Math.max(0.5, Math.min(depth * 0.55, 6)));
           const leadO = it.L.leadO * gk * (it.cur ? Math.max(paneOpacity, it.L.head) : 1);
           it.lights.leader.set({ from: anchorPos, to, progress: it.L.lead, opacity: Math.min(1, leadO) });
           it.lights.head.set({ pos: leaderPoint(anchorPos, to, it.L.lead), opacity: it.L.head * gk, scale: 1 });
@@ -847,7 +959,9 @@ export class Overlay {
     const b = it.cur;
     const born = it.fresh.some((e) => e.kind === 'birth');
     if (b && placed?.mode === 'pane' && pr && !born) {
-      const off = { x: placed.rect.x - pr.x, y: placed.rect.y - pr.y };
+      const fx = placed.align === 'left' ? 1 : placed.align === 'right' ? 0 : 0.5;
+      const fy = placed.vertical === 'below' ? 0 : 1;
+      const off = { x: placed.rect.x + placed.rect.w * fx - pr.x, y: placed.rect.y + placed.rect.h * fy - pr.y };
       if (it.off && Math.hypot(off.x - it.off.x, off.y - it.off.y) > 40) {
         const cause = placed.moved ?? placed.why ?? 'anchor';
         const lm = it.lastMove;
@@ -911,12 +1025,11 @@ export class Overlay {
       const b = it.cur;
       if (!b || !b.rect || b.opacity < 0.01 || b.level === 'none') continue;
       const r = b.rect;
-      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
       panes.push({
         id: it.id,
         level: b.level,
         zone: it.kind,
-        rect: { x: Math.round(r.x * 10) / 10, y: Math.round(r.y * 10) / 10, w: Math.round(b.width * sc * 10) / 10, h: Math.round(b.height * sc * 10) / 10 },
+        rect: { x: Math.round(r.x * 10) / 10, y: Math.round(r.y * 10) / 10, w: Math.round(r.w * 10) / 10, h: Math.round(r.h * 10) / 10 },
         opacity: Math.round(b.opacity * 1000) / 1000,
         gaze: Boolean(it.d.gaze),
       });
@@ -948,8 +1061,7 @@ export class Overlay {
     for (const it of this.items.values()) {
       const r = it.cur?.rect;
       if (!r || !it.cur || it.cur.opacity < 0.3) continue;
-      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
-      if (x >= r.x && x <= r.x + it.cur.width * sc && y >= r.y && y <= r.y + it.cur.height * sc) return it.id;
+      if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return it.id;
     }
     return null;
   }
@@ -971,6 +1083,28 @@ export class Overlay {
   keepOutsNow(): KeepOut[] {
     return this.bridge.keepOuts();
   }
+}
+
+function edgeMidNearest(r: Rect, p: { x: number; y: number }): { x: number; y: number } {
+  const edges: [number, number, number, number][] = [
+    [r.x, r.y + r.h, r.x + r.w, r.y + r.h],
+    [r.x, r.y, r.x + r.w, r.y],
+    [r.x, r.y, r.x, r.y + r.h],
+    [r.x + r.w, r.y, r.x + r.w, r.y + r.h],
+  ];
+  let best = edges[0]!;
+  let bestD = Infinity;
+  for (const e of edges) {
+    const dx = e[2] - e[0];
+    const dy = e[3] - e[1];
+    const u = Math.max(0, Math.min(1, ((p.x - e[0]) * dx + (p.y - e[1]) * dy) / (dx * dx + dy * dy || 1)));
+    const dd = Math.hypot(p.x - (e[0] + dx * u), p.y - (e[1] + dy * u));
+    if (dd < bestD - 0.5) {
+      bestD = dd;
+      best = e;
+    }
+  }
+  return { x: (best[0] + best[2]) / 2, y: (best[1] + best[3]) / 2 };
 }
 
 const shapeCache = new WeakMap<Decision, Map<PaneLevel, string>>();

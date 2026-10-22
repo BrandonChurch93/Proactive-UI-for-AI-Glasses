@@ -109,14 +109,14 @@ These are WebGL objects, not DOM, so they bloom with the marquee and read as lig
 | Aura | Larger radial sprite | 1.8 scaled 0.5 → 2.6 on mark, 1.6 on gaze | (1.1, .95, .7) at 90% |
 | Flare | Horizontal streak sprite | 5.0 wide × 0.32 tall, scaleX 1.2 → 5.5 | (2.5, 2.4, 2.1) |
 | Head | Small glow sprite | 0.5 | (3, 2.8, 2.3) |
-| Leader | 64-point cubic bezier line, additive | 1px | (2.2, 2.1, 1.9) |
-| Seed | DOM hairline, 1.5px, glow 12px | card width | `#fff9e9` |
+| Leader | Straight two-point line, additive, from the pip to the midpoint of the pane edge nearest it | 1px | (2.2, 2.1, 1.9) |
+| Seed | DOM hairline, 1.5px, glow 12px, at birth only | pane width | `#fff9e9` |
 | Edge light | DOM bar 4×26px, glow 10px and 24px | n/a | `#fff4d6` |
 | Trace | DOM dashed hairline from a pane's home to where it stepped aside | overlap width plus 20 px | `rgba(255,250,236,.5)` |
 
 The light vocabulary is depth-tested: a truck between the wearer and a pip occludes it. A pip never draws through a thing.
 
-As built: the sizes above hold at 24 m and beyond (the hero distance); nearer than that each sprite keeps the angular size it has at 24 m, so a pip on a shop sign two metres away is a point of light, not a flood. The pip sits 0.6 m toward the eye from its anchor so the façade it names never swallows it. The leader's pane end is placed at most 6 m from the eye on the ray through the pane corner, so the line is in the air in front of the street and only its far end can be hidden by something real.
+As built: the sizes above hold at 24 m and beyond (the hero distance); nearer than that each sprite keeps the angular size it has at 24 m, so a pip on a shop sign two metres away is a point of light, not a flood. The pip sits 0.6 m toward the eye from its anchor so the façade it names never swallows it. The leader's pane end is placed at most 6 m from the eye on the ray through the midpoint of the pane edge nearest the pip, so the line is straight on screen, in the air in front of the street, and only its far end can be hidden by something real.
 
 Bloom: `UnrealBloomPass(strength .42, radius .45, threshold 1.02)`. Only emissives and the light vocabulary cross the threshold; sunlit white never does. Exposure `.58` with ACES filmic.
 
@@ -147,9 +147,9 @@ Bloom: `UnrealBloomPass(strength .42, radius .45, threshold 1.02)`. Only emissiv
 
 **Gaze** (wearer dwells, 800 ms threshold). Aura to opacity 1, scale 1.6, over 800 ms `sine.inOut`. Pip to 1.6× over the same. Flare opacity 0 → 1 and scaleX 1.2 → 5.5 over 700 ms ease-out, starting at 300 ms; flare fades out over 700 ms ease-in starting at 1100 ms. Exactly one horizontal streak, never two.
 
-**Travel** (light leaves the pip). Head opacity 1. Leader draws from 0 to 1 along a cubic bezier from the pip to the pane's bottom corner nearest the anchor (control points at 30% +0.15 m and 75% -0.1 m), over 320 ms to a glance or 460 ms to a card, `power2.inOut`, the head riding the tip. Head fades over 300 ms on arrival. Breath sound at the midpoint.
+**Travel** (light leaves the pip, at birth only). Head opacity 1. Leader draws from 0 to 1 along a straight segment from the pip to the midpoint of the pane edge nearest it, over 320 ms to a glance or 460 ms to a card, `power2.inOut`, the head riding the tip. Head fades over 300 ms on arrival. Breath sound at the midpoint. After that the segment simply follows the pane's edge every frame.
 
-**Condense** (a pane is born). The seed hairline appears at the pane's top-left at width 0 and grows to the pane's width over 300 ms `power3.out`. 180 ms in, the pane reveals from the seed downward: `clip-path: inset(0 0 100% 0) → inset(0 0 0 0)` over `t-base` (420 ms for a card) ease-out, with chromatic separation `--ca` 2.4 → 0 settling over 700 ms `power2.out` from 340 ms. Children resolve from `opacity 0, y -3px, blur 5px` to rest over `t-base`, stagger 50 ms, from 260 ms. The seed fades over 450 ms ease-in from 500 ms.
+**Condense** (a pane is born; it runs once per pane). The seed hairline appears at the pane's top-left at width 0 and grows to the pane's width over 300 ms `power3.out`. 180 ms in, the pane reveals from the seed downward: `clip-path: inset(0 0 100% 0) → inset(0 0 0 0)` over `t-base` (420 ms for a card) ease-out, with chromatic separation `--ca` 2.4 → 0 settling over 700 ms `power2.out` from 340 ms. Children resolve from `opacity 0, y -3px, blur 5px` to rest over `t-base`, stagger 50 ms, from 260 ms. The seed fades over 450 ms ease-in from 500 ms.
 
 Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 rgba(255,96,96,.6), calc(var(--ca) * 1px) 0 rgba(96,214,255,.6)`.
 
@@ -157,11 +157,9 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Retract** (the light returns to the pip). Head on; leader 1 → 0 over 300 ms `power2.in`; head off.
 
-**Promote** glance → card: dissolve the glance, then travel to the card corner (460 ms), then condense the card (420 ms). The light never disappears between the two; it travels. As built, the travel starts 200 ms into the dissolve rather than after it, so a promotion reads as one move and the card arrives about a quarter second sooner.
+**Grow** (glance → card → expanded). A pane is one surface from birth to death; a level change never builds a second one. The new content is measured off-screen, then the surface's width and height tween to the new size over `t-base` (420 ms to a card) or `t-open` (480 ms to the expanded view) ease-out, growing away from the corner its leader meets: upward from its bottom edge when it sits above its pip, away from the pip when it sits beside it. That corner does not move. The outgoing children fade with the dissolve blur over 120 ms; the incoming children resolve with the condense stagger (from `opacity 0, y -3px, blur 5px`, 50 ms apart) starting at 160 ms. No seed, no travel: the leader just follows the pane's edge as it grows. Nothing happens to the world. No dim, no blur, no depth of field.
 
-**Open** card → expanded: the card grows in place into the expanded view, anchored where it was, pushed clear of the focus zone, over `t-open`. Same condense mechanics on the new content. Nothing happens to the world. No dim, no blur, no depth of field.
-
-**Close** expanded → card: reverse of open, ending on the card.
+**Shrink** (expanded → card → glance, while the pane stays). Grow in reverse, ending on the smaller content, over the timing of the level it ends on (`t-base` to a glance). A change in a pane's content structure at the same level is the same cross-fade, with a resize only if the measured size changed.
 
 **Recede** (safety gate). Breath-down sound. The whole glasses layer: `filter: blur(3px) brightness(.55)`, `translateY 14px`, `scale .985`, `opacity .38`, over 280 ms ease-gate, all at once. In-scene lights fade to 20%. The held glyph slides in from the left over `t-base` at 100 ms. The pavement safety text is in a separate layer and stays razor sharp.
 

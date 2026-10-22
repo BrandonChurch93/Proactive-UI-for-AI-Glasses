@@ -21,6 +21,8 @@ export const MOVE = {
   seedFadeAt: 0.5,
   seedFade: 0.45,
   dissolveKids: 0.16,
+  morphOut: 0.12,
+  morphIn: 0.16,
   dissolveStagger: 0.02,
   dissolveClipAt: 0.08,
   dissolveCa: 1.4,

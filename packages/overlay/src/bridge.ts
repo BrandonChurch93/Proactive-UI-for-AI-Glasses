@@ -3,18 +3,7 @@ import type { KeepOut, Projected, Vec3, Viewport } from '@lumen/shared';
 export type { KeepOut } from '@lumen/shared';
 
 export function leaderPoint(from: Vec3, to: Vec3, u: number): Vec3 {
-  const c1 = { x: from.x + (to.x - from.x) * 0.3, y: from.y + (to.y - from.y) * 0.3 + 0.15, z: from.z + (to.z - from.z) * 0.3 };
-  const c2 = { x: from.x + (to.x - from.x) * 0.75, y: from.y + (to.y - from.y) * 0.75 - 0.1, z: from.z + (to.z - from.z) * 0.75 };
-  const v = 1 - u;
-  const a = v * v * v;
-  const b = 3 * v * v * u;
-  const c = 3 * v * u * u;
-  const d = u * u * u;
-  return {
-    x: a * from.x + b * c1.x + c * c2.x + d * to.x,
-    y: a * from.y + b * c1.y + c * c2.y + d * to.y,
-    z: a * from.z + b * c1.z + c * c2.z + d * to.z,
-  };
+  return { x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u, z: from.z + (to.z - from.z) * u };
 }
 
 export type LightKind = 'pip' | 'aura' | 'flare' | 'head';

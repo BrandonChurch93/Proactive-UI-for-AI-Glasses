@@ -9,7 +9,7 @@ export interface PaneView {
   kids: HTMLElement[];
   why: HTMLElement | null;
   shape: string;
-  update(c: Content): void;
+  update(c: Content): boolean;
 }
 
 export interface PaneHandlers {
@@ -202,12 +202,9 @@ function shapeOf(el: HTMLElement): string {
 }
 
 export function buildPane(d: Decision, level: Level, h: PaneHandlers): PaneView {
-  const el = node('div', s.pane);
   const b = build(d, level, h);
-  el.className = `${s.pane} ${b.cls}`;
-  el.dataset.pane = d.id;
+  const el = node('div', `${s.layer} ${b.cls}`);
   el.dataset.level = level;
-  el.dataset.zone = d.placement.zone;
   for (const k of b.kids) el.appendChild(k);
   el.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -224,15 +221,20 @@ export function buildPane(d: Decision, level: Level, h: PaneHandlers): PaneView 
     shape: shapeOf(el),
     update(c: Content) {
       const fresh = build({ ...d, content: c }, level, h);
-      const tmp = node('div', `${s.pane} ${fresh.cls}`);
+      const tmp = node('div', `${s.layer} ${fresh.cls}`);
       for (const k of fresh.kids) tmp.appendChild(k);
-      if (shapeOf(tmp) !== view.shape) return;
+      if (shapeOf(tmp) !== view.shape) return false;
       const next = new Map<string, string>();
       tmp.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => next.set(e.dataset.k!, e.textContent ?? ''));
+      let changed = false;
       el.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => {
         const v = next.get(e.dataset.k!);
-        if (v !== undefined && e.textContent !== v) e.textContent = v;
+        if (v !== undefined && e.textContent !== v) {
+          e.textContent = v;
+          changed = true;
+        }
       });
+      return changed;
     },
   };
   return view;
@@ -240,7 +242,7 @@ export function buildPane(d: Decision, level: Level, h: PaneHandlers): PaneView 
 
 export function contentShape(d: Decision, level: Level): string {
   const b = build(d, level, { choice() {}, pinch() {} });
-  const tmp = node('div', `${s.pane} ${b.cls}`);
+  const tmp = node('div', `${s.layer} ${b.cls}`);
   for (const k of b.kids) tmp.appendChild(k);
   return shapeOf(tmp);
 }
