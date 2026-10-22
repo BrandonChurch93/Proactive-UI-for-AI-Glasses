@@ -1,9 +1,9 @@
-import { isShow, type BrainFrame, type Decision } from '@lumen/shared';
+import { isShow, type BrainFrame, type Decision, type OverlayEvent } from '@lumen/shared';
 import s from './inspector.module.css';
 import type { InspectorStore } from './store';
 import { clock } from './timeline';
 
-type Filter = 'all' | 'shows' | 'holds';
+type Filter = 'all' | 'shows' | 'holds' | 'overlay';
 
 function el(tag: string, cls?: string, text?: string): HTMLElement {
   const e = document.createElement(tag);
@@ -15,6 +15,7 @@ function el(tag: string, cls?: string, text?: string): HTMLElement {
 function keep(d: Decision, f: Filter): boolean {
   if (f === 'shows') return isShow(d) || d.action === 'save' || d.action === 'surface';
   if (f === 'holds') return d.action === 'hold';
+  if (f === 'overlay') return d.placement.zone !== 'ground';
   return true;
 }
 
@@ -28,6 +29,7 @@ export class Decisions {
   private list: HTMLElement;
   private filter: Filter = 'all';
   private rendered = -1;
+  private seen = 0;
   private count = 0;
   private buttons = new Map<Filter, HTMLButtonElement>();
 
@@ -38,6 +40,7 @@ export class Decisions {
       ['all', 'All'],
       ['shows', 'Shows'],
       ['holds', 'Holds'],
+      ['overlay', 'Overlay'],
     ] as const) {
       const b = el('button', s.btn, label) as HTMLButtonElement;
       b.type = 'button';
@@ -75,8 +78,26 @@ export class Decisions {
     return r;
   }
 
+  private glassRow(e: OverlayEvent): HTMLElement {
+    const r = el('div', s.row);
+    const head = el('div', s.rowHead);
+    const shown = e.kind === 'birth' || e.kind === 'resize';
+    head.append(
+      el('span', s.dim, clock(e.t)),
+      el('span', s.dim, 'GLASS'),
+      el('span', shown ? s.show : s.dim, e.kind),
+      el('span', s.id, e.id),
+      el('span', s.dim, e.from !== undefined && e.from !== e.level ? `${e.from} → ${e.level}` : e.level),
+    );
+    r.appendChild(head);
+    r.appendChild(el('div', s.reason, e.detail ? `${e.cause} · ${e.detail}` : e.cause));
+    if (e.rect) r.appendChild(el('div', s.parts, `x ${Math.round(e.rect.x)}   y ${Math.round(e.rect.y)}   ${Math.round(e.rect.w)} × ${Math.round(e.rect.h)}`));
+    return r;
+  }
+
   update(): void {
     const frames = this.store.frames();
+    const glass = this.filter === 'overlay' ? this.store.overlayLog() : [];
     const now = this.store.now();
     let upTo = -1;
     for (let k = frames.length - 1; k >= 0; k--) {
@@ -85,17 +106,19 @@ export class Decisions {
         break;
       }
     }
-    if (upTo < this.rendered) {
+    if (upTo < this.rendered || glass.length < this.seen) {
       this.rendered = -1;
     }
     if (this.rendered === -1) {
       this.list.replaceChildren();
       this.count = 0;
+      this.seen = 0;
     }
     const fresh: HTMLElement[] = [];
     for (let k = this.rendered + 1; k <= upTo; k++) {
       const f = frames[k];
       if (!f) continue;
+      while (this.seen < glass.length && glass[this.seen]!.t <= f.t + 1e-6) fresh.push(this.glassRow(glass[this.seen++]!));
       for (const d of f.events) if (keep(d, this.filter)) fresh.push(this.row(f, d));
     }
     this.rendered = upTo;

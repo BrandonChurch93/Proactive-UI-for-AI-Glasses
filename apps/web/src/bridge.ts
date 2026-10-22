@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { PLACE_BY_ID, nOf, placeDoor, type Box3, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
-import { LANE_BY_ID, nearestS, pointAt, type Sim } from '@lumen/sim';
+import { PLACE_BY_ID, groundY, placeDoor, type Projected, type Vec3, type Viewport } from '@lumen/shared';
+import { keepOuts, nearestS, pointAt, type Sim } from '@lumen/sim';
 import {
   LIGHT_COLOR,
   LIGHT_SIZE,
@@ -15,7 +15,6 @@ import {
   type SceneBridge,
 } from '@lumen/overlay';
 
-const LOOKAHEAD = 0.45;
 const PIP_TOWARD_CAMERA = 0.6;
 const HERO_DISTANCE = 24;
 
@@ -77,11 +76,6 @@ function columnTexture(): THREE.Texture {
 }
 
 const TONE: Record<'go' | 'warn' | 'stop', string> = { go: '#9ff0bd', warn: '#ffc98a', stop: '#ff8f7a' };
-
-export function groundY(x: number, z: number): number {
-  const n = nOf(z);
-  return Math.abs(x) >= 7 && !(n > 90 && n < 104) ? 0.15 : 0;
-}
 
 export class ThreeBridge implements SceneBridge {
   readonly group = new THREE.Group();
@@ -148,74 +142,9 @@ export class ThreeBridge implements SceneBridge {
     return this.sim.anchorOf(id);
   }
 
-  private rect(b: Box3): Rect | null {
-    let x0 = Infinity;
-    let y0 = Infinity;
-    let x1 = -Infinity;
-    let y1 = -Infinity;
-    let any = false;
-    for (let i = 0; i < 8; i++) {
-      const p = this.project({ x: i & 1 ? b.max.x : b.min.x, y: i & 2 ? b.max.y : b.min.y, z: i & 4 ? b.max.z : b.min.z });
-      if (!p.inFront) continue;
-      any = true;
-      x0 = Math.min(x0, p.x);
-      y0 = Math.min(y0, p.y);
-      x1 = Math.max(x1, p.x);
-      y1 = Math.max(y1, p.y);
-    }
-    const vp = this.viewport();
-    if (!any || x1 < 0 || y1 < 0 || x0 > vp.w || y0 > vp.h) return null;
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
-  }
-
-  private union(a: Rect | null, b: Rect | null): Rect | null {
-    if (!a) return b;
-    if (!b) return a;
-    const x = Math.min(a.x, b.x);
-    const y = Math.min(a.y, b.y);
-    return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
-  }
-
-  keepOuts(): KeepOut[] {
-    const sim = this.sim;
-    const out: KeepOut[] = [];
+  keepOuts(maxDepth = Infinity): KeepOut[] {
     const eye = this.cam.position;
-    for (const v of sim.traffic.vehicles) {
-      if (v.v < 0.3) continue;
-      const b = sim.traffic.bounds(v);
-      const cx = (b.min.x + b.max.x) / 2;
-      const cz = (b.min.z + b.max.z) / 2;
-      if (Math.hypot(cx - eye.x, cz - eye.z) > 70) continue;
-      const lane = LANE_BY_ID.get(v.lane)!;
-      const dx = lane.dir.x * v.v * LOOKAHEAD;
-      const dz = lane.dir.z * v.v * LOOKAHEAD;
-      const ahead = { min: { x: b.min.x + dx, y: b.min.y, z: b.min.z + dz }, max: { x: b.max.x + dx, y: b.max.y, z: b.max.z + dz } };
-      const r = this.union(this.rect(b), this.rect(ahead));
-      if (r) out.push({ rect: r, kind: 'vehicle', moving: true, id: v.id });
-    }
-    for (const p of sim.people.people) {
-      if (!p.alive || p.spawnAt > sim.t) continue;
-      const d = Math.hypot(p.pos.x - eye.x, p.pos.z - eye.z);
-      if (d > 28) continue;
-      const vx = -Math.sin(p.heading) * p.speed * LOOKAHEAD;
-      const vz = -Math.cos(p.heading) * p.speed * LOOKAHEAD;
-      const box = (ox: number, oz: number, y0: number, y1: number): Box3 => ({
-        min: { x: p.pos.x + ox - 0.3, y: y0, z: p.pos.z + oz - 0.3 },
-        max: { x: p.pos.x + ox + 0.3, y: y1, z: p.pos.z + oz + 0.3 },
-      });
-      const g = groundY(p.pos.x, p.pos.z);
-      const body = this.union(this.rect(box(0, 0, g, g + p.height)), this.rect(box(vx, vz, g, g + p.height)));
-      if (!body || body.h < 30) continue;
-      out.push({ rect: body, kind: 'person', moving: p.speed > 0.2, id: p.id });
-      let dh = Math.atan2(-(eye.x - p.pos.x), -(eye.z - p.pos.z)) - p.heading;
-      while (dh > Math.PI) dh -= Math.PI * 2;
-      while (dh < -Math.PI) dh += Math.PI * 2;
-      if (Math.abs(dh) < 1.1) {
-        const face = this.union(this.rect(box(0, 0, g + p.height - 0.3, g + p.height)), this.rect(box(vx, vz, g + p.height - 0.3, g + p.height)));
-        if (face) out.push({ rect: face, kind: 'face', moving: p.speed > 0.2, id: `${p.id}:face` });
-      }
-    }
-    return out;
+    return keepOuts(this.sim, (v) => this.project(v), this.viewport(), { x: eye.x, y: eye.y, z: eye.z }, maxDepth);
   }
 
   routePath(to: string, offset: 'center' | 'curb'): Vec3[] {

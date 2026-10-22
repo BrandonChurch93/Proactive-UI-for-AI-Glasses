@@ -8,3 +8,6 @@ export * from './signal';
 export * from './synth';
 export * from './placement';
 export * from './compact';
+export * from './motion-tokens';
+export * from './keepout';
+export * from './placement-state';

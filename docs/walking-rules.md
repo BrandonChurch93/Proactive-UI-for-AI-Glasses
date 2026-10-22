@@ -59,8 +59,8 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 ## Rule 8 · The world has right of way
 
-- Trigger: a person's or vehicle's projected bounds overlap a pane for more than 120 ms.
-- Response: the pane dims to 30% and slides away from the overlap by the overlap width plus 20 px over 220 ms, leaving a faint trace line to its home position. It returns when clear, over 320 ms ease-out. A pane never renders over a face or a moving vehicle, even for a frame; if it cannot clear, it drops to a pip.
+- Trigger: a person or vehicle between the eye and the pane's anchor overlaps the pane's projected bounds for more than 120 ms. Something behind the thing the pane describes is not in its way.
+- Response: the pane dims to 30% and slides away from the overlap by the overlap width plus 20 px over 220 ms, up or down when it can, never along the mover's own path and never further than its own width, leaving a faint trace line to its home position. It returns when clear, over 320 ms ease-out. A pane never renders over a face or a moving vehicle, even for a frame; if it cannot clear, it drops to a pip.
 - Eval: in the scripted pedestrian beat, the card's rect never intersects the pedestrian's rect while the card is above 30% opacity.
 
 ## Rule 9 · Backdrop adaptivity

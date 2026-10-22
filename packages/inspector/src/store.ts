@@ -1,4 +1,4 @@
-import type { BrainFrame, Override, OverrideEntry, PaneReport, RunExport, ScenarioId, WorldSnapshot } from '@lumen/shared';
+import type { BrainFrame, OverlayEvent, Override, OverrideEntry, PaneReport, RunExport, ScenarioId, WorldSnapshot } from '@lumen/shared';
 
 export interface EvalCase {
   name: string;
@@ -33,6 +33,7 @@ export interface InspectorStore {
   snapshots(): readonly WorldSnapshot[];
   overrides(): readonly OverrideEntry[];
   panes(): readonly PaneReport[];
+  overlayLog(): readonly OverlayEvent[];
   paused(): boolean;
   setPaused(p: boolean): void;
   seek(t: number): void;

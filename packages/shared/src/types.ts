@@ -91,6 +91,19 @@ export interface PaneReport {
   gaze: boolean;
 }
 
+export type OverlayEventKind = 'birth' | 'resize' | 'move' | 'drop' | 'hide' | 'edge' | 'aside' | 'death';
+
+export interface OverlayEvent {
+  t: number;
+  id: string;
+  kind: OverlayEventKind;
+  level: Level | 'none';
+  from?: Level | 'none';
+  cause: string;
+  detail?: string;
+  rect?: Rect;
+}
+
 export interface WearerModel {
   dismissed: Record<string, number>;
   accepted: Record<string, number>;
@@ -324,4 +337,5 @@ export interface RunExport {
   snapshots: import('./compact').CompactSnapshot[];
   overrides: OverrideEntry[];
   entries: [number, Decision][];
+  overlay?: OverlayEvent[];
 }

@@ -57,3 +57,8 @@ export function placeDoor(p: PlaceData): Vec3 {
   const x = p.side === 'E' ? BLOCK.buildingLine - 0.3 : -(BLOCK.buildingLine - 0.3);
   return v3(x, 0, a.z);
 }
+
+export function groundY(x: number, z: number): number {
+  const n = nOf(z);
+  return Math.abs(x) >= 7 && !(n > 90 && n < 104) ? 0.15 : 0;
+}

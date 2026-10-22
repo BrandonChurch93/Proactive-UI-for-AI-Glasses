@@ -2,22 +2,24 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Brain } from '@lumen/brain';
 import { SCENARIO_IDS, WALK_SECONDS, compactSnapshot, isScenarioId, type WorldSnapshot } from '@lumen/shared';
-import { Sim, TICK_HZ, headlessView } from '@lumen/sim';
+import { HeadlessView, Sim, TICK_HZ } from '@lumen/sim';
 import { ROOT, type WalkFile } from './suite';
 
 export function recordWalk(scenario: WalkFile['scenario'], seed = 47): WalkFile {
   const sim = new Sim(scenario, { seed });
   const brain = new Brain({ scenario });
   const snapshots: WorldSnapshot[] = [];
+  const headless = new HeadlessView();
   let view: WorldSnapshot['view'];
   const ticks = Math.round(WALK_SECONDS[scenario] * TICK_HZ);
   for (let i = 0; i <= ticks; i++) {
-    sim.advanceTo(i / TICK_HZ);
+    headless.advanceTo(sim, i / TICK_HZ);
     const snap = sim.snapshot(view);
     const frame = brain.tick(snap);
     snap.wearerModel = frame.model;
     snapshots.push(snap);
-    view = headlessView(frame, sim);
+    headless.apply(frame);
+    view = headless.report(sim);
   }
   return { version: 1, scenario, seed, hz: TICK_HZ, snapshots };
 }

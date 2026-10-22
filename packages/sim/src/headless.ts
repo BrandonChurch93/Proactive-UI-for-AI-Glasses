@@ -1,52 +1,86 @@
 import {
+  Aside,
+  LEVEL_RANK,
   NOMINAL_SIZE,
+  Placement,
+  boxKeepOut,
+  capKeepOut,
+  groundY,
   placeView,
-  placeWorld,
   project,
+  roadwayKeepOuts,
+  uiScale,
   type BrainFrame,
   type Box3,
-  type CameraPose,
+  type FrameCtx,
+  type KeepOut,
   type PaneReport,
+  type Projector,
   type Rect,
+  type Vec3,
   type Viewport,
 } from '@lumen/shared';
-import type { Sim } from './sim';
+import { LANE_BY_ID } from './traffic';
+import { SIM_HZ, type Sim } from './sim';
 
-export function screenRect(pose: CameraPose, vp: Viewport, b: Box3): Rect | null {
-  let x0 = Infinity;
-  let y0 = Infinity;
-  let x1 = -Infinity;
-  let y1 = -Infinity;
-  let any = false;
-  for (let i = 0; i < 8; i++) {
-    const p = project(pose, vp, {
-      x: i & 1 ? b.max.x : b.min.x,
-      y: i & 2 ? b.max.y : b.min.y,
-      z: i & 4 ? b.max.z : b.min.z,
-    });
-    if (!p.inFront) continue;
-    any = true;
-    x0 = Math.min(x0, p.x);
-    y0 = Math.min(y0, p.y);
-    x1 = Math.max(x1, p.x);
-    y1 = Math.max(y1, p.y);
-  }
-  if (!any || x1 < 0 || y1 < 0 || x0 > vp.w || y0 > vp.h) return null;
-  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+const LOOKAHEAD = 0.45;
+const VEHICLE_RANGE_M = 70;
+const PERSON_RANGE_M = 28;
+
+function union(a: { rect: Rect; depth: number } | null, b: { rect: Rect; depth: number } | null): { rect: Rect; depth: number } | null {
+  if (!a) return b;
+  if (!b) return a;
+  const x = Math.min(a.rect.x, b.rect.x);
+  const y = Math.min(a.rect.y, b.rect.y);
+  const rect = { x, y, w: Math.max(a.rect.x + a.rect.w, b.rect.x + b.rect.w) - x, h: Math.max(a.rect.y + a.rect.h, b.rect.y + b.rect.h) - y };
+  return { rect, depth: Math.min(a.depth, b.depth) };
 }
 
-export function keepOuts(sim: Sim, pose: CameraPose, vp: Viewport): Rect[] {
-  const out: Rect[] = [];
+export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, maxDepth = Infinity): KeepOut[] {
+  const out: KeepOut[] = [];
+  const both = (now: { rect: Rect; depth: number } | null, ahead: { rect: Rect; depth: number } | null): { rect: Rect; depth: number; vx?: number } | null => {
+    const u = union(now, ahead);
+    if (!u || !now || !ahead) return u;
+    return { ...u, vx: (ahead.rect.x + ahead.rect.w / 2 - (now.rect.x + now.rect.w / 2)) / LOOKAHEAD };
+  };
+  const push = (r: { rect: Rect; depth: number; vx?: number } | null, kind: KeepOut['kind'], moving: boolean, id: string): void => {
+    if (!r || r.depth >= maxDepth) return;
+    const k: KeepOut = { rect: capKeepOut(r.rect, vp), kind, moving, id, depth: r.depth };
+    if (r.vx !== undefined) k.vx = r.vx;
+    out.push(k);
+  };
   for (const v of sim.traffic.vehicles) {
     if (v.v < 0.3) continue;
-    const r = screenRect(pose, vp, sim.traffic.bounds(v));
-    if (r) out.push(r);
+    const b = sim.traffic.bounds(v);
+    if (Math.hypot((b.min.x + b.max.x) / 2 - eye.x, (b.min.z + b.max.z) / 2 - eye.z) > VEHICLE_RANGE_M) continue;
+    const lane = LANE_BY_ID.get(v.lane)!;
+    const dx = lane.dir.x * v.v * LOOKAHEAD;
+    const dz = lane.dir.z * v.v * LOOKAHEAD;
+    const ahead = { min: { x: b.min.x + dx, y: b.min.y, z: b.min.z + dz }, max: { x: b.max.x + dx, y: b.max.y, z: b.max.z + dz } };
+    push(both(boxKeepOut(b, proj, vp), boxKeepOut(ahead, proj, vp)), 'vehicle', true, v.id);
   }
   for (const p of sim.people.people) {
-    if (!p.alive) continue;
-    const r = screenRect(pose, vp, { min: { x: p.pos.x - 0.3, y: 0, z: p.pos.z - 0.3 }, max: { x: p.pos.x + 0.3, y: p.height, z: p.pos.z + 0.3 } });
-    if (r && r.h > 30) out.push(r);
+    if (!p.alive || p.spawnAt > sim.t) continue;
+    if (Math.hypot(p.pos.x - eye.x, p.pos.z - eye.z) > PERSON_RANGE_M) continue;
+    const vx = -Math.sin(p.heading) * p.speed * LOOKAHEAD;
+    const vz = -Math.cos(p.heading) * p.speed * LOOKAHEAD;
+    const box = (ox: number, oz: number, y0: number, y1: number): Box3 => ({
+      min: { x: p.pos.x + ox - 0.3, y: y0, z: p.pos.z + oz - 0.3 },
+      max: { x: p.pos.x + ox + 0.3, y: y1, z: p.pos.z + oz + 0.3 },
+    });
+    const g = groundY(p.pos.x, p.pos.z);
+    const body = both(boxKeepOut(box(0, 0, g, g + p.height), proj, vp), boxKeepOut(box(vx, vz, g, g + p.height), proj, vp));
+    if (!body || body.rect.h < 30) continue;
+    const moving = p.speed > 0.2;
+    push(body, 'person', moving, p.id);
+    let dh = Math.atan2(-(eye.x - p.pos.x), -(eye.z - p.pos.z)) - p.heading;
+    while (dh > Math.PI) dh -= Math.PI * 2;
+    while (dh < -Math.PI) dh += Math.PI * 2;
+    if (Math.abs(dh) < 1.1) {
+      push(both(boxKeepOut(box(0, 0, g + p.height - 0.3, g + p.height), proj, vp), boxKeepOut(box(vx, vz, g + p.height - 0.3, g + p.height), proj, vp)), 'face', moving, `${p.id}:face`);
+    }
   }
+  out.push(...roadwayKeepOuts(proj, vp));
   return out;
 }
 
@@ -62,42 +96,88 @@ const VIEW_SIZE: Record<string, { w: number; h: number }> = {
   place: { w: 292, h: 152 },
 };
 
-export function headlessView(frame: BrainFrame, sim: Sim): { w: number; h: number; panes: PaneReport[] } {
-  const vp = sim.viewport;
-  const pose = sim.cameraPose();
-  const kos = keepOuts(sim, pose, vp);
-  const panes: PaneReport[] = [];
-  const stack = new Map<string, number>();
-  for (const d of frame.items) {
-    if (d.placement.zone === 'ground') continue;
-    if (d.level === 'pip') continue;
-    if (d.placement.zone === 'view') {
-      const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
-      const size = d.level === 'expanded' ? NOMINAL_SIZE.expanded : (VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!);
-      const i = stack.get(slot) ?? 0;
-      stack.set(slot, i + 1);
-      panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i)), opacity: 1, gaze: Boolean(d.gaze) });
-      continue;
+interface HeadlessItem {
+  place: Placement;
+  aside: Aside;
+  pane: PaneReport | null;
+}
+
+export class HeadlessView {
+  private items = new Map<string, HeadlessItem>();
+  private frame: BrainFrame | null = null;
+
+  advanceTo(sim: Sim, t: number): void {
+    const dt = 1 / SIM_HZ;
+    while (sim.t < t - 1e-7) {
+      sim.step(dt);
+      this.update(sim);
     }
-    const a = sim.anchorOf(d.placement.anchor);
-    if (!a) continue;
-    const lvl = d.level === 'whisper' ? 'glance' : d.level;
-    const size = NOMINAL_SIZE[lvl as 'glance' | 'card' | 'expanded'] ?? NOMINAL_SIZE.glance;
-    const pr = project(pose, vp, a);
-    const placed = placeWorld({
-      level: d.level,
-      anchor: pr,
-      distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z),
-      size,
-      band: frame.band,
-      viewport: vp,
-      focusOk: Boolean(d.placement.focusOk),
-      keepOuts: kos,
-    });
-    if (placed.mode === 'offscreen' || placed.mode === 'pip') continue;
-    panes.push({ id: d.id, level: placed.collapsed ?? d.level, zone: 'world', rect: round(placed.rect), opacity: 1, gaze: Boolean(d.gaze) });
   }
-  return { w: vp.w, h: vp.h, panes };
+
+  apply(frame: BrainFrame): void {
+    this.frame = frame;
+    for (const id of [...this.items.keys()]) if (!frame.items.some((d) => d.id === id)) this.items.delete(id);
+  }
+
+  private update(sim: Sim): void {
+    const frame = this.frame;
+    if (!frame) return;
+    const vp = sim.viewport;
+    const pose = sim.cameraPose();
+    const proj = (v: Vec3): ReturnType<typeof project> => project(pose, vp, v);
+    const anchors = new Map<string, Vec3>();
+    let reach = 0;
+    for (const d of frame.items) {
+      if (d.placement.zone !== 'world') continue;
+      const a = sim.anchorOf(d.placement.anchor);
+      if (!a) continue;
+      anchors.set(d.id, a);
+      if (LEVEL_RANK[d.level] >= LEVEL_RANK.glance && d.level !== 'whisper') reach = Math.max(reach, proj(a).depth);
+    }
+    const ctx: FrameCtx = { t: sim.t, band: frame.band, vp, keepOuts: keepOuts(sim, proj, vp, pose.pos, reach), ui: uiScale(vp) };
+    for (const d of frame.items) {
+      const a = anchors.get(d.id);
+      if (!a) continue;
+      let it = this.items.get(d.id);
+      if (!it) {
+        it = { place: new Placement(d.placement.enter === 'edge'), aside: new Aside(), pane: null };
+        this.items.set(d.id, it);
+      }
+      const lv = d.level === 'glance' || d.level === 'card' || d.level === 'expanded' ? d.level : 'glance';
+      const pr = proj(a);
+      const placed = it.place.update(
+        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: Boolean(d.placement.focusOk) },
+        ctx,
+      );
+      it.pane = null;
+      if (placed.mode !== 'pane' || LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') continue;
+      const home = { x: placed.rect.x + it.place.jumpX.at(sim.t), y: placed.rect.y + it.place.jumpY.at(sim.t), w: placed.rect.w, h: placed.rect.h };
+      const s = it.aside.update(home, ctx, Boolean(d.placement.focusOk), pr.depth);
+      if (s.dropped) continue;
+      const level = placed.collapsed && LEVEL_RANK[placed.collapsed] < LEVEL_RANK[d.level] ? placed.collapsed : d.level;
+      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * 1000) / 1000, gaze: Boolean(d.gaze) };
+    }
+  }
+
+  report(sim: Sim): { w: number; h: number; panes: PaneReport[] } {
+    const vp = sim.viewport;
+    const panes: PaneReport[] = [];
+    const stack = new Map<string, number>();
+    for (const d of this.frame?.items ?? []) {
+      if (d.placement.zone === 'ground' || d.level === 'pip') continue;
+      if (d.placement.zone === 'view') {
+        const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
+        const size = d.level === 'expanded' ? NOMINAL_SIZE.expanded : (VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!);
+        const i = stack.get(slot) ?? 0;
+        stack.set(slot, i + 1);
+        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i)), opacity: 1, gaze: Boolean(d.gaze) });
+        continue;
+      }
+      const p = this.items.get(d.id)?.pane;
+      if (p) panes.push(p);
+    }
+    return { w: vp.w, h: vp.h, panes };
+  }
 }
 
 function round(r: Rect): Rect {

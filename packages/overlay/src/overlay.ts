@@ -10,6 +10,7 @@ import {
   type BrainFrame,
   type Decision,
   type Glyph,
+  type OverlayEvent,
   type PaneReport,
   type Rect,
   type Vec3,
@@ -79,12 +80,21 @@ interface Item {
   order: number;
   decided: Decision['level'] | null;
   pending: { want: PaneLevel; since: number } | null;
+  restored: boolean;
+  why: { kind: OverlayEvent['kind']; cause: string; detail?: string } | null;
+  off: { x: number; y: number } | null;
+  size: { w: number; h: number } | null;
+  asideOn: boolean;
+  fresh: OverlayEvent[];
+  lastMove: OverlayEvent | null;
 }
 
 export interface OverlayOptions {
   reducedMotion?: boolean;
   handlers?: Partial<PaneHandlers>;
   clock?: gsap.core.Timeline;
+  log?: (e: OverlayEvent) => void;
+  resumed?: boolean;
 }
 
 export interface OverlayState {
@@ -260,6 +270,8 @@ export class Overlay {
   private ui = 1;
   private readonly live: HTMLElement;
   private readonly clock: gsap.core.Timeline | null;
+  private readonly log: ((e: OverlayEvent) => void) | null;
+  private resuming: boolean;
 
   constructor(
     private bridge: SceneBridge,
@@ -267,6 +279,8 @@ export class Overlay {
     opts: OverlayOptions = {},
   ) {
     this.clock = opts.clock ?? null;
+    this.log = opts.log ?? null;
+    this.resuming = Boolean(opts.resumed);
     this.reduced = opts.reducedMotion ?? (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.handlers = { choice: opts.handlers?.choice ?? (() => {}), pinch: opts.handlers?.pinch ?? (() => {}) };
     this.root = document.createElement('div');
@@ -343,6 +357,7 @@ export class Overlay {
     for (const e of frame.events) {
       if (e.action === 'save') this.saveBloom(e);
     }
+    this.resuming = false;
   }
 
   private createItem(d: Decision, t: number): Item {
@@ -376,6 +391,13 @@ export class Overlay {
       order: this.order++,
       decided: null,
       pending: null,
+      restored: this.resuming && LEVEL_RANK[d.level] >= LEVEL_RANK.glance && d.level !== 'whisper',
+      why: null,
+      off: null,
+      size: null,
+      asideOn: false,
+      fresh: [],
+      lastMove: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -394,6 +416,8 @@ export class Overlay {
   }
 
   private disposeItem(it: Item): void {
+    for (const e of it.fresh) this.log?.(e);
+    it.fresh = [];
     it.tl?.kill();
     it.gtl?.kill();
     for (const b of [it.cur, ...it.old]) {
@@ -507,10 +531,43 @@ export class Overlay {
     return { pane: b.view.el, seed: b.seed, kids: b.view.kids, why: b.view.why, width: b.width };
   }
 
-  private transition(it: Item, want: PaneLevel, t: number, edge = false): void {
+  private paneRect(it: Item, b: Built): Rect | undefined {
+    if (!b.rect) return undefined;
+    const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
+    const k = (v: number): number => Math.round(v * 10) / 10;
+    return { x: k(b.rect.x), y: k(b.rect.y), w: k(b.width * sc), h: k(b.height * sc) };
+  }
+
+  private note(it: Item, kind: OverlayEvent['kind'], cause: string, detail?: string, rect?: Rect, from?: PaneLevel): void {
+    const e: OverlayEvent = { t: this.t, id: it.id, kind, level: it.want, cause };
+    if (from !== undefined) e.from = from;
+    if (detail) e.detail = detail;
+    if (rect) e.rect = rect;
+    it.fresh.push(e);
+  }
+
+  private explain(it: Item, placed: WorldPlace | null, want: PaneLevel, decided: boolean): NonNullable<Item['why']> {
+    const d = it.d;
+    const brain = { cause: 'brain', detail: [d.action, d.cause].filter(Boolean).join(' · ') };
+    if (want === 'none') {
+      if (it.dying) return { kind: 'death', cause: 'brain', detail: 'gone' };
+      if (LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') return { kind: 'death', ...brain };
+      if (it.aside.dropped) return { kind: 'drop', cause: 'keepout', detail: it.aside.by ?? '' };
+      if (!placed || placed.mode === 'edge') return { kind: 'edge', cause: 'offscreen' };
+      return { kind: 'hide', cause: placed.why ?? 'room' };
+    }
+    if (it.restored) return { kind: 'birth', cause: 'resume' };
+    if (decided) return { kind: 'birth', ...brain };
+    if (placed?.collapsed && placed.why) return { kind: 'birth', cause: placed.why };
+    return { kind: 'birth', cause: 'return', detail: it.why?.cause ?? '' };
+  }
+
+  private transition(it: Item, want: PaneLevel, t: number, edge = false, why?: Item['why']): void {
     it.tl?.kill();
     const tl = this.tl();
     const prev = it.cur;
+    const from = it.want;
+    const prevRect = prev ? this.paneRect(it, prev) : undefined;
     let at = 0;
     const world = it.kind === 'world' && it.lights !== null;
     if (prev) {
@@ -560,6 +617,13 @@ export class Overlay {
     }
     it.want = want;
     it.tl = tl;
+    it.off = null;
+    it.size = null;
+    if (why && (want !== 'none' || prev)) {
+      it.why = why;
+      it.restored = false;
+      this.note(it, why.kind, why.cause, why.detail, want === 'none' ? prevRect : undefined, from);
+    }
   }
 
   update(t: number): void {
@@ -576,7 +640,13 @@ export class Overlay {
       this.lastYaw = cam.yaw;
       this.lastT = t;
     }
-    const keepOuts = this.bridge.keepOuts();
+    let reach = 0;
+    for (const it of this.items.values()) {
+      if (it.kind !== 'world' || it.dying || LEVEL_RANK[it.d.level] < LEVEL_RANK.glance) continue;
+      const a = this.bridge.anchor(it.d.placement.anchor);
+      if (a) reach = Math.max(reach, this.bridge.project(a).depth);
+    }
+    const keepOuts = this.bridge.keepOuts(reach);
     const ui = uiScale(vp);
     if (ui !== this.ui) {
       this.ui = ui;
@@ -622,7 +692,7 @@ export class Overlay {
         const lv = c && c !== 'pip' && LEVEL_RANK[d.level] > LEVEL_RANK[c] ? c : d.level;
         const size = it.cur && it.cur.level === lv ? { w: it.cur.width, h: it.cur.height } : (NOMINAL_SIZE[lv as 'glance'] ?? NOMINAL_SIZE.glance);
         home = { x: placed.rect.x + it.place.jumpX.at(t), y: placed.rect.y + it.place.jumpY.at(t), w: size.w * sc, h: size.h * sc };
-        aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk));
+        aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk), depth);
       }
       const want = this.paneLevelFor(it, placed);
       const decided = it.d.level !== it.decided;
@@ -630,20 +700,21 @@ export class Overlay {
       if (want !== it.want) {
         if (urgent) {
           it.pending = null;
+          const why = this.explain(it, placed, want, decided);
           it.decided = it.d.level;
-          this.transition(it, want, t, placed?.mode === 'edge');
+          this.transition(it, want, t, placed?.mode === 'edge', why);
         } else if (!it.yieldS.on) {
           if (!it.pending || it.pending.want !== want) it.pending = { want, since: t };
           else if (t - it.pending.since >= MOVE.settle) {
             it.pending = null;
-            this.transition(it, want, t, placed?.mode === 'edge');
+            this.transition(it, want, t, placed?.mode === 'edge', this.explain(it, placed, want, false));
           }
         }
       } else {
         it.pending = null;
         it.decided = it.d.level;
       }
-      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t);
+      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t, false, { kind: 'birth', cause: 'shape' });
       else if (it.cur) it.cur.view.update(d.content);
 
       const lum = this.snap?.env.backdrop[it.id];
@@ -747,6 +818,7 @@ export class Overlay {
         it.edge.style.opacity = eo.toFixed(3);
       } else if (it.edge) it.edge.style.opacity = '0';
 
+      this.track(it, placed, aside, pr);
       if (it.dying && !it.cur && it.old.length === 0 && t - it.deadAt > 0.6 && !it.tl?.isActive() && !it.gtl?.isActive() && it.L.pip < 0.01) this.disposeItem(it);
     }
 
@@ -765,6 +837,50 @@ export class Overlay {
         this.safety.delete(id);
       }
     }
+  }
+
+  private track(it: Item, placed: WorldPlace | null, aside: AsideState | null, pr: { x: number; y: number } | null): void {
+    const on = Boolean(aside?.active && !aside.dropped);
+    if (on && !it.asideOn) this.note(it, 'aside', 'keepout', aside?.by ?? '');
+    else if (!on && it.asideOn && !aside?.dropped) this.note(it, 'aside', 'clear');
+    it.asideOn = on;
+    const b = it.cur;
+    const born = it.fresh.some((e) => e.kind === 'birth');
+    if (b && placed?.mode === 'pane' && pr && !born) {
+      const off = { x: placed.rect.x - pr.x, y: placed.rect.y - pr.y };
+      if (it.off && Math.hypot(off.x - it.off.x, off.y - it.off.y) > 40) {
+        const cause = placed.moved ?? placed.why ?? 'anchor';
+        const lm = it.lastMove;
+        if (lm && lm.cause === cause && this.t - lm.t < 0.25) {
+          const r = this.paneRect(it, b);
+          if (r) lm.rect = r;
+          lm.detail = `${Number(lm.detail?.split(' ')[0] ?? 1) + 1} steps`;
+        } else {
+          this.note(it, 'move', cause);
+          it.lastMove = it.fresh[it.fresh.length - 1]!;
+        }
+        it.off = off;
+      } else if (!it.off) it.off = off;
+    }
+    if (b) {
+      const sc = it.kind === 'world' ? (it.placed?.scale ?? 1) : this.ui;
+      const size = { w: b.width * sc, h: b.height * sc };
+      if (it.size && Math.abs(size.w - it.size.w) > it.size.w * 0.12) this.note(it, 'resize', 'scale');
+      if (!it.size || Math.abs(size.w - it.size.w) > it.size.w * 0.12) it.size = size;
+    }
+    const later: OverlayEvent[] = [];
+    for (const e of it.fresh) {
+      if (e.kind === 'birth' && e.t === this.t && !e.rect) {
+        later.push(e);
+        continue;
+      }
+      if (!e.rect && b) {
+        const r = this.paneRect(it, b);
+        if (r) e.rect = r;
+      }
+      this.log?.(e);
+    }
+    it.fresh = later;
   }
 
   private setTrace(it: Item, trace: { from: Rect; to: Rect } | null, o: number): void {

@@ -64,7 +64,7 @@ const DIMS: Record<BodyKind, { len: number; width: number; height: number; v0: [
   suv: { len: 4.9, width: 1.95, height: 1.75, v0: [9, 11.5] },
   van: { len: 5.4, width: 2.0, height: 2.3, v0: [8.5, 10.5] },
   bus: { len: 12.2, width: 2.55, height: 3.2, v0: [8, 9] },
-  truck: { len: 7.6, width: 2.4, height: 3.2, v0: [7.5, 9] },
+  truck: { len: 7.6, width: 3.9, height: 4.15, v0: [7.5, 9] },
   bike: { len: 1.8, width: 0.6, height: 1.7, v0: [5, 6] },
 };
 

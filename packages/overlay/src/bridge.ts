@@ -1,4 +1,6 @@
-import type { Projected, Rect, Vec3, Viewport } from '@lumen/shared';
+import type { KeepOut, Projected, Vec3, Viewport } from '@lumen/shared';
+
+export type { KeepOut } from '@lumen/shared';
 
 export function leaderPoint(from: Vec3, to: Vec3, u: number): Vec3 {
   const c1 = { x: from.x + (to.x - from.x) * 0.3, y: from.y + (to.y - from.y) * 0.3 + 0.15, z: from.z + (to.z - from.z) * 0.3 };
@@ -42,20 +44,13 @@ export interface GroundTextHandle {
   dispose(): void;
 }
 
-export interface KeepOut {
-  rect: Rect;
-  kind: 'vehicle' | 'person' | 'face';
-  moving: boolean;
-  id: string;
-}
-
 export interface SceneBridge {
   viewport(): Viewport;
   project(v: Vec3): Projected;
   unprojectAtDepth(x: number, y: number, depth: number): Vec3;
   camera(): { pos: Vec3; yaw: number; pitch: number };
   anchor(id: string): Vec3 | undefined;
-  keepOuts(): KeepOut[];
+  keepOuts(maxDepth?: number): KeepOut[];
   routePath(to: string, offset: 'center' | 'curb'): Vec3[];
   safetyAnchor(id: string): { pos: Vec3; yaw: number } | undefined;
   createLight(kind: LightKind): LightHandle;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Brain } from '@lumen/brain';
-import { FOCUS_ZONE, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, focusRect, project, rectsOverlap, type Rect } from '@lumen/shared';
+import { FOCUS_ZONE, KEEPOUT, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
 import { ALBEDO, SHADE, Sim, TICK_HZ, keepOuts } from '@lumen/sim';
 import type { KeepOut } from '../src/bridge';
 import { primaryContrast, secondaryContrast, tierFor } from '../src/backdrop';
@@ -24,7 +24,7 @@ describe('placement on every beat of the three walks', () => {
         sim.step(STEP);
         if (i % (60 / TICK_HZ) === 0) frame = brain.tick(sim.snapshot());
         const pose = sim.cameraPose();
-        const kos: KeepOut[] = keepOuts(sim, pose, VP).map((rect, k) => ({ rect, kind: 'person', moving: true, id: String(k) }));
+        const kos: KeepOut[] = keepOuts(sim, (v) => project(pose, VP, v), VP, pose.pos);
         const ctx: FrameCtx = { t: sim.t, band: frame.band, vp: VP, keepOuts: kos };
         const zone = focusRect(frame.band, VP.w, VP.h);
         for (const d of frame.items) {
@@ -104,7 +104,7 @@ describe('rule 8 · the world has right of way', () => {
       const x = -200 + speed * t;
       const now: Rect = { x, y: 260, w: 60, h: 300 };
       const ahead: Rect = { x, y: 260, w: 60 + speed * lookahead, h: 300 };
-      const s = aside.update(card, ctx(t, [{ rect: ahead, kind: 'person', moving: true, id: 'p' }]), false);
+      const s = aside.update(card, ctx(t, [{ rect: ahead, kind: 'person', moving: true, id: 'p', depth: 5 }]), false);
       const shown: Rect = { ...card, x: card.x + s.dx, y: card.y + s.dy };
       if (rectsOverlap(shown, now) && !s.dropped) worst = Math.max(worst, s.opacity);
     }
@@ -114,7 +114,7 @@ describe('rule 8 · the world has right of way', () => {
   it('steps aside by the overlap plus 20 px and comes back when clear', () => {
     const aside = new Aside();
     const pane: Rect = { x: 40, y: 200, w: 292, h: 152 };
-    const ko: KeepOut = { rect: { x: 20, y: 150, w: 60, h: 400 }, kind: 'person', moving: false, id: 'p' };
+    const ko: KeepOut = { rect: { x: 20, y: 150, w: 60, h: 400 }, kind: 'person', moving: false, id: 'p', depth: 5 };
     let s = aside.update(pane, ctx(0, [ko]), false);
     for (let t = STEP; t < 0.6; t += STEP) s = aside.update(pane, ctx(t, [ko]), false);
     expect(s.opacity).toBeCloseTo(MOVE.asideOpacity, 2);
@@ -127,9 +127,9 @@ describe('rule 8 · the world has right of way', () => {
     expect(Math.hypot(s.dx, s.dy)).toBeLessThan(0.5);
   });
 
-  it('a person who would need a long slide to clear drops the pane to its light instead', () => {
+  it('a person who would need a slide longer than the pane is wide drops the pane to its light instead', () => {
     const aside = new Aside();
-    const ko: KeepOut = { rect: { x: 360, y: 150, w: 180, h: 400 }, kind: 'person', moving: false, id: 'p' };
+    const ko: KeepOut = { rect: { x: 300, y: 150, w: 400, h: 400 }, kind: 'person', moving: false, id: 'p', depth: 5 };
     let s = aside.update(card, ctx(0, [ko]), false);
     for (let t = STEP; t < 0.6; t += STEP) s = aside.update(card, ctx(t, [ko]), false);
     expect(s.dropped).toBe(true);
@@ -138,13 +138,54 @@ describe('rule 8 · the world has right of way', () => {
 
   it('a moving vehicle dims the pane on the first frame and drops it to a pip when it cannot clear', () => {
     const aside = new Aside();
-    const truck: KeepOut = { rect: { x: 0, y: 0, w: 1280, h: 800 }, kind: 'vehicle', moving: true, id: 'truck' };
+    const truck: KeepOut = { rect: { x: 0, y: 0, w: 1280, h: 800 }, kind: 'vehicle', moving: true, id: 'truck', depth: 5 };
     let s = aside.update(card, ctx(0, [truck]), false);
     expect(s.dropped).toBe(true);
     for (let t = STEP; t < 2; t += STEP) s = aside.update(card, ctx(t, [truck]), false);
     expect(s.dropped).toBe(true);
     for (let t = 2; t < 2.4; t += STEP) s = aside.update(card, ctx(t, []), false);
     expect(s.dropped).toBe(false);
+  });
+});
+
+describe('keep-outs', () => {
+  const pose: CameraPose = { pos: { x: 8.3, y: 1.68, z: zOf(60) }, yaw: 0.2, pitch: 0, fov: 56 };
+  const proj = (v: { x: number; y: number; z: number }): ReturnType<typeof project> => project(pose, VP, v);
+
+  it('a car passing beside the eye, partly behind it, stays inside the view and under the cap', () => {
+    const car = { min: { x: 4.3, y: 0, z: zOf(63.5) }, max: { x: 6.2, y: 1.5, z: zOf(59.27) } };
+    const k = boxKeepOut(car, proj, VP)!;
+    expect(k.rect.x).toBeGreaterThanOrEqual(0);
+    expect(k.rect.x + k.rect.w).toBeLessThanOrEqual(VP.w);
+    expect(k.rect.y + k.rect.h).toBeLessThanOrEqual(VP.h);
+    expect(k.depth).toBeGreaterThanOrEqual(KEEPOUT.nearM);
+    const capped = capKeepOut(k.rect, VP);
+    expect(capped.w).toBeLessThanOrEqual(VP.w * KEEPOUT.cap + 1e-9);
+    expect(capped.h).toBeLessThanOrEqual(VP.h * KEEPOUT.cap + 1e-9);
+  });
+
+  it('a mover too big to keep whole is capped from the side that runs off the view, so its edge facing the panes stays true', () => {
+    const car = capKeepOut({ x: 0, y: 300, w: VP.w, h: VP.h - 300 }, VP);
+    expect(car.y).toBe(300);
+    expect(car.h).toBeCloseTo(VP.h * KEEPOUT.cap, 6);
+  });
+
+  it('a person behind the anchor does not move the pane', () => {
+    const aside = new Aside();
+    const pane: Rect = { x: 300, y: 200, w: 292, h: 152 };
+    const far: KeepOut = { rect: { x: 280, y: 150, w: 80, h: 400 }, kind: 'person', moving: true, id: 'p', depth: 30 };
+    let s = aside.update(pane, { t: 0, band: 'stopped', vp: VP, keepOuts: [far] }, false, 20);
+    for (let t = STEP; t < 0.6; t += STEP) s = aside.update(pane, { t, band: 'stopped', vp: VP, keepOuts: [far] }, false, 20);
+    expect(s.active).toBe(false);
+    expect(s.opacity).toBe(1);
+  });
+
+  it('the roadway covers the avenue ahead and nothing above 48% of the view', () => {
+    const road = roadwayKeepOuts(proj, VP);
+    expect(road.length).toBeGreaterThan(0);
+    for (const k of road) expect(k.rect.y).toBeGreaterThanOrEqual(VP.h * KEEPOUT.roadCut - 1e-6);
+    const p = proj({ x: 0, y: 0, z: zOf(75) });
+    expect(road.some((k) => p.x >= k.rect.x && p.x <= k.rect.x + k.rect.w && p.y >= k.rect.y && p.y <= k.rect.y + k.rect.h)).toBe(true);
   });
 });
 

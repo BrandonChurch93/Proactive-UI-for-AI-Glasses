@@ -9,6 +9,7 @@ import {
   yawToward,
   compactSnapshot,
   type BrainFrame,
+  type OverlayEvent,
   type Override,
   type PaneReport,
   type RunExport,
@@ -97,6 +98,7 @@ export class Walk {
   readonly bridge: ThreeBridge;
   frames: BrainFrame[] = [];
   snapshots: WorldSnapshot[] = [];
+  overlayLog: OverlayEvent[] = [];
   hoverId: string | null = null;
   head = { yaw: 0.22, pitch: 0.04 };
   paused = false;
@@ -163,10 +165,12 @@ export class Walk {
     this.overlay?.setFocusOutline(on);
   }
 
-  private makeOverlay(): Overlay {
+  private makeOverlay(resumed = false): Overlay {
     clockBase = clockLast + 1 - this.sim.t;
     const o = new Overlay(this.bridge, this.layer, {
       clock,
+      resumed,
+      log: (e) => this.overlayLog.push(e),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       handlers: {
         pinch: (id) => this.pinch(id),
@@ -407,7 +411,9 @@ export class Walk {
       this.overlay = null;
       const warmFrom = this.opts.exact ? this.stepIndex : Math.max(this.stepIndex, target - WARM_STEPS);
       while (this.stepIndex < warmFrom) this.core(true);
-      this.overlay = this.makeOverlay();
+      const from = this.sim.t;
+      this.overlayLog = this.overlayLog.filter((e) => e.t < from);
+      this.overlay = this.makeOverlay(true);
     }
     while (this.stepIndex < target) this.core(false);
     for (const fn of this.listeners) fn();
@@ -425,6 +431,7 @@ export class Walk {
       snapshots: this.snapshots.slice(0, n).map(compactSnapshot),
       overrides: this.brain.log.overrides.map((e) => ({ t: e.t, override: e.override })),
       entries: this.brain.log.entries.map((e) => [e.t, e.decision]),
+      overlay: this.overlayLog.filter((e) => e.t <= this.sim.t + 1e-6),
     };
   }
 }

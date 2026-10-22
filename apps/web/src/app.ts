@@ -117,6 +117,7 @@ export class App {
       snapshots: () => w.snapshots,
       overrides: () => w.overrides(),
       panes: () => w.overlay?.report().panes ?? [],
+      overlayLog: () => w.overlayLog,
       paused: () => w.paused,
       setPaused: (p) => this.setPaused(p),
       seek: (t) => {

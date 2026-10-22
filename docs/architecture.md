@@ -20,7 +20,7 @@ packages/
   overlay/                the glasses layer (docs/overlay-spec.md)
   inspector/              the reviewer drawer (docs/inspector-spec.md)
   evals/                  scenarios, expectations, runner, report (docs/evals.md)
-  shared/                 types, config, the clock, vector helpers
+  shared/                 types, config, the clock, vector helpers, and the DOM-free placement state (Placement, Aside, keep-out geometry, motion timings) that the overlay and the headless recorder both run
 data/
   places.json             the roster with live data and depth payloads
   scenarios/*.json        timed beats and the pace track per walk

@@ -104,7 +104,7 @@ export function configRect(
   side: Align,
   vertical: 'above' | 'below',
   scale: number,
-): { rect: Rect; ok: boolean; leader: { x: number; y: number } } {
+): { rect: Rect; ok: boolean; held: 'clamp' | 'zone' | null; leader: { x: number; y: number } } {
   const zone = focusRect(inp.band, inp.viewport.w, inp.viewport.h);
   const raw = candidate(inp, side, vertical, scale);
   let r = clampInto(raw, inp.viewport);
@@ -116,7 +116,8 @@ export function configRect(
     !(vertical === 'above' && raw.y < MARGIN - 0.5) &&
     !(side === 'center' && !pushed && Math.abs(r.x - raw.x) > r.w * 0.35);
   const align: Align = pushed && side === 'center' ? (inp.anchor.x < inp.viewport.w / 2 ? 'left' : 'right') : side;
-  return { rect: r, ok, leader: leaderOf(r, align, vertical) };
+  const held = pushed ? 'zone' : Math.abs(r.x - raw.x) > 0.5 || Math.abs(r.y - raw.y) > 0.5 ? 'clamp' : null;
+  return { rect: r, ok, held, leader: leaderOf(r, align, vertical) };
 }
 
 export function placeWorld(inp: PlaceInput): Placed {

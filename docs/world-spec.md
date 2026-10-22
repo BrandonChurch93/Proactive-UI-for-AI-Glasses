@@ -50,7 +50,7 @@ Signage rule: a person's name or a plain descriptor, two or three words. Each ro
 
 ## 4. Life
 
-- Traffic: cars, taxis, vans, a bus that stops at the M4 stop, the delivery truck. Lane logic with following distance; signals obeyed; never through each other; never stopped inside the intersection. Parked cars along the avenue.
+- Traffic: cars, taxis, vans, a bus that stops at the M4 stop, the delivery truck. Each vehicle's box in the sim matches the model as drawn (the truck model, scaled to its 7.6 m length, is 3.9 m wide and 4.15 m tall), because keep-outs and the backdrop sampler use the sim's box. Lane logic with following distance; signals obeyed; never through each other; never stopped inside the intersection. Parked cars along the avenue.
 - People: rigged characters with walk cycles (CC0 low-poly packs, e.g. Quaternius or Kenney, loaded as glTF). Idle groups talking (the social signal), someone at the newsstand, someone waiting at the light. Nobody within 3 m of the camera except scripted beats.
 - Scripted people for beats: two people in conversation ahead in Just walking; a rider in the bike lane for the bike moment; a passerby at the corner for Errands.
 - Ambient audio: a city bed with distant traffic, a horn now and then, footsteps matched to the bob.

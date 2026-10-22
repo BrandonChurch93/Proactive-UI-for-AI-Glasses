@@ -1,5 +1,5 @@
 import { Brain } from '@lumen/brain';
-import { Sim, TICK_HZ, headlessView } from '@lumen/sim';
+import { HeadlessView, Sim, TICK_HZ } from '@lumen/sim';
 import { isScenarioId, isShow } from '@lumen/shared';
 
 const s = process.argv[2] ?? 'hungry';
@@ -7,12 +7,14 @@ if (!isScenarioId(s)) throw new Error('usage: tsx scripts/decisions.ts hungry|er
 const pips = process.argv.includes('--pips');
 const sim = new Sim(s);
 const brain = new Brain({ scenario: s });
+const headless = new HeadlessView();
 let view;
 for (let i = 0; i <= 99 * TICK_HZ; i++) {
-  sim.advanceTo(i / TICK_HZ);
+  headless.advanceTo(sim, i / TICK_HZ);
   const snap = sim.snapshot(view);
   const f = brain.tick(snap);
-  view = headlessView(f, sim);
+  headless.apply(f);
+  view = headless.report(sim);
   for (const d of f.events) {
     if (!pips && d.level === 'pip' && d.action !== 'save') continue;
     const c = d.content;
