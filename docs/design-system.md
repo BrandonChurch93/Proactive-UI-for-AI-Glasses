@@ -110,14 +110,14 @@ These are WebGL objects, not DOM, so they bloom with the marquee and read as lig
 | Aura | Larger radial sprite | 1.8 scaled 0.5 → 2.6 on mark, 1.6 on gaze | (1.1, .95, .7) at 90% |
 | Flare | Horizontal streak sprite | 5.0 wide × 0.32 tall, scaleX 1.2 → 5.5 | (2.5, 2.4, 2.1) |
 | Head | Small glow sprite | 0.5 | (3, 2.8, 2.3) |
-| Leader | Straight two-point line, additive, from the pip to the midpoint of the pane edge nearest it | 1px | (2.2, 2.1, 1.9) |
+| Leader | Straight two-point line, additive, from the pip to the nearest point of the nearest pane edge, 8 px in from its corners | 1px | (2.2, 2.1, 1.9) |
 | Seed | DOM hairline, 1.5px, glow 12px, at birth only | pane width | `#fff9e9` |
 | Edge light | DOM bar 4×26px, glow 10px and 24px | n/a | `#fff4d6` |
 | Trace | DOM dashed hairline from a pane's home to where it stepped aside | overlap width plus 20 px | `rgba(255,250,236,.5)` |
 
 The light vocabulary is depth-tested: a truck between the wearer and a pip occludes it. A pip never draws through a thing.
 
-As built: the sizes above hold at 24 m and beyond (the hero distance); nearer than that each sprite keeps the angular size it has at 24 m, so a pip on a shop sign two metres away is a point of light, not a flood. The pip sits 0.6 m toward the eye from its anchor so the façade it names never swallows it. The leader's pane end is placed at most 6 m from the eye on the ray through the midpoint of the pane edge nearest the pip, so the line is straight on screen, in the air in front of the street, and only its far end can be hidden by something real.
+As built: the sizes above hold at 24 m and beyond (the hero distance); nearer than that each sprite keeps the angular size it has at 24 m, so a pip on a shop sign two metres away is a point of light, not a flood. The pip sits 0.6 m toward the eye from its anchor so the façade it names never swallows it. The leader's pane end is placed at most 6 m from the eye on the ray through the nearest point of the pane edge nearest the pip, so the line is straight on screen, in the air in front of the street, and only its far end can be hidden by something real.
 
 Bloom: `UnrealBloomPass(strength .42, radius .45, threshold 1.02)`. Only emissives and the light vocabulary cross the threshold; sunlit white never does. Exposure `.58` with ACES filmic.
 
@@ -148,7 +148,7 @@ Bloom: `UnrealBloomPass(strength .42, radius .45, threshold 1.02)`. Only emissiv
 
 **Gaze** (wearer dwells, at the glance dwell of 450 ms). Aura to opacity 1, scale 1.6, over 800 ms `sine.inOut`. Pip to 1.6× over the same. Flare opacity 0 → 1 and scaleX 1.2 → 5.5 over 700 ms ease-out, starting at 300 ms; flare fades out over 700 ms ease-in starting at 1100 ms. Exactly one horizontal streak, never two.
 
-**Travel** (light leaves the pip, at birth only). Head opacity 1. Leader draws from 0 to 1 along a straight segment from the pip to the midpoint of the pane edge nearest it, over 320 ms to a glance or 460 ms to a card, `power2.inOut`, the head riding the tip. Head fades over 300 ms on arrival. Breath sound at the midpoint. After that the segment simply follows the pane's edge every frame.
+**Travel** (light leaves the pip, at birth only). Head opacity 1. Leader draws from 0 to 1 along a straight segment from the pip to the nearest point of the nearest pane edge, over 320 ms to a glance or 460 ms to a card, `power2.inOut`, the head riding the tip. Head fades over 300 ms on arrival. Breath sound halfway. After that the segment simply follows the pane's edge every frame.
 
 **Condense** (a pane is born; it runs once per pane). The seed hairline appears at the pane's top-left at width 0 and grows to the pane's width over 300 ms `power3.out`. 180 ms in, the pane reveals from the seed downward: `clip-path: inset(0 0 100% 0) → inset(0 0 0 0)` over `t-base` (420 ms for a card) ease-out, with chromatic separation `--ca` 2.4 → 0 settling over 700 ms `power2.out` from 340 ms. Children resolve from `opacity 0, y -3px, blur 5px` to rest over `t-base`, stagger 50 ms, from 260 ms. The seed fades over 450 ms ease-in from 500 ms. A pane the wearer earned by looking condenses while its light travels rather than after it, and its children resolve with the reveal, from 180 ms, so the glance reads within a second of the look.
 
@@ -205,7 +205,7 @@ Zones:
 - View zone (held glyph, message toasts, map tile, the ask glance, reviewer chrome): fixed in view, edges only.
 
 Rules:
-1. Anchor at sign height for a storefront, chest height for a person. The pane sits beside its light on the side away from the center of the view, its near edge 24 px from the light and vertically centered on it, joined by a short straight leader; when that does not fit, centered above the light with its bottom 22 px above it; then centered below. It is never placed over the roadway; with nowhere else to go it sits above its light at the roadway's top edge.
+1. Anchor at sign height for a storefront, chest height for a person. The pane sits beside its light on the side away from the center of the view, its near edge 24 px from the light and rising from it, the light 85 % of the way down the pane's height, joined by a short straight leader; when that does not fit, centered above the light with its bottom 22 px above it; then centered below. It is never placed over the roadway; with nowhere else to go it sits above its light at the roadway's top edge.
 2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it except the pane on the thing being looked at, which the zone does not apply to. When the zone grows, or the look leaves a pane that sits in it, the pane moves out over 320 ms if it has a place within its own width of its light, and otherwise waits as its light.
 3. Keep-out: roadway, vehicles in traffic (moving or stopped), people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). A pane that cannot clear a mover dims in place and drops to its light when mostly covered.
 4. Calm backdrop: façade over sky over road, never over a bright sign. (The pip may sit above a marquee, never on it: a glow on a glow is invisible.)
@@ -230,7 +230,7 @@ As built, smaller screens: sizes above are at the reference view of 1280 × 800.
 | Whisper line | View, bottom edge | Whisper | Name · one fact, 2.5 s, Brisk only |
 | Edge light | View edge | Pip | Where an off-view anchor is |
 | Curb follow-up | View | Glance | "Held that while you crossed. Still want it?" |
-| Safety text | Ground | Glance | WALK · WAIT countdown; BIKE · 2 s with an arrow; stop tone |
+| Safety text | Ground | Glance | WALK · WAIT countdown; BIKE · 2 s with an arrow; stop tone. One line on the pavement at a time: the bike line takes the countdown's place while it shows |
 | Route | Ground | Glance | Pavement band fading 25 m ahead; turn arc; stays at 40% during a gate |
 | Destination marker | Ground + world | Glance | Column of light, settles to a pip at the door |
 | Map tile | View | Glance | Only for a turn the wearer cannot see |

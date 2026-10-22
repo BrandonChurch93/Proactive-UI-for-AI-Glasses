@@ -106,12 +106,12 @@ Rules for a say line: under 60 characters; at most two numbers (a unit counts wi
 | 47th St Station | Uptown in 4 · stairs at the corner | | Uptown in 4 · stairs at the corner | Uptown in 4 |
 | Pocket Park | | | Benches in the shade · end of the walk | Shaded benches |
 
-Live lines on cards (the two facts behind the sentence) stay as in `data/places.json`: "3 min wait · 9 seats open", "Last show 8:00 · 40 seats left", "Uptown trains · 4 min", "M4 · 2 min · next in 11".
+Live lines on cards (the two facts behind the sentence) stay as in `data/places.json` and fit one line of the card, 28 characters at most: "3 min wait · 9 seats open", "5:30 nearly full · 40 at 8", "Ready since noon · till 9", "5 lanes open · $12 an hour", "Uptown trains · 4 min", "M4 · 2 min · next in 11".
 
 ## What a pane shows
 
 - Glance: the name and the say line (the short form in Walk and Brisk). Nothing else.
-- Card: the name, the say line, one live line, and the reason line in Stopped and Stroll. No year, no category line, no hint on the glass.
+- Card: the name, the say line, one live line, and the reason line in Stopped and Stroll unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
 - Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 
 ## Expanded views

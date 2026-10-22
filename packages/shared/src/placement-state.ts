@@ -60,6 +60,7 @@ export interface FrameCtx {
   band: Band;
   vp: Viewport;
   keepOuts: readonly KeepOut[];
+  chrome?: readonly Rect[];
   focusOk?: boolean;
   ui?: number;
   scanning?: boolean;
@@ -178,6 +179,7 @@ export class Placement {
       focusOk: req.focusOk,
       keepOuts: rects,
       road,
+      chrome: ctx.chrome ?? [],
       ui,
     });
     const near2: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';

@@ -827,7 +827,12 @@ export class Overlay {
       this.root.style.setProperty('--ui', ui.toFixed(3));
     }
     const yieldSide = this.yieldTracker.update({ t, yawRate: this.yawRate, curbDistance: this.bridge.curbDistance() });
-    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, ui, scanning: yieldSide !== null };
+    const chrome: Rect[] = [];
+    for (const it of this.items.values()) {
+      const r = it.kind === 'view' && !it.dying && it.cur && it.cur.opacity > 0.05 ? it.cur.rect : null;
+      if (r) chrome.push({ x: r.x - 8, y: r.y - 8, w: r.w + 16, h: r.h + 16 });
+    }
+    const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, chrome, ui, scanning: yieldSide !== null };
     const gk = this.gateK.v;
     const pipMul = this.snooze ? 0.3 : 1;
     const zone = focusRect(this.band, vp.w, vp.h);
@@ -835,6 +840,11 @@ export class Overlay {
 
     const slots = new Map<string, number>();
     const ordered = [...this.items.values()].sort((a, b) => a.order - b.order);
+    let below = 0;
+    for (const it of ordered) {
+      const r = it.kind === 'view' && !it.dying && it.d.placement.anchor === 'view:edge-top' ? it.cur?.rect : null;
+      if (r && it.cur!.opacity > 0.05) below = Math.max(below, r.y + r.h + 10);
+    }
     for (const it of ordered) {
       const d = it.d;
       let anchorPos: Vec3 | undefined;
@@ -936,7 +946,7 @@ export class Overlay {
           const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
           scale = ui;
-          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i);
+          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0);
           if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.h.at(t) * ui };
           if (b === it.cur) {
             const y = it.yieldS.update(t, yieldSide, rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right');
@@ -980,7 +990,7 @@ export class Overlay {
         it.lights.flare.set({ pos: anchorPos, opacity: it.L.flare * lightMul, scaleX: it.L.flareSX });
         const lr = (it.cur ?? it.old[it.old.length - 1])?.rect;
         if (lr && pr && it.L.leadO > 0.001) {
-          const m = edgeMidNearest(lr, pr);
+          const m = edgePointNearest(lr, pr);
           const to = this.bridge.unprojectAtDepth(m.x, m.y, Math.max(0.5, Math.min(depth * 0.55, 6)));
           const leadO = it.L.leadO * gk * (it.cur ? Math.max(paneOpacity, it.L.head) : 1);
           it.lights.leader.set({ from: anchorPos, to, progress: it.L.lead, opacity: Math.min(1, leadO) });
@@ -1016,8 +1026,11 @@ export class Overlay {
       if (d.component !== 'safety') continue;
       if (!this.safety.has(id)) this.safety.set(id, new SafetyView(this.bridge));
     }
+    const isBike = (d: Decision | undefined): boolean => Boolean(d?.placement.anchor.startsWith('bike:'));
+    const bike = [...ground.values()].some(isBike);
     for (const [id, sv] of this.safety) {
-      const alive = sv.update(t, ground.get(id));
+      const d = ground.get(id);
+      const alive = sv.update(t, bike && d && !isBike(d) ? undefined : d);
       if (!alive && !ground.has(id)) {
         sv.dispose();
         this.safety.delete(id);
@@ -1171,7 +1184,7 @@ export class Overlay {
   }
 }
 
-function edgeMidNearest(r: Rect, p: { x: number; y: number }): { x: number; y: number } {
+function edgePointNearest(r: Rect, p: { x: number; y: number }): { x: number; y: number } {
   const edges: [number, number, number, number][] = [
     [r.x, r.y + r.h, r.x + r.w, r.y + r.h],
     [r.x, r.y, r.x + r.w, r.y],
@@ -1190,7 +1203,12 @@ function edgeMidNearest(r: Rect, p: { x: number; y: number }): { x: number; y: n
       best = e;
     }
   }
-  return { x: (best[0] + best[2]) / 2, y: (best[1] + best[3]) / 2 };
+  const inset = 8;
+  const dx = best[2] - best[0];
+  const dy = best[3] - best[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const along = Math.max(inset, Math.min(len - inset, ((p.x - best[0]) * dx + (p.y - best[1]) * dy) / len));
+  return { x: best[0] + (dx / len) * along, y: best[1] + (dy / len) * along };
 }
 
 const shapeCache = new WeakMap<Decision, Map<PaneLevel, string>>();

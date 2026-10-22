@@ -47,7 +47,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -269,7 +269,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -448,7 +448,7 @@
     {
      "name": "1:02 · the pocket surfaces with the time available",
      "pass": true,
-     "detail": "t=62.801 surface pocket card"
+     "detail": "t=62.701 surface pocket card"
     },
     {
      "name": "1:04 · pinch opens its card",
@@ -516,7 +516,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -725,7 +725,7 @@
     {
      "name": "1:21 · stopped after two food glances: the ask",
      "pass": true,
-     "detail": "t=81.202 show ask glance"
+     "detail": "t=81.102 show ask glance"
     },
     {
      "name": "1:23 · no",
@@ -773,7 +773,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -914,7 +914,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1055,7 +1055,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1196,7 +1196,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1349,7 +1349,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1484,7 +1484,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1619,7 +1619,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1760,7 +1760,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1907,7 +1907,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2042,7 +2042,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2183,7 +2183,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2318,7 +2318,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2453,7 +2453,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2594,7 +2594,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2741,7 +2741,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2876,7 +2876,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3017,7 +3017,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3146,7 +3146,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3293,7 +3293,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3428,7 +3428,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3557,7 +3557,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3698,7 +3698,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3839,7 +3839,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3968,7 +3968,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4103,7 +4103,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4238,7 +4238,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4379,7 +4379,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4514,7 +4514,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4649,7 +4649,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4784,7 +4784,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4919,7 +4919,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5066,7 +5066,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5207,7 +5207,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5348,7 +5348,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5495,7 +5495,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5654,7 +5654,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
      "rule": "copy",
      "pass": true,
      "detail": ""

@@ -173,8 +173,10 @@ export class ThreeBridge implements SceneBridge {
     const sim = this.sim;
     if (id.startsWith('bike:') || sim.wearer.state === 'crossing') {
       const h = sim.wearer.heading;
-      const x = sim.wearer.pos.x + h.x * 5.5;
-      const z = sim.wearer.pos.z + h.z * 5.5;
+      const cross = sim.route.stops.find((st) => sim.wearer.s >= st.s - 0.01 && sim.wearer.s <= st.crossEnd);
+      const ahead = cross ? Math.min(5.5, Math.max(1.5, cross.crossEnd - sim.wearer.s - 1.2)) : 5.5;
+      const x = sim.wearer.pos.x + h.x * ahead;
+      const z = sim.wearer.pos.z + h.z * ahead;
       return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: Math.atan2(-h.x, -h.z) };
     }
     const st = sim.route.stops[0];

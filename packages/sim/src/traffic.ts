@@ -57,6 +57,10 @@ export const LANES: Lane[] = [
 
 export const LANE_BY_ID = new Map(LANES.map((l) => [l.id, l]));
 
+function sameWay(a: Lane | undefined, b: Lane): boolean {
+  return Boolean(a) && a!.road === b.road && a!.dir.x * b.dir.x + a!.dir.z * b.dir.z > 0.9;
+}
+
 const PAINT = ['#17181a', '#d8d8d2', '#8e949a', '#1f2c45', '#6e1d1d', '#2f3b31', '#b9b4a8', '#3a4455', '#5b6066', '#e8e6df'];
 const DIMS: Record<BodyKind, { len: number; width: number; height: number; v0: [number, number] }> = {
   sedan: { len: 4.75, width: 1.84, height: 1.45, v0: [9.5, 12] },
@@ -64,7 +68,7 @@ const DIMS: Record<BodyKind, { len: number; width: number; height: number; v0: [
   suv: { len: 4.9, width: 1.95, height: 1.75, v0: [9, 11.5] },
   van: { len: 5.4, width: 2.0, height: 2.3, v0: [8.5, 10.5] },
   bus: { len: 12.2, width: 2.55, height: 3.2, v0: [8, 9] },
-  truck: { len: 7.6, width: 3.9, height: 4.15, v0: [7.5, 9] },
+  truck: { len: 7.6, width: 2.5, height: 4.15, v0: [7.5, 9] },
   bike: { len: 1.8, width: 0.6, height: 1.7, v0: [5, 6] },
 };
 
@@ -131,7 +135,9 @@ export class Traffic {
         const last = this.vehicles.filter((v) => v.lane === lane.id).sort((a, b) => a.s - b.s)[0];
         if (!last || last.s - last.len > 14) {
           const roll = rng.next();
-          const body: BodyKind = lane.road === 'avenue' ? (roll < 0.34 ? 'taxi' : roll < 0.62 ? 'sedan' : roll < 0.86 ? 'suv' : 'van') : roll < 0.2 ? 'taxi' : roll < 0.6 ? 'sedan' : roll < 0.85 ? 'suv' : 'van';
+          let body: BodyKind = lane.road === 'avenue' ? (roll < 0.34 ? 'taxi' : roll < 0.62 ? 'sedan' : roll < 0.86 ? 'suv' : 'van') : roll < 0.2 ? 'taxi' : roll < 0.6 ? 'sedan' : roll < 0.85 ? 'suv' : 'van';
+          // The one van model cannot be repainted, so two at once read as a copy.
+          if (body === 'van' && this.vehicles.some((v) => v.body === 'van' && sameWay(LANE_BY_ID.get(v.lane), lane))) body = 'suv';
           this.vehicles.push(this.make(lane, body, 0, rng));
         }
         at += Math.max(2.4, -Math.log(1 - rng.next()) / lane.spawnRate);

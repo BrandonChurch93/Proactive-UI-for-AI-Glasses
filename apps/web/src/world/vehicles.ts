@@ -33,6 +33,7 @@ interface Baked {
   wheel: THREE.BufferGeometry;
   wheels: THREE.Vector3[];
   length: number;
+  width: number;
   textured?: THREE.Material;
 }
 
@@ -139,7 +140,7 @@ async function bake(name: string): Promise<Baked> {
     wheel.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3).fill(0.04), 3));
     for (const k of ['aPaint', 'aRough', 'aMetal']) wheel.setAttribute(k, new THREE.BufferAttribute(new Float32Array(n).fill(k === 'aRough' ? 0.8 : 0), 1));
   }
-  const out: Baked = { body, wheel, wheels, length: alongX ? size.x : size.z };
+  const out: Baked = { body, wheel, wheels, length: alongX ? size.x : size.z, width: alongX ? size.z : size.x };
   if (textured) out.textured = textured;
   return out;
 }
@@ -491,7 +492,7 @@ export class VehicleView {
       if (b.body.count >= CAPACITY) continue;
       const k = v.len / b.baked.length;
       q.setFromAxisAngle(yAxis, heading);
-      this.m4.compose(new THREE.Vector3(pos.x, 0, pos.z), q, new THREE.Vector3(k, k, k));
+      this.m4.compose(new THREE.Vector3(pos.x, 0, pos.z), q, new THREE.Vector3(Math.min(k, v.width / b.baked.width), k, k));
       b.body.setMatrixAt(b.body.count, this.m4);
       b.body.setColorAt(b.body.count, b.baked.textured ? col.setRGB(1, 1, 1) : col.set(v.color));
       b.body.count++;

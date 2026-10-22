@@ -27,7 +27,7 @@
       "year": 1927,
       "card": {
         "meta": "Live theater · landmarked 1981",
-        "live": "5:30 nearly full · box office till 9"
+        "live": "5:30 nearly full · 40 at 8"
       },
       "short": "Night Market at 8",
       "reasons": {
@@ -182,7 +182,7 @@
       ],
       "card": {
         "meta": "Bowling · twelve lanes",
-        "live": "5 lanes open · $12 an hour till 5"
+        "live": "5 lanes open · $12 an hour"
       },
       "short": "5 lanes open",
       "reasons": {
@@ -676,7 +676,7 @@
       ],
       "card": {
         "meta": "Pharmacy · open till 9",
-        "live": "Ready since noon · open till 9"
+        "live": "Ready since noon · till 9"
       },
       "short": "Open till 9",
       "reasons": {

@@ -19,6 +19,7 @@ export interface PlaceInput {
   focusOk: boolean;
   keepOuts: readonly Rect[];
   road?: readonly Rect[];
+  chrome?: readonly Rect[];
   prefer?: { side: Align; vertical: Vertical; push?: boolean };
   ui?: number;
 }
@@ -37,6 +38,7 @@ export interface Placed {
 
 export const MARGIN = 16;
 export const PIP_GAP = { beside: 24, above: 22 } as const;
+const BESIDE_RISE = 0.85;
 
 export const NOMINAL_SIZE: Record<'glance' | 'card' | 'expanded', { w: number; h: number }> = {
   glance: { w: 214, h: 60 },
@@ -55,7 +57,7 @@ export function distanceScale(distance: number): number {
 }
 
 export function anchorFactors(align: Align, vertical: Vertical): { fx: number; fy: number } {
-  return { fx: align === 'left' ? 1 : align === 'right' ? 0 : 0.5, fy: vertical === 'middle' ? 0.5 : vertical === 'below' ? 0 : 1 };
+  return { fx: align === 'left' ? 1 : align === 'right' ? 0 : 0.5, fy: vertical === 'middle' ? BESIDE_RISE : vertical === 'below' ? 0 : 1 };
 }
 
 function roadTop(road: readonly Rect[] | undefined, x0: number, x1: number): number {
@@ -70,7 +72,7 @@ function candidate(inp: PlaceInput, side: Align, vertical: Vertical, scale: numb
   const h = inp.size.h * scale;
   if (vertical === 'middle') {
     const x = side === 'left' ? a.x - PIP_GAP.beside * scale - w : a.x + PIP_GAP.beside * scale;
-    return { x, y: a.y - h / 2, w, h };
+    return { x, y: a.y - h * BESIDE_RISE, w, h };
   }
   const x = a.x - w / 2;
   if (vertical === 'below') return { x, y: a.y + PIP_GAP.above * scale, w, h };
@@ -118,7 +120,7 @@ export function configRect(
   const pushed = push && !inp.focusOk && (pushOff !== undefined || rectsOverlap(r, zone));
   if (pushed) r = pushOff ? { ...r, x: inp.anchor.x + pushOff.x, y: inp.anchor.y + pushOff.y } : pushOutOfZone(r, zone, inp.anchor.x, inp.anchor.y, vp);
   const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= r.h * 0.35 : dy < 0.5 && dx <= r.w * 0.35);
-  const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k));
+  const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k)) && !(inp.chrome ?? []).some((k) => rectsOverlap(r, k));
   const gap = Math.hypot(Math.max(r.x - inp.anchor.x, 0, inp.anchor.x - (r.x + r.w)), Math.max(r.y - inp.anchor.y, 0, inp.anchor.y - (r.y + r.h)));
   const ok = inView(r, vp) && fits && clear && (inp.focusOk || !rectsOverlap(r, zone)) && (!pushed || gap <= r.w * 0.9);
   const { fx, fy } = anchorFactors(side, vertical);
@@ -171,16 +173,16 @@ export function placeWorld(inp: PlaceInput): Placed {
 
 export type ViewSlot = 'view:edge-right' | 'view:edge-top' | 'view:glyph' | 'view:bottom';
 
-export function placeView(slot: string, size: { w: number; h: number }, vp: Viewport, stackIndex = 0): Rect {
+export function placeView(slot: string, size: { w: number; h: number }, vp: Viewport, stackIndex = 0, below = 0): Rect {
   const { w, h } = size;
   switch (slot) {
     case 'view:edge-top':
-      return { x: vp.w - 24 - w, y: 24 + stackIndex * (h + 10), w, h };
+      return { x: vp.w - 24 - w, y: 56 + stackIndex * (h + 10), w, h };
     case 'view:glyph':
       return { x: MARGIN, y: vp.h - 44 - h, w, h };
     case 'view:bottom':
       return { x: (vp.w - w) / 2, y: vp.h - vp.h * 0.09 - h, w, h };
     default:
-      return { x: vp.w - 24 - w, y: vp.h * 0.2 + stackIndex * (h + 10), w, h };
+      return { x: vp.w - 24 - w, y: Math.max(vp.h * 0.2, below) + stackIndex * (h + 10), w, h };
   }
 }

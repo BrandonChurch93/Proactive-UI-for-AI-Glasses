@@ -190,7 +190,7 @@ export class Sim {
       if (!st) return undefined;
       return st.leg === 'avenue' ? v3(-7.6, 3.35, zOf(89.7)) : v3(7.6, 3.35, zOf(104.3));
     }
-    if (id === 'scaffolding') return v3(10.9, 4.6, zOf(46));
+    if (id === 'scaffolding') return v3(10.4, 2.8, zOf(48));
     return undefined;
   };
 

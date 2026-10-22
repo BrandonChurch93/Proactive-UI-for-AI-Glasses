@@ -40,12 +40,13 @@ export function glanceContent(e: Entity, r: Reason, scenario: ScenarioId): Conte
 }
 
 export function cardContent(e: Entity, r: Reason, band: Band, scenario: ScenarioId): Content {
+  const say = sayFor(e, scenario).line;
   const c: Content = {
     name: e.name,
-    say: sayFor(e, scenario).line,
+    say,
     live: liveLine(e),
     reason: r,
-    showReason: band === 'stopped' || band === 'stroll',
+    showReason: (band === 'stopped' || band === 'stroll') && !say.toLowerCase().includes(r.text.replace(/\.$/, '').toLowerCase()),
   };
   if (e.depth) c.depthRef = e.depth;
   return c;

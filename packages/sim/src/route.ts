@@ -15,7 +15,7 @@ export interface Route {
 
 const P = (x: number, n: number): RoutePoint => ({ x, n });
 
-const AVE_STOP_E = P(BLOCK.avenueHalf + 0.6, AVENUE_CROSSWALK.n);
+const AVE_STOP_E = P(BLOCK.avenueHalf + 1.2, AVENUE_CROSSWALK.n);
 const AVE_FAR_W = P(-(BLOCK.avenueHalf + 0.6), AVENUE_CROSSWALK.n);
 const CROSS_STOP = P(CROSS_CROSSWALK.x, BLOCK.crossFrom - 1.3);
 const CROSS_FAR = P(CROSS_CROSSWALK.x, BLOCK.crossTo + 0.7);
@@ -33,7 +33,7 @@ interface RouteSpec {
 const SPECS: Record<ScenarioId, RouteSpec> = {
   hungry: {
     legs: [
-      [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
+      [...eastWithShelter(85.4), P(8.25, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
       [AVE_FAR_W, P(-8.5, 86.4), P(-8.6, 78.2), P(-9.2, 76.9), P(-10.5, 76.8)],
     ],
@@ -49,7 +49,7 @@ const SPECS: Record<ScenarioId, RouteSpec> = {
   },
   walking: {
     legs: [
-      [...eastWithShelter(85.4), P(8.05, 87.0), AVE_STOP_E],
+      [...eastWithShelter(85.4), P(8.25, 87.0), AVE_STOP_E],
       [AVE_STOP_E, AVE_FAR_W],
       [AVE_FAR_W, P(-8.0, 86.6), P(-8.9, 86.1)],
     ],

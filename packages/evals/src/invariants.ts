@@ -47,7 +47,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'copy',
-    name: 'every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word',
+    name: 'every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters',
     check: (r) => {
       for (const e of r.entries) {
         const c = e.decision.content;
@@ -56,6 +56,8 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (countCopy(c.say).numbers > 2) return `t=${e.t} ${e.decision.id} say holds more than two numbers: ${c.say}`;
         if (c.say.toLowerCase().includes(c.name.toLowerCase())) return `t=${e.t} ${e.decision.id} say repeats the name: ${c.say}`;
         if (!reasonIsClean(c.say)) return `t=${e.t} ${e.decision.id} banned word: ${c.say}`;
+        if (c.live && c.live.length > 28) return `t=${e.t} ${e.decision.id} live line over 28: ${c.live}`;
+        if (c.showReason && c.say.toLowerCase().includes(c.reason.text.replace(/\.$/, '').toLowerCase())) return `t=${e.t} ${e.decision.id} reason repeats the say line: ${c.reason.text}`;
       }
       return null;
     },

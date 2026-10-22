@@ -284,7 +284,7 @@ export function buildLayout(seed = 47): BlockLayout {
   prop('trash', curbE + 0.6, 26.4);
   prop('trash', -(curbE + 0.6), 64.6);
   prop('trash', curbE + 0.6, 79.5);
-  prop('mailbox', curbE + 0.7, 44.6);
+  prop('mailbox', -(curbE + 0.7), 40.8, Math.PI);
   prop('cart', 12.0, 16.4, -Math.PI / 2, v3(1.8, 2.1, 1));
   prop('cafe-seating', -11.8, 39, 0, v3(1.2, 1, 5.5));
   prop('cafe-seating', 12.2, 49.5, 0, v3(0.9, 1, 4));
