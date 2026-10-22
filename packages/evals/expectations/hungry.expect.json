@@ -74,16 +74,14 @@
       }
     },
     {
-      "name": "0:16 \u00b7 the card after 1.6 s more, because the band is Walk",
+      "name": "0:16 \u00b7 no card at 50 m: a far place keeps its label until it is within 30 m",
       "between": [
         15.5,
         18.5
       ],
-      "must": {
-        "action": "promote",
+      "mustNot": {
         "id": "mega-burger",
-        "level": "card",
-        "band": "walk"
+        "level": "card"
       }
     },
     {
@@ -119,23 +117,10 @@
       }
     },
     {
-      "name": "0:31 \u00b7 look away, down a level",
+      "name": "0:31 \u00b7 look away, back down to its light",
       "between": [
         30.5,
         32
-      ],
-      "must": {
-        "action": "demote",
-        "id": "mega-burger",
-        "level": "glance",
-        "cause": "look-away"
-      }
-    },
-    {
-      "name": "0:32 \u00b7 and down again",
-      "between": [
-        31.7,
-        33.5
       ],
       "must": {
         "action": "demote",

@@ -25,6 +25,8 @@ export interface Config {
     lookAwayS: number;
     maxGlances: number;
     minShownS: number;
+    cardWithinM: number;
+    pipDwellS: number;
   };
   hysteresisS: number;
   autoFoldS: Record<Band, number | null>;
@@ -67,6 +69,8 @@ export const DEFAULT_CONFIG: Config = {
     lookAwayS: 1.2,
     maxGlances: 3,
     minShownS: 2.5,
+    cardWithinM: 30,
+    pipDwellS: 0.25,
   },
   hysteresisS: 1.2,
   autoFoldS: { stopped: null, stroll: 4, walk: 2.5, brisk: 0 },

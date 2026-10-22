@@ -67,6 +67,7 @@ export interface LadderInput {
   scoreAbove: boolean;
   canProactive: boolean;
   visible?: boolean;
+  far?: boolean;
 }
 
 export interface LadderOut {
@@ -77,6 +78,7 @@ export interface LadderOut {
 
 export function earnedByDwell(dwellS: number, band: Band, cfg: Config): PaneLevel {
   const gl = cfg.ladder.glanceDwellS;
+  if (dwellS < cfg.ladder.pipDwellS - 1e-9) return 'none';
   if (dwellS < gl - 1e-9) return 'pip';
   const cd = cfg.ladder.cardDwellS[band];
   if (cd !== null && dwellS >= gl + cd - 1e-9) return 'card';
@@ -107,7 +109,9 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
         via = 'pinch';
       }
     }
-    let level = maxLevel(it.level, maxLevel(earned, 'pip'));
+    if (inp.far && rank(earned) > rank('glance')) earned = 'glance';
+    const lit: PaneLevel = inp.dwellS >= cfg.ladder.pipDwellS - 1e-9 ? 'pip' : inp.floor;
+    let level = maxLevel(it.level, maxLevel(earned, lit));
     if (rank(level) > rank(bandCap(band))) level = bandCap(band);
     return { level, via: rank(level) > rank(it.level) ? via : rank(level) < rank(it.level) ? 'band' : 'hold', gaze: true };
   }

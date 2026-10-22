@@ -521,6 +521,7 @@ export class Brain {
     const cardOpen = this.cardOpen();
     const stops = this.openStops(snap);
     const frozen = this.gateNow.safety;
+    const noticed = target && dwellS >= this.cfg.ladder.pipDwellS - 1e-9 ? target : undefined;
     const list = candidates(
       snap.entities,
       {
@@ -528,7 +529,7 @@ export class Brain {
         openStops: stops,
         allStops: this.stops,
         ...(this.destination ? { destination: this.destination } : {}),
-        ...(target ? { target } : {}),
+        ...(noticed ? { target: noticed } : {}),
         band,
         cardOpenElsewhere: (id) => cardOpen && this.standing.get(id)?.level !== 'card',
         dismissed: this.dismissed,
@@ -601,6 +602,7 @@ export class Brain {
           target: isT,
           dwellS: Math.max(0, dwellS - it.hiddenS),
           visible,
+          far: e.distance > this.cfg.ladder.cardWithinM,
           pinch: pinch === e.id,
           floor: sc.pipScore > 0 ? 'pip' : 'none',
           proactive: true,

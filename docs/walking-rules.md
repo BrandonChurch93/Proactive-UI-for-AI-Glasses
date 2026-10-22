@@ -72,7 +72,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 10 · The dwell ladder
 
 - Trigger: continuous gaze on one anchor.
-- Response: attention alone climbs every level. 0.8 s of dwell shows the glance; the band's card dwell (0.8 s Stopped, 1.0 s Stroll, 1.6 s Walk) shows the card; a further 2.0 s of dwell on the card, in Stopped or Stroll only, expands it. Pinch is a shortcut that skips the wait, never a requirement. Looking away for 1.2 s walks back down one level at a time. There is no separate hands-busy mode: a wearer carrying bags, holding a child's hand, or wearing gloves gets the same interface, because dwell already reaches everything.
+- Response: attention alone climbs every level. 0.8 s of dwell shows the glance; the band's card dwell (0.8 s Stopped, 1.0 s Stroll, 1.6 s Walk) shows the card; a further 2.0 s of dwell on the card, in Stopped or Stroll only, expands it. Pinch is a shortcut that skips the wait, never a requirement. A place beyond 30 m climbs no further than its glance: a far store gets a label, and the card comes as the wearer closes in. A look has to hold for 250 ms before a place even lights, so sweeping the view across a street lights nothing. Looking away for 1.2 s walks back down one level at a time. There is no separate hands-busy mode: a wearer carrying bags, holding a child's hand, or wearing gloves gets the same interface, because dwell already reaches everything.
 - Eval: with no pinch events, a scripted 4.4 s dwell in Stopped ends at expanded; the same dwell in Walk ends at card; no level is ever reached without the dwell its band requires.
 
 ## Rule 11 · The whisper channel

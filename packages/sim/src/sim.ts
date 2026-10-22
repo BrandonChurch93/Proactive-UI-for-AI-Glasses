@@ -57,6 +57,7 @@ export interface LiveInput {
 
 const GAZE_ACQUIRE = (3.5 * Math.PI) / 180;
 const GAZE_RELEASE = (6.0 * Math.PI) / 180;
+const GAZE_FLICKER_S = 0.6;
 
 function signalAnchorOf(data: ScenarioData): SignalAnchor {
   const b = data.beats.find((x) => x.kind === 'signal');
@@ -83,6 +84,7 @@ export class Sim {
   private liveData = new Map<string, Record<string, LiveValue>>();
   private gazeTarget: string | null = null;
   private gazeSince = 0;
+  private lostGaze: { id: string; at: number; since: number } | null = null;
   private lastTickT = -Infinity;
   private pendingLive: Events = {};
   private conversation: string[] = [];
@@ -261,8 +263,10 @@ export class Sim {
       id = this.live.gazeId ?? null;
     }
     if (id !== this.gazeTarget) {
+      if (this.gazeTarget) this.lostGaze = { id: this.gazeTarget, at: t, since: this.gazeSince };
+      const back = id !== null && this.lostGaze?.id === id && t - this.lostGaze.at <= GAZE_FLICKER_S + 1e-9;
       this.gazeTarget = id;
-      this.gazeSince = t;
+      this.gazeSince = back ? this.lostGaze!.since : t;
     }
   }
 

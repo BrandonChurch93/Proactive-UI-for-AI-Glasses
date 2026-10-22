@@ -4,7 +4,7 @@
   "scenario": "hungry",
   "duration": 8,
   "description": "Backdrop adaptivity is applied by the overlay from the sim's sampled luminance; contrast is measured in the legibility test. The brain's contract: the cards it opens on the lit east fa\u00e7ade and the shadowed west fa\u00e7ade are the same decision whatever the backdrop.",
-  "startN": 6,
+  "startN": 18,
   "pace": [
     [
       0,

@@ -3,8 +3,8 @@
  "totals": {
   "suites": 39,
   "passed": 39,
-  "cases": 870,
-  "casesPassed": 870
+  "cases": 869,
+  "casesPassed": 869
  },
  "byGroup": {
   "walks": {
@@ -389,14 +389,14 @@
      "detail": "t=15 show mega-burger glance"
     },
     {
-     "name": "0:16 · the card after 1.6 s more, because the band is Walk",
+     "name": "0:16 · no card at 50 m: a far place keeps its label until it is within 30 m",
      "pass": true,
-     "detail": "t=16.6 promote mega-burger card"
+     "detail": ""
     },
     {
      "name": "0:22 · pinch while walking saves",
      "pass": true,
-     "detail": "t=22 save mega-burger card"
+     "detail": "t=22 save mega-burger glance"
     },
     {
      "name": "0:22 · nothing opens",
@@ -409,14 +409,9 @@
      "detail": "345 frames"
     },
     {
-     "name": "0:31 · look away, down a level",
+     "name": "0:31 · look away, back down to its light",
      "pass": true,
-     "detail": "t=31.101 demote mega-burger glance"
-    },
-    {
-     "name": "0:32 · and down again",
-     "pass": true,
-     "detail": "t=32.301 demote mega-burger pip"
+     "detail": "t=31.101 demote mega-burger pip"
     },
     {
      "name": "0:37 to 0:58 · Brisk, nothing but whisper",
@@ -687,7 +682,7 @@
     {
      "name": "0:56 · Atlas Books held, snoozed",
      "pass": true,
-     "detail": "t=56.601 hold atlas-books pip"
+     "detail": "t=56.901 hold atlas-books pip"
     },
     {
      "name": "0:56 to 1:02 · nothing shows",
@@ -4168,7 +4163,7 @@
     {
      "name": "[5.95, 6.05) must {\"action\":\"save\",\"id\":\"mega-burger\",\"reasonKind\":\"pocket\"}",
      "pass": true,
-     "detail": "t=6 save mega-burger card",
+     "detail": "t=6 save mega-burger glance",
      "rule": "walking-6"
     },
     {

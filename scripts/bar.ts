@@ -31,9 +31,11 @@ async function open(sc: string): Promise<void> {
   }
 }
 
-const PROBES: Record<string, { t: number; id: string }[]> = {
+// dy: how far below the anchor the person aims. Across the street people look at the shopfront (1.6 m below
+// the sign); a store on their own side well ahead is seen edge-on, so they look at its sign (0.2 m).
+const PROBES: Record<string, { t: number; id: string; dy?: number }[]> = {
   hungry: [
-    { t: 6, id: 'kathys-cupcakes' },
+    { t: 6, id: 'kathys-cupcakes', dy: 0.2 },
     { t: 29, id: 'post-office' },
   ],
   errands: [
@@ -42,7 +44,7 @@ const PROBES: Record<string, { t: number; id: string }[]> = {
   ],
   walking: [
     { t: 4, id: 'grace-theater' },
-    { t: 40, id: 'atlas-books' },
+    { t: 50, id: 'atlas-books' },
   ],
 };
 
@@ -53,7 +55,7 @@ if (probes) {
       const id = ${JSON.stringify(pr.id)};
       const walk = window.__app.walk; walk.paused = true; walk.seek(${pr.t});
       const sim = walk.sim; const o = walk.overlay;
-      const aim = () => { const a = sim.anchorOf(id); const e = sim.wearer.pos; walk.look(Math.atan2(-(a.x - e.x), -(a.z - e.z)) - sim.wearer.bodyYaw, Math.atan2(a.y - 1.6 - e.y, Math.hypot(a.x - e.x, a.z - e.z))); };
+      const aim = () => { const a = sim.anchorOf(id); const e = sim.wearer.pos; walk.look(Math.atan2(-(a.x - e.x), -(a.z - e.z)) - sim.wearer.bodyYaw, Math.atan2(a.y - ${pr.dy ?? 1.6} - e.y, Math.hypot(a.x - e.x, a.z - e.z))); };
       aim(); walk.lookedAt = -Infinity;
       const t0 = walk.t; let on = null, glance = null, card = null, pre = null; const targets = []; let lastT; let band = null;
       const shown = (lv) => { const it = o.items.get(id); if (!it || !it.cur || it.cur.level !== lv || it.cur.opacity < 0.9) return false; const k = it.cur.view.kids[0]; return k && Number(getComputedStyle(k).opacity) > 0.9; };
