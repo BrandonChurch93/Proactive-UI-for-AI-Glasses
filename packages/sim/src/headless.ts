@@ -13,6 +13,7 @@ import {
   type BrainFrame,
   type Box3,
   type FrameCtx,
+  type HiddenBy,
   type KeepOut,
   type PaneReport,
   type Projector,
@@ -102,6 +103,8 @@ interface HeadlessItem {
   pane: PaneReport | null;
 }
 
+const hidden = (id: string, level: PaneReport['level'], gaze: boolean, by: HiddenBy): PaneReport => ({ id, level, zone: 'world', rect: { x: 0, y: 0, w: 0, h: 0 }, opacity: 0, gaze, visible: false, hiddenBy: by });
+
 export class HeadlessView {
   private items = new Map<string, HeadlessItem>();
   private frame: BrainFrame | null = null;
@@ -149,13 +152,27 @@ export class HeadlessView {
         { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: Boolean(d.placement.focusOk) },
         ctx,
       );
-      it.pane = null;
-      if (placed.mode !== 'pane' || LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') continue;
+      const gaze = Boolean(d.gaze);
+      if (placed.mode === 'edge') {
+        it.pane = hidden(d.id, d.level, gaze, placed.behind ? 'offscreen' : 'edge');
+        continue;
+      }
+      if (LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') {
+        it.pane = { id: d.id, level: d.level, zone: 'world', rect: { x: 0, y: 0, w: 0, h: 0 }, opacity: 0, gaze, visible: true };
+        continue;
+      }
+      if (placed.mode !== 'pane') {
+        it.pane = hidden(d.id, d.level, gaze, 'room');
+        continue;
+      }
       const home = { x: placed.rect.x + it.place.jumpX.at(sim.t), y: placed.rect.y + it.place.jumpY.at(sim.t), w: placed.rect.w, h: placed.rect.h };
       const s = it.aside.update(home, ctx, Boolean(d.placement.focusOk), pr.depth);
-      if (s.dropped) continue;
+      if (s.dropped) {
+        it.pane = hidden(d.id, d.level, gaze, 'keepout');
+        continue;
+      }
       const level = placed.collapsed && LEVEL_RANK[placed.collapsed] < LEVEL_RANK[d.level] ? placed.collapsed : d.level;
-      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * 1000) / 1000, gaze: Boolean(d.gaze) };
+      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * 1000) / 1000, gaze, visible: true };
     }
   }
 
@@ -164,13 +181,13 @@ export class HeadlessView {
     const panes: PaneReport[] = [];
     const stack = new Map<string, number>();
     for (const d of this.frame?.items ?? []) {
-      if (d.placement.zone === 'ground' || d.level === 'pip') continue;
+      if (d.placement.zone === 'ground' || d.component === 'whisper') continue;
       if (d.placement.zone === 'view') {
         const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
         const size = d.level === 'expanded' ? NOMINAL_SIZE.expanded : (VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!);
         const i = stack.get(slot) ?? 0;
         stack.set(slot, i + 1);
-        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i)), opacity: 1, gaze: Boolean(d.gaze) });
+        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i)), opacity: 1, gaze: Boolean(d.gaze), visible: true });
         continue;
       }
       const p = this.items.get(d.id)?.pane;

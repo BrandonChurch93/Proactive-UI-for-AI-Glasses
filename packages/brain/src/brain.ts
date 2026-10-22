@@ -570,6 +570,7 @@ export class Brain {
       } else {
         it.gazeSince = null;
         if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
+        if (snap.goal.end === e.id && e.distance < this.cfg.arrival.distanceM * 2) it.lastGazeAt = t;
       }
       it.wasTarget = isT;
 
@@ -582,13 +583,24 @@ export class Brain {
       if (sc.score > this.cfg.score.glanceThreshold) it.aboveSince ??= t;
       else it.aboveSince = null;
 
+      const visible = this.paneVisible(e.id);
+      const dtL = Number.isFinite(it.lastT) ? Math.max(0, t - it.lastT) : 0;
+      it.lastT = t;
+      if (!isT) it.hiddenS = 0;
+      if (!visible && isPane(it.level)) {
+        if (isT) it.hiddenS += dtL;
+        if (Number.isFinite(it.cardAt)) it.cardAt += dtL;
+      }
+      if (visible) it.hiddenLogged = false;
+
       const out = step(
         it,
         {
           t,
           band,
           target: isT,
-          dwellS,
+          dwellS: Math.max(0, dwellS - it.hiddenS),
+          visible,
           pinch: pinch === e.id,
           floor: sc.pipScore > 0 ? 'pip' : 'none',
           proactive: true,
@@ -598,6 +610,10 @@ export class Brain {
         this.cfg,
       );
       const level = out.level;
+      if (out.via === 'hidden' && isPane(it.level) && !it.hiddenLogged) {
+        it.hiddenLogged = true;
+        this.logHoldOnce(e.id, 'world', it.level as Level, 'place', reason('world', 'Held until it is back in sight', [{ signal: 'pane.visible', value: 0, weight: 1 }]), 'now', 'hidden');
+      }
       if (level === 'card' && isT && rank(it.level) < rank('card')) {
         for (const [id, d] of this.standing) {
           if (id !== e.id && (d.level === 'card' || d.level === 'expanded')) {
@@ -1359,6 +1375,10 @@ export class Brain {
     return d;
   }
 
+  private paneVisible(id: string): boolean {
+    return this.snap.env.panes?.find((p) => p.id === id)?.visible ?? true;
+  }
+
   private logHoldOnce(
     id: string,
     zone: Zone,
@@ -1366,6 +1386,7 @@ export class Brain {
     component: ComponentKind,
     r: Reason,
     timing: Timing,
+    cause?: Cause,
   ): void {
     const key = `${r.kind}|${r.text}|${level}`;
     const seen = this.holdEpisodes.get(id) ?? new Set<string>();
@@ -1373,7 +1394,9 @@ export class Brain {
     seen.add(key);
     this.holdEpisodes.set(id, seen);
     const w: Want = { id, component, zone, level, anchor: id, content: { name: id, reason: r }, reason: r, origin: 'proactive' };
+    if (cause) w.cause = cause;
     this.emitEvent(w, 'hold', this.snap.t, timing);
+    if (cause === 'hidden') seen.delete(key);
   }
 
   private verdict(w: Want, prev: Decision | undefined): 'pass' | 'freeze' | { reason: Reason; timing: Timing; keep: boolean } {

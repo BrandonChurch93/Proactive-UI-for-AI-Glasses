@@ -24,6 +24,7 @@ export interface Config {
     expandDwellS: number;
     lookAwayS: number;
     maxGlances: number;
+    minShownS: number;
   };
   hysteresisS: number;
   autoFoldS: Record<Band, number | null>;
@@ -65,6 +66,7 @@ export const DEFAULT_CONFIG: Config = {
     expandDwellS: 2.0,
     lookAwayS: 1.2,
     maxGlances: 3,
+    minShownS: 2.5,
   },
   hysteresisS: 1.2,
   autoFoldS: { stopped: null, stroll: 4, walk: 2.5, brisk: 0 },

@@ -89,9 +89,19 @@ export interface PaneReport {
   rect: Rect;
   opacity: number;
   gaze: boolean;
+  visible: boolean;
+  hiddenBy?: HiddenBy;
 }
 
-export type OverlayEventKind = 'birth' | 'resize' | 'move' | 'drop' | 'hide' | 'edge' | 'aside' | 'death';
+export type HiddenBy = 'keepout' | 'edge' | 'offscreen' | 'room';
+
+export interface PaneVisibility {
+  id: string;
+  visible: boolean;
+  hiddenBy?: HiddenBy;
+}
+
+export type OverlayEventKind = 'birth' | 'resize' | 'move' | 'drop' | 'hide' | 'edge' | 'aside' | 'return' | 'death';
 
 export interface OverlayEvent {
   t: number;
@@ -132,11 +142,12 @@ export interface WorldSnapshot {
     people: PersonInfo[];
     sidewalkNarrowsAhead?: { fromN: number; toN: number; distance: number };
     backdrop: Record<string, number>;
+    panes?: PaneVisibility[];
   };
   social: { inConversation: boolean; companions: number };
   entities: Entity[];
   inbox: Notification[];
-  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean };
+  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; end?: string };
   wearerModel: WearerModel;
   view?: { w: number; h: number; panes: PaneReport[] };
 }
@@ -251,7 +262,8 @@ export type Cause =
   | 'pocket'
   | 'safety'
   | 'arrival'
-  | 'timer';
+  | 'timer'
+  | 'hidden';
 
 export interface Glyph {
   kind: 'held' | 'pocket' | 'social' | 'snooze';

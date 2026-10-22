@@ -10,6 +10,7 @@ import {
   type BrainFrame,
   type Decision,
   type Glyph,
+  type HiddenBy,
   type OverlayEvent,
   type PaneReport,
   type Rect,
@@ -60,6 +61,7 @@ interface Item {
   want: PaneLevel;
   cur: Built | null;
   old: Built[];
+  stash: Built | null;
   tl: gsap.core.Timeline | null;
   gtl: gsap.core.Timeline | null;
   L: LightVals;
@@ -370,6 +372,7 @@ export class Overlay {
       want: 'none',
       cur: null,
       old: [],
+      stash: null,
       tl: null,
       gtl: null,
       L: lightVals(),
@@ -416,11 +419,12 @@ export class Overlay {
   }
 
   private disposeItem(it: Item): void {
+    if (it.stash) this.note(it, 'death', 'brain', 'gone', undefined, it.want);
     for (const e of it.fresh) this.log?.(e);
     it.fresh = [];
     it.tl?.kill();
     it.gtl?.kill();
-    for (const b of [it.cur, ...it.old]) {
+    for (const b of [it.cur, it.stash, ...it.old]) {
       b?.tl?.kill();
       b?.wrap.remove();
     }
@@ -672,10 +676,22 @@ export class Overlay {
       this.morph(it, prev, want, t, from, why);
       return;
     }
+    if (!prev && want === 'none' && it.stash && why?.kind === 'death') {
+      const b = it.stash;
+      it.stash = null;
+      b.tl?.kill();
+      b.wrap.remove();
+      it.old = it.old.filter((o) => o !== b);
+      it.want = want;
+      it.why = why;
+      this.note(it, 'death', why.cause, why.detail, undefined, from);
+      return;
+    }
     const prevRect = prev ? this.paneRect(it, prev) : undefined;
     let at = 0;
     const world = it.kind === 'world' && it.lights !== null;
     if (prev) {
+      const keep = !it.dying && why !== undefined && why !== null && why.kind !== 'death';
       const dtl = this.tl();
       let end: number;
       if (edge) {
@@ -683,18 +699,23 @@ export class Overlay {
         end = T.quick;
       } else end = dissolve(dtl, this.els(prev), 0, this.reduced, prev.fade);
       dtl.call(() => {
-        prev.wrap.remove();
+        if (keep) prev.wrap.style.opacity = '0';
+        else prev.wrap.remove();
         it.old = it.old.filter((o) => o !== prev);
       }, [], end + 0.02);
       prev.tl = dtl;
       it.old.push(prev);
+      if (keep) it.stash = prev;
       at = end;
     }
     it.cur = null;
+    let returned = false;
     if (want !== 'none') {
       const c = it.d.content;
       this.live.textContent = [c.name, c.fact ?? c.live, c.showReason !== false ? c.reason.text : ''].filter(Boolean).join('. ');
-      const b = this.build(it, want);
+      const b = it.stash ? this.restore(it, it.stash, want) : this.build(it, want);
+      returned = it.stash === b;
+      it.stash = null;
       it.cur = b;
       const big = want === 'card' || want === 'expanded';
       if (world) {
@@ -726,8 +747,27 @@ export class Overlay {
     if (why && (want !== 'none' || prev)) {
       it.why = why;
       it.restored = false;
-      this.note(it, why.kind, why.cause, why.detail, want === 'none' ? prevRect : undefined, from);
+      this.note(it, returned ? 'return' : why.kind, why.cause, why.detail, want === 'none' ? prevRect : undefined, from);
     }
+  }
+
+  private restore(it: Item, b: Built, want: PaneLevel): Built {
+    b.tl?.kill();
+    it.old = it.old.filter((o) => o !== b);
+    if (b.level !== want || b.view.shape !== buildShape(it, want, this.handlers)) {
+      const view = buildPane({ ...it.d, level: want as Decision['level'] }, want as Decision['level'], this.handlers);
+      b.view.el.replaceWith(view.el);
+      gsap.set(view.el, { opacity: 1 });
+      b.view = view;
+      b.width = view.el.offsetWidth;
+      b.height = view.el.offsetHeight;
+      b.w.set(b.width);
+      b.h.set(b.height);
+      b.level = want;
+      this.sizeBox(b, want);
+    }
+    hidePane(this.els(b));
+    return b;
   }
 
   update(t: number): void {
@@ -807,7 +847,7 @@ export class Overlay {
       }
       const want = this.paneLevelFor(it, placed);
       const decided = it.d.level !== it.decided;
-      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || it.want === 'none' && !it.cur && t - it.born < 0.05;
+      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
       if (want !== it.want) {
         if (urgent) {
           it.pending = null;
@@ -1021,18 +1061,31 @@ export class Overlay {
   report(): { w: number; h: number; panes: PaneReport[] } {
     const vp = this.bridge.viewport();
     const panes: PaneReport[] = [];
+    const k = (v: number): number => Math.round(v * 10) / 10;
     for (const it of this.items.values()) {
+      if (it.dying || it.d.component === 'whisper') continue;
       const b = it.cur;
-      if (!b || !b.rect || b.opacity < 0.01 || b.level === 'none') continue;
-      const r = b.rect;
-      panes.push({
+      let hiddenBy: HiddenBy | undefined;
+      if (it.kind === 'world') {
+        const pl = it.placed;
+        const wantsPane = LEVEL_RANK[it.d.level] >= LEVEL_RANK.glance;
+        if (!pl) hiddenBy = 'offscreen';
+        else if (pl.mode === 'edge') hiddenBy = pl.behind ? 'offscreen' : 'edge';
+        else if (it.aside.dropped) hiddenBy = 'keepout';
+        else if (wantsPane && (pl.mode === 'pip' || (it.want === 'none' && !it.pending))) hiddenBy = 'room';
+      }
+      const r = b?.rect;
+      const report: PaneReport = {
         id: it.id,
-        level: b.level,
+        level: b && b.level !== 'none' ? b.level : it.d.level,
         zone: it.kind,
-        rect: { x: Math.round(r.x * 10) / 10, y: Math.round(r.y * 10) / 10, w: Math.round(r.w * 10) / 10, h: Math.round(r.h * 10) / 10 },
-        opacity: Math.round(b.opacity * 1000) / 1000,
+        rect: r ? { x: k(r.x), y: k(r.y), w: k(r.w), h: k(r.h) } : { x: 0, y: 0, w: 0, h: 0 },
+        opacity: b ? Math.round(b.opacity * 1000) / 1000 : 0,
         gaze: Boolean(it.d.gaze),
-      });
+        visible: hiddenBy === undefined,
+      };
+      if (hiddenBy) report.hiddenBy = hiddenBy;
+      panes.push(report);
     }
     return { w: vp.w, h: vp.h, panes };
   }

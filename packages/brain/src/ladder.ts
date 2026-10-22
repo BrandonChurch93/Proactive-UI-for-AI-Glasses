@@ -17,6 +17,9 @@ export interface LadderItem {
   aboveSince: number | null;
   whispered: boolean;
   wasTarget: boolean;
+  lastT: number;
+  hiddenS: number;
+  hiddenLogged: boolean;
 }
 
 export function newLadderItem(id: string): LadderItem {
@@ -33,6 +36,9 @@ export function newLadderItem(id: string): LadderItem {
     aboveSince: null,
     whispered: false,
     wasTarget: false,
+    lastT: -Infinity,
+    hiddenS: 0,
+    hiddenLogged: false,
   };
 }
 
@@ -60,11 +66,12 @@ export interface LadderInput {
   proactive: boolean;
   scoreAbove: boolean;
   canProactive: boolean;
+  visible?: boolean;
 }
 
 export interface LadderOut {
   level: PaneLevel;
-  via: 'dwell' | 'pinch' | 'score' | 'look-away' | 'auto-fold' | 'band' | 'hold';
+  via: 'dwell' | 'pinch' | 'score' | 'look-away' | 'auto-fold' | 'band' | 'hold' | 'hidden';
   gaze: boolean;
 }
 
@@ -78,6 +85,9 @@ export function earnedByDwell(dwellS: number, band: Band, cfg: Config): PaneLeve
 
 export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
   const { t, band } = inp;
+  const visible = inp.visible !== false;
+  const held = t - it.since < cfg.ladder.minShownS - 1e-9;
+  if (inp.target && !visible) return { level: maxLevel(it.level, 'pip'), via: 'hidden', gaze: true };
   if (inp.target) {
     let earned = earnedByDwell(inp.dwellS, band, cfg);
     if (
@@ -110,11 +120,11 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
       }
     } else {
       const limit = cfg.autoFoldS[band];
-      if (limit !== null && t - it.shownAt >= limit - 1e-9) return { level: inp.floor, via: 'auto-fold', gaze: false };
-      if (!inp.scoreAbove && scoreChangeAllowed(it.since, t, cfg)) return { level: inp.floor, via: 'score', gaze: false };
+      if (limit !== null && !held && t - it.shownAt >= limit - 1e-9) return { level: inp.floor, via: 'auto-fold', gaze: false };
+      if (!inp.scoreAbove && !held && scoreChangeAllowed(it.since, t, cfg)) return { level: inp.floor, via: 'score', gaze: false };
     }
     const cap = it.dwelt ? bandCap(band) : band === 'walk' ? 'glance' : bandCap(band);
-    if (rank(it.level) > rank(cap)) return { level: cap === 'pip' ? inp.floor : cap, via: 'band', gaze: false };
+    if (rank(it.level) > rank(cap) && (band === 'brisk' || !held)) return { level: cap === 'pip' ? inp.floor : cap, via: 'band', gaze: false };
     return { level: it.level, via: 'hold', gaze: false };
   }
 
@@ -122,7 +132,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     return { level: 'pip', via: 'hold', gaze: false };
   }
 
-  if (inp.proactive && inp.scoreAbove && inp.canProactive && band !== 'brisk') {
+  if (inp.proactive && inp.scoreAbove && inp.canProactive && band !== 'brisk' && visible) {
     const settled = it.level === 'none' || scoreChangeAllowed(it.since, t, cfg);
     if (settled && it.aboveSince !== null && t - it.aboveSince >= cfg.score.promotionHoldS - 1e-9) {
       return { level: 'glance', via: 'score', gaze: false };

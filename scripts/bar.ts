@@ -129,6 +129,8 @@ if (probes) {
     t: number;
   };
   const { m, log } = out;
+  const only = arg('id');
+  if (only) for (const e of log) if (e.id === only) console.log(`  ${e.t.toFixed(2)} ${e.kind} ${e.from ?? ''}>${e.level} ${e.cause} ${e.detail ?? ''}`);
   const EXEMPT = /gate|safety|dismiss|look-away|band|choice/;
   const RANK: Record<string, number> = { none: 0, pip: 1, whisper: 1, glance: 2, card: 3, expanded: 4 };
   const changes = new Map<string, { t: number; exempt: boolean }[]>();
@@ -140,7 +142,8 @@ if (probes) {
     if (levelChange) {
       const list = changes.get(e.id) ?? [];
       const climb = /dwell|pinch/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
-      list.push({ t: e.t, exempt: climb || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
+      const world = e.kind === 'drop' || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
+      list.push({ t: e.t, exempt: climb || world || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
       changes.set(e.id, list);
     }
     if (e.kind === 'birth') {
@@ -163,7 +166,7 @@ if (probes) {
   }
   const pct = (n: number, d: number): string => `${((100 * n) / Math.max(1, d)).toFixed(1)}%`;
   console.log(`bar ${scenario} ${w}x${h} live, ${m.frames} frames to ${out.t.toFixed(1)} s`);
-  console.log(`  level changes inside 2.5 s (not gate, dismiss, look-away, dwell climb): ${fast.length}${fast.length ? `  ${fast.slice(0, 6).join('; ')}` : ''}`);
+  console.log(`  level changes inside 2.5 s (not gate, dismiss, look-away, dwell climb, right of way): ${fast.length}${fast.length ? `  ${fast.slice(0, 6).join('; ')}` : ''}`);
   console.log(`  most births per item per life: ${maxBirths} (${maxBirthsAt})`);
   console.log(`  pane edge farther than 1.0 x its width from its pip: ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
   console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);

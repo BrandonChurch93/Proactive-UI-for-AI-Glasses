@@ -136,14 +136,19 @@ describe('rule 8 · the world has right of way', () => {
     expect(Math.hypot(s.dx, s.dy)).toBeLessThan(1);
   });
 
-  it('a moving vehicle dims the pane on the first frame and drops it to a pip when it cannot clear', () => {
+  it('a moving vehicle dims the pane on the first frame and drops it to a pip only after covering most of it for 300 ms', () => {
     const aside = new Aside();
     const truck: KeepOut = { rect: { x: 0, y: 0, w: 1280, h: 800 }, kind: 'vehicle', moving: true, id: 'truck', depth: 5 };
     let s = aside.update(card, ctx(0, [truck]), false);
+    expect(s.active).toBe(true);
+    expect(s.dropped).toBe(false);
+    for (let t = STEP; t < 0.25; t += STEP) s = aside.update(card, ctx(t, [truck]), false);
+    expect(s.dropped).toBe(false);
+    for (let t = 0.25; t < 2; t += STEP) s = aside.update(card, ctx(t, [truck]), false);
     expect(s.dropped).toBe(true);
-    for (let t = STEP; t < 2; t += STEP) s = aside.update(card, ctx(t, [truck]), false);
+    for (let t = 2; t < 2.2; t += STEP) s = aside.update(card, ctx(t, []), false);
     expect(s.dropped).toBe(true);
-    for (let t = 2; t < 2.4; t += STEP) s = aside.update(card, ctx(t, []), false);
+    for (let t = 2.2; t < 2.5; t += STEP) s = aside.update(card, ctx(t, []), false);
     expect(s.dropped).toBe(false);
   });
 });

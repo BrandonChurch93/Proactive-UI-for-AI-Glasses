@@ -169,7 +169,7 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Yield** (head scan, walking rule 5). The panes on the scanned side go to opacity .15 and slide 24 px outward over 180 ms `ease-gate`; they return over 320 ms ease-out. In-scene lights follow the same opacity.
 
-**Step aside** (right of way, walking rule 8). The pane dims to .3 and slides clear by the overlap width plus 20 px over 220 ms, a dashed trace from its home to its new place; it returns over 320 ms ease-out. If it cannot clear, it drops to a pip at .45 and comes back as a condense when the way is clear.
+**Step aside** (right of way, walking rule 8). The pane dims to .3 and slides clear by the overlap width plus 20 px over 220 ms, never further than its own width, a dashed trace from its home to its new place; it returns over 320 ms ease-out. If it cannot clear, it stays dimmed where it is; when the mover covers more than 60% of it for 300 ms it dissolves to its pip at .45, and when the way is clear the same pane condenses back in its own place.
 
 **Auto-fold** (walking rule 3). Dissolve then retract, exactly the leave moves, with no sound. Nothing waits to be dismissed while the wearer moves.
 
@@ -181,7 +181,7 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Snooze** (walking rule 12). Everything folds with the leave moves at once; the held glyph slides in with the countdown. Cancel reverses it.
 
-**Edge fold**. When an anchor leaves the view, the panes dim to 0 over `t-quick` and the edge light appears at the nearest edge at the anchor's height; return is a condense.
+**Edge fold**. When an anchor leaves the view, the panes dim to 0 over `t-quick` and the edge light appears at the nearest edge at the anchor's height; return is a condense of the same pane, in place.
 
 Laws: nothing bounces, overshoots or springs. Stagger is 40 to 50 ms, never more than 120 ms across a pane. Recede can interrupt any move mid-flight and never waits.
 

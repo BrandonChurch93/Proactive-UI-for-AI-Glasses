@@ -29,7 +29,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 3 · Auto-fold while walking
 
 - Trigger: a glance has been shown for 2.5 s in Walk and is not the gaze target.
-- Response: it folds on its own (dissolve, retract). Nothing waits to be dismissed while the wearer moves. In Stroll the limit is 4 s; Stopped has no limit; Brisk has no glances to fold.
+- Response: it folds on its own (dissolve, retract). Nothing waits to be dismissed while the wearer moves. In Stroll the limit is 4 s; Stopped has no limit; Brisk has no glances to fold. Like every change the wearer did not ask for, it never comes sooner than 2.5 s after the pane's last change of level.
 - Eval: no non-gaze glance persists past its band's limit. Level hysteresis (1.2 s) applies to score-driven changes only, never to the dwell ladder's climbs or the look-away descent.
 
 ## Rule 4 · Peripheral entry
@@ -60,8 +60,8 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 8 · The world has right of way
 
 - Trigger: a person or vehicle between the eye and the pane's anchor overlaps the pane's projected bounds for more than 120 ms. Something behind the thing the pane describes is not in its way.
-- Response: the pane dims to 30% and slides away from the overlap by the overlap width plus 20 px over 220 ms, up or down when it can, never along the mover's own path and never further than its own width, leaving a faint trace line to its home position. It returns when clear, over 320 ms ease-out. A pane never renders over a face or a moving vehicle, even for a frame; if it cannot clear, it drops to a pip.
-- Eval: in the scripted pedestrian beat, the card's rect never intersects the pedestrian's rect while the card is above 30% opacity.
+- Response: the pane dims to 30% on the first frame and slides away from the overlap by the overlap width plus 20 px over 220 ms, up or down when it can, never along the mover's own path and never further than its own width, leaving a faint trace line to its home position. It returns when clear, over 320 ms ease-out. If it cannot clear, it stays dimmed in place, and drops to its pip only when the mover covers more than 60% of it for 300 ms (a face it cannot clear drops it at once). A dropped pane is hidden, not destroyed: the brain holds its level while it is out of sight, and it condenses back in its own place 300 ms after the way is clear.
+- Eval: in the scripted pedestrian beat, the card's rect never intersects the pedestrian's rect while the card is above 30% opacity; a vehicle covering a pane dims it on the first frame and drops it only after 300 ms above 60% cover.
 
 ## Rule 9 · Backdrop adaptivity
 

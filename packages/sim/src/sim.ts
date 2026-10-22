@@ -454,7 +454,7 @@ export class Sim {
     const backdrop: Record<string, number> = {};
     if (view) {
       const dyn = this.dynamicColliders();
-      for (const p of view.panes) backdrop[p.id] = this.backdrop.sampleRect(pose, view, p.rect, dyn);
+      for (const p of view.panes) if (p.visible && p.rect.w > 0) backdrop[p.id] = this.backdrop.sampleRect(pose, view, p.rect, dyn);
     }
     const narrows = this.data.beats.find((b) => b.kind === 'sidewalkNarrows' && b.t <= this.t + 1e-9);
     const snap: WorldSnapshot = {
@@ -493,11 +493,15 @@ export class Sim {
     const stops = this.data.beats.find((b) => b.kind === 'stops' && b.t <= this.t + 1e-9);
     if (stops && stops.kind === 'stops') snap.goal.stops = stops.ids.map((id) => ({ id }));
     if (this.scenario === 'errands') snap.goal.destination = this.data.destination;
+    if (this.data.destination) snap.goal.end = this.data.destination;
     if (w.arrived) {
       snap.goal.arrived = true;
       snap.goal.destination = this.data.destination;
     }
-    if (view) snap.view = view;
+    if (view) {
+      snap.view = view;
+      snap.env.panes = view.panes.map((p) => (p.hiddenBy ? { id: p.id, visible: p.visible, hiddenBy: p.hiddenBy } : { id: p.id, visible: p.visible }));
+    }
     return snap;
   }
 }

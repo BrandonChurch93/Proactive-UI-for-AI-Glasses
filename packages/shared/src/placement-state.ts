@@ -87,6 +87,7 @@ export interface WorldPlace {
   align?: Align;
   vertical?: 'above' | 'below';
   edge?: { x: number; y: number };
+  behind?: boolean;
 }
 
 interface Config {
@@ -131,7 +132,7 @@ export class Placement {
         this.shown = null;
         this.cfg = null;
         const edge = { x: left ? 6 : vp.w - 6, y };
-        return { mode: 'edge', rect: { x: edge.x, y, w: 0, h: 0 }, leader: edge, scale: 1, side: left ? 'left' : 'right', edge };
+        return { mode: 'edge', rect: { x: edge.x, y, w: 0, h: 0 }, leader: edge, scale: 1, side: left ? 'left' : 'right', edge, behind };
       }
       return this.last;
     }
@@ -139,7 +140,10 @@ export class Placement {
 
     const edgeFrac = Math.min(a.x, vp.w - a.x) / vp.w;
     const big = req.level === 'card' || req.level === 'expanded';
-    if (big) {
+    if (req.focusOk) {
+      this.collapsed = undefined;
+      this.step = undefined;
+    } else if (big) {
       if (edgeFrac < 0.08) this.collapsed = 'glance';
       else if (edgeFrac > 0.1) this.collapsed = undefined;
     } else if (req.level === 'glance') {
@@ -199,7 +203,7 @@ export class Placement {
     let res = this.cfg ? configRect(inp, this.cfg.side, this.cfg.vertical, scaleOf(this.cfg)) : null;
     if (!res || !res.ok) {
       let placed = placeWorld({ ...inp, prefer: prefer() });
-      if (placed.mode === 'pip' || placed.mode === 'offscreen') {
+      if ((placed.mode === 'pip' || placed.mode === 'offscreen') && !req.focusOk) {
         for (const lower of STEP_DOWN[level] ?? []) {
           const p2 = placeWorld({ ...make(lower), prefer: prefer() });
           if (p2.mode !== 'pip' && p2.mode !== 'offscreen') {
@@ -211,18 +215,33 @@ export class Placement {
           }
         }
       }
-      if (placed.mode === 'pip' || placed.mode === 'offscreen') {
+      const failed = placed.mode === 'pip' || placed.mode === 'offscreen';
+      const squeeze = 0.74 * ui;
+      const fits = inp.size.w * squeeze <= vp.w - 2 * MARGIN && inp.size.h * squeeze <= vp.h - 2 * MARGIN;
+      if (failed && req.focusOk && fits) {
+        const same = this.cfg?.side === 'center' && this.cfg.vertical === 'above' && this.cfg.shrink === squeeze;
+        if (!same) {
+          if (this.cfg) {
+            jump ??= MOVE.pushOut;
+            moved ??= 'replace';
+          }
+          this.cfg = { side: 'center', vertical: 'above', shrink: squeeze };
+          this.cfgAt = t;
+        }
+        res = configRect(inp, 'center', 'above', squeeze);
+      } else if (failed) {
         return this.remember({ mode: 'pip', rect: { x: a.x, y: a.y, w: 0, h: 0 }, leader: { x: a.x, y: a.y }, scale: 1, side: near, why: 'room' });
-      }
-      const fresh = !this.cfg;
-      const shrink = Math.abs(placed.scale - distanceScale(req.distance) * ui) > 1e-6 ? placed.scale : null;
-      this.cfg = { side: placed.align, vertical: placed.vertical, shrink };
-      this.cfgAt = t;
-      res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg));
-      if (fresh && this.enterEdge && ctx.band !== 'stopped') this.pinned = a.x < vp.w / 2 ? 'left' : 'right';
-      else if (!fresh) {
-        jump ??= MOVE.pushOut;
-        moved ??= 'replace';
+      } else {
+        const fresh = !this.cfg;
+        const shrink = Math.abs(placed.scale - distanceScale(req.distance) * ui) > 1e-6 ? placed.scale : null;
+        this.cfg = { side: placed.align, vertical: placed.vertical, shrink };
+        this.cfgAt = t;
+        res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg));
+        if (fresh && this.enterEdge && ctx.band !== 'stopped') this.pinned = a.x < vp.w / 2 ? 'left' : 'right';
+        else if (!fresh) {
+          jump ??= MOVE.pushOut;
+          moved ??= 'replace';
+        }
       }
     }
     const scale = scaleOf(this.cfg!);
@@ -301,8 +320,13 @@ export interface AsideState {
   trace: { from: Rect; to: Rect } | null;
 }
 
+function overlapArea(a: Rect, b: Rect): number {
+  return Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+}
+
 export class Aside {
   private overlapSince: number | null = null;
+  private coveredSince: number | null = null;
   private clearSince: number | null = null;
   private dir: 'left' | 'right' | 'up' | 'down' | null = null;
   private readonly x = new Track(0);
@@ -325,8 +349,16 @@ export class Aside {
         const move = this.solve(home, hits, near, ctx, focusOk);
         this.by = hits.map((k) => `${k.kind} ${k.id}`).join(', ');
         this.active = true;
-        if (!move) {
+        const covered = Math.min(1, hits.reduce((sum, k) => sum + overlapArea(home, k.rect), 0) / Math.max(1, home.w * home.h));
+        if (!move && covered > MOVE.asideDropCover) this.coveredSince ??= t;
+        else this.coveredSince = null;
+        const face = hits.some((k) => k.kind === 'face');
+        if (!move && (face || (this.coveredSince !== null && t - this.coveredSince >= MOVE.asideDropMs / 1000 - 1e-9))) {
           this.dropped = true;
+          this.coveredSince = null;
+          this.x.go(t, 0, MOVE.asideIn, 'out');
+          this.y.go(t, 0, MOVE.asideIn, 'out');
+        } else if (!move) {
           this.x.go(t, 0, MOVE.asideIn, 'out');
           this.y.go(t, 0, MOVE.asideIn, 'out');
         } else {
@@ -337,6 +369,7 @@ export class Aside {
       }
     } else {
       this.overlapSince = null;
+      this.coveredSince = null;
       if (this.active) {
         this.clearSince ??= t;
         const wait = this.dropped ? 0.3 : 0;

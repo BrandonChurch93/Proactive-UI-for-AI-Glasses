@@ -732,7 +732,7 @@
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 7, non-gaze 4, holds 4"
+     "detail": "shows 7, non-gaze 4, holds 5"
     }
    ],
    "description": "Recorded walk · 1021 snapshots at 10 Hz"
