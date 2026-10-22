@@ -28,8 +28,8 @@
     {
       "rule": "gates",
       "between": [
-        4.7,
-        5
+        4.4,
+        4.6
       ],
       "must": {
         "action": "show",

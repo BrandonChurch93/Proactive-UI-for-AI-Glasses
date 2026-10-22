@@ -34,7 +34,7 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     const at = (line: string): number | undefined => lines.find((e) => e.line === line)?.t;
     expect(at('show goldies-counter glance')).toBeCloseTo(2.0, 5);
     expect(at('demote goldies-counter pip')).toBeCloseTo(4.5, 5);
-    expect(at('show mega-burger glance')).toBeCloseTo(14.8, 5);
+    expect(at('show mega-burger glance')).toBeCloseTo(14.5, 5);
     expect(at('promote mega-burger card')).toBeUndefined();
     expect(at('save mega-burger glance')).toBeCloseTo(22.0, 5);
     expect(at('demote mega-burger pip')).toBeCloseTo(31.1, 5);
@@ -135,15 +135,22 @@ describe('walking rules, unit level', () => {
     expect(p.shouldSurface(2, 12, true, cfg)).toBe(false);
   });
 
-  it('rule 12: looking up for a second snoozes, and again cancels', () => {
-    const spec: CaseSpec = { id: 's', scenario: 'walking', duration: 8, startN: 40, pace: [[0, 0]], pitch: [[1, 0.5], [2.3, 0], [5, 0.5], [6.3, 0]] };
+  it('rule 12: looking up, still, for two seconds snoozes (the glyph says so for the second one), and again cancels', () => {
+    const spec: CaseSpec = { id: 's', scenario: 'walking', duration: 10, startN: 40, pace: [[0, 0]], pitch: [[1, 0.6], [3.3, 0], [5, 0.6], [7.3, 0]] };
     const brain = new Brain({ scenario: 'walking' });
-    const snooze: boolean[] = [];
-    for (const s of synthesize(spec)) snooze.push(brain.tick(s).gate.snooze);
-    expect(snooze[19]).toBe(false);
-    expect(snooze[21]).toBe(true);
-    expect(snooze[59]).toBe(true);
-    expect(snooze[61]).toBe(false);
+    const frames = synthesize(spec).map((s) => brain.tick(s));
+    expect(frames[19]!.glyph?.label).not.toBe('Snoozing');
+    expect(frames[21]!.glyph?.label).toBe('Snoozing');
+    expect(frames[29]!.gate.snooze).toBe(false);
+    expect(frames[31]!.gate.snooze).toBe(true);
+    expect(frames[69]!.gate.snooze).toBe(true);
+    expect(frames[71]!.gate.snooze).toBe(false);
+  });
+
+  it('rule 12: dragging the view up to a tall building does not snooze', () => {
+    const spec: CaseSpec = { id: 'd', scenario: 'walking', duration: 6, startN: 40, pace: [[0, 0]], pitch: [[1, 0.6], [1.5, 0.64], [2, 0.6], [2.5, 0.66], [3, 0.6], [3.5, 0.64], [4, 0.6], [4.5, 0.66], [5, 0]] };
+    const brain = new Brain({ scenario: 'walking' });
+    expect(synthesize(spec).some((s) => brain.tick(s).gate.snooze)).toBe(false);
   });
 
   it('rule 13: a show drains the budget and the meter counts it', () => {

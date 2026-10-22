@@ -21,10 +21,10 @@ Route: east sidewalk north to the corner, cross the avenue, a few steps back sou
 2. 0:14 · Dwell on Mega Burger across the street, 50 m ahead: the glance at 0.8 s, and no card yet, because a place beyond 30 m keeps its label until the wearer is closer. One thing at a time. (Rule 10.)
 3. 0:22 · The wearer pinches the Mega Burger glance while walking. Nothing opens; "Saved" at the pip, the held glyph reads Pocket 1. (Rule 6.)
 4. 0:30 · Look away. After 1.2 s the glance walks back down to its light. (Rule 10.)
-5. 0:36 · Pace to signal: the light ahead is about to change. The wearer speeds up to Brisk on the script. (Rules 1, 2.)
-6. 0:40 · Still Brisk. A dwell on the station stair at the corner gives only the whisper line at the bottom edge: "47th St Station · uptown 4 min". The focus zone is at its largest. (Rule 11.)
-7. 0:58 · Red light at the corner anyway. "No need to run" at the curb. Stopped. A text from Maya arrives: "Running 10 late, order me the usual?", glance toast, reply or later.
-8. 1:02 · The pocket surfaces: "12 s · what you saved", Mega Burger with its live line, grown beside the held glyph. (Rule 7.) At 1:04 a pinch opens its card; the gaze stays on it and 2 s later it expands in place: "Hold a seat · Not now". At 1:08, hold a seat. The route draws on the pavement, across the avenue and a few steps south.
+5. 0:40 · A dwell on the station stair at the corner gives its glance, "Uptown trains · 4 min", and its card as the dwell holds. (Rule 10.)
+6. 0:44 · Pace to signal: the light ahead is about to change. The wearer speeds up to Brisk on the script until 0:57; the station's card folds with the band, nothing is looked at, nothing but the whisper channel is allowed, and the focus zone is at its largest. (Rules 1, 2, 11.)
+7. 0:58 · Red light at the corner anyway; the wearer eases onto the stop line by 1:00. "No need to run" at the curb. Stopped. A text from Maya arrives: "Running 10 late, order me the usual?", glance toast, reply or later.
+8. 1:02 · The pocket surfaces: "11 s · what you saved", Mega Burger with its live line, grown beside the held glyph. (Rule 7.) At 1:04 a pinch opens its card; the gaze stays on it and 2 s later it expands in place: "Hold a seat · Not now". At 1:08, hold a seat. The route draws on the pavement, across the avenue and a few steps south.
 9. 1:14 · Crossing, 10 s. Everything recedes. An app update arrives mid-crossing and is held. Far curb at 1:24: everything returns, then "Held that while you crossed" with "Order ready · 1 more" batched under the route glance.
 10. 1:26 · A few steps south on the west sidewalk. The destination column stands at the door.
 11. 1:34 · Arrival. The column settles to a pip. "Seat's held, inside on the left." Fade.
@@ -51,23 +51,23 @@ Route: east sidewalk north, the theater across the street near the start, end on
 2. 0:08 · The wearer slows to Stroll and dwells on the Grace Theater marquee ahead across the street, the composition of `reference/hero-block.html`: glance, card, then the expanded view on continued dwell, grown in place: "Tonight · three shows · box office till 9", "Hold two for 8:00" and "Not now". Nothing happens to the world behind it. (Rule 10.)
 3. 0:16 · Still at Stroll, still on the marquee. A delivery truck crawls up the inner northbound lane from 10 m behind and passes between the wearer and the marquee from about 0:17 to 0:22. The expanded view cannot clear it, drops to a dimmed pip, and returns when the truck has passed. (Rule 8.)
 4. 0:26 · Gaze on the Trattoria da Lia sign ahead across the street, in Italian: translation card ("Home cooking · open until 11 PM", "Read from Italian"). The look moves on at 0:29, before the card would expand. First food glance.
-5. 0:30 · Gaze on Kathy's Cupcakes beside the wearer: a glance, "Fresh batch at 2", that is all; the look moves on at 0:32, before the card dwell, and the glance walks down. Second food glance. (Rule 10.)
+5. 0:30 · Gaze on Kathy's Cupcakes beside the wearer: a glance, "Fresh batch at 2", that is all; the look moves on at 0:31.6, before the card dwell, and the glance walks down. Second food glance. (Rule 10.)
 6. 0:32 · Back to Walk.
 7. 0:38 · Two people talking on the sidewalk ahead, on the path: pips on them stay bare. No names, no info. A text that arrives ("Lunch tomorrow?") is held until they are passed at 0:46, then shows at glance at the edge.
 8. 0:48 · A call from Maya: answer and decline at the view edge, world untouched. Decline at 0:51 folds it.
-9. 0:54 · The wearer looks up at the sky for a second. Everything folds; the glyph counts down from 60; the glance that would have shown on Atlas Books ahead (dwelt on from 0:56) is held with the reason "Snoozed". (Rule 12.)
-10. 1:02 · Looking up again cancels the snooze. Mega Burger comes up beside the wearer across the street; nothing shows, because nothing is looked at.
+9. 0:55.5 · On the straight past the bus shelter, the wearer looks up at the sky and holds it. Through the second second the glyph reads "Snoozing"; at 0:58.5 everything folds and the glyph counts down from 60; the glance that would have shown on Atlas Books ahead (dwelt on from 0:58.5) is held with the reason "Snoozed". (Rule 12.)
+10. 1:02 · Looking up again the same way cancels the snooze at 1:04. Mega Burger comes up beside the wearer across the street; nothing shows, because nothing is looked at.
 11. 1:19 · Red light at the corner, 6 s. Stopped, and two food glances have happened, so the ask glance appears once at the edge at 1:21: "Hungry? · Find lunch · No". No, at 1:23.
 12. 1:25 · Crossing, 10 s: recede and return, same as always. A bike comes up the bike lane from behind on this side as the wearer steps off: `BIKE · 2 s` on the pavement with its arrow, stop tone, gone when the rider passes.
 13. 1:35 · The bench in Pocket Park at the far corner. Idle glance, never two at once: "Benches in the shade". End of the walk. Fade. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
 ## Timing as built
 
-The wearer decelerates into a stop line at 0.9 m/s² rather than stopping dead, so the curb arrivals land within a second of the beat sheet: Hungry reaches the corner at 0:57.6 and the pocket surfaces at 0:59.6 with 14 s on the light; Errands stops at the cross street at 1:10.8; Just walking at 1:18.4. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.
+The wearer decelerates into a stop line at 0.9 m/s² rather than stopping dead, so the curb arrivals land within a second of the beat sheet: Hungry eases onto the stop line at 1:00.5 and the pocket surfaces at 1:02.8 with 11 s on the light; Errands stops at the cross street at 1:10.8; Just walking at 1:18.4. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.
 
 ## Pace script
 
-Every walk carries a pace track in its scenario file: a band per segment, with the sim's speed per band (Stroll 0.6 m/s, Walk 1.38 m/s, Brisk 1.9 m/s, Stopped 0). Default Walk. Hungry: Brisk 0:36 to 0:58, Stopped 0:58 to 1:14. Errands: Stopped 0:24 to 0:29 at the pharmacy, Stopped 1:10 to 1:18 at the corner. Just walking: Stroll 0:08 to 0:32, Stopped 1:19 to 1:25. Speed eases between bands over about a second, and the sim clamps the wearer at a stop line, so the arithmetic of speed × time lands the wearer at the corner (n = 90) within a metre on every walk. The reviewer never controls pace; the inspector shows the band live.
+Every walk carries a pace track in its scenario file: a band per segment, with the sim's speed per band (Stroll 0.6 m/s, Walk 1.38 m/s, Brisk 1.9 m/s, Stopped 0). Default Walk. Hungry: Brisk 0:44 to 0:57, Walk to the stop line, Stopped 1:00 to 1:14. Errands: Stopped 0:24 to 0:29 at the pharmacy, Stopped 1:10 to 1:18 at the corner. Just walking: Stroll 0:08 to 0:32, Stopped 1:19 to 1:25. Speed eases between bands over about a second, and the sim clamps the wearer at a stop line, so the arithmetic of speed × time lands the wearer at the corner (n = 90) within a metre on every walk. The reviewer never controls pace; the inspector shows the band live.
 
 ## The scripted reviewer
 
@@ -88,7 +88,7 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 | --- | --- | --- | --- |
 | Pace to signal | "No need to run" | Glance at the curb | Hungry |
 | Bus at the stop | "M4 · 2 min · next in 11" | Pip on the stop; a glance only when looked at | Errands |
-| Which stairs | "47th St Station · uptown 4 min" | Whisper on the station stair (Brisk) | Hungry |
+| Which stairs | "47th St Station · uptown 4 min" | Glance on the station stair when looked at, three words and a number even in Brisk | Hungry |
 | Closed early | "Hardware closed early. One stop left." | The errands card, reordered | Errands |
 | Sidewalk narrows | "Scaffolding ahead. Keep to the curb." | Route band shifts plus one glance | Errands |
 | Bike behind you | "BIKE · 2 s" with an arrow | Pavement, stop tone | Just walking |

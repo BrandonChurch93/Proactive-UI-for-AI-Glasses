@@ -27,8 +27,8 @@
     {
       "rule": "moments",
       "between": [
-        6.7,
-        7.0
+        6.4,
+        6.6
       ],
       "must": {
         "action": "show",

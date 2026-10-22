@@ -112,7 +112,8 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     if (inp.far && rank(earned) > rank('glance')) earned = 'glance';
     const lit: PaneLevel = inp.dwellS >= cfg.ladder.pipDwellS - 1e-9 ? 'pip' : inp.floor;
     let level = maxLevel(it.level, maxLevel(earned, lit));
-    if (rank(level) > rank(bandCap(band))) level = bandCap(band);
+    const cap = band === 'brisk' ? 'glance' : bandCap(band);
+    if (rank(level) > rank(cap)) level = cap;
     return { level, via: rank(level) > rank(it.level) ? via : rank(level) < rank(it.level) ? 'band' : 'hold', gaze: true };
   }
 
@@ -144,7 +145,8 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
   }
 
   const want: PaneLevel = inp.floor;
-  if (want !== it.level && it.level !== 'none' && want === 'none' && !scoreChangeAllowed(it.since, t, cfg)) {
+  const relight = it.level === 'none' && want === 'pip' && it.since > 0;
+  if (want !== it.level && (want === 'none' || relight) && !scoreChangeAllowed(it.since, t, cfg)) {
     return { level: it.level, via: 'hold', gaze: false };
   }
   return { level: want, via: want === it.level ? 'hold' : 'score', gaze: false };

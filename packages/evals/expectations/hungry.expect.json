@@ -130,10 +130,10 @@
       }
     },
     {
-      "name": "0:37 to 0:58 \u00b7 Brisk, nothing but whisper",
+      "name": "0:44 to 0:57 \u00b7 Brisk, nothing looked at: nothing but whisper",
       "between": [
-        38,
-        55.5
+        46,
+        56.5
       ],
       "state": {
         "band": "brisk",
@@ -141,16 +141,16 @@
       }
     },
     {
-      "name": "0:40 \u00b7 the station gives only the whisper line",
+      "name": "0:40 \u00b7 a dwell on the station stair gives its glance",
       "between": [
-        40,
-        43
+        40.5,
+        41.2
       ],
       "must": {
         "action": "show",
-        "id": "whisper",
-        "nameIs": "47th St Station",
-        "factIs": "uptown 4 min"
+        "id": "47th-st-station",
+        "level": "glance",
+        "cause": "dwell"
       }
     },
     {

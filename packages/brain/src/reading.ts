@@ -45,7 +45,7 @@ export function trimForPace(
 ): Content {
   if (band === 'stopped') return { ...content, showReason: true };
   const trimmed: string[] = [];
-  let showReason = band !== 'walk';
+  let showReason = band === 'stroll';
   if (!showReason) trimmed.push('reason');
   let fact = content.fact;
   const budgetMs = viewS * 1000;

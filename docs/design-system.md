@@ -145,11 +145,11 @@ Bloom: `UnrealBloomPass(strength .42, radius .45, threshold 1.02)`. Only emissiv
 
 **Mark** (brain notices an object). Tick sound. Pip opacity 0 → 1 and scale .2 → 1 over 500 ms ease-out. Aura opacity .8 → 0 while scaling .5 → 2.6 over 900 ms `power2.out`, starting 50 ms after the pip.
 
-**Gaze** (wearer dwells, 800 ms threshold). Aura to opacity 1, scale 1.6, over 800 ms `sine.inOut`. Pip to 1.6× over the same. Flare opacity 0 → 1 and scaleX 1.2 → 5.5 over 700 ms ease-out, starting at 300 ms; flare fades out over 700 ms ease-in starting at 1100 ms. Exactly one horizontal streak, never two.
+**Gaze** (wearer dwells, at the glance dwell of 450 ms). Aura to opacity 1, scale 1.6, over 800 ms `sine.inOut`. Pip to 1.6× over the same. Flare opacity 0 → 1 and scaleX 1.2 → 5.5 over 700 ms ease-out, starting at 300 ms; flare fades out over 700 ms ease-in starting at 1100 ms. Exactly one horizontal streak, never two.
 
 **Travel** (light leaves the pip, at birth only). Head opacity 1. Leader draws from 0 to 1 along a straight segment from the pip to the midpoint of the pane edge nearest it, over 320 ms to a glance or 460 ms to a card, `power2.inOut`, the head riding the tip. Head fades over 300 ms on arrival. Breath sound at the midpoint. After that the segment simply follows the pane's edge every frame.
 
-**Condense** (a pane is born; it runs once per pane). The seed hairline appears at the pane's top-left at width 0 and grows to the pane's width over 300 ms `power3.out`. 180 ms in, the pane reveals from the seed downward: `clip-path: inset(0 0 100% 0) → inset(0 0 0 0)` over `t-base` (420 ms for a card) ease-out, with chromatic separation `--ca` 2.4 → 0 settling over 700 ms `power2.out` from 340 ms. Children resolve from `opacity 0, y -3px, blur 5px` to rest over `t-base`, stagger 50 ms, from 260 ms. The seed fades over 450 ms ease-in from 500 ms.
+**Condense** (a pane is born; it runs once per pane). The seed hairline appears at the pane's top-left at width 0 and grows to the pane's width over 300 ms `power3.out`. 180 ms in, the pane reveals from the seed downward: `clip-path: inset(0 0 100% 0) → inset(0 0 0 0)` over `t-base` (420 ms for a card) ease-out, with chromatic separation `--ca` 2.4 → 0 settling over 700 ms `power2.out` from 340 ms. Children resolve from `opacity 0, y -3px, blur 5px` to rest over `t-base`, stagger 50 ms, from 260 ms. The seed fades over 450 ms ease-in from 500 ms. A pane the wearer earned by looking condenses while its light travels rather than after it, and its children resolve with the reveal, from 180 ms, so the glance reads within a second of the look.
 
 Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 rgba(255,96,96,.6), calc(var(--ca) * 1px) 0 rgba(96,214,255,.6)`.
 

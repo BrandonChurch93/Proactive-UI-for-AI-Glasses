@@ -1,4 +1,5 @@
 import {
+  angleWrap,
   FOCUS_ZONE,
   LEVEL_RANK,
   isShow,
@@ -148,6 +149,9 @@ export class Brain {
   private snoozeUntil: number | undefined;
   private lookUpSince: number | null = null;
   private lookUpArmed = true;
+  private headMovedAt = -Infinity;
+  private lastPitch: number | null = null;
+  private lastRelYaw: number | null = null;
   private goal: ScenarioId;
   private destination: string | undefined;
   private stops: string[] = [];
@@ -298,13 +302,18 @@ export class Brain {
   }
 
   private updateSnooze(snap: WorldSnapshot, t: number): void {
-    const up = snap.wearer.gaze.pitch > this.cfg.snooze.pitch && !snap.wearer.gaze.target;
+    const g = snap.wearer.gaze;
+    const rel = angleWrap(g.yaw - Math.atan2(-snap.wearer.heading.x, -snap.wearer.heading.z));
+    if (this.lastPitch === null || this.lastRelYaw === null || Math.abs(g.pitch - this.lastPitch) > 0.01 || Math.abs(angleWrap(rel - this.lastRelYaw)) > 0.015) this.headMovedAt = t;
+    this.lastPitch = g.pitch;
+    this.lastRelYaw = rel;
+    const up = g.pitch > this.cfg.snooze.pitch && !g.target;
     if (!up) {
       this.lookUpSince = null;
       this.lookUpArmed = true;
     } else if (this.lookUpArmed) {
       if (this.lookUpSince === null) this.lookUpSince = t;
-      if (t - this.lookUpSince >= this.cfg.snooze.holdS - 1e-9) {
+      if (t - this.lookUpSince >= this.cfg.snooze.holdS - 1e-9 && t - this.headMovedAt >= this.cfg.snooze.stillS - 1e-9) {
         this.lookUpArmed = false;
         this.lookUpSince = null;
         if (this.snoozeUntil !== undefined && t < this.snoozeUntil) this.snoozeUntil = undefined;
@@ -538,6 +547,20 @@ export class Brain {
       },
       this.cfg,
     );
+    const moment = (e: Entity): boolean => e.kind === 'transit' && e.live.busAtStop === true;
+    const eligible = list.filter(({ entity: e, scored: sc }) => e.id !== target && sc.pipScore > 0 && (sc.relevance >= this.cfg.ladder.awarenessRelevance || moment(e)));
+    const isUp = (id: string): boolean => {
+      const d = this.standing.get(id);
+      return Boolean(d && d.placement.zone === 'world' && isPane(d.level));
+    };
+    const others = [...this.standing.values()].filter((d) => isUp(d.id) && !eligible.some((c) => c.entity.id === d.id)).length;
+    const rankOf = (c: (typeof list)[number]): number => c.scored.pipScore + (isUp(c.entity.id) ? 100 : this.standing.get(c.entity.id)?.level === 'pip' ? 0.1 : 0) + (moment(c.entity) ? 10 : 0);
+    const aware = new Set(
+      eligible
+        .sort((a, b) => rankOf(b) - rankOf(a))
+        .slice(0, Math.max(0, this.cfg.ladder.awarenessPips - others))
+        .map(({ entity: e }) => e.id),
+    );
     for (const { entity: e, scored: sc, reason: why, contentKey } of list) {
       const it = this.item(e.id);
       const isT = target === e.id;
@@ -575,14 +598,22 @@ export class Brain {
       }
       it.wasTarget = isT;
 
-      if (band === 'brisk' && isT && dwellS >= this.cfg.ladder.glanceDwellS && !it.whispered) {
+      if (sc.score > this.cfg.score.glanceThreshold) it.aboveSince ??= t;
+      else it.aboveSince = null;
+
+      if (band !== 'brisk') it.whispered = false;
+      else if (
+        !isT &&
+        !it.whispered &&
+        !this.whisper &&
+        !isPane(it.level) &&
+        sc.relevance >= this.cfg.ladder.awarenessRelevance &&
+        it.aboveSince !== null &&
+        t - it.aboveSince >= this.cfg.score.promotionHoldS - 1e-9
+      ) {
         it.whispered = true;
         this.whisper = { content: whisperContent(e, why), reason: why, until: t + this.cfg.whisper.seconds, from: e.id };
       }
-      if (!isT) it.whispered = false;
-
-      if (sc.score > this.cfg.score.glanceThreshold) it.aboveSince ??= t;
-      else it.aboveSince = null;
 
       const visible = this.paneVisible(e.id);
       const dtL = Number.isFinite(it.lastT) ? Math.max(0, t - it.lastT) : 0;
@@ -604,7 +635,7 @@ export class Brain {
           visible,
           far: e.distance > this.cfg.ladder.cardWithinM,
           pinch: pinch === e.id,
-          floor: sc.pipScore > 0 ? 'pip' : 'none',
+          floor: aware.has(e.id) ? 'pip' : 'none',
           proactive: true,
           scoreAbove: sc.score > this.cfg.score.glanceThreshold,
           canProactive: this.glancesUp() < this.cfg.ladder.maxGlances,
@@ -1218,8 +1249,7 @@ export class Brain {
       anchor: 'view:bottom',
       content: this.whisper.content,
       reason: this.whisper.reason,
-      origin: 'gaze',
-      gaze: true,
+      origin: 'proactive',
     });
   }
 
@@ -1467,7 +1497,7 @@ export class Brain {
       if (action) {
         this.log.append(t, d, this.snapRef);
         this.frameEvents.push(d);
-        if (isShow(d)) this.spendBudget();
+        if (isShow(d) && d.cause !== 'dwell' && d.cause !== 'pinch') this.spendBudget();
       }
       w.onCommit?.();
       next.set(w.id, d);
@@ -1544,6 +1574,8 @@ export class Brain {
     if (gate.snooze && this.snoozeUntil !== undefined) {
       return { kind: 'snooze', label: `${Math.max(0, Math.ceil(this.snoozeUntil - t))} s` };
     }
+    const arming = this.lookUpArmed && this.lookUpSince !== null && t - this.lookUpSince >= this.cfg.snooze.holdS - this.cfg.snooze.stillS - 1e-9 && t - this.headMovedAt >= 0.2 - 1e-9;
+    if (arming && !gate.safety) return { kind: 'snooze', label: 'Snoozing' };
     if (gate.safety) {
       const n = this.heldGlyph.size;
       return { kind: 'held', label: n > 1 ? `Held ${n}` : 'Held', count: n };

@@ -24,6 +24,8 @@ export interface Config {
     expandDwellS: number;
     lookAwayS: number;
     maxGlances: number;
+    awarenessPips: number;
+    awarenessRelevance: number;
     minShownS: number;
     cardWithinM: number;
     pipDwellS: number;
@@ -36,7 +38,7 @@ export interface Config {
   pocket: { savedMs: number; stoppedForS: number; minSeconds: number; defaultSeconds: number };
   budget: { shows: number; refillS: number };
   safety: { vehicleTimeToPath: number; curbScanM: number };
-  snooze: { pitch: number; holdS: number; seconds: number };
+  snooze: { pitch: number; holdS: number; stillS: number; seconds: number };
   whisper: { seconds: number };
   followupS: number;
   needToRun: { briskWithinS: number; curbM: number; seconds: number };
@@ -63,11 +65,13 @@ export const DEFAULT_CONFIG: Config = {
     acceptFactor: 1.2,
   },
   ladder: {
-    glanceDwellS: 0.8,
-    cardDwellS: { stopped: 0.8, stroll: 1.0, walk: 1.6, brisk: null },
-    expandDwellS: 2.0,
+    glanceDwellS: 0.45,
+    cardDwellS: { stopped: 0.6, stroll: 0.8, walk: 1.2, brisk: null },
+    expandDwellS: 1.6,
     lookAwayS: 1.2,
     maxGlances: 3,
+    awarenessPips: 3,
+    awarenessRelevance: 0.6,
     minShownS: 2.5,
     cardWithinM: 30,
     pipDwellS: 0.25,
@@ -80,7 +84,7 @@ export const DEFAULT_CONFIG: Config = {
   pocket: { savedMs: 600, stoppedForS: 2, minSeconds: 6, defaultSeconds: 20 },
   budget: { shows: 7, refillS: 40 },
   safety: { vehicleTimeToPath: 3, curbScanM: 8 },
-  snooze: { pitch: 0.35, holdS: 1, seconds: 60 },
+  snooze: { pitch: 0.55, holdS: 2, stillS: 1, seconds: 60 },
   whisper: { seconds: 2.5 },
   followupS: 6,
   needToRun: { briskWithinS: 12, curbM: 4, seconds: 4 },

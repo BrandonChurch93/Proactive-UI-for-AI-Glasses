@@ -95,7 +95,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-2',
-    name: 'reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk',
+    name: 'reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap',
     check: (r, cfg) => {
       for (const e of r.entries) {
         const d = e.decision;
@@ -107,7 +107,13 @@ const checks: { rule: string; name: string; check: Check }[] = [
           }
         }
         if (d.band === 'brisk' && (d.action === 'show' || d.action === 'promote') && d.placement.zone !== 'ground' && LEVEL_RANK[d.level] >= LEVEL_RANK.glance) {
-          return `t=${e.t} ${d.id} ${d.level} appeared in Brisk`;
+          const looked = d.placement.zone === 'world' && d.level === 'glance' && d.gaze && d.cause === 'dwell';
+          if (!looked) return `t=${e.t} ${d.id} ${d.level} appeared in Brisk`;
+          if (d.content.showReason) return `t=${e.t} ${d.id} shows a reason in Brisk`;
+          if (d.content.fact) {
+            const c = countCopy(d.content.fact);
+            if (c.words > cfg.reading.glanceWords || c.numbers > cfg.reading.glanceNumbers) return `t=${e.t} ${d.id} fact over cap in Brisk: ${d.content.fact}`;
+          }
         }
       }
       return null;
@@ -278,7 +284,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     rule: 'walking-13',
     name: 'budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count',
     check: (r, cfg) => {
-      const shows = r.entries.filter((e) => isShow(e.decision)).length;
+      const shows = r.entries.filter((e) => isShow(e.decision) && e.decision.cause !== 'dwell' && e.decision.cause !== 'pinch').length;
       const last = r.frames[r.frames.length - 1];
       if (!last) return null;
       if (last.budgetUsed !== shows) return `meter ${last.budgetUsed} but ${shows} shows`;

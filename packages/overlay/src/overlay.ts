@@ -94,6 +94,7 @@ interface Item {
   fresh: OverlayEvent[];
   lastMove: OverlayEvent | null;
   changedAt: number;
+  lookedAt: number;
 }
 
 export interface OverlayOptions {
@@ -406,6 +407,7 @@ export class Overlay {
       fresh: [],
       lastMove: null,
       changedAt: -Infinity,
+      lookedAt: -Infinity,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -621,7 +623,7 @@ export class Overlay {
     if (it.restored) return { kind: 'birth', cause: 'resume' };
     if (decided) return { kind: 'birth', ...brain };
     if (placed?.collapsed && placed.why) return { kind: 'birth', cause: placed.why };
-    return { kind: 'birth', cause: 'return', detail: it.why?.cause ?? '' };
+    return { kind: 'birth', cause: 'return', detail: d.placement.focusOk && it.why?.detail === 'not looked at' ? 'looked at again' : (it.why?.cause ?? '') };
   }
 
   private morph(it: Item, b: Built, want: PaneLevel, t: number, from: PaneLevel, why: Item['why'] | undefined): void {
@@ -741,10 +743,12 @@ export class Overlay {
       it.stash = null;
       it.cur = b;
       const big = want === 'card' || want === 'expanded';
+      const looked = it.d.cause === 'dwell' || it.d.cause === 'pinch';
       if (world) {
         const dur = big ? MOVE.travelCard : MOVE.travelGlance;
         const tStart = t - it.born < 0.05 ? 0.35 : 0;
-        at = travel(tl, it.L, tStart, dur, this.reduced);
+        const arrive = travel(tl, it.L, tStart, dur, this.reduced);
+        at = looked && !returned ? tStart : arrive;
         if (big) tl.call(() => this.sound.breathUp(want === 'expanded'), [], tStart + dur / 2);
       } else if (big || it.d.component === 'pocket') {
         tl.call(() => this.sound.breathUp(true), [], at);
@@ -757,6 +761,7 @@ export class Overlay {
         reduced: this.reduced,
         open: want === 'expanded' || it.d.component === 'pocket',
         ...(whyAt !== undefined ? { whyAt } : {}),
+        ...(looked ? { kidsAt: MOVE.revealAt } : {}),
         fade: b.fade,
       });
       it.condensingUntil = t + end;
@@ -871,8 +876,10 @@ export class Overlay {
       }
       const want = this.paneLevelFor(it, placed);
       const decided = it.d.level !== it.decided;
-      const inZone = !d.placement.focusOk && want === 'none' && Boolean(it.cur?.rect && rectsOverlap(it.cur.rect, zone));
-      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || inZone || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
+      if (d.placement.focusOk) it.lookedAt = t;
+      const inZone = !d.placement.focusOk && t - it.lookedAt >= MOVE.pushOut && want === 'none' && Boolean(it.cur?.rect && rectsOverlap(it.cur.rect, zone));
+      const backInView = Boolean(d.placement.focusOk) && it.want === 'none' && want !== 'none';
+      const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || inZone || backInView || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
       if (want !== it.want) {
         if (urgent) {
           it.pending = null;
@@ -950,7 +957,7 @@ export class Overlay {
       }
 
       if (it.lights && anchorPos) {
-        const gazedNow = this.frame?.dwell.target === it.id && (this.frame?.dwell.dwellMs ?? 0) >= 800 && !it.dying;
+        const gazedNow = this.frame?.dwell.target === it.id && (this.frame?.dwell.dwellMs ?? 0) >= MOVE.gazeTellMs && !it.dying;
         if (gazedNow && !it.gazed) {
           it.gazed = true;
           it.gtl?.kill();
@@ -1098,7 +1105,7 @@ export class Overlay {
         if (!pl) hiddenBy = 'offscreen';
         else if (pl.mode === 'edge') hiddenBy = pl.behind ? 'offscreen' : 'edge';
         else if (it.aside.dropped) hiddenBy = 'keepout';
-        else if (wantsPane && (pl.mode === 'pip' || (it.want === 'none' && !it.pending))) hiddenBy = 'room';
+        else if (wantsPane && (pl.mode === 'pip' || it.want === 'none')) hiddenBy = 'room';
       }
       const r = b?.rect;
       const report: PaneReport = {

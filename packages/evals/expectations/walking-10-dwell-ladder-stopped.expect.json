@@ -4,8 +4,8 @@
     {
       "rule": "walking-10",
       "between": [
-        1.75,
-        1.95
+        1.45,
+        1.55
       ],
       "must": {
         "action": "show",
@@ -17,8 +17,8 @@
     {
       "rule": "walking-10",
       "between": [
-        2.55,
-        2.75
+        2.05,
+        2.15
       ],
       "must": {
         "action": "promote",
@@ -29,8 +29,8 @@
     {
       "rule": "walking-10",
       "between": [
-        4.55,
-        4.75
+        3.65,
+        3.75
       ],
       "must": {
         "action": "promote",

@@ -57,7 +57,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 ## Held and follow-up
 
-- Held (glyph) · Held 2 · 3 · social · Pocket 1 · 60 s (snooze countdown)
+- Held (glyph) · Held 2 · 3 · social · Pocket 1 · Snoozing (the second second of the gesture, before it takes) · 60 s (snooze countdown)
 - Held that while you crossed. Still want it?
 - One message came in. Read it?
 - Two messages came in. Read them?

@@ -181,10 +181,20 @@
       }
     },
     {
-      "name": "0:55 \u00b7 look up: snooze with the countdown",
+      "name": "0:57 \u00b7 the glyph says it is about to snooze",
       "between": [
-        55,
-        56.6
+        57,
+        58.3
+      ],
+      "stateSome": {
+        "glyph": "Snoozing"
+      }
+    },
+    {
+      "name": "0:56 \u00b7 look up: \"Snoozing\" while the look holds, then the countdown",
+      "between": [
+        58.3,
+        59.5
       ],
       "stateSome": {
         "snooze": true,
@@ -192,10 +202,10 @@
       }
     },
     {
-      "name": "0:56 \u00b7 Atlas Books held, snoozed",
+      "name": "0:58 \u00b7 Atlas Books held, snoozed",
       "between": [
-        56,
-        58.5
+        58.5,
+        61.5
       ],
       "must": {
         "action": "hold",
@@ -204,9 +214,9 @@
       }
     },
     {
-      "name": "0:56 to 1:02 \u00b7 nothing shows",
+      "name": "0:58 to 1:02 \u00b7 nothing shows",
       "between": [
-        55.5,
+        58.4,
         62
       ],
       "max": {
@@ -214,9 +224,9 @@
       }
     },
     {
-      "name": "1:03 \u00b7 looking up again cancels",
+      "name": "1:04 \u00b7 looking up again cancels",
       "between": [
-        63.6,
+        64.6,
         66
       ],
       "state": {

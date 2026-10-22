@@ -4,14 +4,15 @@
     {
       "rule": "moments",
       "between": [
-        1.7,
-        2
+        1.4,
+        1.6
       ],
       "must": {
         "action": "show",
-        "id": "whisper",
-        "nameIs": "47th St Station",
-        "factIs": "uptown 4 min"
+        "id": "47th-st-station",
+        "level": "glance",
+        "band": "brisk",
+        "cause": "dwell"
       }
     }
   ]

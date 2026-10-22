@@ -16,8 +16,8 @@
     {
       "rule": "walking-13",
       "between": [
-        30.7,
-        31
+        30.4,
+        30.6
       ],
       "must": {
         "action": "show",

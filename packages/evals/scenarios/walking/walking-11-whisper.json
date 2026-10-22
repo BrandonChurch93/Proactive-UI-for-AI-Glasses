@@ -3,7 +3,7 @@
   "rule": "walking-11",
   "scenario": "hungry",
   "duration": 8,
-  "description": "Brisk: a dwell gives one captioned line at the bottom edge, never a pane.",
+  "description": "Brisk: the place being looked at gets at most a glance, three words and a number; something worth saying that is not looked at gets one captioned line at the bottom edge for 2.5 s, never a pane.",
   "startN": 50,
   "pace": [
     [

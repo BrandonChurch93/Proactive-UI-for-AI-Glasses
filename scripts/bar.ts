@@ -9,6 +9,8 @@ const scenario = arg('scenario', 'walking')!;
 const w = Number(arg('w', '1920'));
 const h = Number(arg('h', '1080'));
 const probes = process.argv.includes('--probes');
+const nolookup = process.argv.includes('--nolookup');
+const wander = process.argv.includes('--wander');
 const server = await ensureServer(base);
 const b = await launch();
 const p = await b.newPage({ viewport: { width: w, height: h } });
@@ -58,7 +60,7 @@ if (probes) {
       const aim = () => { const a = sim.anchorOf(id); const e = sim.wearer.pos; walk.look(Math.atan2(-(a.x - e.x), -(a.z - e.z)) - sim.wearer.bodyYaw, Math.atan2(a.y - ${pr.dy ?? 1.6} - e.y, Math.hypot(a.x - e.x, a.z - e.z))); };
       aim(); walk.lookedAt = -Infinity;
       const t0 = walk.t; let on = null, glance = null, card = null, pre = null; const targets = []; let lastT; let band = null;
-      const shown = (lv) => { const it = o.items.get(id); if (!it || !it.cur || it.cur.level !== lv || it.cur.opacity < 0.9) return false; const k = it.cur.view.kids[0]; return k && Number(getComputedStyle(k).opacity) > 0.9; };
+      const shown = (lv) => { const it = o.items.get(id); if (!it || !it.cur || it.cur.level !== lv || it.cur.opacity < 0.9) return false; const k = it.cur.view.kids[0]; return k && Number(getComputedStyle(k).opacity) >= 0.5; };
       while (walk.t - t0 < 4) {
         walk.seek(walk.t + 1 / 60);
         const dt = walk.t - t0;
@@ -80,13 +82,15 @@ if (probes) {
   const out = (await p.evaluate(`(async () => {
     const walk = window.__app.walk; walk.paused = true;
     const sim = walk.sim; const o = walk.overlay;
+    if (${nolookup}) sim.reviewer.lookUps = [];
     const vp = { w: innerWidth, h: innerHeight };
-    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {} };
+    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0 };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
     while (walk.t < walk.duration - 0.02 && !walk.ended) {
       const ai = sim.reviewer.aim(sim.t, sim.wearer.pos, sim.wearer.bodyYaw, sim.anchorOf, sim.wearer.state === 'crossing');
-      walk.look(ai.yaw - sim.wearer.bodyYaw, ai.pitch);
+      if (${wander}) walk.look(0.6 * Math.sin(sim.t * 0.5), 0.35 + 0.35 * Math.sin(sim.t * 0.37));
+      else walk.look(ai.yaw - sim.wearer.bodyYaw, ai.pitch);
       const prevT = sim.t;
       walk.seek(walk.t + 1 / 60);
       const ev = sim.reviewer.eventsBetween(prevT, sim.t);
@@ -95,11 +99,11 @@ if (probes) {
       const kos = walk.bridge.keepOuts();
       const road = kos.filter((k) => k.kind === 'roadway');
       for (const k of kos) { m.keepW = Math.max(m.keepW, k.rect.w / vp.w); m.keepH = Math.max(m.keepH, k.rect.h / vp.h); }
-      let lit = 0;
+      let lit = 0; const litIds = [];
       for (const it of o.items.values()) {
         if (it.kind === 'world' && it.lights && !it.dying && it.L.pip > 0.5) {
           const a = walk.bridge.anchor(it.d.placement.anchor); const pr = a && walk.bridge.project(a);
-          if (pr && pr.inFront && pr.x > 0 && pr.x < vp.w && pr.y > 0 && pr.y < vp.h) lit++;
+          if (pr && pr.inFront && pr.x > 0 && pr.x < vp.w && pr.y > 0 && pr.y < vp.h) { lit++; litIds.push(it.id + ':' + it.d.level); }
         }
         const c = it.cur;
         if (it.kind !== 'world' || !c || !c.rect || c.opacity < 0.5 || it.want === 'none') continue;
@@ -115,10 +119,12 @@ if (probes) {
         let ov = 0; for (const k of road) ov += overlap(r, k.rect);
         if (ov > 1) { m.roadFrames++; const f = ov / (r.w * r.h); if (f > m.worstRoad) { m.worstRoad = f; m.worstRoadAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
       }
-      if (!sim.gaze.target && lit > m.pipsMax) { m.pipsMax = lit; m.pipsAt = +walk.t.toFixed(2); }
+      if (!sim.gaze.target && lit > m.pipsMax) { m.pipsMax = lit; m.pipsAt = +walk.t.toFixed(2); m.pipsIds = litIds; }
       const last = walk.last();
       if (last && last.frame.t !== lastTick) {
         lastTick = last.frame.t;
+        if (last.frame.gate.snooze && !m.wasSnoozed) m.snoozes++;
+        m.wasSnoozed = last.frame.gate.snooze;
         for (const d of last.frame.events) {
           if (d.action !== 'promote' || d.placement.zone !== 'world') continue;
           const it = o.items.get(d.id);
@@ -128,7 +134,7 @@ if (probes) {
     }
     return { m, log: walk.overlayLog, t: walk.t };
   })()`)) as {
-    m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number> };
+    m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
   };
@@ -146,7 +152,7 @@ if (probes) {
     if (levelChange) {
       const list = changes.get(e.id) ?? [];
       const climb = /dwell|pinch/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
-      const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
+      const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'return' && /looked at again|offscreen/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
       list.push({ t: e.t, exempt: climb || world || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
       changes.set(e.id, list);
     }
@@ -175,8 +181,9 @@ if (probes) {
   console.log(`  pane edge farther than 1.0 x its width from its pip (pip in view): ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
   console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
   console.log(`  largest keep-out: ${(100 * m.keepW).toFixed(0)}% x ${(100 * m.keepH).toFixed(0)}% of the view`);
-  console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt}` : ''}`);
+  console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt} ${JSON.stringify((m as unknown as { pipsIds?: string[] }).pipsIds ?? [])}` : ''}`);
   if (process.argv.includes('--per')) console.log(`  pane frames per item: ${JSON.stringify(m.per)}`);
+  console.log(`  snoozes started: ${m.snoozes}${nolookup ? ' (no deliberate look-ups)' : wander ? ' (wandering drag, pitch up to 0.7 rad)' : ''}`);
   console.log(`  promotions while the pane was not visible: ${m.hiddenPromotes.length}${m.hiddenPromotes.length ? `  ${JSON.stringify(m.hiddenPromotes.slice(0, 6))}` : ''}`);
 }
 console.log(`  console errors: ${errors.length}${errors.length ? `\n${errors.slice(0, 5).join('\n')}` : ''}`);

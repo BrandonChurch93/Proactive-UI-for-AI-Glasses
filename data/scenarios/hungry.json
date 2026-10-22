@@ -19,11 +19,15 @@
       "band": "walk"
     },
     {
-      "t": 36,
+      "t": 44,
       "band": "brisk"
     },
     {
-      "t": 58,
+      "t": 57,
+      "band": "walk"
+    },
+    {
+      "t": 60,
       "band": "stopped",
       "until": "signal"
     },

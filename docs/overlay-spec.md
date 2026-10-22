@@ -50,9 +50,9 @@ The expanded view grows in place from the card's position and is placed by the s
 ## 4. Input model (sim side, but the overlay consumes it)
 
 - Drag turns the head; the center of the view is the gaze point. A full 180°.
-- Dwell: a pip within 28 px of the gaze point for 800 ms promotes it, and continued dwell keeps climbing per the dwell ladder (walking rule 10). The brain receives `gaze.dwellMs`; the overlay only shows the tell: aura and flare.
+- Dwell: 450 ms on a place promotes it to a glance, and continued dwell keeps climbing per the dwell ladder (walking rule 10). The brain receives `gaze.dwellMs`; the overlay only shows the tell: aura and flare.
 - Pinch: a click with under 4 px of movement skips the wait on the gazed item or picks a choice; clicking a pane directly also works. Tap on touch. While the band is Walk or Brisk a pinch saves to the pocket instead.
-- Snooze: looking up past 0.35 rad for 1 s. Looking up again cancels.
+- Snooze: looking up past 0.55 rad at nothing for 2 s, the head held still for the last second; the glyph reads "Snoozing" meanwhile. Looking up again the same way cancels.
 - Dismiss: right-click, Esc, or looking away for 1.2 s per level.
 - Keys: Enter expand, Esc dismiss, I inspector, Space pause.
 

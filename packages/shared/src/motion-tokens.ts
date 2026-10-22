@@ -3,6 +3,7 @@ export const MOVE = {
   markAura: 0.9,
   markAuraDelay: 0.05,
   gaze: 0.8,
+  gazeTellMs: 450,
   flareIn: 0.7,
   flareInAt: 0.3,
   flareOutAt: 1.1,

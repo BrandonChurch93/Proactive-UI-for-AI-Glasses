@@ -8,10 +8,10 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 | Band | Speed | What is allowed |
 | --- | --- | --- |
-| Stopped | < 0.2 m/s | Anything: glance, card on 0.8 s dwell, expanded on a further 2.0 s dwell or a pinch, the pocket surfaces |
-| Stroll | 0.2 to 0.9 m/s | Glance; card on 1.0 s dwell; expanded on a further 2.0 s dwell |
-| Walk | 0.9 to 1.6 m/s | Glance; card on 1.6 s dwell only; pinch saves to the pocket |
-| Brisk | > 1.6 m/s | Whisper channel only, no panes; pinch saves |
+| Stopped | < 0.2 m/s | Anything: glance on 0.45 s dwell, card on a further 0.6 s, expanded on a further 1.6 s or a pinch, the pocket surfaces |
+| Stroll | 0.2 to 0.9 m/s | Glance; card on a further 0.8 s of dwell; expanded on a further 1.6 s |
+| Walk | 0.9 to 1.6 m/s | Glance; card on a further 1.2 s of dwell only; pinch saves to the pocket |
+| Brisk | > 1.6 m/s | The place being looked at gets a glance (three words and a number); anything else is the whisper line; pinch saves |
 
 ## Rule 1 · Speed-scaled focus zone
 
@@ -23,8 +23,8 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 2 · Reading budget
 
 - Trigger: a candidate is about to be shown while the band is not Stopped.
-- Response: the brain estimates reading time (words × 240 ms + numbers × 320 ms) and compares it to the time the item will stay in comfortable view at the current speed. Glance content is capped at three words plus one number while walking (the place name does not count; a unit counts with its number); in Walk the reason line is never on the glass, only in the log; a card is refused unless the band allows it; copy that does not fit is shortened by rule (drop the reason line first, then the second fact), never truncated with an ellipsis.
-- Eval: no shown world-zone glance exceeds the cap while Walk; no world-zone card appears in Walk without a 1.6 s dwell; no pane appears in Brisk. View-zone items (the errands card, message and call toasts, the pocket, the ask glance) are governed by the notification rules and the view zone's edge placement, not the dwell ladder: allowed in any band but Brisk, at the edge, folding after 4 s while moving unless looked at.
+- Response: the brain estimates reading time (words × 240 ms + numbers × 320 ms) and compares it to the time the item will stay in comfortable view at the current speed. Glance content is capped at three words plus one number while walking (the place name does not count; a unit counts with its number); in Walk and Brisk the reason line is never on the glass, only in the log; a card is refused unless the band allows it; copy that does not fit is shortened by rule (drop the reason line first, then the second fact), never truncated with an ellipsis.
+- Eval: no shown world-zone glance exceeds the cap in Walk or Brisk; no world-zone card appears in Walk without its dwell; in Brisk no card appears and the only world glance is the place being looked at. View-zone items (the errands card, message and call toasts, the pocket, the ask glance) are governed by the notification rules and the view zone's edge placement, not the dwell ladder: allowed in any band but Brisk, at the edge, folding after 4 s while moving unless looked at.
 
 ## Rule 3 · Auto-fold while walking
 
@@ -71,26 +71,26 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 10 · The dwell ladder
 
 - Trigger: continuous gaze on one anchor.
-- Response: attention alone climbs every level. 0.8 s of dwell shows the glance; the band's card dwell (0.8 s Stopped, 1.0 s Stroll, 1.6 s Walk) shows the card; a further 2.0 s of dwell on the card, in Stopped or Stroll only, expands it. Pinch is a shortcut that skips the wait, never a requirement. A place beyond 30 m climbs no further than its glance: a far store gets a label, and the card comes as the wearer closes in. A look has to hold for 250 ms before a place even lights, so sweeping the view across a street lights nothing. Looking away for 1.2 s walks back down one level at a time. There is no separate hands-busy mode: a wearer carrying bags, holding a child's hand, or wearing gloves gets the same interface, because dwell already reaches everything.
-- Eval: with no pinch events, a scripted 4.4 s dwell in Stopped ends at expanded; the same dwell in Walk ends at card; no level is ever reached without the dwell its band requires.
+- Response: attention alone climbs every level. 0.45 s of dwell shows the glance; the band's card dwell past it (0.6 s Stopped, 0.8 s Stroll, 1.2 s Walk) shows the card; a further 1.6 s of dwell on the card, in Stopped or Stroll only, expands it. A glance the wearer earns by looking condenses while its light travels, so it reads well inside a second of the look; in Brisk the place being looked at climbs to a glance and no further. Pinch is a shortcut that skips the wait, never a requirement. A place beyond 30 m climbs no further than its glance: a far store gets a label, and the card comes as the wearer closes in. A look has to hold for 250 ms before a place even lights, so sweeping the view across a street lights nothing. Looking away for 1.2 s walks back down one level at a time. There is no separate hands-busy mode: a wearer carrying bags, holding a child's hand, or wearing gloves gets the same interface, because dwell already reaches everything.
+- Eval: with no pinch events, a scripted dwell in Stopped reaches the glance at 0.5 s, the card at 1.1 s and the expanded view at 2.7 s (on the 10 Hz tick); the same dwell in Walk reaches the card at 1.7 s and never expands; no level is ever reached without the dwell its band requires.
 
 ## Rule 11 · The whisper channel
 
-- Trigger: Brisk band.
-- Response: instead of a world-zone pane, the brain shows one captioned line at the bottom edge in the view zone: "Grace Theater · last show at 8". After the name, three words and a number at most, 2.5 s, then gone. Visual when the wearer can afford it, a line when they cannot.
-- Eval: in Brisk, no card and no world-zone glance; whisper lines obey the cap and the duration.
+- Trigger: Brisk band, and something worth saying that the wearer is not looking at (relevant to the goal, past the score threshold).
+- Response: instead of a world-zone pane, the brain shows one captioned line at the bottom edge in the view zone: "Grace Theater · last show at 8". After the name, three words and a number at most, 2.5 s, then gone, once per place per Brisk stretch. The place the wearer is looking at gets its glance instead, capped the same way. Visual when the wearer can afford it, a line when they cannot.
+- Eval: in Brisk, no card, and no world-zone glance except the place being looked at; whisper lines obey the cap and the duration.
 
 ## Rule 12 · Snooze
 
-- Trigger: the wearer looks up (pitch above 0.35 rad) at nothing in particular for 1 s. Looking up at a sign is attention, not the gesture: with a gaze target the pitch does not count (a shop sign 4 m up and 5 m away is already 0.45 rad).
-- Response: everything folds, the held glyph shows "60 s" and counts down, nothing new is shown except safety until it expires or the wearer looks up again to cancel. The quietest control in the system.
-- Eval: after the gesture, no shows for 60 s except gate-related safety text; the glyph shows the countdown.
+- Trigger: the wearer looks up (pitch above 0.55 rad) at nothing in particular for 2 s, with the head held still for the last of those seconds (relative to the walking direction, so a bend in the route is not a drag). Looking up at a sign is attention, not the gesture: with a gaze target the pitch does not count. Dragging the view up to a tall building keeps moving the head, so it does not snooze.
+- Response: through the second second the held glyph reads "Snoozing", so looking down cancels it before anything happens. Then everything folds, the glyph shows "60 s" and counts down, and nothing new is shown except safety until it expires or the wearer looks up again the same way to cancel. The quietest control in the system.
+- Eval: after the gesture, no shows for 60 s except gate-related safety text; the glyph shows "Snoozing" during the second second and then the countdown; a moving look up does not snooze.
 
 ## Rule 13 · The budget is visible
 
 - Trigger: always, in the inspector.
-- Response: the attention budget is a meter that drains on each show (a decision with action `show` at glance level or above; pips and ground safety text are not shows) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
-- Eval: shows per walk never exceed 7 plus the refills earned during the walk (9 on a 90 s walk with enough quiet); the meter in the log matches the show count.
+- Response: the attention budget is a meter that drains on each proactive show (a decision with action `show` at whisper level or above that the wearer did not earn by looking or pinching; pips and ground safety text are not shows, and dwell-earned shows are free) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
+- Eval: proactive shows per walk never exceed 7 plus the refills earned during the walk (9 on a 90 s walk with enough quiet); the meter in the log matches the count of shows that were not earned by dwell or pinch.
 
 ## How these combine
 

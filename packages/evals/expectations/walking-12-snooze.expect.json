@@ -4,8 +4,19 @@
     {
       "rule": "walking-12",
       "between": [
-        4,
-        4.1
+        4.0,
+        4.9
+      ],
+      "state": {
+        "snooze": false,
+        "glyph": "Snoozing"
+      }
+    },
+    {
+      "rule": "walking-12",
+      "between": [
+        5.0,
+        5.1
       ],
       "state": {
         "snooze": true,
@@ -15,8 +26,8 @@
     {
       "rule": "walking-12",
       "between": [
-        6.7,
-        7.0
+        6.4,
+        6.6
       ],
       "must": {
         "action": "hold",
@@ -27,8 +38,8 @@
     {
       "rule": "walking-12",
       "between": [
-        4.1,
-        21
+        5.1,
+        21.4
       ],
       "mustNot": {
         "action": [
@@ -41,7 +52,7 @@
     {
       "rule": "walking-12",
       "between": [
-        21.2,
+        21.6,
         22
       ],
       "state": {
@@ -51,8 +62,8 @@
     {
       "rule": "walking-12",
       "between": [
-        22.7,
-        23.2
+        22.4,
+        22.7
       ],
       "must": {
         "action": "show",

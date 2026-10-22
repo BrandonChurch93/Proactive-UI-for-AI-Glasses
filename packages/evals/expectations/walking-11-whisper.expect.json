@@ -4,27 +4,40 @@
     {
       "rule": "walking-11",
       "between": [
-        1.7,
-        2.0
+        0.9,
+        1.4
       ],
       "must": {
         "action": "show",
         "id": "whisper",
         "level": "whisper",
         "band": "brisk",
-        "nameIs": "47th St Station",
-        "factIs": "uptown 4 min"
+        "nameIs": "Goldie's Counter"
       }
     },
     {
       "rule": "walking-11",
       "between": [
-        4.2,
-        4.4
+        3.6,
+        3.8
       ],
       "must": {
         "action": "dismiss",
         "id": "whisper"
+      }
+    },
+    {
+      "rule": "walking-11",
+      "between": [
+        1.4,
+        1.6
+      ],
+      "must": {
+        "action": "show",
+        "id": "47th-st-station",
+        "level": "glance",
+        "band": "brisk",
+        "cause": "dwell"
       }
     },
     {
@@ -35,7 +48,7 @@
       ],
       "mustNot": {
         "zone": "world",
-        "levelAtLeast": "glance"
+        "levelAtLeast": "card"
       }
     }
   ]

@@ -77,7 +77,7 @@ export function condense(
   tl: TL,
   p: PaneEls,
   at: number,
-  opts: { card: boolean; reduced: boolean; open?: boolean; whyAt?: number; fade: { v: number } },
+  opts: { card: boolean; reduced: boolean; open?: boolean; whyAt?: number; fade: { v: number }; kidsAt?: number },
 ): number {
   const reveal = opts.open ? T.open : opts.card ? T.baseCard : T.base;
   const kids = opts.whyAt !== undefined && p.why ? p.kids.filter((k) => k !== p.why) : p.kids;
@@ -95,10 +95,10 @@ export function condense(
     kids,
     { opacity: 0, y: -3, filter: 'blur(5px)' },
     { opacity: 1, y: 0, filter: 'blur(0px)', duration: T.base, ease: EASE.out, stagger: MOVE.stagger, clearProps: 'filter' },
-    at + MOVE.kidsAt,
+    at + (opts.kidsAt ?? MOVE.kidsAt),
   );
   tl.to(p.seed, { opacity: 0, duration: MOVE.seedFade, ease: EASE.in }, at + MOVE.seedFadeAt);
-  let end = at + MOVE.kidsAt + T.base + MOVE.stagger * Math.max(0, kids.length - 1);
+  let end = at + (opts.kidsAt ?? MOVE.kidsAt) + T.base + MOVE.stagger * Math.max(0, kids.length - 1);
   if (opts.whyAt !== undefined && p.why) {
     const w = Math.max(end, opts.whyAt);
     tl.fromTo(p.why, { opacity: 0, filter: 'blur(5px)' }, { opacity: 1, filter: 'blur(0px)', duration: T.base, ease: EASE.out, clearProps: 'filter' }, w);

@@ -30,8 +30,8 @@
     {
       "rule": "walking-1",
       "between": [
-        4.5,
-        6
+        4.0,
+        4.5
       ],
       "must": {
         "id": "kathys-cupcakes",

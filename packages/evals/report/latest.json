@@ -3,8 +3,8 @@
  "totals": {
   "suites": 39,
   "passed": 39,
-  "cases": 869,
-  "casesPassed": 869
+  "cases": 872,
+  "casesPassed": 872
  },
  "byGroup": {
   "walks": {
@@ -65,7 +65,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -160,12 +160,12 @@
     {
      "name": "0:24 · the pharmacy unfolds from the sign",
      "pass": true,
-     "detail": "t=25.401 show main-street-pharmacy glance"
+     "detail": "t=25.001 show main-street-pharmacy glance"
     },
     {
      "name": "0:25 · its card",
      "pass": true,
-     "detail": "t=26.201 promote main-street-pharmacy card"
+     "detail": "t=25.601 promote main-street-pharmacy card"
     },
     {
      "name": "0:28 · picked up, the errands card returns with the stop ticked",
@@ -210,7 +210,7 @@
     {
      "name": "1:10 · the Post Office card up on dwell",
      "pass": true,
-     "detail": "t=72.001 promote post-office card"
+     "detail": "t=71.401 promote post-office card"
     },
     {
      "name": "1:12 · head scans and a passerby change no level",
@@ -281,7 +281,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -386,7 +386,7 @@
     {
      "name": "0:14 · dwell on Mega Burger gives the glance",
      "pass": true,
-     "detail": "t=15 show mega-burger glance"
+     "detail": "t=14.7 show mega-burger glance"
     },
     {
      "name": "0:16 · no card at 50 m: a far place keeps its label until it is within 30 m",
@@ -414,14 +414,14 @@
      "detail": "t=31.101 demote mega-burger pip"
     },
     {
-     "name": "0:37 to 0:58 · Brisk, nothing but whisper",
+     "name": "0:44 to 0:57 · Brisk, nothing looked at: nothing but whisper",
      "pass": true,
-     "detail": "175 frames"
+     "detail": "105 frames"
     },
     {
-     "name": "0:40 · the station gives only the whisper line",
+     "name": "0:40 · a dwell on the station stair gives its glance",
      "pass": true,
-     "detail": "t=41.101 show whisper whisper"
+     "detail": "t=40.801 show 47th-st-station glance"
     },
     {
      "name": "0:58 · no need to run",
@@ -436,7 +436,7 @@
     {
      "name": "1:02 · the pocket surfaces with the time available",
      "pass": true,
-     "detail": "t=60.301 surface pocket card"
+     "detail": "t=62.801 surface pocket card"
     },
     {
      "name": "1:04 · pinch opens its card",
@@ -446,7 +446,7 @@
     {
      "name": "1:06 · held gaze expands it in place",
      "pass": true,
-     "detail": "t=66.001 promote pocket:mega-burger expanded"
+     "detail": "t=65.601 promote pocket:mega-burger expanded"
     },
     {
      "name": "1:08 · hold a seat, the route draws",
@@ -522,7 +522,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -607,17 +607,17 @@
     {
      "name": "0:08 · the marquee, glance on dwell",
      "pass": true,
-     "detail": "t=9.3 show grace-theater glance"
+     "detail": "t=9 show grace-theater glance"
     },
     {
      "name": "0:09 · card at Stroll",
      "pass": true,
-     "detail": "t=10.3 promote grace-theater card"
+     "detail": "t=9.8 promote grace-theater card"
     },
     {
      "name": "0:11 · expanded in place on continued dwell",
      "pass": true,
-     "detail": "t=12.3 promote grace-theater expanded"
+     "detail": "t=11.4 promote grace-theater expanded"
     },
     {
      "name": "0:17 to 0:22 · the truck passes; not a gate, the level holds (the overlay drops it to a pip)",
@@ -627,12 +627,12 @@
     {
      "name": "0:26 · Trattoria da Lia, translated",
      "pass": true,
-     "detail": "t=27.201 show trattoria-da-lia glance"
+     "detail": "t=26.901 show trattoria-da-lia glance"
     },
     {
      "name": "0:27 · its card, read from Italian",
      "pass": true,
-     "detail": "t=28.201 promote trattoria-da-lia card"
+     "detail": "t=27.701 promote trattoria-da-lia card"
     },
     {
      "name": "0:29 · the look moves on before it would expand",
@@ -642,7 +642,7 @@
     {
      "name": "0:30 · Kathy's, a glance and that is all",
      "pass": true,
-     "detail": "t=31.401 show kathys-cupcakes glance"
+     "detail": "t=31.101 show kathys-cupcakes glance"
     },
     {
      "name": "0:32 · no card for Kathy's",
@@ -675,24 +675,29 @@
      "detail": "t=51.001 dismiss maya-call card"
     },
     {
-     "name": "0:55 · look up: snooze with the countdown",
+     "name": "0:57 · the glyph says it is about to snooze",
      "pass": true,
-     "detail": "t=55.201"
+     "detail": "t=57.001"
     },
     {
-     "name": "0:56 · Atlas Books held, snoozed",
+     "name": "0:56 · look up: \"Snoozing\" while the look holds, then the countdown",
      "pass": true,
-     "detail": "t=56.901 hold atlas-books pip"
+     "detail": "t=58.301"
     },
     {
-     "name": "0:56 to 1:02 · nothing shows",
+     "name": "0:58 · Atlas Books held, snoozed",
+     "pass": true,
+     "detail": "t=59.301 hold atlas-books pip"
+    },
+    {
+     "name": "0:58 to 1:02 · nothing shows",
      "pass": true,
      "detail": "shows 0, non-gaze 0, holds 3"
     },
     {
-     "name": "1:03 · looking up again cancels",
+     "name": "1:04 · looking up again cancels",
      "pass": true,
-     "detail": "24 frames"
+     "detail": "14 frames"
     },
     {
      "name": "1:03 · Mega Burger passes; nothing is looked at, nothing shows",
@@ -768,7 +773,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -903,7 +908,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -993,9 +998,9 @@
      "rule": "gates"
     },
     {
-     "name": "[4.7, 5) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[4.4, 4.6) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=4.8 show kathys-cupcakes glance",
+     "detail": "t=4.5 show kathys-cupcakes glance",
      "rule": "gates"
     }
    ],
@@ -1038,7 +1043,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1173,7 +1178,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1320,7 +1325,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1449,7 +1454,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1578,7 +1583,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1713,7 +1718,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1854,7 +1859,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -1983,7 +1988,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2118,7 +2123,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2247,7 +2252,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2376,7 +2381,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2466,9 +2471,9 @@
      "rule": "moments"
     },
     {
-     "name": "[6.7, 7) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"glance\",\"factIs\":\"2 min\"}",
+     "name": "[6.4, 6.6) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"glance\",\"factIs\":\"2 min\"}",
      "pass": true,
-     "detail": "t=6.8 show m4-stop glance",
+     "detail": "t=6.5 show m4-stop glance",
      "rule": "moments"
     }
    ],
@@ -2511,7 +2516,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2652,7 +2657,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2781,7 +2786,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2916,7 +2921,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -2994,14 +2999,14 @@
      "detail": ""
     },
     {
-     "name": "[1.7, 2) must {\"action\":\"show\",\"id\":\"whisper\",\"nameIs\":\"47th St Station\",\"factIs\":\"uptown 4 min\"}",
+     "name": "[1.4, 1.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=1.8 show whisper whisper",
+     "detail": "t=1.5 show 47th-st-station glance",
      "rule": "moments"
     }
    ],
    "rule": "moments",
-   "description": "Brisk toward the corner: a dwell on the station gives the whisper line."
+   "description": "Brisk toward the corner: a dwell on the station gives its glance, the departure in three words and a number."
   },
   {
    "id": "walking-01-focus-zone",
@@ -3039,7 +3044,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3125,13 +3130,13 @@
     {
      "name": "[3, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"gaze\":true,\"focusOk\":true}",
      "pass": true,
-     "detail": "t=3.8 show kathys-cupcakes glance",
+     "detail": "t=3.5 show kathys-cupcakes glance",
      "rule": "walking-1"
     },
     {
-     "name": "[4.5, 6) must {\"id\":\"kathys-cupcakes\",\"level\":\"card\",\"gaze\":true,\"focusOk\":true}",
+     "name": "[4, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"card\",\"gaze\":true,\"focusOk\":true}",
      "pass": true,
-     "detail": "t=4.6 promote kathys-cupcakes card",
+     "detail": "t=4.1 promote kathys-cupcakes card",
      "rule": "walking-1"
     },
     {
@@ -3180,7 +3185,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3309,7 +3314,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3432,7 +3437,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3567,7 +3572,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3702,7 +3707,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3825,7 +3830,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -3911,7 +3916,7 @@
     {
      "name": "[10, 12) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"band\":\"stopped\"}",
      "pass": true,
-     "detail": "t=10.8 show kathys-cupcakes glance",
+     "detail": "t=10.3 show kathys-cupcakes pip",
      "rule": "walking-4"
     }
    ],
@@ -3954,7 +3959,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4083,7 +4088,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4218,7 +4223,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4347,7 +4352,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4476,7 +4481,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4605,7 +4610,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4683,15 +4688,15 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 4) must {\"id\":\"goldies-counter\",\"level\":\"card\"}",
+     "name": "[1, 4) must {\"id\":\"goldies-counter\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=1.6 promote goldies-counter card",
+     "detail": "t=1.1 promote goldies-counter card",
      "rule": "walking-9"
     },
     {
-     "name": "[5.5, 8) must {\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
+     "name": "[5, 8) must {\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=5.6 promote trattoria-da-lia card",
+     "detail": "t=5.1 promote trattoria-da-lia card",
      "rule": "walking-9"
     }
    ],
@@ -4734,7 +4739,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4812,21 +4817,21 @@
      "detail": ""
     },
     {
-     "name": "[1.75, 1.95) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[1.45, 1.55) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=1.8 show grace-theater glance",
+     "detail": "t=1.5 show grace-theater glance",
      "rule": "walking-10"
     },
     {
-     "name": "[2.55, 2.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
+     "name": "[2.05, 2.15) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=2.6 promote grace-theater card",
+     "detail": "t=2.1 promote grace-theater card",
      "rule": "walking-10"
     },
     {
-     "name": "[4.55, 4.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\"}",
+     "name": "[3.65, 3.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\"}",
      "pass": true,
-     "detail": "t=4.6 promote grace-theater expanded",
+     "detail": "t=3.7 promote grace-theater expanded",
      "rule": "walking-10"
     },
     {
@@ -4875,7 +4880,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -4953,9 +4958,9 @@
      "detail": ""
     },
     {
-     "name": "[3.35, 3.55) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
+     "name": "[2.65, 2.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
      "pass": true,
-     "detail": "t=3.4 promote grace-theater card",
+     "detail": "t=2.7 promote grace-theater card",
      "rule": "walking-10"
     },
     {
@@ -5010,7 +5015,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -5145,7 +5150,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -5223,26 +5228,32 @@
      "detail": ""
     },
     {
-     "name": "[1.7, 2) must {\"action\":\"show\",\"id\":\"whisper\",\"level\":\"whisper\",\"band\":\"brisk\",\"nameIs\":\"47th St Station\",\"factIs\":\"uptown 4 min\"}",
+     "name": "[0.9, 1.4) must {\"action\":\"show\",\"id\":\"whisper\",\"level\":\"whisper\",\"band\":\"brisk\",\"nameIs\":\"Goldie's Counter\"}",
      "pass": true,
-     "detail": "t=1.8 show whisper whisper",
+     "detail": "t=1.2 show whisper whisper",
      "rule": "walking-11"
     },
     {
-     "name": "[4.2, 4.4) must {\"action\":\"dismiss\",\"id\":\"whisper\"}",
+     "name": "[3.6, 3.8) must {\"action\":\"dismiss\",\"id\":\"whisper\"}",
      "pass": true,
-     "detail": "t=4.3 dismiss whisper whisper",
+     "detail": "t=3.7 dismiss whisper whisper",
      "rule": "walking-11"
     },
     {
-     "name": "[0, 8) mustNot {\"zone\":\"world\",\"levelAtLeast\":\"glance\"}",
+     "name": "[1.4, 1.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
+     "pass": true,
+     "detail": "t=1.5 show 47th-st-station glance",
+     "rule": "walking-11"
+    },
+    {
+     "name": "[0, 8) mustNot {\"zone\":\"world\",\"levelAtLeast\":\"card\"}",
      "pass": true,
      "detail": "",
      "rule": "walking-11"
     }
    ],
    "rule": "walking-11",
-   "description": "Brisk: a dwell gives one captioned line at the bottom edge, never a pane."
+   "description": "Brisk: the place being looked at gets at most a glance, three words and a number; something worth saying that is not looked at gets one captioned line at the bottom edge for 2.5 s, never a pane."
   },
   {
    "id": "walking-12-snooze",
@@ -5280,7 +5291,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -5358,33 +5369,39 @@
      "detail": ""
     },
     {
-     "name": "[4, 4.1) state {\"snooze\":true,\"glyph\":\"60 s\"}",
+     "name": "[4, 4.9) state {\"snooze\":false,\"glyph\":\"Snoozing\"}",
+     "pass": true,
+     "detail": "9 frames",
+     "rule": "walking-12"
+    },
+    {
+     "name": "[5, 5.1) state {\"snooze\":true,\"glyph\":\"60 s\"}",
      "pass": true,
      "detail": "1 frames",
      "rule": "walking-12"
     },
     {
-     "name": "[6.7, 7) must {\"action\":\"hold\",\"id\":\"atlas-books\",\"reasonText\":\"Snoozed\"}",
+     "name": "[6.4, 6.6) must {\"action\":\"hold\",\"id\":\"atlas-books\",\"reasonText\":\"Snoozed\"}",
      "pass": true,
-     "detail": "t=6.8 hold atlas-books glance",
+     "detail": "t=6.5 hold atlas-books glance",
      "rule": "walking-12"
     },
     {
-     "name": "[4.1, 21) mustNot {\"action\":[\"show\",\"promote\"],\"zone\":\"world\"}",
+     "name": "[5.1, 21.4) mustNot {\"action\":[\"show\",\"promote\"],\"zone\":\"world\"}",
      "pass": true,
      "detail": "",
      "rule": "walking-12"
     },
     {
-     "name": "[21.2, 22) state {\"snooze\":false}",
+     "name": "[21.6, 22) state {\"snooze\":false}",
      "pass": true,
-     "detail": "8 frames",
+     "detail": "4 frames",
      "rule": "walking-12"
     },
     {
-     "name": "[22.7, 23.2) must {\"action\":\"show\",\"id\":\"atlas-books\",\"level\":\"glance\"}",
+     "name": "[22.4, 22.7) must {\"action\":\"show\",\"id\":\"atlas-books\",\"level\":\"glance\"}",
      "pass": true,
-     "detail": "t=22.8 show atlas-books glance",
+     "detail": "t=22.5 show atlas-books glance",
      "rule": "walking-12"
     }
    ],
@@ -5427,7 +5444,7 @@
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; nothing but whisper in Brisk",
+     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
@@ -5511,9 +5528,9 @@
      "rule": "walking-13"
     },
     {
-     "name": "[30.7, 31) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[30.4, 30.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=30.8 show 47th-st-station glance",
+     "detail": "t=30.5 show 47th-st-station glance",
      "rule": "walking-13"
     }
    ],
