@@ -12,8 +12,8 @@
         "id": "goldies-counter",
         "level": "glance",
         "band": "stopped",
-        "factIs": "3 min wait \u00b7 9 seats",
-        "showReason": true
+        "showReason": false,
+        "sayIs": "Fastest lunch on this side \u00b7 3 min, 9 seats"
       }
     }
   ]

@@ -12,7 +12,7 @@
         "id": "goldies-counter",
         "level": "glance",
         "band": "walk",
-        "factIs": "3 min wait",
+        "factIs": "3 min",
         "showReason": false
       }
     },

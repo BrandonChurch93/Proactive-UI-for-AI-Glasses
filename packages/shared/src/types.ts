@@ -174,14 +174,11 @@ export interface ContentRow {
 
 export interface Content {
   name: string;
+  say?: string;
   fact?: string;
   reason: Reason;
   depthRef?: string;
-  year?: string;
-  meta?: string;
   live?: string;
-  hint?: string;
-  sub?: string;
   rows?: ContentRow[];
   actions?: { id: string; label: string; primary?: boolean }[];
   note?: string;

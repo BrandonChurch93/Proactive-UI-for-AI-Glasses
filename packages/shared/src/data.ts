@@ -18,19 +18,28 @@ export interface DepthRow {
   value?: string;
   tone?: 'go' | 'warn' | 'stop';
   now?: boolean;
+  when?: string;
 }
 
 export interface DepthPayload {
   sub: string;
-  yearLabel?: string;
   rows: DepthRow[];
   actions: { id: string; label: string; primary?: boolean }[];
-  note?: string;
   after?: Record<string, string>;
+  liveAfter?: Record<string, string>;
 }
 
+export interface SayLine {
+  line: string;
+  short: string;
+}
+
+export type SayTable = { default: SayLine } & Partial<Record<ScenarioId, SayLine>>;
+
 export interface PlaceCopy {
-  card: { meta: string; live: string; year?: string };
+  card: { meta: string; live: string };
+  say: SayTable;
+  sayLive?: Record<string, SayTable>;
   short: string;
   reasons: { goal?: string; world?: string };
   expanded: DepthPayload | null;
@@ -151,6 +160,9 @@ function validatePlace(raw: unknown, i: number): PlaceData {
     fail(where, 'card needs meta and live');
   }
   if (typeof raw.short !== 'string') fail(where, 'short must be a string');
+  const sayOk = (t: unknown): boolean => isRecord(t) && isRecord(t.default) && Object.values(t).every((v) => isRecord(v) && typeof v.line === 'string' && typeof v.short === 'string');
+  if (!sayOk(raw.say)) fail(where, 'say needs a default line and short form, and every entry a line and a short form');
+  if (raw.sayLive !== undefined && !(isRecord(raw.sayLive) && Object.values(raw.sayLive).every(sayOk))) fail(where, 'sayLive entries must be say tables');
   if (!isRecord(raw.reasons)) fail(where, 'reasons must be an object');
   for (const r of Object.values(raw.reasons)) {
     if (typeof r !== 'string' || r.length > 48) fail(where, `reason over 48 characters: ${String(r)}`);

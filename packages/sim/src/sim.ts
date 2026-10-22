@@ -412,11 +412,13 @@ export class Sim {
         visible: pr.inFront && pr.x > 0 && pr.x < this.viewport.w && pr.y > 0 && pr.y < this.viewport.h,
         card: p.card,
         short: p.short,
+        say: p.say,
         reasons: p.reasons,
         expanded: p.expanded,
       };
       if (p.year !== undefined) e.year = p.year;
       if (p.liveLines) e.liveLines = p.liveLines;
+      if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
       out.push(e);
     }

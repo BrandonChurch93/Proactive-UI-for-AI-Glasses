@@ -97,12 +97,14 @@ describe('walking rules, unit level', () => {
   it('rule 2: copy counts a unit with its number and trims by rule, never with an ellipsis', () => {
     expect(countCopy('3 min wait · 9 seats')).toEqual({ words: 2, numbers: 2 });
     const r = { kind: 'goal' as const, text: 'Short wait, on your side of the street', parts: [] };
-    const c = trimForPace({ name: "Goldie's Counter", fact: '3 min wait · 9 seats', reason: r }, 'walk', 10, '3 min wait', cfg);
-    expect(c.fact).toBe('3 min wait');
+    expect(countCopy('M4 in 2')).toEqual({ words: 2, numbers: 1 });
+    const say = 'Fastest lunch on this side · 3 min, 9 seats';
+    const c = trimForPace({ name: "Goldie's Counter", say, reason: r }, 'walk', 10, '3 min, 9 seats', cfg);
+    expect(c.say).toBeUndefined();
+    expect(c.fact).toBe('3 min');
     expect(c.showReason).toBe(false);
-    const long = trimForPace({ name: 'Grace Theater', fact: 'Last show tonight at 8', reason: r }, 'walk', 10, 'Last show at 8', cfg);
-    expect(long.fact).toBe('Last show at 8');
-    expect(JSON.stringify(long)).not.toContain('…');
+    expect(trimForPace({ name: "Goldie's Counter", say, reason: r }, 'stopped', 10, '3 min, 9 seats', cfg).say).toBe(say);
+    expect(JSON.stringify(c)).not.toContain('…');
   });
 
   it('rule 3 and rule 10: a proactive glance auto-folds; a dwelt one walks down on look-away', () => {

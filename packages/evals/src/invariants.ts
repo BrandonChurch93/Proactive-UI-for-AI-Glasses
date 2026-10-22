@@ -20,11 +20,9 @@ function strings(d: Decision): string[] {
   return [
     d.reason.text,
     c.name,
+    c.say,
     c.fact,
-    c.meta,
     c.live,
-    c.hint,
-    c.sub,
     c.note,
     ...(c.rows ?? []).flatMap((r) => [r.title, r.sub, r.value, r.key]),
     ...(c.actions ?? []).map((a) => a.label),
@@ -43,6 +41,21 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (!ALLOWED.includes(d.reason.kind)) return `t=${e.t} ${d.id} kind ${d.reason.kind}`;
         if (d.reason.text.length > 48) return `t=${e.t} ${d.id} reason over 48: ${d.reason.text}`;
         if (!reasonIsClean(d.reason.text)) return `t=${e.t} ${d.id} banned word: ${d.reason.text}`;
+      }
+      return null;
+    },
+  },
+  {
+    rule: 'copy',
+    name: 'every say line is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word',
+    check: (r) => {
+      for (const e of r.entries) {
+        const c = e.decision.content;
+        if (!c.say) continue;
+        if (c.say.length >= 60) return `t=${e.t} ${e.decision.id} say over 60: ${c.say}`;
+        if (countCopy(c.say).numbers > 2) return `t=${e.t} ${e.decision.id} say holds more than two numbers: ${c.say}`;
+        if (c.say.toLowerCase().includes(c.name.toLowerCase())) return `t=${e.t} ${e.decision.id} say repeats the name: ${c.say}`;
+        if (!reasonIsClean(c.say)) return `t=${e.t} ${e.decision.id} banned word: ${c.say}`;
       }
       return null;
     },

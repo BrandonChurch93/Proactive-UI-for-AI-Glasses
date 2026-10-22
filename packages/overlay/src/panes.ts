@@ -67,16 +67,14 @@ function keyed<T extends HTMLElement>(e: T, k: string): T {
 
 function glanceKids(c: Content): HTMLElement[] {
   const out: HTMLElement[] = [keyed(node('div', `${s.glanceName} ${s.t}`, c.name), 'name')];
-  if (c.fact) out.push(keyed(node('div', `${s.fact} ${s.t}`, c.fact), 'fact'));
+  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
+  else if (c.fact) out.push(keyed(node('div', `${s.fact} ${s.t}`, c.fact), 'fact'));
   return out;
 }
 
 function cardKids(c: Content): HTMLElement[] {
-  const head = node('div', s.row);
-  head.appendChild(keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name'));
-  if (c.year) head.appendChild(keyed(node('div', `${s.year} ${s.t}`, c.year), 'year'));
-  const out = [head];
-  if (c.meta) out.push(keyed(node('div', `${s.meta} ${s.t}`, c.meta), 'meta'));
+  const out = [keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name')];
+  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
   if (c.live) {
     const live = node('div', `${s.live} ${s.t}`);
     live.appendChild(node('i', undefined));
@@ -88,11 +86,12 @@ function cardKids(c: Content): HTMLElement[] {
 
 function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement | null {
   if (!c.rows?.length) return null;
-  const ul = node('ul', cls);
+  const keyless = cls === s.rows && c.rows.every((r) => !r.key);
+  const ul = node('ul', keyless ? `${cls} ${s.noKey}` : cls);
   c.rows.forEach((r, i) => {
     const li = node('li', tone(r.tone));
     if (cls === s.rows) {
-      li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
+      if (!keyless) li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
       const mid = node('span', undefined);
       mid.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
       if (r.sub) mid.appendChild(keyed(node('em', undefined, r.sub), `r${i}s`));
@@ -172,12 +171,11 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       break;
   }
   if (level === 'expanded') {
-    kids.push(...cardKids({ ...c, meta: undefined, live: undefined }));
-    kids[0]!.querySelector(`.${s.cardName}`)?.classList.replace(s.cardName!, s.expName!);
-    if (c.sub) push(keyed(node('div', `${s.sub} ${s.t}`, c.sub), 'sub'));
+    kids.push(...cardKids({ ...c, live: undefined }));
+    kids[0]!.classList.replace(s.cardName!, s.expName!);
     push(rowsList(c, s.rows!, null));
-    if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));
     push(actions(c, d.id, h));
+    if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));
     w = why(c, s.expWhy!);
     push(w);
     return { cls: `${s.expanded} ${s.expandedPane}`, kids, why: w };
@@ -186,7 +184,6 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
     kids.push(...cardKids(c));
     w = why(c, s.cardWhy!);
     push(w);
-    if (c.hint) push(keyed(node('div', s.hint, c.hint), 'hint'));
     return { cls: s.card!, kids, why: w };
   }
   kids.push(...glanceKids(c));

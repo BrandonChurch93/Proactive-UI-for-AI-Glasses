@@ -27,16 +27,14 @@
       "year": 1927,
       "card": {
         "meta": "Live theater · landmarked 1981",
-        "live": "Last show 8:00 · 40 seats left",
-        "year": "1927"
+        "live": "5:30 nearly full · box office till 9"
       },
-      "short": "Last show at 8",
+      "short": "Night Market at 8",
       "reasons": {
         "world": "Seats left for tonight"
       },
       "expanded": {
         "sub": "Tonight · three shows · box office till 9",
-        "yearLabel": "EST 1927",
         "rows": [
           {
             "key": "5:30",
@@ -72,9 +70,14 @@
             "label": "Not now"
           }
         ],
-        "note": "I'll hold them till 7:40, no charge if you don't make it.",
         "after": {
           "hold-two": "Two held for 8:00 · I'll walk you there at 7:35."
+        }
+      },
+      "say": {
+        "default": {
+          "line": "Night Market at 8 has 40 seats · earlier shows filling",
+          "short": "Night Market at 8"
         }
       }
     },
@@ -104,8 +107,7 @@
       ],
       "card": {
         "meta": "Burgers · $ · open late",
-        "live": "6 min wait · 4 seats open",
-        "year": "EST 1994"
+        "live": "6 min wait · 4 seats open"
       },
       "short": "6 min wait",
       "reasons": {
@@ -114,22 +116,20 @@
       },
       "expanded": {
         "sub": "Counter and booths · open till 1",
-        "yearLabel": "EST 1994",
         "rows": [
           {
-            "key": "$9.50",
-            "title": "The Mega",
-            "sub": "Double patty · cheddar"
+            "title": "Seat now",
+            "value": "6 min",
+            "tone": "go"
           },
           {
-            "key": "$7",
-            "title": "Classic",
-            "sub": "Single patty · pickles"
+            "title": "Order ahead",
+            "value": "ready in 8"
           },
           {
-            "key": "$3.50",
-            "title": "Fries",
-            "sub": "Hand cut · sea salt"
+            "title": "Maya's usual",
+            "value": "pastrami",
+            "when": "maya-usual"
           }
         ],
         "actions": [
@@ -145,6 +145,16 @@
         ],
         "after": {
           "hold-seat": "Seat held. Follow the route, across and back."
+        }
+      },
+      "say": {
+        "hungry": {
+          "line": "4 seats open, 6 min · across the street, on your way",
+          "short": "6 min wait"
+        },
+        "default": {
+          "line": "Burgers till 1 am · 6 min wait",
+          "short": "6 min wait"
         }
       }
     },
@@ -172,16 +182,14 @@
       ],
       "card": {
         "meta": "Bowling · twelve lanes",
-        "live": "5 lanes open · $12 an hour till 5",
-        "year": "EST 1958"
+        "live": "5 lanes open · $12 an hour till 5"
       },
-      "short": "Lanes open",
+      "short": "5 lanes open",
       "reasons": {
         "world": "Lanes open now"
       },
       "expanded": {
         "sub": "Lanes right now",
-        "yearLabel": "EST 1958",
         "rows": [
           {
             "key": "1 to 4",
@@ -219,6 +227,12 @@
         "after": {
           "book": "Lane 6 is yours at 3:30."
         }
+      },
+      "say": {
+        "default": {
+          "line": "5 lanes open till 5 · walk right in",
+          "short": "5 lanes open"
+        }
       }
     },
     {
@@ -244,16 +258,14 @@
       ],
       "card": {
         "meta": "Bookshop · new and used",
-        "live": "Open till 9",
-        "year": "EST 1972"
+        "live": "Open till 9"
       },
-      "short": "Open till 9",
+      "short": "Reading at 7",
       "reasons": {
         "world": "Reading tonight at 7"
       },
       "expanded": {
         "sub": "Tonight at Atlas · open till 9",
-        "yearLabel": "EST 1972",
         "rows": [
           {
             "key": "7:00",
@@ -279,6 +291,12 @@
         ],
         "after": {
           "save-reading": "Saved. I'll remind you at 6:45."
+        }
+      },
+      "say": {
+        "default": {
+          "line": "Poetry reading at 7 · upstairs, free",
+          "short": "Reading at 7"
         }
       }
     },
@@ -308,8 +326,7 @@
       ],
       "card": {
         "meta": "Home cooking · open until 11 PM",
-        "live": "Open until 11 PM",
-        "year": "DAL 1986"
+        "live": "Open until 11 PM"
       },
       "short": "Home cooking",
       "reasons": {
@@ -319,7 +336,6 @@
       "translate": true,
       "expanded": {
         "sub": "Menu · read from Italian",
-        "yearLabel": "DAL 1986",
         "rows": [
           {
             "key": "$16",
@@ -350,6 +366,16 @@
         ],
         "after": {
           "hold-table": "Table held for two."
+        }
+      },
+      "say": {
+        "hungry": {
+          "line": "Sit-down, about 20 min · the sign says home cooking",
+          "short": "Home cooking"
+        },
+        "default": {
+          "line": "The sign says home cooking · open till 11",
+          "short": "Home cooking"
         }
       }
     },
@@ -385,7 +411,13 @@
         "goal": "End of the walk",
         "world": "Benches in the shade"
       },
-      "expanded": null
+      "expanded": null,
+      "say": {
+        "default": {
+          "line": "Benches in the shade · end of the walk",
+          "short": "Shaded benches"
+        }
+      }
     },
     {
       "id": "goldies-counter",
@@ -413,8 +445,7 @@
       ],
       "card": {
         "meta": "Deli · $ · counter seating",
-        "live": "3 min wait · 9 seats open",
-        "year": "EST 1961"
+        "live": "3 min wait · 9 seats open"
       },
       "short": "3 min wait",
       "reasons": {
@@ -423,22 +454,20 @@
       },
       "expanded": {
         "sub": "Counter seating · open till 4",
-        "yearLabel": "EST 1961",
         "rows": [
           {
-            "key": "$14",
-            "title": "Pastrami on rye",
-            "sub": "Hot · deli mustard"
+            "title": "Seat now",
+            "value": "3 min",
+            "tone": "go"
           },
           {
-            "key": "$7",
-            "title": "Matzo ball soup",
-            "sub": "Cup or bowl"
+            "title": "Order ahead",
+            "value": "ready in 5"
           },
           {
-            "key": "$4",
-            "title": "Egg cream",
-            "sub": "Chocolate"
+            "title": "Maya's usual",
+            "value": "pastrami",
+            "when": "maya-usual"
           }
         ],
         "actions": [
@@ -454,6 +483,16 @@
         ],
         "after": {
           "hold-seat": "Seat held. Follow the route, 40 m."
+        }
+      },
+      "say": {
+        "hungry": {
+          "line": "Fastest lunch on this side · 3 min, 9 seats",
+          "short": "3 min, 9 seats"
+        },
+        "default": {
+          "line": "Pastrami counter · 3 min wait",
+          "short": "3 min wait"
         }
       }
     },
@@ -481,17 +520,15 @@
       ],
       "card": {
         "meta": "Bakery · cupcakes and coffee",
-        "live": "Fresh batch at 2:00",
-        "year": "EST 2009"
+        "live": "Fresh batch at 2:00"
       },
-      "short": "Fresh batch at 2",
+      "short": "Batch at 2",
       "reasons": {
         "goal": "On your route",
         "world": "Baked on site"
       },
       "expanded": {
         "sub": "Today's flavors",
-        "yearLabel": "EST 2009",
         "rows": [
           {
             "key": "$4",
@@ -524,6 +561,16 @@
         "after": {
           "save-one": "One brown butter, held at the counter."
         }
+      },
+      "say": {
+        "hungry": {
+          "line": "Not lunch, but a brown butter batch at 2",
+          "short": "Batch at 2"
+        },
+        "default": {
+          "line": "Brown butter batch at 2 · 80 min from now",
+          "short": "Batch at 2"
+        }
       }
     },
     {
@@ -551,8 +598,7 @@
       ],
       "card": {
         "meta": "Coffee · espresso bar",
-        "live": "Line of 4 · 5 min",
-        "year": "EST 2014"
+        "live": "Line of 4 · 5 min"
       },
       "short": "Line of 4",
       "reasons": {
@@ -561,7 +607,6 @@
       },
       "expanded": {
         "sub": "Order ahead · skip the line",
-        "yearLabel": "EST 2014",
         "rows": [
           {
             "key": "$4.25",
@@ -590,6 +635,20 @@
         "after": {
           "order": "Ordered. Ready in 5 min."
         }
+      },
+      "say": {
+        "hungry": {
+          "line": "Coffee after · line of 4, 5 min",
+          "short": "Line of 4"
+        },
+        "errands": {
+          "line": "Scaffolding over the door · keep to the curb",
+          "short": "Keep to the curb"
+        },
+        "default": {
+          "line": "Line of 4 · 5 min",
+          "short": "Line of 4"
+        }
       }
     },
     {
@@ -617,9 +676,9 @@
       ],
       "card": {
         "meta": "Pharmacy · open till 9",
-        "live": "Prescription's ready here · counter 2"
+        "live": "Ready since noon · open till 9"
       },
-      "short": "Prescription's ready",
+      "short": "Open till 9",
       "reasons": {
         "goal": "On your route",
         "world": "Open till 9"
@@ -631,16 +690,9 @@
         "sub": "Pickup · counter 2",
         "rows": [
           {
-            "key": "Now",
             "title": "Counter 2",
-            "sub": "Ready, no line",
-            "value": "Ready",
+            "value": "ready",
             "tone": "go"
-          },
-          {
-            "key": "Hours",
-            "title": "Open till 9",
-            "sub": "Pharmacist on till 8"
           }
         ],
         "actions": [
@@ -656,6 +708,27 @@
         ],
         "after": {
           "paid": "Paid. Show the code at counter 2."
+        },
+        "liveAfter": {
+          "pickedUp": "In your bag. Two stops to go."
+        }
+      },
+      "say": {
+        "errands": {
+          "line": "Prescription's ready · counter 2, no line",
+          "short": "Ready, counter 2"
+        },
+        "default": {
+          "line": "Open till 9",
+          "short": "Open till 9"
+        }
+      },
+      "sayLive": {
+        "pickedUp": {
+          "default": {
+            "line": "Picked up",
+            "short": "Picked up"
+          }
         }
       }
     },
@@ -685,7 +758,7 @@
         "meta": "Hardware · keys cut",
         "live": "Open till 6"
       },
-      "short": "Open till 6",
+      "short": "Keys cut till 5",
       "reasons": {
         "goal": "On your route",
         "world": "Open till 6"
@@ -720,6 +793,31 @@
         ],
         "after": {
           "hold-item": "Held at the till under your name."
+        },
+        "liveAfter": {
+          "closedEarly": "Dropped from the route. The Post Office is next."
+        }
+      },
+      "say": {
+        "errands": {
+          "line": "Picture hooks in aisle 4 · open till 6",
+          "short": "Aisle 4, till 6"
+        },
+        "default": {
+          "line": "Keys cut till 5",
+          "short": "Keys cut till 5"
+        }
+      },
+      "sayLive": {
+        "closedEarly": {
+          "errands": {
+            "line": "Closed early today · dropped from the route",
+            "short": "Closed early"
+          },
+          "default": {
+            "line": "Closed early today",
+            "short": "Closed early"
+          }
         }
       }
     },
@@ -750,7 +848,7 @@
         "meta": "Bus · uptown",
         "live": "M4 · 2 min · next in 11"
       },
-      "short": "2 min",
+      "short": "M4 in 2",
       "reasons": {
         "world": "Bus at the stop"
       },
@@ -768,10 +866,6 @@
           {
             "key": "19 min",
             "title": "M4 uptown"
-          },
-          {
-            "key": "27 min",
-            "title": "M4 uptown"
           }
         ],
         "actions": [
@@ -787,6 +881,16 @@
         ],
         "after": {
           "remind": "I'll tell you when it's 3 min out."
+        }
+      },
+      "say": {
+        "errands": {
+          "line": "M4 in 2 min · not on today's route",
+          "short": "M4 in 2"
+        },
+        "default": {
+          "line": "M4 in 2 min · then 11",
+          "short": "M4 in 2"
         }
       }
     },
@@ -817,7 +921,7 @@
         "meta": "Subway · stairs at the corner",
         "live": "Uptown trains · 4 min"
       },
-      "short": "uptown 4 min",
+      "short": "Uptown in 4",
       "reasons": {
         "goal": "Stairs at the corner",
         "world": "Stairs at the corner"
@@ -836,10 +940,6 @@
           {
             "key": "10 min",
             "title": "Uptown"
-          },
-          {
-            "key": "13 min",
-            "title": "Downtown"
           }
         ],
         "actions": [
@@ -855,6 +955,16 @@
         ],
         "after": {
           "route": "Stairs on your right at the corner."
+        }
+      },
+      "say": {
+        "hungry": {
+          "line": "Uptown in 4 · stairs at the corner",
+          "short": "Uptown in 4"
+        },
+        "default": {
+          "line": "Uptown in 4 · stairs at the corner",
+          "short": "Uptown in 4"
         }
       }
     },
@@ -890,14 +1000,16 @@
         "sub": "Counter · open till 5",
         "rows": [
           {
-            "key": "Now",
             "title": "Line of 8",
-            "sub": "About 12 min"
+            "value": "about 12 min"
           },
           {
-            "key": "Hours",
-            "title": "Open till 5",
-            "sub": "Pickup window till 6"
+            "title": "Counter",
+            "value": "till 5"
+          },
+          {
+            "title": "Pickup window",
+            "value": "till 6"
           }
         ],
         "actions": [
@@ -912,7 +1024,17 @@
           }
         ],
         "after": {
-          "number": "You're number 9. I'll tell you at the door."
+          "number": "You're number 9. I'll say when it's close."
+        }
+      },
+      "say": {
+        "errands": {
+          "line": "Line of 8, about 12 min · you'll make the counter",
+          "short": "12 min, closes 5"
+        },
+        "default": {
+          "line": "Counter till 5 · line of 8",
+          "short": "Line of 8"
         }
       }
     }

@@ -31,6 +31,7 @@ export interface Match {
   secondsAtLeast?: number;
   secondsIs?: number;
   nameIs?: string;
+  sayIs?: string;
   factIs?: string | null;
   factIncludes?: string;
   showReason?: boolean;
@@ -98,6 +99,7 @@ export function matches(d: Decision, m: Match): boolean {
   if (m.secondsAtLeast !== undefined && !((d.content.seconds ?? -1) >= m.secondsAtLeast)) return false;
   if (m.secondsIs !== undefined && d.content.seconds !== m.secondsIs) return false;
   if (m.nameIs !== undefined && d.content.name !== m.nameIs) return false;
+  if (m.sayIs !== undefined && d.content.say !== m.sayIs) return false;
   if (m.factIs !== undefined && (d.content.fact ?? null) !== m.factIs) return false;
   if (m.factIncludes !== undefined && !(d.content.fact ?? '').includes(m.factIncludes)) return false;
   if (m.showReason !== undefined && Boolean(d.content.showReason) !== m.showReason) return false;

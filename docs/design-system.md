@@ -53,9 +53,10 @@ Scale:
 | Role | Size | Weight | Tracking |
 | --- | --- | --- | --- |
 | Glance name | 15.5px | 500 | 0 |
-| Glance fact | 12px mono | 400 | .01em |
+| Glance short form (Walk, Brisk) | 12px mono | 400 | .01em |
 | Card name | 20px | 600 | -.005em |
-| Card meta | 13.5px | 400 | 0 |
+| Say line (card, expanded) | 14px | 400 | 0 |
+| Say line (glance, Stopped and Stroll) | 13.5px | 400 | 0 |
 | Card live | 12px mono | 400 | .01em |
 | Reason line | 11.5px | 400 | .005em |
 | Expanded name | 21px | 600 | -.01em |
@@ -219,9 +220,9 @@ As built, smaller screens: sizes above are at the reference view of 1280 × 800.
 | Component | Zone | Levels | Notes |
 | --- | --- | --- | --- |
 | Pip | World | Pip | Light vocabulary, category tint |
-| Glance line | World | Glance | Name · one fact, reason beneath |
-| Place card | World | Card | Name, year or category, live line, reason, a hint by band: `KEEP LOOKING · MORE` in Stopped and Stroll, `PINCH · SAVES FOR LATER` in Walk (no card exists in Brisk) |
-| Expanded view | World, in place | Expanded | Menu, showtimes, departures, history; two actions |
+| Glance line | World | Glance | Name and what the assistant would say about it (its say line); in Walk and Brisk the say line's three-word form. Nothing else |
+| Place card | World | Card | Name, the say line, one live line (the two facts behind it), the reason in Stopped and Stroll. No year, no hint (no card exists in Brisk) |
+| Expanded view | World, in place | Expanded | One decision: name, the say line, at most three rows that support it, two actions, then the line after a choice |
 | Errands card | View edge | Card | The stops in order with why; ticks a stop on pickup; reorders on a closure; folds to the route after 4 s while moving |
 | Leader, seed | World | Glance, card | Light vocabulary |
 | Held glyph | View | Any | Rotated square, accent, optional count (held items, pocket count, social count) or the snooze countdown; the only persistent element |

@@ -57,7 +57,7 @@ Signage rule: a person's name or a plain descriptor, two or three words. Each ro
 
 ## 5. Lighting
 
-Early afternoon, sun high and slightly off-axis, fixed. Both sides of the street lit; trees and poles throw clear shadows on the pavement. Marquee and neon read against daylight through bloom. No time-of-day slider.
+Early afternoon, sun high and slightly off-axis, fixed. Every walk starts at 12:40, and any copy that names a time is written from that clock (Kathy's 2:00 batch is 80 min away; the Post Office counter closes at 5). Both sides of the street lit; trees and poles throw clear shadows on the pavement. Marquee and neon read against daylight through bloom. No time-of-day slider.
 
 ## 6. Backdrop luminance
 

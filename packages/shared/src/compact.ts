@@ -30,11 +30,13 @@ export function hydrateSnapshot(c: CompactSnapshot): WorldSnapshot {
         depth: p.depth,
         card: p.card,
         short: p.short,
+        say: p.say,
         reasons: p.reasons,
         expanded: p.expanded,
       };
       if (p.year !== undefined) e.year = p.year;
       if (p.liveLines) e.liveLines = p.liveLines;
+      if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
       return e;
     }),

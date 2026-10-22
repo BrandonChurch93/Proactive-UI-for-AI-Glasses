@@ -32,6 +32,7 @@ import {
   expandedContent,
   glanceContent,
   pipContent,
+  sayFor,
   reason,
   whisperContent,
 } from './content';
@@ -612,7 +613,7 @@ export class Brain {
         t - it.aboveSince >= this.cfg.score.promotionHoldS - 1e-9
       ) {
         it.whispered = true;
-        this.whisper = { content: whisperContent(e, why), reason: why, until: t + this.cfg.whisper.seconds, from: e.id };
+        this.whisper = { content: whisperContent(e, why, this.goal), reason: why, until: t + this.cfg.whisper.seconds, from: e.id };
       }
 
       const visible = this.paneVisible(e.id);
@@ -733,11 +734,11 @@ export class Brain {
   }
 
   private entityContent(e: Entity, level: PaneLevel, why: Reason, band: Band): Content {
-    if (level === 'expanded') return expandedContent(e, why, this.chosen.get(e.id));
-    if (level === 'card') return cardContent(e, why, band);
+    if (level === 'expanded') return expandedContent(e, why, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id));
+    if (level === 'card') return cardContent(e, why, band, this.goal);
     if (level === 'glance') {
-      const c = glanceContent(e, why);
-      return trimForPace(c, band, this.viewSeconds(e, this.snap.wearer.speed), e.short, this.cfg);
+      const c = glanceContent(e, why, this.goal);
+      return trimForPace(c, band, this.viewSeconds(e, this.snap.wearer.speed), sayFor(e, this.goal).short, this.cfg);
     }
     return pipContent(e, why);
   }
@@ -1103,10 +1104,10 @@ export class Brain {
       }
       const content =
         level === 'expanded'
-          ? expandedContent(e, r, this.chosen.get(e.id))
+          ? expandedContent(e, r, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id))
           : level === 'card'
-            ? { ...cardContent(e, r, band), hint: band === 'walk' ? 'PINCH · SAVES FOR LATER' : 'KEEP LOOKING · MORE' }
-            : glanceContent(e, r);
+            ? cardContent(e, r, band, this.goal)
+            : trimForPace(glanceContent(e, r, this.goal), band, Infinity, sayFor(e, this.goal).short, this.cfg);
       wants.push({
         id,
         component: 'place',

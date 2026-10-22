@@ -1,6 +1,6 @@
 # Copy · everything the wearer and the reviewer read
 
-Rules: plain, warm, short. Sentence case. The brain never apologizes, never explains in the roadway, and in a reason line never mentions the wearer's eyes, body or habits (an input hint such as KEEP LOOKING · MORE is an instruction to the reviewer, not a reason, and may say look). No em dashes anywhere; use the interpunct ( · ), a period, or a new sentence.
+Rules: plain, warm, short. Sentence case. The brain never apologizes, never explains in the roadway, and in a reason line or a say line never mentions the wearer's eyes, body or habits. No em dashes anywhere; use the interpunct ( · ), a period, or a new sentence.
 
 ## Title screen
 
@@ -68,8 +68,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 - Saved (at the pip, 600 ms)
 - 12 s · what you saved (header; the number follows the signal)
 - Pocket rows: Mega Burger · 6 min wait · $
-- Card hints by band: KEEP LOOKING · MORE (Stopped, Stroll) / PINCH · SAVES FOR LATER (Walk)
-- Whisper line: 47th St Station · uptown 4 min / Grace Theater · last show at 8 (three words and a number at most)
+- Whisper line: the name and the say line's short form, three words and a number at most: Goldie's Counter · 3 min / Mega Burger · 6 min wait
 - Ask glance (Just walking only): Hungry? · Find lunch · No
 
 ## Messages
@@ -80,23 +79,51 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 - Call: Maya · Calling · Answer · Decline
 - App: Package delivered · Front desk · 1 more / Order ready · 1 more
 
-## Places (glance facts, from the roster)
+## What each place says
 
-See `docs/world-spec.md` section 3 and `data/places.json`; the roster is the source. Live lines: "3 min wait · 9 seats", "Last show 8:00 · 40 seats left", "Uptown trains · 4 min", "M4 · 2 min · next in 11".
+The clock: every walk starts at 12:40, and a line that names a time is written from it.
+
+Each place has a say line per scenario, the one sentence the assistant would say about it, and its short form. The brain uses the scenario's line, else the default. The say line is the glance's text in Stopped and Stroll and the first line of the card and the expanded view; in Walk and Brisk the glance shows the short form, which the reading budget still caps at three words and a number (a second fact after a comma is dropped by rule). Live data can replace the table (Corner Hardware closed early, the prescription picked up).
+
+Rules for a say line: under 60 characters; at most two numbers (a unit counts with its number); never repeats the place's name; never a banned word; written from the 12:40 clock. The eval checks every say line the brain shows against these.
+
+| Place | Hungry | Errands | Default (Just walking) | Short form |
+| --- | --- | --- | --- | --- |
+| Goldie's Counter | Fastest lunch on this side · 3 min, 9 seats | | Pastrami counter · 3 min wait | 3 min, 9 seats (Hungry) · 3 min wait |
+| Mega Burger | 4 seats open, 6 min · across the street, on your way | | Burgers till 1 am · 6 min wait | 6 min wait |
+| Trattoria da Lia | Sit-down, about 20 min · the sign says home cooking | | The sign says home cooking · open till 11 | Home cooking |
+| Kathy's Cupcakes | Not lunch, but a brown butter batch at 2 | | Brown butter batch at 2 · 80 min from now | Batch at 2 |
+| The Big Bean | Coffee after · line of 4, 5 min | Scaffolding over the door · keep to the curb | Line of 4 · 5 min | Line of 4 · Keep to the curb (Errands) |
+| Main Street Pharmacy | | Prescription's ready · counter 2, no line | Open till 9 | Ready, counter 2 (Errands) · Open till 9 |
+| Main Street Pharmacy, picked up | | | Picked up | Picked up |
+| Corner Hardware | | Picture hooks in aisle 4 · open till 6 | Keys cut till 5 | Aisle 4, till 6 (Errands) · Keys cut till 5 |
+| Corner Hardware, closed early | | Closed early today · dropped from the route | Closed early today | Closed early |
+| Post Office | | Line of 8, about 12 min · you'll make the counter | Counter till 5 · line of 8 | 12 min, closes 5 (Errands) · Line of 8 |
+| Grace Theater | | | Night Market at 8 has 40 seats · earlier shows filling | Night Market at 8 |
+| Lucky Lanes | | | 5 lanes open till 5 · walk right in | 5 lanes open |
+| Atlas Books | | | Poetry reading at 7 · upstairs, free | Reading at 7 |
+| M4 stop | | M4 in 2 min · not on today's route | M4 in 2 min · then 11 | M4 in 2 |
+| 47th St Station | Uptown in 4 · stairs at the corner | | Uptown in 4 · stairs at the corner | Uptown in 4 |
+| Pocket Park | | | Benches in the shade · end of the walk | Shaded benches |
+
+Live lines on cards (the two facts behind the sentence) stay as in `data/places.json`: "3 min wait · 9 seats open", "Last show 8:00 · 40 seats left", "Uptown trains · 4 min", "M4 · 2 min · next in 11".
+
+## What a pane shows
+
+- Glance: the name and the say line (the short form in Walk and Brisk). Nothing else.
+- Card: the name, the say line, one live line, and the reason line in Stopped and Stroll. No year, no category line, no hint on the glass.
+- Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 
 ## Expanded views
 
-- Theater: Tonight · three shows · box office till 9 / Hold two for 8:00 · Not now / I'll hold them till 7:40, no charge if you don't make it. / Two held for 8:00 · I'll walk you there at 7:35.
-- Mega Burger: Hold a seat · Not now / Seat held. Follow the route, across and back.
-- Deli: Hold a seat · Not now / Seat held. Follow the route, 40 m.
+- Grace Theater: the three shows (5:30 The Winter Guest · 12 seats / 8:00 Night Market · 40 seats / 10:30 Late Set · Plenty) / Hold two for 8:00 · Not now / after: Two held for 8:00 · I'll walk you there at 7:35.
+- Mega Burger: Seat now · 6 min / Order ahead · ready in 8 / Maya's usual · pastrami (Hungry, once Maya's text has arrived) / Hold a seat · Not now / after: Seat held. Follow the route, across and back.
+- Goldie's Counter: Seat now · 3 min / Order ahead · ready in 5 / Maya's usual · pastrami (Hungry, once Maya's text has arrived) / Hold a seat · Not now / after: Seat held. Follow the route, 40 m.
+- Post Office: Line of 8 · about 12 min / Counter · till 5 / Pickup window · till 6 / Take a number · Not now / after: You're number 9. I'll say when it's close.
+- Main Street Pharmacy: Counter 2 · ready / Pay ahead · Not now / after: Paid. Show the code at counter 2. / once picked up, the decision is settled: Picked up / In your bag. Two stops to go.
+- Corner Hardware, closed early: Closed early today / Dropped from the route. The Post Office is next.
+- The others keep their rows and actions from `data/places.json`, at most three rows: Lucky Lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Save the reading. Trattoria da Lia · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Brown butter · Save me one. The Big Bean · Order ahead · Ordered. Ready in 5 min. M4 stop · Remind me at 11. 47th St Station · Route me there. Corner Hardware · Hold it at the till.
 - Errands card: Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / after the pickup: Two to go / 1 Hardware · 2 Post Office / after the closure: Hardware closed early. One stop left. / 1 Post Office
-- Pharmacy stop: Prescription's ready here · counter 2 / Picked up
-
-## Cards and expanded views for every place
-
-Card lines (meta, live, year), the short walking form, and the expanded view (sub line, rows, two actions, the line after a choice) live in `data/places.json` and are the source for these. Highlights: Mega Burger · Burgers · $ · open late · 6 min wait · 4 seats open · Hold a seat · Not now. Lucky Lanes · Bowling · twelve lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Tonight at Atlas · Poetry reading · Save the reading. Trattoria da Lia · Menu · read from Italian · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Today's flavors · Brown butter · Save me one. The Big Bean · Order ahead · skip the line · Ordered. Ready in 5 min. M4 stop · Next four buses · Remind me at 11. 47th St Station · Next four departures · Route me there. Post Office · Counter · open till 5 · Take a number.
-
-Short walking forms (used when a glance must fit three words and a number): Last show at 8 · 6 min wait · Lanes open · Open till 9 · Home cooking · Shaded benches · 3 min wait · Fresh batch at 2 · Line of 4 · Prescription's ready · Open till 6 · 2 min · uptown 4 min · Line of 8
 
 ## Arrival and end
 
