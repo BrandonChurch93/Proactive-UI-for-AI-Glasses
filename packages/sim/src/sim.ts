@@ -252,7 +252,7 @@ export class Sim {
       const want = this.reviewer.gazeId(t);
       if (want?.startsWith('pocket:')) id = want;
       else if (want) {
-        const a = this.anchorOf(want);
+        const a = this.reviewer.aimPoint(t, this.anchorOf);
         if (a) {
           const off = this.offTarget(a);
           const keep = this.gazeTarget === want && off < GAZE_RELEASE;

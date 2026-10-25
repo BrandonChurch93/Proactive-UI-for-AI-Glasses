@@ -99,11 +99,11 @@ describe('walking rules, unit level', () => {
     const r = { kind: 'goal' as const, text: 'Short wait, on your side of the street', parts: [] };
     expect(countCopy('M4 in 2')).toEqual({ words: 2, numbers: 1 });
     const say = 'Fastest lunch on this side · 3 min, 9 seats';
-    const c = trimForPace({ name: "Goldie's Counter", say, reason: r }, 'walk', 10, '3 min, 9 seats', cfg);
+    const c = trimForPace({ name: "Goldie's Counter", say, reason: r }, 'walk', '3 min, 9 seats', cfg);
     expect(c.say).toBeUndefined();
     expect(c.fact).toBe('3 min');
     expect(c.showReason).toBe(false);
-    expect(trimForPace({ name: "Goldie's Counter", say, reason: r }, 'stopped', 10, '3 min, 9 seats', cfg).say).toBe(say);
+    expect(trimForPace({ name: "Goldie's Counter", say, reason: r }, 'stopped', '3 min, 9 seats', cfg).say).toBe(say);
     expect(JSON.stringify(c)).not.toContain('…');
   });
 

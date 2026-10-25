@@ -52,22 +52,18 @@
       "toN": 45
     },
     {
-      "t": 26,
+      "t": 25.5,
       "kind": "gaze",
       "id": "trattoria-da-lia"
     },
     {
-      "t": 29,
+      "t": 27.5,
       "kind": "gaze",
-      "id": null
+      "id": "kathys-cupcakes",
+      "dy": 1.6
     },
     {
       "t": 30,
-      "kind": "gaze",
-      "id": "kathys-cupcakes"
-    },
-    {
-      "t": 31.6,
       "kind": "gaze",
       "id": null
     },

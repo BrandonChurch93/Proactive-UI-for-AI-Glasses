@@ -100,6 +100,7 @@ export class App {
       ...(this.opts.exact ? { exact: true } : {}),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       ...(this.opts.focusOutline ? { focusOutline: true } : {}),
+      chrome: () => this.chrome.rects(),
     });
     this.syncSound(w);
     return w;

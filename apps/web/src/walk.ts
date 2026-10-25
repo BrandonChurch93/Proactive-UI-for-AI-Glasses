@@ -12,6 +12,7 @@ import {
   type OverlayEvent,
   type Override,
   type PaneReport,
+  type Rect,
   type RunExport,
   type ScenarioId,
   type WorldSnapshot,
@@ -92,6 +93,7 @@ export interface WalkOptions {
   exact?: boolean;
   reducedMotion?: boolean;
   focusOutline?: boolean;
+  chrome?: () => Rect[];
 }
 
 export class Walk {
@@ -132,6 +134,7 @@ export class Walk {
   ) {
     this.focusOutline = Boolean(opts.focusOutline);
     this.bridge = new ThreeBridge(world.core.camera, new Sim(scenario, { seed: SEED }));
+    if (opts.chrome) this.bridge.chromeRects = opts.chrome;
     world.core.scene.add(this.bridge.group);
     this.reset();
     this.overlay = this.makeOverlay();

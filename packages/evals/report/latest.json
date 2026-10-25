@@ -3,8 +3,8 @@
  "totals": {
   "suites": 39,
   "passed": 39,
-  "cases": 911,
-  "casesPassed": 911
+  "cases": 912,
+  "casesPassed": 912
  },
  "byGroup": {
   "walks": {
@@ -47,7 +47,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -65,7 +65,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -269,7 +269,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -287,7 +287,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -516,7 +516,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -534,7 +534,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -643,27 +643,32 @@
      "detail": "50 frames"
     },
     {
-     "name": "0:26 · Trattoria da Lia, translated",
+     "name": "0:25.5 · Trattoria da Lia, translated",
      "pass": true,
-     "detail": "t=26.901 show trattoria-da-lia glance"
+     "detail": "t=26.401 show trattoria-da-lia glance"
     },
     {
-     "name": "0:27 · its card, read from Italian",
+     "name": "0:26.5 · its card, read from Italian",
      "pass": true,
-     "detail": "t=27.701 promote trattoria-da-lia card"
+     "detail": "t=27.201 promote trattoria-da-lia card"
     },
     {
-     "name": "0:29 · the look moves on before it would expand",
+     "name": "0:27.5 · the look moves on before it would expand",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:30 · Kathy's, a glance and that is all",
+     "name": "0:27.5 · Kathy's from the shopfront, a glance",
      "pass": true,
-     "detail": "t=31.101 show kathys-cupcakes glance"
+     "detail": "t=28.601 show kathys-cupcakes glance"
     },
     {
-     "name": "0:32 · no card for Kathy's",
+     "name": "0:29 · its card while the look holds",
+     "pass": true,
+     "detail": "t=29.401 promote kathys-cupcakes card"
+    },
+    {
+     "name": "0:30 · the look moves on before it would expand",
      "pass": true,
      "detail": ""
     },
@@ -773,7 +778,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -791,7 +796,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -914,7 +919,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -932,7 +937,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1055,7 +1060,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1073,7 +1078,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1196,7 +1201,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1214,7 +1219,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1349,7 +1354,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1367,7 +1372,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1484,7 +1489,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1502,7 +1507,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1619,7 +1624,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1637,7 +1642,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1760,7 +1765,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1778,7 +1783,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -1907,7 +1912,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -1925,7 +1930,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2042,7 +2047,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2060,7 +2065,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2183,7 +2188,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2201,7 +2206,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2318,7 +2323,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2336,7 +2341,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2453,7 +2458,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2471,7 +2476,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2594,7 +2599,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2612,7 +2617,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2741,7 +2746,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2759,7 +2764,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -2876,7 +2881,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -2894,7 +2899,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3017,7 +3022,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3035,7 +3040,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3146,7 +3151,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3164,7 +3169,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3293,7 +3298,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3311,7 +3316,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3428,7 +3433,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3446,7 +3451,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3557,7 +3562,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3575,7 +3580,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3698,7 +3703,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3716,7 +3721,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3839,7 +3844,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3857,7 +3862,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -3968,7 +3973,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -3986,7 +3991,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4103,7 +4108,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4121,7 +4126,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4238,7 +4243,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4256,7 +4261,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4379,7 +4384,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4397,7 +4402,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4514,7 +4519,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4532,7 +4537,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4649,7 +4654,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4667,7 +4672,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4784,7 +4789,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4802,7 +4807,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -4919,7 +4924,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -4937,7 +4942,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5066,7 +5071,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5084,7 +5089,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5207,7 +5212,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5225,7 +5230,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5348,7 +5353,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5366,7 +5371,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5495,7 +5500,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5513,7 +5518,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
@@ -5654,7 +5659,7 @@
      "detail": ""
     },
     {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters",
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
      "rule": "copy",
      "pass": true,
      "detail": ""
@@ -5672,7 +5677,7 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)",
+     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""

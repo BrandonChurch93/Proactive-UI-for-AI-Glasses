@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PLACE_BY_ID, groundY, placeDoor, type Projected, type Vec3, type Viewport } from '@lumen/shared';
+import { PLACE_BY_ID, groundY, placeDoor, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
 import { keepOuts, nearestS, pointAt, type Sim } from '@lumen/sim';
 import {
   LIGHT_COLOR,
@@ -193,6 +193,12 @@ export class ThreeBridge implements SceneBridge {
 
   curbDistance(): number {
     return this.sim.wearer.curbDistance();
+  }
+
+  chromeRects: () => Rect[] = () => [];
+
+  chrome(): Rect[] {
+    return this.chromeRects();
   }
 
   createLight(kind: LightKind): LightHandle {

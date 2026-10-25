@@ -73,7 +73,7 @@ interface BeatBase {
 }
 
 export type Beat =
-  | (BeatBase & { kind: 'gaze'; id: string | null })
+  | (BeatBase & { kind: 'gaze'; id: string | null; dy?: number })
   | (BeatBase & { kind: 'pinch'; id: string })
   | (BeatBase & { kind: 'signal'; leg: Leg; state: SignalState; secondsLeft: number })
   | (BeatBase & {

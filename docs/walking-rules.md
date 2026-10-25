@@ -9,7 +9,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 | Band | Speed | What is allowed |
 | --- | --- | --- |
 | Stopped | < 0.2 m/s | Anything: glance on 0.45 s dwell, card on a further 0.6 s, expanded on a further 1.6 s or a pinch, the pocket surfaces |
-| Stroll | 0.2 to 0.9 m/s | Glance; card on a further 0.8 s of dwell; expanded on a further 1.6 s |
+| Stroll | 0.2 to 0.9 m/s | Glance (the short form); card on a further 0.8 s of dwell; expanded on a further 1.6 s |
 | Walk | 0.9 to 1.6 m/s | Glance; card on a further 1.2 s of dwell only; pinch saves to the pocket |
 | Brisk | > 1.6 m/s | The place being looked at gets a glance (three words and a number); anything else is the whisper line; pinch saves |
 
@@ -17,13 +17,13 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 - Trigger: every frame, from the pace band.
 - Response: the keep-out zone in the center of the view scales with speed. Stopped: middle 33% of width × 40% of height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. World-zone content is placed outside it; content already inside it when the zone grows is pushed out over 320 ms ease-out, not cut.
-- The pane on the thing being looked at is exempt: gaze is the center of the view, so that thing is always inside the zone, and its pane sits beside it. When the look moves away, the pane leaves the zone over the same 320 ms, or waits as its light if it has no place within its own width of it.
-- Eval: in every frame of every walk, no world-zone pane above 20% opacity intersects the zone for its current band, except the pane being looked at and a pane in its 320 ms move out (after the zone grew or the look left).
+- The pane on the thing being looked at is exempt: gaze is the center of the view, so that thing is always inside the zone, and its pane sits beside it. The exemption lasts through the look-away descent: a pane the wearer has just left stays where it is and shrinks a level at a time where it stands, and only if it is still up 2.5 s after the look left (`minShownS`) does it leave the zone over the same 320 ms, or wait as its light if it has no place within its own width of it. One move, never two.
+- Eval: in every frame of every walk, no world-zone pane above 20% opacity intersects the zone for its current band, except the pane being looked at, a pane within 2.5 s of the look leaving it, and a pane in its 320 ms move out (after the zone grew or that time ran out).
 
 ## Rule 2 · Reading budget
 
 - Trigger: a candidate is about to be shown while the band is not Stopped.
-- Response: the brain estimates reading time (words × 240 ms + numbers × 320 ms) and compares it to the time the item will stay in comfortable view at the current speed. Glance content is capped at three words plus one number while walking (the place name does not count; a unit counts with its number); in Walk and Brisk the reason line is never on the glass, only in the log; a card is refused unless the band allows it; copy that does not fit is shortened by rule (drop the reason line first, then the second fact), never truncated with an ellipsis.
+- Response: while moving, a glance shows the say line's short form, never the sentence; only a Stopped glance shows the whole say line, and that line fits two lines of the glance (56 characters). Glance content is capped at three words plus one number while walking (the place name does not count; a unit counts with its number); in Walk and Brisk the reason line is never on the glass, only in the log; a card is refused unless the band allows it; copy that does not fit is shortened by rule (drop the reason line first, then the second fact), never truncated with an ellipsis.
 - Eval: no shown world-zone glance exceeds the cap in Walk or Brisk; no world-zone card appears in Walk without its dwell; in Brisk no card appears and the only world glance is the place being looked at. View-zone items (the errands card, message and call toasts, the pocket, the ask glance) are governed by the notification rules and the view zone's edge placement, not the dwell ladder: allowed in any band but Brisk, at the edge, folding after 4 s while moving unless looked at.
 
 ## Rule 3 · Auto-fold while walking
@@ -41,7 +41,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 5 · Head-scan yielding
 
 - Trigger: within 8 m of a curb, the head turns toward a side faster than 0.8 rad/s (the look-left, look-right before crossing).
-- Response: content on that side yields instantly (fade to 15% and slide 24 px outward over 180 ms ease-gate) and returns when the head comes back (320 ms ease-out). Nothing is re-placed during the scan: panes stay with their stores, and one that the scan carries somewhere it could not normally sit yields as well. The glasses never compete with a safety check.
+- Response: content on that side yields instantly (fade to 15% and slide 24 px outward over 180 ms ease-gate) and holds still where it was when the yield began: no move, no clamp, no fold while it yields. It returns when the scan is over, the head back within 0.3 rad of where it started or the look settled on a different place (320 ms ease-out, from the held spot to its place). Nothing is re-placed during the scan: panes stay with their stores, and one that the scan carries somewhere it could not normally sit yields and holds as well. The glasses never compete with a safety check.
 - Eval: in the scripted head-scan beat, the panes on the scanned side are below 20% opacity within 200 ms of the turn and restored within 400 ms of the return.
 
 ## Rule 6 · The pocket

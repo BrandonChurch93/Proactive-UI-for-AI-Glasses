@@ -1,5 +1,6 @@
 import type { Band } from './data';
 import type { Projected, Viewport } from './camera';
+import { MOVE } from './motion-tokens';
 import { focusRect } from './rules';
 import type { Level } from './types';
 import { clamp, rectsOverlap, type Rect } from './vec';
@@ -20,6 +21,7 @@ export interface PlaceInput {
   keepOuts: readonly Rect[];
   road?: readonly Rect[];
   chrome?: readonly Rect[];
+  scaleFrom?: number;
   prefer?: { side: Align; vertical: Vertical; push?: boolean };
   ui?: number;
 }
@@ -119,7 +121,7 @@ export function configRect(
   const dy = Math.abs(r.y - raw.y);
   const pushed = push && !inp.focusOk && (pushOff !== undefined || rectsOverlap(r, zone));
   if (pushed) r = pushOff ? { ...r, x: inp.anchor.x + pushOff.x, y: inp.anchor.y + pushOff.y } : pushOutOfZone(r, zone, inp.anchor.x, inp.anchor.y, vp);
-  const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= r.h * 0.35 : dy < 0.5 && dx <= r.w * 0.35);
+  const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= MOVE.clampMax : dy < 0.5 && dx <= MOVE.clampMax);
   const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k)) && !(inp.chrome ?? []).some((k) => rectsOverlap(r, k));
   const gap = Math.hypot(Math.max(r.x - inp.anchor.x, 0, inp.anchor.x - (r.x + r.w)), Math.max(r.y - inp.anchor.y, 0, inp.anchor.y - (r.y + r.h)));
   const ok = inView(r, vp) && fits && clear && (inp.focusOk || !rectsOverlap(r, zone)) && (!pushed || gap <= r.w * 0.9);
@@ -142,8 +144,8 @@ export function placeWorld(inp: PlaceInput): Placed {
   if (collapsed === 'pip') return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip', collapsed };
 
   const ui = inp.ui ?? 1;
-  const start = distanceScale(inp.distance) * ui;
-  const scales = [start, 0.84 * ui, 0.78 * ui, 0.74 * ui].filter((sc, i, all) => sc <= start + 1e-9 && all.indexOf(sc) === i);
+  const start = inp.scaleFrom ?? distanceScale(inp.distance) * ui;
+  const scales = inp.scaleFrom !== undefined ? [start] : [start, 0.84 * ui, 0.78 * ui, 0.74 * ui].filter((sc, i, all) => sc <= start + 1e-9 && all.indexOf(sc) === i);
   const all: [Align, Vertical][] = [
     [away, 'middle'],
     ['center', 'above'],

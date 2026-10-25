@@ -1,4 +1,4 @@
-import type { KeepOut, Projected, Vec3, Viewport } from '@lumen/shared';
+import type { KeepOut, Projected, Rect, Vec3, Viewport } from '@lumen/shared';
 
 export type { KeepOut } from '@lumen/shared';
 
@@ -48,4 +48,5 @@ export interface SceneBridge {
   createColumn(): ColumnHandle;
   createGroundText(): GroundTextHandle;
   curbDistance(): number;
+  chrome?(): Rect[];
 }

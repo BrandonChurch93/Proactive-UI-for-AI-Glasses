@@ -519,11 +519,6 @@ export class Brain {
     });
   }
 
-  private viewSeconds(e: Entity, speed: number): number {
-    if (speed < 0.2) return Infinity;
-    return Math.max(0.5, (e.distance * Math.cos(this.cfg.reading.comfortAngle)) / speed);
-  }
-
   private entityWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const target = snap.wearer.gaze.target;
     const dwellS = snap.wearer.gaze.dwellMs / 1000;
@@ -738,7 +733,7 @@ export class Brain {
     if (level === 'card') return cardContent(e, why, band, this.goal);
     if (level === 'glance') {
       const c = glanceContent(e, why, this.goal);
-      return trimForPace(c, band, this.viewSeconds(e, this.snap.wearer.speed), sayFor(e, this.goal).short, this.cfg);
+      return trimForPace(c, band, sayFor(e, this.goal).short, this.cfg);
     }
     return pipContent(e, why);
   }
@@ -810,13 +805,7 @@ export class Brain {
           { signal: 'sidewalk.narrows', value: `${nar.fromN} to ${nar.toN}`, weight: 1 },
           { signal: 'distance', value: Math.round(nar.distance), weight: 1 },
         ]);
-        const c = trimForPace(
-          { name: 'Scaffolding ahead', fact: 'Keep to the curb', reason: r },
-          band,
-          snap.wearer.speed > 0.2 ? nar.distance / snap.wearer.speed : Infinity,
-          undefined,
-          this.cfg,
-        );
+        const c = trimForPace({ name: 'Scaffolding ahead', fact: 'Keep to the curb', reason: r }, band, undefined, this.cfg);
         wants.push({
           id: 'scaffolding',
           component: 'moment',
@@ -1107,7 +1096,7 @@ export class Brain {
           ? expandedContent(e, r, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id))
           : level === 'card'
             ? cardContent(e, r, band, this.goal)
-            : trimForPace(glanceContent(e, r, this.goal), band, Infinity, sayFor(e, this.goal).short, this.cfg);
+            : trimForPace(glanceContent(e, r, this.goal), band, sayFor(e, this.goal).short, this.cfg);
       wants.push({
         id,
         component: 'place',

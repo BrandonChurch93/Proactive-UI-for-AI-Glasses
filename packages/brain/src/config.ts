@@ -34,7 +34,7 @@ export interface Config {
   autoFoldS: Record<Band, number | null>;
   viewFoldS: number;
   stoppedToastS: number;
-  reading: { wordMs: number; numberMs: number; glanceWords: number; glanceNumbers: number; comfortAngle: number };
+  reading: { glanceWords: number; glanceNumbers: number };
   pocket: { savedMs: number; stoppedForS: number; minSeconds: number; defaultSeconds: number };
   budget: { shows: number; refillS: number };
   safety: { vehicleTimeToPath: number; curbScanM: number };
@@ -80,7 +80,7 @@ export const DEFAULT_CONFIG: Config = {
   autoFoldS: { stopped: null, stroll: 4, walk: 2.5, brisk: 0 },
   viewFoldS: 4,
   stoppedToastS: 8,
-  reading: { wordMs: 240, numberMs: 320, glanceWords: 3, glanceNumbers: 1, comfortAngle: 0.9 },
+  reading: { glanceWords: 3, glanceNumbers: 1 },
   pocket: { savedMs: 600, stoppedForS: 2, minSeconds: 6, defaultSeconds: 20 },
   budget: { shows: 7, refillS: 40 },
   safety: { vehicleTimeToPath: 3, curbScanM: 8 },

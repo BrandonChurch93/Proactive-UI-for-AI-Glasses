@@ -6,6 +6,8 @@ import {
   NOMINAL_SIZE,
   Placement,
   boxKeepOut,
+  clamp,
+  leftRecently,
   capKeepOut,
   groundY,
   placeView,
@@ -103,6 +105,8 @@ interface HeadlessItem {
   aside: Aside;
   yieldS: PaneYield;
   pane: PaneReport | null;
+  lookedAt: number;
+  frozen: Rect | null;
 }
 
 const hidden = (id: string, level: PaneReport['level'], gaze: boolean, by: HiddenBy): PaneReport => ({ id, level, zone: 'world', rect: { x: 0, y: 0, w: 0, h: 0 }, opacity: 0, gaze, visible: false, hiddenBy: by });
@@ -140,20 +144,31 @@ export class HeadlessView {
       anchors.set(d.id, a);
       if (LEVEL_RANK[d.level] >= LEVEL_RANK.glance && d.level !== 'whisper') reach = Math.max(reach, proj(a).depth);
     }
-    const side = this.scan.update({ t: sim.t, yawRate: sim.head.yawRate, curbDistance: sim.wearer.curbDistance() });
+    const side = this.scan.update({ t: sim.t, yawRate: sim.head.yawRate, curbDistance: sim.wearer.curbDistance(), yaw: sim.head.yaw, target: sim.gaze.target });
     const ctx: FrameCtx = { t: sim.t, band: frame.band, vp, keepOuts: keepOuts(sim, proj, vp, pose.pos, reach), ui: uiScale(vp), scanning: side !== null };
     for (const d of frame.items) {
       const a = anchors.get(d.id);
       if (!a) continue;
       let it = this.items.get(d.id);
       if (!it) {
-        it = { place: new Placement(), aside: new Aside(), yieldS: new PaneYield(), pane: null };
+        it = { place: new Placement(), aside: new Aside(), yieldS: new PaneYield(), pane: null, lookedAt: -Infinity, frozen: null };
         this.items.set(d.id, it);
       }
       const lv = d.level === 'glance' || d.level === 'card' || d.level === 'expanded' ? d.level : 'glance';
       const pr = proj(a);
+      if (d.placement.focusOk) it.lookedAt = sim.t;
+      if (it.frozen && it.yieldS.on && it.pane?.visible && LEVEL_RANK[d.level] >= LEVEL_RANK.glance) {
+        const paneSide = it.frozen.x + it.frozen.w / 2 < vp.w / 2 ? 'left' : 'right';
+        const y = it.yieldS.update(sim.t, side !== null ? paneSide : null, paneSide);
+        if (it.yieldS.on) {
+          it.pane = { ...it.pane, level: d.level, gaze: Boolean(d.gaze), rect: round({ ...it.frozen, x: it.frozen.x + y.dx }), opacity: Math.round(y.opacity * 1000) / 1000 };
+          continue;
+        }
+        it.frozen = null;
+      }
+      const exempt = Boolean(d.placement.focusOk) || leftRecently(sim.t, it.lookedAt);
       const placed = it.place.update(
-        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: Boolean(d.placement.focusOk) },
+        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: exempt, left: exempt && !d.placement.focusOk },
         ctx,
       );
       const gaze = Boolean(d.gaze);
@@ -170,7 +185,7 @@ export class HeadlessView {
         continue;
       }
       const home = { x: placed.rect.x + it.place.jumpX.at(sim.t), y: placed.rect.y + it.place.jumpY.at(sim.t), w: placed.rect.w, h: placed.rect.h };
-      const s = it.aside.update(home, ctx, Boolean(d.placement.focusOk), pr.depth);
+      const s = it.aside.update(home, ctx, exempt, pr.depth);
       if (s.dropped) {
         it.pane = hidden(d.id, d.level, gaze, 'keepout');
         continue;
@@ -178,7 +193,10 @@ export class HeadlessView {
       const level = placed.collapsed && LEVEL_RANK[placed.collapsed] < LEVEL_RANK[d.level] ? placed.collapsed : d.level;
       const paneSide = home.x + home.w / 2 < vp.w / 2 ? 'left' : 'right';
       const y = it.yieldS.update(sim.t, placed.stilled ? paneSide : side, paneSide);
-      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x: home.x + s.dx + y.dx, y: home.y + s.dy }), opacity: Math.round(s.opacity * y.opacity * 1000) / 1000, gaze, visible: true };
+      if (it.yieldS.on) it.frozen ??= { ...home, x: home.x + s.dx, y: home.y + s.dy };
+      else it.frozen = null;
+      const x = clamp(home.x + s.dx + y.dx, 0, Math.max(0, vp.w - home.w));
+      it.pane = { id: d.id, level, zone: 'world', rect: round({ ...home, x, y: clamp(home.y + s.dy, 0, Math.max(0, vp.h - home.h)) }), opacity: Math.round(s.opacity * y.opacity * 1000) / 1000, gaze, visible: true };
     }
   }
 

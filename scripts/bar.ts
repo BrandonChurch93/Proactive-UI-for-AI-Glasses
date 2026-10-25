@@ -84,7 +84,7 @@ if (probes) {
     const sim = walk.sim; const o = walk.overlay;
     if (${nolookup}) sim.reviewer.lookUps = [];
     const vp = { w: innerWidth, h: innerHeight };
-    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0 };
+    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {} };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
     while (walk.t < walk.duration - 0.02 && !walk.ended) {
@@ -119,6 +119,26 @@ if (probes) {
         let ov = 0; for (const k of road) ov += overlap(r, k.rect);
         if (ov > 1) { m.roadFrames++; const f = ov / (r.w * r.h); if (f > m.worstRoad) { m.worstRoad = f; m.worstRoadAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
       }
+      const chromeRects = [];
+      for (const el of window.__app.chrome.el.children) {
+        if (el.getAttribute('role') === 'alert' || /PAUSED/.test(el.textContent || '') || getComputedStyle(el).display === 'none') continue;
+        const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) chromeRects.push({ x: r.left, y: r.top, w: r.width, h: r.height });
+      }
+      if (Number(getComputedStyle(o.glyphEl).opacity) > 0.05) { const r = o.glyphEl.getBoundingClientRect(); if (r.width > 0) chromeRects.push({ x: r.left, y: r.top, w: r.width, h: r.height }); }
+      for (const it of o.items.values()) {
+        if (it.kind !== 'world') continue;
+        for (const b of [it.cur, ...it.old]) {
+          if (!b || !b.rect || b.opacity <= 0.2) continue;
+          const r = b.rect;
+          if (r.x < -0.5 || r.y < -0.5 || r.x + r.w > vp.w + 0.5 || r.y + r.h > vp.h + 0.5) { m.outFrames++; if (m.outAt.length < 6) m.outAt.push([+walk.t.toFixed(2), it.id, b.level, Math.round(r.x), Math.round(r.y), +b.opacity.toFixed(2)]); }
+          if (chromeRects.some((c) => overlap(r, c) > 1)) { m.chromeFrames++; if (m.chromeAt.length < 6) m.chromeAt.push([+walk.t.toFixed(2), it.id, b.level]); }
+        }
+        if (it.cur && it.cur.opacity > 0.2 && it.placed && it.placed.mode === 'pane') {
+          const sc = it.placed.scale; const prev = m.scaleLast[it.id];
+          if (prev !== undefined && Math.abs(sc - prev) > 0.002) (m.scaleAt[it.id] = m.scaleAt[it.id] || []).push(+walk.t.toFixed(3));
+          m.scaleLast[it.id] = sc;
+        }
+      }
       if (!sim.gaze.target && lit > m.pipsMax) { m.pipsMax = lit; m.pipsAt = +walk.t.toFixed(2); m.pipsIds = litIds; }
       const last = walk.last();
       if (last && last.frame.t !== lastTick) {
@@ -152,7 +172,7 @@ if (probes) {
     if (levelChange) {
       const list = changes.get(e.id) ?? [];
       const climb = /dwell|pinch/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
-      const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'return' && /looked at again|offscreen/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
+      const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'return' && /looked at again|offscreen|view edge/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
       list.push({ t: e.t, exempt: climb || world || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
       changes.set(e.id, list);
     }
@@ -184,6 +204,22 @@ if (probes) {
   console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt} ${JSON.stringify((m as unknown as { pipsIds?: string[] }).pipsIds ?? [])}` : ''}`);
   if (process.argv.includes('--per')) console.log(`  pane frames per item: ${JSON.stringify(m.per)}`);
   console.log(`  snoozes started: ${m.snoozes}${nolookup ? ' (no deliberate look-ups)' : wander ? ' (wandering drag, pitch up to 0.7 rad)' : ''}`);
+  const mm = m as unknown as { outFrames: number; outAt: unknown[]; chromeFrames: number; chromeAt: unknown[]; scaleAt: Record<string, number[]> };
+  let scaleMax = 0;
+  let scaleWorst = '';
+  for (const [id, ts] of Object.entries(mm.scaleAt)) {
+    for (let i = 0; i < ts.length; i++) {
+      let n = 0;
+      for (let j = i; j < ts.length && ts[j]! - ts[i]! < 2.5; j++) n++;
+      if (n > scaleMax) {
+        scaleMax = n;
+        scaleWorst = `${id} from ${ts[i]!.toFixed(2)}`;
+      }
+    }
+  }
+  console.log(`  pane frames partly outside the view above 20% opacity: ${mm.outFrames}${mm.outFrames ? `  ${JSON.stringify(mm.outAt)}` : ''}`);
+  console.log(`  pane frames overlapping chrome: ${mm.chromeFrames}${mm.chromeFrames ? `  ${JSON.stringify(mm.chromeAt)}` : ''}`);
+  console.log(`  most scale changes per pane inside 2.5 s: ${scaleMax}${scaleMax ? ` (${scaleWorst})` : ''}`);
   console.log(`  promotions while the pane was not visible: ${m.hiddenPromotes.length}${m.hiddenPromotes.length ? `  ${JSON.stringify(m.hiddenPromotes.slice(0, 6))}` : ''}`);
 }
 console.log(`  console errors: ${errors.length}${errors.length ? `\n${errors.slice(0, 5).join('\n')}` : ''}`);

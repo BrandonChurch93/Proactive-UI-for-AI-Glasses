@@ -64,10 +64,10 @@
       }
     },
     {
-      "name": "0:26 \u00b7 Trattoria da Lia, translated",
+      "name": "0:25.5 \u00b7 Trattoria da Lia, translated",
       "between": [
-        26.3,
-        28
+        25.8,
+        27.5
       ],
       "must": {
         "action": "show",
@@ -76,10 +76,10 @@
       }
     },
     {
-      "name": "0:27 \u00b7 its card, read from Italian",
+      "name": "0:26.5 \u00b7 its card, read from Italian",
       "between": [
-        27.3,
-        29
+        26.8,
+        28.5
       ],
       "must": {
         "action": "promote",
@@ -89,9 +89,9 @@
       }
     },
     {
-      "name": "0:29 \u00b7 the look moves on before it would expand",
+      "name": "0:27.5 \u00b7 the look moves on before it would expand",
       "between": [
-        26,
+        25.5,
         34
       ],
       "mustNot": {
@@ -100,10 +100,10 @@
       }
     },
     {
-      "name": "0:30 \u00b7 Kathy's, a glance and that is all",
+      "name": "0:27.5 \u00b7 Kathy's from the shopfront, a glance",
       "between": [
-        30.3,
-        32
+        28,
+        29.5
       ],
       "must": {
         "action": "show",
@@ -112,14 +112,26 @@
       }
     },
     {
-      "name": "0:32 \u00b7 no card for Kathy's",
+      "name": "0:29 \u00b7 its card while the look holds",
       "between": [
-        30,
+        28.8,
+        30.2
+      ],
+      "must": {
+        "action": "promote",
+        "id": "kathys-cupcakes",
+        "level": "card"
+      }
+    },
+    {
+      "name": "0:30 \u00b7 the look moves on before it would expand",
+      "between": [
+        27.5,
         36
       ],
       "mustNot": {
         "id": "kathys-cupcakes",
-        "level": "card"
+        "level": "expanded"
       }
     },
     {

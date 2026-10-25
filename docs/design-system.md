@@ -168,7 +168,7 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Batch**. A second item tucks under the open pane as a strip, from `y -8px, blur 4px` over `t-quick`, counted, never stacked above.
 
-**Yield** (head scan, walking rule 5). The panes on the scanned side go to opacity .15 and slide 24 px outward over 180 ms `ease-gate`; they return over 320 ms ease-out. In-scene lights follow the same opacity.
+**Yield** (head scan, walking rule 5). The panes on the scanned side go to opacity .15 and slide 24 px outward over 180 ms `ease-gate`, and hold still where they were when the yield began: no move, no clamp, no fold while yielded. They return over 320 ms ease-out when the scan is over (the head back where it started, or the look settled on a different place), easing from the held spot to their place. In-scene lights follow the same opacity.
 
 **Step aside** (right of way, walking rule 8). The pane dims to .3 and slides clear by the overlap width plus 20 px over 220 ms, never further than its own width, a dashed trace from its home to its new place; it returns over 320 ms ease-out. If it cannot clear, it stays dimmed where it is; when the mover covers more than 60% of it for 300 ms it dissolves to its pip at .45, and when the way is clear the same pane condenses back in its own place.
 
@@ -182,7 +182,7 @@ Chromatic separation is implemented as text shadows: `calc(var(--ca) * -1px) 0 r
 
 **Snooze** (walking rule 12). Everything folds with the leave moves at once; the held glyph slides in with the countdown. Cancel reverses it.
 
-**Edge fold**. When an anchor leaves the view, the panes dim to 0 over `t-quick` and the edge light appears at the nearest edge at the anchor's height; return is a condense of the same pane, in place.
+**Edge fold**. Before the edge would cut a pane, it folds: when its anchor leaves the view, when keeping it in the view would move it more than 24 px, when any part of it would fall outside the view, or when it would touch the reviewer chrome. The pane dims to 0 over `t-quick` where it stands, without following its anchor. If the anchor is off the view the edge light appears at the nearest edge at the anchor's height; otherwise the pane's own light stays. It stays folded until it fits 40 px clear of the view edges (a pane the look has just left stays folded); the return is a condense of the same pane, in place. No pane is ever drawn partly outside the view.
 
 Laws: nothing bounces, overshoots or springs. Stagger is 40 to 50 ms, never more than 120 ms across a pane. Recede can interrupt any move mid-flight and never waits.
 
@@ -207,10 +207,10 @@ Zones:
 Rules:
 1. Anchor at sign height for a storefront, chest height for a person. The pane sits beside its light on the side away from the center of the view, its near edge 24 px from the light and rising from it, the light 85 % of the way down the pane's height, joined by a short straight leader; when that does not fit, centered above the light with its bottom 22 px above it; then centered below. It is never placed over the roadway; with nowhere else to go it sits above its light at the roadway's top edge.
 2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it except the pane on the thing being looked at, which the zone does not apply to. When the zone grows, or the look leaves a pane that sits in it, the pane moves out over 320 ms if it has a place within its own width of its light, and otherwise waits as its light.
-3. Keep-out: roadway, vehicles in traffic (moving or stopped), people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). A pane that cannot clear a mover dims in place and drops to its light when mostly covered.
+3. Keep-out: roadway, vehicles in traffic (moving or stopped), people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). The view-edge cards and the reviewer chrome (Sound, Pause, `I · INSPECTOR`, the pace readout, the held glyph) are hard rects too, padded 8 px. A pane that cannot clear a mover dims in place and drops to its light when mostly covered.
 4. Calm backdrop: façade over sky over road, never over a bright sign. (The pip may sit above a marquee, never on it: a glow on a glow is invisible.)
-5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it.
-6. Edge: a card that is not being looked at collapses to a glance within 8% of the edge, and a glance to its light within 4%; the pane on the thing being looked at never collapses, it shrinks to 0.74 instead. Content whose anchor leaves the view folds to the edge light and returns in place when the wearer looks back. The head turns a full 180 degrees.
+5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it. Scale belongs to the placement: a move never changes it, and a placement re-chosen inside the 1.2 s keeps the current scale.
+6. Edge: a card that is not being looked at collapses to a glance within 8% of the edge, and a glance folds within 4%; the pane on the thing being looked at never collapses, it shrinks to 0.74 or folds when it reaches the edge. A pane is never cut by the edge: it folds first (Edge fold), and returns in place when it fits again or the wearer looks back. The head turns a full 180 degrees.
 7. A new pane is born at its placed position with the condense move (walking rule 4); nothing slides in from the edge.
 
 As built, smaller screens: sizes above are at the reference view of 1280 × 800. On a smaller view every pane, the held glyph and the whisper line scale by `clamp(1.3 × min(w / 1280, h / 800), 0.74, 1)` on top of the distance scale, so a landscape phone runs at 0.74 and anything from a 1024 × 640 laptop up runs at 1. A pane that is not being looked at and cannot be placed at its level steps down a level (expanded to card to glance) before it falls back to its light, and steps back up when there is room again; the pane on the thing being looked at shrinks to 0.74 instead and never steps down. Phones held upright get a prompt to turn sideways instead of the street; tablets work both ways.

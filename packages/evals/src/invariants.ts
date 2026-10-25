@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG, countCopy, type Config } from '@lumen/brain';
 import {
   LEVEL_RANK,
+  MOVE,
   focusRect,
   isShow,
   rectsOverlap,
@@ -47,7 +48,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'copy',
-    name: 'every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters',
+    name: 'every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)',
     check: (r) => {
       for (const e of r.entries) {
         const c = e.decision.content;
@@ -57,6 +58,8 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (c.say.toLowerCase().includes(c.name.toLowerCase())) return `t=${e.t} ${e.decision.id} say repeats the name: ${c.say}`;
         if (!reasonIsClean(c.say)) return `t=${e.t} ${e.decision.id} banned word: ${c.say}`;
         if (c.live && c.live.length > 28) return `t=${e.t} ${e.decision.id} live line over 28: ${c.live}`;
+        if (e.decision.level === 'glance' && e.decision.band !== 'stopped') return `t=${e.t} ${e.decision.id} glance shows its say line in ${e.decision.band}`;
+        if (e.decision.level === 'glance' && c.say.length > 56) return `t=${e.t} ${e.decision.id} glance say line over two lines: ${c.say}`;
         if (c.showReason && c.say.toLowerCase().includes(c.reason.text.replace(/\.$/, '').toLowerCase())) return `t=${e.t} ${e.decision.id} reason repeats the say line: ${c.reason.text}`;
       }
       return null;
@@ -86,7 +89,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-1',
-    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at (a pane leaves over 320 ms when the zone grows or the look moves away)',
+    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)',
     check: (r) => {
       let bandAt = -Infinity;
       const lookedAt = new Map<string, number>();
@@ -101,7 +104,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const zone = focusRect(f.band, view.w, view.h);
         for (const p of view.panes) {
           if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
-          if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < 0.32 + TICK) continue;
+          if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < MOVE.minShown + 0.32 + TICK) continue;
           return `t=${s.t} ${p.id} ${p.level} in the ${f.band} zone`;
         }
       }

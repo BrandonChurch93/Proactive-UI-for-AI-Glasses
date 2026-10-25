@@ -26,29 +26,18 @@ export function countCopy(text: string): { words: number; numbers: number } {
   return { words, numbers };
 }
 
-export function readingMs(text: string, cfg: Config): number {
-  const { words, numbers } = countCopy(text);
-  return words * cfg.reading.wordMs + numbers * cfg.reading.numberMs;
-}
-
 function fitsCap(text: string, cfg: Config): boolean {
   const { words, numbers } = countCopy(text);
   return words <= cfg.reading.glanceWords && numbers <= cfg.reading.glanceNumbers;
 }
 
-export function trimForPace(
-  content: Content,
-  band: Band,
-  viewS: number,
-  short: string | undefined,
-  cfg: Config,
-): Content {
+export function trimForPace(content: Content, band: Band, short: string | undefined, cfg: Config): Content {
   const out: Content = { ...content, showReason: false };
   if (band === 'stopped') return out;
   const trimmed: string[] = [];
   let fact = content.fact;
   if (band === 'stroll') {
-    if (content.say && short && readingMs(content.say, cfg) > viewS * 1000) {
+    if (content.say && short) {
       trimmed.push(`say: ${content.say}`);
       delete out.say;
       fact = short;

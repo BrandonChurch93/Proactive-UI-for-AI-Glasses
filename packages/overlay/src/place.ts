@@ -1,1 +1,1 @@
-export { Aside, PaneYield, Placement, Track, Yield, type AsideState, type Curve, type FrameCtx, type PaneMode as PlaceMode, type PlaceRequest, type WorldPlace, type YieldInput } from '@lumen/shared';
+export { Aside, PaneYield, Placement, Track, Yield, leftRecently, type AsideState, type Curve, type FrameCtx, type PaneMode as PlaceMode, type PlaceRequest, type WorldPlace, type YieldInput } from '@lumen/shared';

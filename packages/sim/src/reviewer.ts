@@ -43,7 +43,7 @@ export interface Events {
 }
 
 export class ScriptedReviewer {
-  private gazes: { t: number; id: string | null }[];
+  private gazes: { t: number; id: string | null; dy: number }[];
   private pinches: { t: number; id: string }[];
   private choices: { t: number; id: string; action: string }[];
   private lookUps: { t: number; seconds: number }[];
@@ -51,7 +51,7 @@ export class ScriptedReviewer {
 
   constructor(data: ScenarioData) {
     const b = data.beats;
-    this.gazes = b.flatMap((x) => (x.kind === 'gaze' ? [{ t: x.t, id: x.id }] : []));
+    this.gazes = b.flatMap((x) => (x.kind === 'gaze' ? [{ t: x.t, id: x.id, dy: x.dy ?? 0 }] : []));
     this.pinches = b.flatMap((x) => (x.kind === 'pinch' ? [{ t: x.t, id: x.id }] : []));
     this.choices = b.flatMap((x) => {
       if (x.kind === 'choice') return [{ t: x.t, id: x.id, action: x.action }];
@@ -66,6 +66,13 @@ export class ScriptedReviewer {
     let id: string | null = null;
     for (const g of this.gazes) if (g.t <= t + 1e-9) id = g.id;
     return id;
+  }
+
+  aimPoint(t: number, anchorOf: (id: string) => Vec3 | undefined): Vec3 | undefined {
+    let g: { id: string | null; dy: number } | null = null;
+    for (const x of this.gazes) if (x.t <= t + 1e-9) g = x;
+    const a = g?.id && !g.id.startsWith('pocket:') ? anchorOf(g.id) : undefined;
+    return a && { ...a, y: a.y - g!.dy };
   }
 
   eventsBetween(a: number, b: number): Events {
@@ -97,8 +104,7 @@ export class ScriptedReviewer {
     let yaw = bodyYaw + (crossing ? 0.05 * Math.sin(t * 0.7) : idle);
     let pitch = IDLE_PITCH + 0.012 * Math.sin(t * 0.37);
     let omega = 6.5;
-    const id = this.gazeId(t);
-    const a = id && !id.startsWith('pocket:') ? anchorOf(id) : undefined;
+    const a = this.aimPoint(t, anchorOf);
     if (a) {
       yaw = yawToward(eye, a);
       pitch = clamp(pitchToward(eye, a), -0.4, STEEP);
