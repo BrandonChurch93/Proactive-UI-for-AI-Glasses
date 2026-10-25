@@ -35,7 +35,7 @@ Route: east sidewalk north, a stop at the pharmacy, cross the cross street at th
 
 1. 0:02 · The brain lists the three stops in one card at the view edge, in the order it chose, with why ("In order along the way"): Pharmacy, Hardware, Post Office. Route draws on the pavement. The card folds to the route after 4 s because the band is Walk. (Rules 1, 4.)
 2. 0:24 · The pharmacy door. The wearer stops; its card unfolds from the sign: "Prescription's ready · counter 2, no line". At 0:28 the live data ticks "Picked up"; the errands card returns at the edge with the stop ticked, "Two to go", and the route redraws. At 0:29 the walk resumes.
-3. 0:34 · Scaffolding over The Big Bean's frontage narrows the sidewalk ahead: the route band shifts to the curb side and one glance says why, "Scaffolding ahead. Keep to the curb." A route shown as a decision.
+3. 0:34 · Scaffolding over The Big Bean's frontage narrows the sidewalk ahead: the route band shifts to the curb side and one glance says why, "Scaffolding ahead. Keep to the curb." The glance hangs from the scaffold's far end (n 52.6, under the deck's edge), which stays ahead of the wearer for the whole approach, so it reads from 0:34 until it folds by rule at 0:36.5. A route shown as a decision.
 4. 0:40 · Bus at the M4 stop ahead: its light is one of the three awareness lights. Not on the goal, so a glance only if looked at: "M4 in 2", and on a card "M4 in 2 min · not on today's route".
 5. 0:46 · Corner Hardware's live data changes: closed early. The brain says so, drops the stop, and the route redraws. The wearer watches the decision happen: "Hardware closed early. One stop left."
 6. 0:52 · Social notifications accumulate on the held glyph while walking (1, 2, 3 · social by 0:58). Never one by one.
