@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import type { ScenarioId } from '@lumen/shared';
+import type { Band, ScenarioId } from '@lumen/shared';
 import css from './title.module.css';
 
 export const SCENARIO_NAMES: Record<ScenarioId, string> = { hungry: 'Hungry', errands: 'Errands', walking: 'Just walking' };
@@ -53,6 +53,42 @@ function el(tag: string, cls?: string, text?: string): HTMLElement {
   if (cls) e.className = cls;
   if (text !== undefined) e.textContent = text;
   return e;
+}
+
+function buildAbout(): { el: HTMLElement; open(from: HTMLElement): void } {
+  const about = el('div', css.about);
+  about.setAttribute('role', 'dialog');
+  about.setAttribute('aria-label', 'About this project');
+  const card = el('div', css.aboutCard);
+  for (const line of ABOUT) card.appendChild(el('p', undefined, line));
+  const close = el('button', css.aboutClose, 'Close') as HTMLButtonElement;
+  close.type = 'button';
+  card.appendChild(close);
+  about.appendChild(card);
+  about.style.display = 'none';
+  let back: HTMLElement | null = null;
+  const hide = (e: Event): void => {
+    e.stopPropagation();
+    about.style.display = 'none';
+    back?.focus({ preventScroll: true });
+  };
+  close.addEventListener('click', hide);
+  about.addEventListener('click', (e) => {
+    if (e.target === about) hide(e);
+    else e.stopPropagation();
+  });
+  about.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hide(e);
+  });
+  return {
+    el: about,
+    open(from) {
+      back = from;
+      about.style.display = '';
+      gsap.fromTo(card, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.36, ease: EASE_OUT, clearProps: 'filter' });
+      close.focus({ preventScroll: true });
+    },
+  };
 }
 
 export class TitleScreen {
@@ -111,39 +147,15 @@ export class TitleScreen {
     this.aboutLink = el('button', css.aboutLink, 'About this project') as HTMLButtonElement;
     this.aboutLink.type = 'button';
     footer.appendChild(this.aboutLink);
-    const about = el('div', css.about);
-    about.setAttribute('role', 'dialog');
-    about.setAttribute('aria-label', 'About this project');
-    const card = el('div', css.aboutCard);
-    for (const line of ABOUT) card.appendChild(el('p', undefined, line));
-    const close = el('button', css.aboutClose, 'Close') as HTMLButtonElement;
-    close.type = 'button';
-    card.appendChild(close);
-    about.appendChild(card);
-    about.style.display = 'none';
+    const about = buildAbout();
     this.aboutLink.addEventListener('click', (e) => {
       e.stopPropagation();
       this.skipToChoice();
-      about.style.display = '';
-      gsap.fromTo(card, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.36, ease: EASE_OUT, clearProps: 'filter' });
-      close.focus({ preventScroll: true });
-    });
-    const hideAbout = (e: Event): void => {
-      e.stopPropagation();
-      about.style.display = 'none';
-      this.aboutLink.focus({ preventScroll: true });
-    };
-    close.addEventListener('click', hideAbout);
-    about.addEventListener('click', (e) => {
-      if (e.target === about) hideAbout(e);
-      else e.stopPropagation();
-    });
-    about.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') hideAbout(e);
+      about.open(this.aboutLink);
     });
     this.panel.append(sub, name, lede, whatHead, what, chooseHead, choices, controls, footer);
     this.reveals = [sub, name, lede, whatHead, what, chooseHead, choices, controls, footer];
-    this.el.append(this.plate, this.panel, about);
+    this.el.append(this.plate, this.panel, about.el);
     this.el.addEventListener('click', () => this.skipToChoice());
     this.el.style.display = 'none';
     parent.appendChild(this.el);
@@ -208,27 +220,57 @@ export class TitleScreen {
 export interface EndStats {
   scenario: ScenarioId;
   watched: boolean;
+  duration: number;
+  places: number;
+  cards: number;
   held: number;
-  showed: number;
+  saved: number;
+  ticks: { t: number; kind: 'card' | 'hold' }[];
+  gates: [number, number][];
+  bands: { t: number; band: Band }[];
+  decided: { t: number; name: string; reason: string }[];
+  first: { t: number; id: string } | null;
 }
+
+export interface EndHandlers {
+  again(): void;
+  choose(id: ScenarioId): void;
+  play(): void;
+  inspect(t: number, id: string): void;
+}
+
+const BAND_STEP: Record<Band, number> = { stopped: 0, stroll: 1, walk: 2, brisk: 3 };
+
+export function endSentence(st: Pick<EndStats, 'places' | 'cards' | 'held' | 'saved'>): string {
+  const parts: string[] = [];
+  if (st.places) parts.push(`saw ${st.places} places`);
+  if (st.cards) parts.push(`showed you ${st.cards}`);
+  if (st.held) parts.push(`held ${st.held} while you crossed`);
+  if (st.saved) parts.push(`saved ${st.saved} for the red light`);
+  if (!parts.length) return 'In ninety seconds the glasses stayed quiet.';
+  const list = parts.length === 1 ? parts[0] : parts.length === 2 ? `${parts[0]} and ${parts[1]}` : `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+  return `In ninety seconds the glasses ${list}.`;
+}
+
+const clockOf = (t: number): string => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 
 export class EndCard {
   readonly el: HTMLElement;
   private plate: HTMLElement;
-  private text: HTMLElement;
+  private panel: HTMLElement;
+  private about = buildAbout();
   private tl: gsap.core.Timeline | null = null;
 
   constructor(
     parent: HTMLElement,
-    private onAgain: () => void,
-    private onChoose: (id: ScenarioId) => void,
-    private onPlay: () => void,
+    private h: EndHandlers,
   ) {
     this.el = el('section', `${css.screen} ${css.end}`);
-    this.el.style.cursor = 'default';
+    this.el.setAttribute('aria-label', 'End of the walk');
     this.plate = el('div', css.plate);
-    this.text = el('div', css.text);
-    this.el.append(this.plate, this.text);
+    this.panel = el('div', css.panel);
+    this.el.append(this.plate, this.panel, this.about.el);
+    this.el.addEventListener('click', (e) => e.stopPropagation());
     this.el.style.display = 'none';
     parent.appendChild(this.el);
   }
@@ -237,35 +279,99 @@ export class EndCard {
     return this.el.style.display !== 'none';
   }
 
-  show(stats: EndStats): void {
+  private timeline(st: EndStats): { el: HTMLElement; ticks: HTMLElement[]; strip: HTMLElement } {
+    const wrap = el('div', css.timeline);
+    const strip = el('div', css.strip);
+    const x = (t: number): string => `${Math.max(0, Math.min(100, (100 * t) / st.duration)).toFixed(3)}%`;
+    for (const [a, b] of st.gates) {
+      const g = el('div', css.gate);
+      g.style.left = x(a);
+      g.style.width = `${((100 * (b - a)) / st.duration).toFixed(3)}%`;
+      strip.appendChild(g);
+    }
+    const ticks: HTMLElement[] = [];
+    for (const k of st.ticks) {
+      const tk = el('div', k.kind === 'card' ? css.tick : `${css.tick} ${css.tickHold}`);
+      tk.style.left = x(k.t);
+      tk.dataset.f = String(k.t / st.duration);
+      strip.appendChild(tk);
+      ticks.push(tk);
+    }
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('class', css.bands!);
+    svg.setAttribute('viewBox', `0 0 ${st.duration} 8`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const pts: string[] = [];
+    let y = 7;
+    for (const b of st.bands) {
+      pts.push(`${b.t.toFixed(2)},${y}`);
+      y = 7 - BAND_STEP[b.band] * 2;
+      pts.push(`${b.t.toFixed(2)},${y}`);
+    }
+    pts.push(`${st.duration},${y}`);
+    const line = document.createElementNS(svgNs, 'polyline');
+    line.setAttribute('points', pts.join(' '));
+    line.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.appendChild(line);
+    strip.appendChild(svg);
+    const labels = el('div', css.tlLabels);
+    const end = el('span', undefined, '1:30');
+    end.style.left = x(90);
+    labels.append(el('span', undefined, '0:00'), end);
+    wrap.append(strip, labels);
+    return { el: wrap, ticks, strip };
+  }
+
+  show(st: EndStats): void {
     this.el.style.display = '';
-    const name = el('h2', css.endName, SCENARIO_NAMES[stats.scenario]);
-    const line = el('div', css.endLine, `Held ${stats.held} ${stats.held === 1 ? 'thing' : 'things'}, showed ${stats.showed}`);
+    const name = el('h2', css.name, SCENARIO_NAMES[st.scenario]);
+    const line = el('p', css.lede, endSentence(st));
+    const tl = this.timeline(st);
+    const head = el('div', css.label, 'What it decided');
+    const decided = el('div', css.decided);
+    for (const d of st.decided) {
+      const r = el('div');
+      r.append(el('i', undefined, clockOf(d.t)), el('b', undefined, d.name), el('span', undefined, d.reason));
+      decided.appendChild(r);
+    }
     const actions = el('div', css.endActions);
-    if (stats.watched) {
-      const play = el('button', css.primary, 'Play it yourself') as HTMLButtonElement;
-      play.type = 'button';
-      play.addEventListener('click', () => this.onPlay());
-      actions.appendChild(play);
-    }
-    const again = el('button', stats.watched ? undefined : css.primary, 'Walk again') as HTMLButtonElement;
-    again.type = 'button';
-    again.addEventListener('click', () => this.onAgain());
-    actions.appendChild(again);
-    for (const id of (['hungry', 'errands', 'walking'] as const).filter((x) => x !== stats.scenario)) {
-      const b = el('button', undefined, SCENARIO_NAMES[id]) as HTMLButtonElement;
+    const button = (text: string, fn: () => void, primary = false): HTMLButtonElement => {
+      const b = el('button', primary ? css.primary : undefined, text) as HTMLButtonElement;
       b.type = 'button';
-      b.addEventListener('click', () => this.onChoose(id));
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fn();
+      });
       actions.appendChild(b);
+      return b;
+    };
+    if (st.watched) button('Play it yourself', () => this.h.play(), true);
+    if (st.first) {
+      const f = st.first;
+      button('See every decision', () => this.h.inspect(f.t, f.id), !st.watched);
     }
-    this.text.replaceChildren(name, line, actions);
+    button('Walk again', () => this.h.again());
+    for (const id of (['hungry', 'errands', 'walking'] as const).filter((x) => x !== st.scenario)) button(SCENARIO_NAMES[id], () => this.h.choose(id));
+    const about = button('About', () => this.about.open(about));
+    const parts = [name, line, tl.el, head, decided, actions];
+    this.panel.replaceChildren(...parts);
     this.tl?.kill();
-    const tl = gsap.timeline();
-    gsap.set([name, line, actions], { opacity: 0 });
-    tl.fromTo(this.plate, { opacity: 0 }, { opacity: 1, duration: 0.9, ease: 'power1.inOut' }, 0);
-    tl.fromTo([name, line, actions], { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.48, ease: EASE_OUT, stagger: 0.12, clearProps: 'filter' }, 1.0);
-    tl.call(() => (actions.firstElementChild as HTMLButtonElement).focus({ preventScroll: true }), [], 1.5);
-    this.tl = tl;
+    const t = gsap.timeline();
+    gsap.set(parts, { opacity: 0 });
+    gsap.set(this.panel, { xPercent: -100 });
+    gsap.set(tl.ticks, { scaleY: 0 });
+    gsap.set(tl.strip, { clipPath: 'inset(0 100% 0 0)' });
+    t.fromTo(this.plate, { opacity: 0 }, { opacity: 0.65, duration: 0.9, ease: 'power1.inOut' }, 0);
+    t.to(this.panel, { xPercent: 0, duration: 0.9, ease: EASE_OUT }, 0);
+    t.fromTo(parts, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.48, ease: EASE_OUT, stagger: 0.12, clearProps: 'filter' }, 0.35);
+    t.to(tl.strip, { clipPath: 'inset(0 0% 0 0)', duration: 0.9, ease: 'power2.out' }, 0.6);
+    for (const tk of tl.ticks) {
+      const f = Number(tk.dataset.f);
+      t.to(tk, { scaleY: 1, duration: 0.18, ease: EASE_OUT }, 0.6 + 0.9 * (1 - Math.sqrt(Math.max(0, 1 - f))));
+    }
+    t.call(() => (actions.firstElementChild as HTMLButtonElement | null)?.focus({ preventScroll: true }), [], 1.2);
+    this.tl = t;
   }
 
   hide(): void {

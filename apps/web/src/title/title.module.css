@@ -64,6 +64,7 @@
   line-height: 1.45;
   color: var(--chrome-fg-2);
   max-width: 44ch;
+  text-wrap: pretty;
 }
 
 .label {
@@ -180,63 +181,130 @@
   color: var(--chrome-fg-2);
 }
 
-.text {
-  position: absolute;
-  left: 7%;
-  right: 7%;
-  top: 50%;
-  transform: translateY(-50%);
-  max-width: calc(800px * var(--u));
-  display: flex;
-  flex-direction: column;
-  gap: calc(14px * var(--u));
-}
-
-
-.end .text {
-  gap: calc(12px * max(1, var(--ui, 1)));
-}
-
-.endName {
-  margin: 0;
-  font-size: calc(44px * max(1, var(--ui, 1)));
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.endLine {
-  font-family: var(--font-mono);
-  font-size: calc(13px * max(1, var(--ui, 1)));
-  letter-spacing: 0.02em;
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-}
-
 .endActions {
+  margin-top: calc(6px * var(--u));
   display: flex;
   flex-wrap: wrap;
-  gap: calc(10px * max(1, var(--ui, 1)));
-  margin-top: calc(10px * max(1, var(--ui, 1)));
+  gap: calc(8px * var(--u));
 }
 
 .endActions button {
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 250, 236, 0.18);
+  font: inherit;
+  font-size: calc(14px * var(--u));
+  color: var(--chrome-fg);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--chrome-rule);
   border-radius: var(--radius);
-  padding: calc(9px * max(1, var(--ui, 1))) calc(14px * max(1, var(--ui, 1)));
+  padding: calc(9px * var(--u)) calc(14px * var(--u));
   cursor: pointer;
-  font-size: calc(14px * max(1, var(--ui, 1)));
 }
 
 .endActions button.primary {
-  background: rgba(255, 210, 122, 0.14);
-  border-color: var(--voice);
+  border-color: rgba(240, 180, 41, 0.6);
 }
 
 .endActions button:hover,
 .endActions button:focus-visible {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #3a414a;
+}
+
+.end {
+  cursor: default;
+}
+
+.timeline {
+  margin-top: calc(6px * var(--u));
+}
+
+.strip {
+  position: relative;
+  height: calc(46px * var(--u));
+  border-bottom: 1px solid var(--chrome-rule);
+}
+
+.gate {
+  position: absolute;
+  top: 0;
+  height: calc(36px * var(--u));
+  background: #1d2228;
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  width: calc(2px * var(--u));
+  height: calc(36px * var(--u));
+  margin-left: calc(-1px * var(--u));
+  background: var(--ink);
+  transform-origin: 50% 100%;
+}
+
+.tickHold {
+  background: var(--voice);
+  opacity: 0.5;
+}
+
+.bands {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(10px * var(--u));
+  overflow: visible;
+}
+
+.bands polyline {
+  fill: none;
+  stroke: var(--chrome-fg-2);
+  stroke-width: 1;
+}
+
+.tlLabels {
+  position: relative;
+  height: calc(16px * var(--u));
+  margin-top: calc(4px * var(--u));
+  font-family: var(--font-mono);
+  font-size: calc(11px * var(--u));
+  color: var(--chrome-fg-2);
+}
+
+.tlLabels span {
+  position: absolute;
+  top: 0;
+}
+
+.tlLabels span:last-child {
+  transform: translateX(-50%);
+}
+
+.decided {
+  display: grid;
+  gap: calc(7px * var(--u));
+  font-size: calc(14px * var(--u));
+  line-height: 1.4;
+}
+
+.decided div {
+  display: grid;
+  grid-template-columns: calc(44px * var(--u)) auto 1fr;
+  gap: calc(10px * var(--u));
+  align-items: baseline;
+}
+
+.decided i {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: calc(11px * var(--u));
+  color: var(--chrome-fg-2);
+}
+
+.decided b {
+  font-weight: 500;
+}
+
+.decided span {
+  color: var(--voice);
 }
 
 .aboutLink {

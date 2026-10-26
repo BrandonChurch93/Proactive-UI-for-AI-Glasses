@@ -1,4 +1,4 @@
-import { SCENARIOS, isShow, uiScale, type ScenarioId } from '@lumen/shared';
+import { LEVEL_RANK, SCENARIOS, isShow, reasonIsClean, uiScale, type Band, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
@@ -49,12 +49,12 @@ export class App {
     start: ScenarioId | null,
   ) {
     this.title = new TitleScreen(ui, (id) => (id === 'watch' ? this.watch() : this.choose(id)));
-    this.end = new EndCard(
-      ui,
-      () => this.again(),
-      (id) => this.choose(id, true),
-      () => this.again('hungry'),
-    );
+    this.end = new EndCard(ui, {
+      again: () => this.again(),
+      choose: (id) => this.choose(id, true),
+      play: () => this.again('hungry'),
+      inspect: (t, id) => this.inspect(t, id),
+    });
     this.chrome = new Chrome(
       ui,
       {
@@ -220,16 +220,62 @@ export class App {
   }
 
   private stats(): EndStats {
+    const w = this.walk;
+    const places = new Set<string>();
+    for (const snap of w.snapshots) for (const e of snap?.entities ?? []) if (e.distance <= 70) places.add(e.id);
+    const level = new Map<string, number>();
     const held = new Set<string>();
-    let showed = 0;
-    for (const f of this.walk.frames) {
+    const ticks: EndStats['ticks'] = [];
+    const gates: [number, number][] = [];
+    const bands: { t: number; band: Band }[] = [];
+    const shows: { t: number; id: string; name: string; reason: string; score: number }[] = [];
+    let cards = 0;
+    let saved = 0;
+    let gateFrom: number | null = null;
+    let first: EndStats['first'] = null;
+    for (const f of w.frames) {
       if (!f) continue;
+      if (bands[bands.length - 1]?.band !== f.band) bands.push({ t: f.t, band: f.band });
+      if (f.gate.safety && gateFrom === null) gateFrom = f.t;
+      if (!f.gate.safety && gateFrom !== null) {
+        gates.push([gateFrom, f.t]);
+        gateFrom = null;
+      }
       for (const d of f.events) {
-        if (d.action === 'hold' && d.placement.zone !== 'ground') held.add(d.id);
-        if (isShow(d)) showed++;
+        if (d.placement.zone === 'ground') continue;
+        const was = level.get(d.id) ?? 0;
+        const now = LEVEL_RANK[d.level];
+        if ((d.action === 'show' || d.action === 'promote') && now >= LEVEL_RANK.card && was < LEVEL_RANK.card) {
+          cards++;
+          ticks.push({ t: f.t, kind: 'card' });
+        }
+        if (d.action !== 'hold') level.set(d.id, d.action === 'dismiss' ? 0 : now);
+        if (d.action === 'hold') {
+          ticks.push({ t: f.t, kind: 'hold' });
+          if (f.gate.safety) held.add(d.id);
+        }
+        if (d.action === 'save') saved++;
+        if (isShow(d)) first ??= { t: f.t, id: d.id };
+        if (isShow(d) || (d.action === 'promote' && now >= LEVEL_RANK.card)) {
+          if (d.reason.text && d.reason.text !== d.content.name && d.reason.kind !== 'gate' && reasonIsClean(d.reason.text)) shows.push({ t: f.t, id: d.id, name: d.content.name, reason: d.reason.text, score: d.score });
+        }
       }
     }
-    return { scenario: this.walk.scenario, held: held.size, showed, watched: this.mode === 'watch' };
+    if (gateFrom !== null) gates.push([gateFrom, w.duration]);
+    const best = new Map<string, (typeof shows)[number]>();
+    for (const x of shows) if (!best.has(x.name) || best.get(x.name)!.score < x.score) best.set(x.name, x);
+    const decided = [...best.values()]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .sort((a, b) => a.t - b.t)
+      .map(({ t, name, reason }) => ({ t, name, reason }));
+    return { scenario: w.scenario, watched: this.mode === 'watch', duration: w.duration, places: places.size, cards, held: held.size, saved, ticks, gates, bands, decided, first };
+  }
+
+  private inspect(t: number, id: string): void {
+    this.hideEnd();
+    if (!this.inspector) this.mountInspector();
+    this.inspector?.openAt(t, id);
   }
 
   private showEnd(): void {
@@ -237,11 +283,13 @@ export class App {
     this.chrome.setCaption(null);
     this.setPaused(true);
     this.chrome.setPaused(false);
+    this.walk.setGlassesVisible(false);
     this.end.show(this.stats());
   }
 
   private hideEnd(): void {
     this.end.hide();
+    this.walk.setGlassesVisible(true);
     this.endShown = false;
   }
 
@@ -328,7 +376,7 @@ export class App {
       if (this.mode !== 'walk') return;
       if (e.key === 'i' || e.key === 'I') {
         this.inspector?.toggle();
-        if (this.inspector?.isOpen && this.end.visible) this.end.hide();
+        if (this.inspector?.isOpen && this.end.visible) this.hideEnd();
       } else if (e.key === 'Escape') {
         if (this.inspector?.isOpen) this.inspector.close();
         else this.dismiss();

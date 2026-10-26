@@ -26,6 +26,7 @@ export interface Inspector {
   open(): void;
   close(): void;
   toggle(): void;
+  openAt(t: number, id: string): void;
   dispose(): void;
 }
 
@@ -138,6 +139,11 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
     toggle() {
       if (isOpen) api.close();
       else api.open();
+    },
+    openAt(t, id) {
+      select('decisions');
+      api.open();
+      panels.decisions.focusAt(t, id);
     },
     dispose() {
       unsubscribe();

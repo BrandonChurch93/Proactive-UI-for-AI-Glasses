@@ -37,3 +37,7 @@ The inspector speaks plainly and never in the brain's voice. "Held: in the roadw
 - Scrubbing is a replay, not a cache: the app keeps the reviewer's own input per sim step (head, gaze) and per brain tick (pinches, choices, dismissals, overrides), rebuilds the sim and brain from zero in Node-speed fast mode, and runs only the last 2.5 s with the overlay on so every pane arrives in its true state. A scrub to the end of a walk takes about a quarter of a second. Scrubbing back keeps the known future; touching anything (a drag, a pinch, an override) discards it from that moment on.
 - The Overrides tab also toggles the pace readout (reviewer chrome, off by default).
 - Export writes `{ kind: 'lumen-run', scenario, seed, hz, source, snapshots, overrides, entries, overlay }`, where `overlay` is the glass's log up to the moment of export. `pnpm eval --file <export>` replays the snapshots through a fresh brain with the overrides at their times, checks that it reproduces the exported decision log exactly, runs every invariant, and for an untouched scripted run also the walk's hand-written expectations.
+
+## From the end screen
+
+The end screen's See every decision opens the inspector on the Decisions tab with the Shows filter, scrolled to the walk's first show and marked with an accent rule on its left. Closing the inspector returns to the end screen.

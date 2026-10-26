@@ -154,6 +154,11 @@
   border-bottom: 1px solid var(--chrome-rule);
 }
 
+.focus {
+  box-shadow: inset 2px 0 0 var(--chrome-accent);
+  padding-left: 10px;
+}
+
 .rowHead {
   display: grid;
   grid-template-columns: 44px 52px 62px 1fr auto;

@@ -58,8 +58,21 @@ export class Decisions {
     this.el.append(filters, this.list);
   }
 
+  focusAt(t: number, id: string): void {
+    this.filter = 'shows';
+    for (const [k, x] of this.buttons) x.setAttribute('aria-pressed', String(k === 'shows'));
+    this.rendered = -1;
+    this.update();
+    const row = [...this.list.children].find((r) => (r as HTMLElement).dataset.t === t.toFixed(3) && (r as HTMLElement).dataset.id === id) as HTMLElement | undefined;
+    if (!row) return;
+    row.classList.add(s.focus!);
+    requestAnimationFrame(() => row.scrollIntoView({ block: 'center' }));
+  }
+
   private row(f: BrainFrame, d: Decision): HTMLElement {
     const r = el('div', s.row);
+    r.dataset.t = f.t.toFixed(3);
+    r.dataset.id = d.id;
     const head = el('div', s.rowHead);
     const shown = isShow(d) || d.action === 'save' || d.action === 'surface';
     head.append(

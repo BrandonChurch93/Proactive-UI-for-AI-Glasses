@@ -92,6 +92,6 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 | Bike behind you | "BIKE · 2 s" with an arrow | Pavement, stop tone | Just walking |
 | The pocket | "12 s · what you saved" | Beside the held glyph, at a stop | Hungry |
 
-## End card (shared)
+## End screen (shared)
 
-Fade to black over `t-scene`, then a quiet card: the scenario name, one line of what the brain decided most often (from the log: "Held 11 things, showed 6"), and "Walk again" with the other two scenarios.
+The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: the scenario name; one sentence built from the log ("In ninety seconds the glasses saw 14 places, showed you 3, held 1 while you crossed, and saved 1 for the red light", every number counted from this walk: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, and pinches saved; a zero clause is dropped); a timeline of the walk, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", the three highest-scoring things shown that carried a reason line, one per name, in time order; and the buttons See every decision, Walk again, the other two walks and About. After Watch, Play it yourself comes first. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.

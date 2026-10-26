@@ -211,6 +211,11 @@ export class Walk {
     this.ended = false;
   }
 
+  setGlassesVisible(on: boolean): void {
+    this.layer.style.visibility = on ? '' : 'hidden';
+    this.bridge.group.visible = on;
+  }
+
   dispose(): void {
     this.overlay?.dispose();
     this.overlay = null;

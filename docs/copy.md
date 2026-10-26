@@ -129,12 +129,12 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## Arrival and end
 
 - Seat's held, inside on the left.
-- End card: {Scenario} · Held 11 things, showed 6 · Walk again · {other two}
+- End screen, in the start screen's panel: {Scenario} / In ninety seconds the glasses saw {places} places, showed you {cards}, held {held} while you crossed, and saved {saved} for the red light. (any clause whose number is zero is dropped; with nothing left: In ninety seconds the glasses stayed quiet.) / the timeline, 0:00 and 1:30 / What it decided (mono caps), three lines: {time} · {name} · {reason line} / See every decision · Walk again · {other two} · About
+- End after Watch: Play it yourself first, then the same buttons
 
 ## Reviewer chrome
 
 - I · INSPECTOR
 - Captions (Watch only, `caption` beats in `data/scenarios/hungry.json`, shown 6 s each): 0:02 Three lunch spots lit · the brain says one thing / 0:14 Looking at Mega Burger · it opens / 0:22 Pinch while walking · saved for later / 0:36 Light about to change · nothing new / 0:44 Brisk · one line at the bottom, no cards / 0:58 Red light · the pocket surfaces / 1:06 Hold a seat · the route draws / 1:14 Crossing · everything recedes / 1:24 Far curb · "Held that while you crossed" / 1:34 Arrival
-- End after Watch: Play it yourself (first button)
 - Pace readout (reviewer chrome, off by default): PACE · WALK · 1.4 M/S
 - Inspector headers: Timeline · Decisions · Signals · Overrides · Evals · Export
