@@ -16,18 +16,6 @@
     {
       "rule": "gates",
       "between": [
-        3,
-        3.2
-      ],
-      "must": {
-        "action": "show",
-        "id": "maya-call",
-        "component": "call"
-      }
-    },
-    {
-      "rule": "gates",
-      "between": [
         4.2,
         4.4
       ],

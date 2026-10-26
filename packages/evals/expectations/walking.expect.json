@@ -150,64 +150,6 @@
       }
     },
     {
-      "name": "0:38 \u00b7 two people on the path: bare pips",
-      "between": [
-        38.5,
-        45.5
-      ],
-      "state": {
-        "levelsAtMost": "pip"
-      }
-    },
-    {
-      "name": "0:40 \u00b7 the text waits behind them",
-      "between": [
-        40,
-        40.3
-      ],
-      "must": {
-        "action": "hold",
-        "id": "maya-lunch",
-        "reasonKind": "social"
-      }
-    },
-    {
-      "name": "0:46 \u00b7 passed, the text at the edge",
-      "between": [
-        45.5,
-        47.5
-      ],
-      "must": {
-        "action": "show",
-        "id": "maya-lunch",
-        "reasonText": "Held for you"
-      }
-    },
-    {
-      "name": "0:48 \u00b7 a call at the view edge",
-      "between": [
-        48,
-        48.3
-      ],
-      "must": {
-        "action": "show",
-        "id": "maya-call",
-        "component": "call",
-        "zone": "view"
-      }
-    },
-    {
-      "name": "0:51 \u00b7 decline folds it",
-      "between": [
-        51,
-        51.3
-      ],
-      "must": {
-        "action": "dismiss",
-        "id": "maya-call"
-      }
-    },
-    {
       "name": "0:57 \u00b7 the glyph says it is about to snooze",
       "between": [
         57,

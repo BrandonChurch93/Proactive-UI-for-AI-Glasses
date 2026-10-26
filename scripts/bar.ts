@@ -137,7 +137,7 @@ if (probes) {
           const sc = it.placed.scale; const prev = m.scaleLast[it.id];
           if (prev !== undefined && Math.abs(sc - prev) > 0.002) (m.scaleAt[it.id] = m.scaleAt[it.id] || []).push(+walk.t.toFixed(3));
           m.scaleLast[it.id] = sc;
-        }
+        } else delete m.scaleLast[it.id];
       }
       if (!sim.gaze.target && lit > m.pipsMax) { m.pipsMax = lit; m.pipsAt = +walk.t.toFixed(2); m.pipsIds = litIds; }
       const last = walk.last();

@@ -7,9 +7,8 @@ Scripts live in `data/scenarios/*.json` as timed events the sim injects into the
 ## Opening (shared)
 
 1. The street fades up from black over `t-scene` (900 ms) as the panel slides in from the left over the same time; its text reveals top to bottom, 120 ms apart. Behind it the street plays the Just walking script with the scripted reviewer, muted, as an attract loop, undimmed.
-2. The panel (`docs/copy.md`, Title screen) reads, top to bottom: the subtitle and the name, the setting, "What this is" in three lines, "Choose a walk" with four cards (Hungry, Errands, Just walking, Watch), the controls and the footer. No text sits over the street; below 900 px wide the panel takes the full width and the street behind it drops to 40% brightness (reviewer chrome, not the glasses).
+2. The panel (`docs/copy.md`, Title screen) reads, top to bottom: the subtitle and the name, the setting, "What this is" in three lines, "Choose a walk" with three cards (Hungry, Errands, Just walking), the controls and the footer. No text sits over the street; below 900 px wide the panel takes the full width and the street behind it drops to 40% brightness (reviewer chrome, not the glasses).
 3. A click skips the reveal. Choosing a walk slides the panel out over 450 ms and the walk starts within two seconds.
-4. Watch plays Hungry with the scripted reviewer, sound following the Sound control, with one caption at a time in a strip at the bottom center (ten, `docs/copy.md`). A click or Esc ends it and returns to the panel. At the end it lands on the end screen, whose first button, "Play it yourself", returns to the panel with Hungry focused.
 
 ## Hungry · discovery, the pocket, a choice
 
@@ -51,13 +50,11 @@ Route: east sidewalk north, the theater across the street near the start, end on
 4. 0:25.5 · The look moves to the Trattoria da Lia sign ahead across the street, in Italian: its label, already up, grows into the translation card ("The sign says home cooking · open till 11", with the reason "Read from Italian") as the theater's view shrinks back to its label, one exchange. The look moves on at 0:27.5, before the card would expand. First food look.
 5. 0:27.5 · Gaze on Kathy's Cupcakes on the wearer's own side, aimed at the shopfront (the window and the awning, not the fascia above it) from about 6 m: its label, "Batch at 2", then its card, "Brown butter batch at 2 · 80 min from now". The look holds 2.5 s and moves on at 0:30, before the card would expand, and the card shrinks back to its label beside its light. Second food look. (Rule 10.)
 6. 0:32 · Back to Walk.
-7. 0:38 · Two people talking on the sidewalk ahead, on the path: pips on them stay bare. No names, no info. A text that arrives ("Lunch tomorrow?") is held until they are passed at 0:46, then shows at glance at the edge.
-8. 0:48 · A call from Maya: answer and decline at the view edge, world untouched. Decline at 0:51 folds it.
-9. 0:55.5 · On the straight past the bus shelter, the wearer looks up at the sky and holds it. Through the second second the glyph reads "Snoozing"; at 0:58.5 everything folds and the glyph counts down from 60; the label that would have shown on Atlas Books ahead (looked at from 0:58.5) is held with the reason "Snoozed". (Rule 12.)
-10. 1:02 · Looking up again the same way cancels the snooze at 1:04. Mega Burger comes up beside the wearer across the street; nothing shows, because nothing is looked at.
-11. 1:19 · Red light at the corner, 6 s. Stopped, and two food places have been looked at, so the ask glance appears once at the edge at 1:21: "Hungry? · Find lunch · No". No, at 1:23.
-12. 1:25 · Crossing, 10 s: recede and return, same as always. A bike comes up the bike lane from behind on this side as the wearer steps off: `BIKE · 2 s` on the pavement with its arrow, stop tone, gone when the rider passes.
-13. 1:35 · The bench in Pocket Park at the far corner. Its label: "Benches in the shade · end of the walk". End of the walk. Fade. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
+7. 0:55.5 · On the straight past the bus shelter, the wearer looks up at the sky and holds it. Through the second second the glyph reads "Snoozing"; at 0:58.5 everything folds and the glyph counts down from 60; the label that would have shown on Atlas Books ahead (looked at from 0:58.5) is held with the reason "Snoozed". (Rule 12.)
+8. 1:02 · Looking up again the same way cancels the snooze at 1:04. Mega Burger comes up beside the wearer across the street; nothing shows, because nothing is looked at.
+9. 1:19 · Red light at the corner, 6 s. Stopped, and two food places have been looked at, so the ask glance appears once at the edge at 1:21: "Hungry? · Find lunch · No". No, at 1:23.
+10. 1:25 · Crossing, 10 s: recede and return, same as always. A bike comes up the bike lane from behind on this side as the wearer steps off: `BIKE · 2 s` on the pavement with its arrow, stop tone, gone when the rider passes.
+11. 1:35 · The bench in Pocket Park at the far corner. Its label: "Benches in the shade · end of the walk". End of the walk. Fade. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
 ## Timing as built
 
@@ -77,7 +74,6 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 | --- | --- |
 | Text or DM from a person | Glance toast, sender and one line, at the next safe moment, reply or later |
 | Social (likes, follows, comments) | Never shown one by one. Count on the held glyph; one strip when stopped: "3 notifications · later" |
-| Call | Toast at the edge with answer and decline. Interrupts a walk, never a crossing. World untouched |
 | App update (package, order) | Batched under whatever is open |
 
 ## Proactive moments
@@ -94,4 +90,4 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 
 ## End screen (shared)
 
-The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: the scenario name; one sentence built from the log ("In ninety seconds the glasses saw 14 places, showed you 3, held 1 while you crossed, and saved 1 for the red light", every number counted from this walk: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, and pinches saved; a zero clause is dropped); a timeline of the walk, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", the three highest-scoring things shown that carried a reason line, one per name, in time order; and the buttons See every decision, Walk again, the other two walks and About. After Watch, Play it yourself comes first. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.
+The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: the scenario name; one sentence built from the log ("In ninety seconds the glasses saw 14 places, showed you 3, held 1 while you crossed, and saved 1 for the red light", every number counted from this walk: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, and pinches saved; a zero clause is dropped); a timeline of the walk, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", the three highest-scoring things shown that carried a reason line, one per name, in time order; and the buttons See every decision, Walk again, the other two walks and About. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.

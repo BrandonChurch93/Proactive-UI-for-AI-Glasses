@@ -68,8 +68,7 @@ const STEP = 1 / SIM_HZ;
 const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
 const SEED = 47;
-const NEAR_M = 35;
-const LIT_M = 70;
+const ATTENTION_M = 70;
 
 const clock = gsap.timeline({ autoRemoveChildren: true });
 gsap.globalTimeline.remove(clock);
@@ -319,7 +318,7 @@ export class Walk {
     for (const id of ids) {
       const a = this.sim.anchorOf(id);
       const far = a ? Math.hypot(a.x - eye.x, a.z - eye.z) : Infinity;
-      if (!a || far > LIT_M || (far > NEAR_M && !lit.has(id))) continue;
+      if (!a || far > ATTENTION_M) continue;
       const keep = id === cur;
       const place = PLACE_BY_ID.get(id);
       if (place?.n) {

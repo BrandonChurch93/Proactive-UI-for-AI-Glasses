@@ -9,7 +9,7 @@ export type Zone = 'world' | 'ground' | 'view';
 export type ReasonKind = 'goal' | 'world' | 'gate' | 'budget' | 'social' | 'edge' | 'pace' | 'pocket';
 export type WearerState = 'walking' | 'stopped' | 'crossing';
 export type VehicleKind = 'car' | 'bus' | 'truck' | 'bike';
-export type NotificationType = 'text' | 'dm' | 'social' | 'app' | 'call';
+export type NotificationType = 'text' | 'dm' | 'social' | 'app';
 
 export const LEVEL_RANK: Record<Level | 'none', number> = {
   none: 0,
@@ -197,7 +197,6 @@ export type ComponentKind =
   | 'person'
   | 'moment'
   | 'toast'
-  | 'call'
   | 'strip'
   | 'errands'
   | 'pocket'

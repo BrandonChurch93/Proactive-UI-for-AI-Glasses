@@ -254,3 +254,86 @@ Done: all three walks end on the panel with a true sentence (checked against the
 ### 18.6 · Order and checks
 
 18.3 first (everything after is measured at the new scale), then 18.1, 18.2, 18.4, 18.5. Each with `pnpm -w test`, `eval`, `lint`, `build`, the bar on all three walks at 1920 × 1080 and 3840 × 2160 (replace 1280 × 800 with 4K in the bar runs; keep 1280 in the device matrix), fresh screenshots beside the reference frames, and a STATUS entry with the numbers. Commit on `build` after each sub-phase. Never push. When 18.5 is done, add one paragraph to the Final section of `STATUS.md` and stop.
+
+## 8. Phase 19 · One walk
+
+The owner played Phase 18 and set the direction: one street, one walk that never has to end, everything on it answers a look, and the intent (hungry, errands, nothing) is a layer on top that adds a list, a route and an arrival. Texting replaces the call and the "friends on the street"; a reply can change where you are going. The cards get a V3 designed in Figma and approved by the owner before they are built. Read `CLAUDE.md`, this whole file and `docs/walking-rules.md` first. Rewrite the docs in place. No em dashes.
+
+### 19.0 · Cuts
+
+- Watch (18.4) and its captions. The attract loop behind the title stays.
+- The call toast, the `call` component and its evals. The social accumulation strip stays.
+- The "two people talking on the path" beat and the text held behind it. The social gate stays in the brain and its focused eval; no walk stages it.
+- The three scripted routes and the three scenario files as separate walks. One walk file replaces them (19.2).
+- Phase 18's deviation "only lit places count beyond 35 m" is reversed: any place in view within 70 m can be looked at. The symptom it was hiding (a far store at the vanishing point grew a card unasked) is fixed by rule: beyond 35 m a label needs 1.0 s of hold to grow, not 0.5 s, and no label grows until the head has moved at least 5° since the walk or the lap began.
+
+### 19.1 · The gaze mark
+
+Real glasses would track the eyes; this demo has a view center and nothing shows it. Draw a mark at the center of the view, reviewer chrome, honest about being a stand-in:
+
+- A ring 10 px across at `--ui` 1, 1 px stroke, `--ink` at 18 % over nothing.
+- Over a lookable place it brightens to 55 % in `--voice` over `t-snap`, and a 1.5 px arc fills clockwise with the dwell: empty at acquisition, full when the card is earned (0.5 s, or 1.0 s beyond 35 m). It fills again from the card toward expanded in Stopped and Stroll. A pinch snaps it full.
+- Hidden during a gate (with the recede), on the title, on the end panel, and while a view-zone pane has the pointer. Off in reduced motion except the ring. An inspector override "Gaze mark" toggles it, default on.
+- `docs/design-system.md` 9 gains it; `docs/inspector-spec.md` lists the override.
+
+Done: a frame with the ring over empty street, one over a label at half dwell, one at the card; the device matrix clean.
+
+### 19.2 · The loop, the router and the opening
+
+- **The loop.** The walk is a loop around the block: start at the south-east corner, east sidewalk north, cross the avenue at the north corner, west sidewalk south, cross the avenue at the south corner, back to the start. The cross street's crossing (`cross-east`) is a side leg for the Post Office. About 150 s at Walk. The walk never ends on its own; "End the walk" on the intent panel (19.3) or the inspector ends it.
+- **The router.** Replace the hand-authored routes in `packages/sim/src/route.ts` with a sidewalk graph: four corner nodes, two sidewalks per side, the avenue crossings at both corners, the cross street crossing, and a door node per roster place on its sidewalk. Shortest path from the wearer's current position to any door or back to the start, as legs the existing route code already plays (sidewalk, crossing). Pace stays Walk by default; the signal logic and the stop line are unchanged; the wearer waits at a red light at any corner the route reaches. The route band, turn arc and destination column draw from the router's legs. Rerouting mid-walk (a new destination) rebuilds the path from where the wearer stands, never backtracks across a crossing already started, and is logged as a decision with cause `choice` or `reply`.
+- **The opening.** The walk begins Stopped at the start corner with the sim holding the light red for 12 s. Every time the wearer reaches the start corner again (the end of a lap, or arriving back after a destination) the sim holds the light red for 12 s again. That is where the intent panel lives (19.3). Everything else about the start (title, the street fading up, the 0.8 s quiet) is unchanged.
+- **One walk file.** `data/scenarios/walk.json` replaces the three. It holds the pace track (Walk, with Stroll on the theater stretch and Brisk on the north stretch as today), the signal phases, the scripted people and vehicles (the truck beat stays on the theater stretch, the bus stays at the M4 stop), live-data events keyed to intent start (`+40 s` for the hardware closure), the inbox keyed to intent start (19.4), and the scripted reviewer for `pnpm record`, which now also scripts `intent`, `choose` (a picker row), `reply` (a quick reply) and `go` (the route offer). Three scripted recordings (hungry, errands, walking) are made from the one file with different intent beats, so the evals keep their three walks.
+- **Arrival does not end anything.** At a destination the wearer stops 4 s at the door, the arrival line shows, then the walk resumes along the loop with no destination and no intent (labels on everything, the brain quiet). For Errands the next stop is the next destination.
+
+Done: a live lap from the corner, through a chosen door, back to the corner with the panel up again, no pause, no cut; `scripts/overlaylog.ts` on the three recordings; the bar unchanged.
+
+### 19.3 · The intent panel, the lunch picker, the stops
+
+All three are view-zone panes placed by the existing view rules (edge, never in a crossing, fold behind a gate, pointer is the gaze).
+
+- **Intent panel.** Appears within 1 s of the wearer being Stopped at the start corner. "What are you up to?" with Hungry · Errands · Just walk · End the walk. The title's choice (19.5) preselects one so a first-time viewer sees where it lives. Choosing Just walk folds it. Choosing End the walk opens the end panel (19.6). Esc folds it (Just walk).
+- **Lunch picker.** Replaces the panel in place on Hungry. Every roster place of kind food or cafe, one row each: image (V3) or tone dot (until V3), name, the Hungry say line, walk time from the router, wait and seats. Sorted by walk time. Six rows; the pane scrolls with the wheel or a drag while the pointer is over it, and the row under the pointer is the gaze target (the gaze mark sits on it). Pinch chooses; "Not now" folds it and the intent is Just walk. On a choice: the row's place becomes the destination, the route draws within 2 s, the light goes to WALK within 2 s, the picker folds, and the destination's card shows a `Going here` chip in `--voice` in its header from then on. Any other food place's card gains a primary action "Go here instead" that reroutes (logged as a decision with cause `choice`; the old destination's chip goes).
+- **Stops list.** Replaces the panel on Errands: the three stops in order with why, as today's errands card, plus "Start" which sets the first stop as the destination. The hardware closure fires 40 s after the intent starts and reorders the list as today. Arrival at a stop shows its card, ticks it after 3 s ("Picked up"), and the next stop becomes the destination. After the last stop the walk resumes the loop.
+- **Copy** for all three in `docs/copy.md` (replace the Errands card and ask glance sections): panel lines, picker header "Lunch on this block · by walk time", row format `name · say · walk time · wait and seats`, the chip, "Go here instead", "Not now", "Start".
+- **Evals.** New cases: the panel within 1 s of Stopped at the corner; a `choose` beat draws the route within 2 s and sets the destination; "Go here instead" reroutes with cause `choice`; nothing opens during a crossing; the panel returns at the corner on the next lap.
+
+Done: live, Hungry chosen at the light, Goldie's picked, routed, "Go here instead" on Mega Burger across the street reroutes, arrival, the loop resumes, the panel returns at the corner. Shot at each beat.
+
+### 19.4 · Messages that change the walk
+
+Texting replaces the call. The thread is a view-zone pane in the phone's grammar (V3 in Figma; until then the current toast with the fields below).
+
+- **Anatomy.** Avatar (a warm monogram `M` in a circle; never a photo), sender, time (from the 12:40 clock), the message, and up to three quick replies as chips. A reply appears in the thread as a bubble on the right. The brain's own line, when it has one, sits under the thread in `--voice` with Yes and Not now.
+- **Timing.** The text arrives 25 s after an intent starts (or 25 s into Just walk), at the next safe moment by the notification rules; held in a crossing, counted on the glyph, shown at the far curb. Replies are pinch targets; while walking the thread sits at the edge at glance size (sender, line, chips); at a stop it opens to the full thread.
+- **Per intent.**
+  - Hungry and Just walk: Maya · "Lunch? I'm by the Big Bean at 1." Replies: On my way · Can't today · Where exactly?
+    - On my way: the brain says "Big Bean · 4 min · route there?" Yes sets the Big Bean as the destination (replacing a picked place; its chip moves) and draws the route. Not now folds.
+    - Where exactly?: Maya replies 20 s later, "Corner table by the window," and the same offer follows.
+    - Can't today: Maya replies "Next time" and nothing else happens.
+  - Errands: Maya · "Can you grab stamps while you're out?" Replies: On it · Can't today. On it: "Post Office sells stamps · added as a stop" (if the Post Office is not already a stop it is appended; if it is, "already on your route"). Can't today: "Next time."
+- **The brain reads the reply**, never the message text: the offer is keyed to the reply id and the place named in the scenario file, so the brain stays a rules policy with no language in it. Logged with cause `reply`; the reason line is in the goal voice ("Meeting Maya at 1").
+- **Copy** in `docs/copy.md` Messages section rewritten with every line above; `docs/scenarios.md` Notifications table rewritten; the call rows removed.
+- **Evals.** A `reply` beat within a window produces the offer within 1 s; `go` sets the destination and draws the route; a text arriving in a crossing is held and shown at the far curb; "Can't today" produces no route.
+
+Done: live, Hungry: picked Goldie's, Maya's text at the edge while walking, "On my way" at the next stop, the offer, Yes, the route redraws to the Big Bean, the chip moves. Shot at each beat.
+
+### 19.5 · The start panel, revised
+
+Keep 18.4's panel and reading order with these changes: the choice block becomes one primary "Start the walk" and, under it, a line "At the first red light the glasses ask what you're up to," with Hungry · Errands · Just walk as three chips that preselect the intent panel. Watch is gone. The "What this is" lines stay. `docs/copy.md` Title section updated.
+
+### 19.6 · The end panel, revised
+
+Reached from "End the walk" on the intent panel, Esc on the intent panel, or the inspector. 18.5's panel with a session sentence: "In {m} minutes the glasses saw {places} places, showed you {cards}, held {held} while you crossed, saved {saved} for a red light, got you to {destinations}, and sent {replies} replies." Zero clauses dropped. The timeline spans the whole session. "Walk again" restarts at the title; "Keep walking" returns to the corner with the panel up.
+
+### 19.7 · The V3 card family, designed first
+
+The reviewer (not Opus) designs the V3 family in Figma and the owner approves it before any of it is built. The Figma file is the source of truth for the look of these components once the owner approves; `docs/design-system.md` is rewritten from it, and the code is built to it. Until approval, 19.1 to 19.6 use the current components.
+
+In the family: label, compact card, card and expanded for each place kind (food, cafe, theater, venue, shop, service, transit, park), with an image slot; the lunch picker and its rows; the stops list; the message thread with quick replies and the route offer; the intent panel; the gaze mark in its three states; the whisper line; the pocket; the end panel; the start panel. Imagery: generated for the project in one consistent style (a hero image per place, a thumbnail per menu row and picker row, Maya's monogram), vendored as WebP under 60 KB each in `apps/web/public/img`, and listed in `LICENSES.md` as generated for this project.
+
+Build order after approval: tokens and type scale, then label and card, then expanded, then the view-zone panes, then the two screens. Every component screenshot beside its Figma frame in the STATUS entry.
+
+### 19.8 · Order and checks
+
+19.0 and 19.1 first (small, immediate). Then 19.2, 19.3, 19.4, 19.5, 19.6, each with `pnpm -w test`, `eval`, `lint`, `build`, the bar on the three recordings at 1920 × 1080 and 3840 × 2160, fresh screenshots beside the reference frames, and a STATUS entry with the numbers. New bar rows: intent panel within 1 s of Stopped at the corner; route drawn within 2 s of a choice or a Yes; no pane during a crossing; laps completed without a pause. Commit on `build` after each sub-phase. Never push. Stop after 19.6 and write the Final paragraph; 19.7 starts only when the owner has approved the Figma file and says so.

@@ -1,0 +1,7 @@
+{
+  "walk": "walking-10g-head-still",
+  "cases": [
+    { "rule": "walking-10", "between": [1.25, 1.35], "must": { "action": "show", "id": "grace-theater", "level": "label" } },
+    { "rule": "walking-10", "between": [0, 5], "mustNot": { "id": "grace-theater", "level": "card" } }
+  ]
+}

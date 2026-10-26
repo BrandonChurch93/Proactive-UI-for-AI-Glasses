@@ -50,7 +50,6 @@ type Origin =
   | 'gaze'
   | 'message'
   | 'social'
-  | 'call'
   | 'app'
   | 'safety'
   | 'ground'
@@ -114,7 +113,6 @@ const DEFAULT_CAUSE: Partial<Record<Origin, Cause>> = {
   gaze: 'dwell',
   message: 'notification',
   social: 'notification',
-  call: 'notification',
   app: 'notification',
   safety: 'safety',
   ground: 'goal',
@@ -148,6 +146,8 @@ export class Brain {
   private labelsCenterAt = -Infinity;
   private wasSettled = true;
   private cardGrownAt = -Infinity;
+  private yaw0: number | null = null;
+  private headMoved = false;
   private budgetUsed = 0;
   private dismissed: Record<string, number> = {};
   private accepted: Record<string, number> = {};
@@ -263,6 +263,8 @@ export class Brain {
     this.applyChoice(snap, t);
     this.applyDismiss(snap, t);
 
+    this.yaw0 ??= snap.wearer.gaze.yaw;
+    if (Math.abs(angleWrap(snap.wearer.gaze.yaw - this.yaw0)) >= this.cfg.ladder.moveRad) this.headMoved = true;
     const wants: Want[] = [];
     if (t >= this.cfg.quietStartS) {
       this.entityWants(snap, t, band, wants);
@@ -641,6 +643,8 @@ export class Brain {
           visible,
           far,
           cardWait: t - this.cardGrownAt < this.cfg.ladder.swapGapS - 1e-9,
+          growS: e.distance > this.cfg.ladder.nearM ? this.cfg.ladder.growFarS : this.cfg.ladder.growS,
+          still: !this.headMoved,
           pinch: pinch === e.id,
           floor: aware.has(e.id) ? 'pip' : 'none',
           labelled,
@@ -920,17 +924,11 @@ export class Brain {
 
   private messageWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const cardOpen = this.cardOpen();
-    const anchorFor = (n: Notification): string => (n.type === 'call' ? 'view:edge-top' : 'view:edge-right');
     for (const it of this.inbox.values()) {
       const n = it.n;
       if (it.status === 'done' || n.type === 'social') continue;
       if (it.status === 'shown') {
-        const still = n.type === 'call' ? 20 : this.cfg.stoppedToastS;
-        if (viewFoldDue(it.movingS, it.stillS, false, this.cfg, still) && n.type !== 'call') {
-          it.status = 'done';
-          continue;
-        }
-        if (n.type === 'call' && t - it.shownAt > 20) {
+        if (viewFoldDue(it.movingS, it.stillS, false, this.cfg, this.cfg.stoppedToastS)) {
           it.status = 'done';
           continue;
         }
@@ -944,23 +942,9 @@ export class Brain {
       ];
       let r: Reason;
       let content: Content;
-      let level: Level = 'glance';
+      const level: Level = 'glance';
       let component: ComponentKind = 'toast';
-      if (n.type === 'call') {
-        component = 'call';
-        level = 'card';
-        r = reason('social', 'Clear sidewalk ahead', parts);
-        content = {
-          name: n.from ?? 'Call',
-          fact: 'Calling',
-          reason: r,
-          showReason: false,
-          actions: [
-            { id: 'answer', label: 'Answer', primary: true },
-            { id: 'decline', label: 'Decline' },
-          ],
-        };
-      } else if (n.type === 'app') {
+      if (n.type === 'app') {
         component = 'strip';
         r = it.heldInGate
           ? reason('gate', 'Held that while you crossed', [...parts, { signal: 'gate', value: 'cleared', weight: 1 }])
@@ -996,10 +980,10 @@ export class Brain {
         component,
         zone: 'view',
         level,
-        anchor: anchorFor(n),
+        anchor: 'view:edge-right',
         content,
         reason: r,
-        origin: n.type === 'call' ? 'call' : n.type === 'app' ? (it.heldInGate ? 'followup' : 'app') : 'message',
+        origin: n.type === 'app' ? (it.heldInGate ? 'followup' : 'app') : 'message',
         timing,
         onCommit: () => {
           it.reason ??= r;
@@ -1479,10 +1463,10 @@ export class Brain {
     if (g.snooze) {
       return { reason: reason('gate', 'Snoozed', parts), timing: 'next-pause', keep: false };
     }
-    if (g.social && w.origin !== 'call') {
+    if (g.social) {
       return { reason: reason('social', "When you're free", parts), timing: 'next-pause', keep: Boolean(prev) };
     }
-    const isMessage = w.origin === 'message' || w.origin === 'call' || w.origin === 'app';
+    const isMessage = w.origin === 'message' || w.origin === 'app';
     if (isMessage && g.path && !prev) {
       return { reason: reason('social', 'Held for you', parts), timing: 'next-pause', keep: false };
     }

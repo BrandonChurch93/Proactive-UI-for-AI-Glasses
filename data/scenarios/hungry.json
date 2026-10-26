@@ -38,19 +38,9 @@
   ],
   "beats": [
     {
-      "t": 2,
-      "kind": "caption",
-      "text": "Three lunch spots lit · the brain says one thing"
-    },
-    {
       "t": 14,
       "kind": "gaze",
       "id": "mega-burger"
-    },
-    {
-      "t": 14,
-      "kind": "caption",
-      "text": "Looking at Mega Burger · it opens"
     },
     {
       "t": 22,
@@ -58,19 +48,9 @@
       "id": "mega-burger"
     },
     {
-      "t": 22,
-      "kind": "caption",
-      "text": "Pinch while walking · saved for later"
-    },
-    {
       "t": 30,
       "kind": "gaze",
       "id": null
-    },
-    {
-      "t": 36,
-      "kind": "caption",
-      "text": "Light about to change · nothing new"
     },
     {
       "t": 40,
@@ -81,11 +61,6 @@
       "t": 44,
       "kind": "gaze",
       "id": null
-    },
-    {
-      "t": 44,
-      "kind": "caption",
-      "text": "Brisk · one line at the bottom, no cards"
     },
     {
       "t": 58,
@@ -103,11 +78,6 @@
       "text": "Running 10 late, order me the usual?"
     },
     {
-      "t": 58,
-      "kind": "caption",
-      "text": "Red light · the pocket surfaces"
-    },
-    {
       "t": 64,
       "kind": "gaze",
       "id": "pocket:mega-burger"
@@ -116,11 +86,6 @@
       "t": 64,
       "kind": "pinch",
       "id": "pocket:mega-burger"
-    },
-    {
-      "t": 66,
-      "kind": "caption",
-      "text": "Hold a seat · the route draws"
     },
     {
       "t": 68,
@@ -140,11 +105,6 @@
       "seconds": 10
     },
     {
-      "t": 74,
-      "kind": "caption",
-      "text": "Crossing · everything recedes"
-    },
-    {
       "t": 78,
       "kind": "inbox",
       "type": "app",
@@ -153,19 +113,9 @@
       "more": 1
     },
     {
-      "t": 84,
-      "kind": "caption",
-      "text": "Far curb · \"Held that while you crossed\""
-    },
-    {
       "t": 94,
       "kind": "arrive",
       "id": "mega-burger"
-    },
-    {
-      "t": 94,
-      "kind": "caption",
-      "text": "Arrival"
     }
   ]
 }

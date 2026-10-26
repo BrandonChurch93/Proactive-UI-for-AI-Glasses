@@ -35,7 +35,7 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     expect(at('show goldies-counter label')).toBeCloseTo(2.0, 5);
     expect(at('demote goldies-counter pip')).toBeCloseTo(4.5, 5);
     expect(at('show mega-burger label')).toBeCloseTo(14.3, 5);
-    expect(at('promote mega-burger card')).toBeCloseTo(14.8, 5);
+    expect(at('promote mega-burger card')).toBeCloseTo(15.3, 5);
     expect(at('save mega-burger card')).toBeCloseTo(22.0, 5);
     expect(at('demote mega-burger label')).toBeCloseTo(31.1, 5);
     expect(at('demote mega-burger pip')).toBeCloseTo(33.9, 5);

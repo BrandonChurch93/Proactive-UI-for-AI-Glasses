@@ -43,7 +43,7 @@ Category is hinted by pip color only. Cards never change color by category. Sema
 | Token | Family | Use |
 | --- | --- | --- |
 | `--font-ui` | Instrument Sans | All words |
-| `--font-mono` | Martian Mono | All live numbers, times, counts, the pavement text, the held glyph, captions |
+| `--font-mono` | Martian Mono | All live numbers, times, counts, the pavement text, the held glyph |
 | `--font-sign` | Archivo Black | World signage only (marquee, blade signs). Never in the overlay |
 
 Both overlay families are vendored as OFL font files in `apps/web/public/fonts` (listed in `LICENSES.md`) with real fallback stacks; nothing loads from the network. Tabular numerals wherever a number updates.
@@ -64,7 +64,6 @@ Scale:
 | Pavement text | 34px mono | 500 | .16em |
 | Whisper line | 15px (number in mono) | 400 | 0 |
 | Pocket header | 11.5px mono | 500 | .04em |
-| Caption (reviewer chrome) | 10.5px mono | 400 | .1em uppercase |
 
 Minimum 12px on a label, 14px in cards for anything that must be read while walking. Sizes are at the reference scale; the overlay scales with distance (see 5. Placement).
 
@@ -240,7 +239,6 @@ Screen scale: sizes above are at the reference view of 1280 × 800. Every pane, 
 | Map tile | View | Glance | Only for a turn the wearer cannot see |
 | Message toast | View | Glance, card | Sender, one line, reply or later; enters from the edge; allowed in any band but Brisk |
 | Notification strip | View | Glance | "3 notifications · later"; social only surfaces stopped |
-| Call toast | View | Card | Answer, decline; interrupts a walk, never a crossing; view zone, so allowed in Walk |
 | Ask glance | View edge | Glance | One line, two choices; only in Just walking, at the first stop after two food places have been looked at |
 | Reminder | World | Label, card | Tied to a place when passing one |
 | Title screen | View | n/a | Over the live street; not a brain component |
@@ -270,6 +268,6 @@ Target: a real-time Three.js street that a reviewer mistakes for a game at first
 
 ## 9. Reviewer chrome
 
-The inspector, captions, the `I · INSPECTOR` hint and the title bar are not glasses UI. Every size in them multiplies by `max(1, --ui)` (section 5, Screen scale).
+The inspector, the `I · INSPECTOR` hint and the title bar are not glasses UI. Every size in them multiplies by `max(1, --ui)` (section 5, Screen scale).
 
-The start screen is a panel on the left: 40% of the width (520 to 760 px at scale 1), full height, `#0e1216` at .94 with a 1 px `#1d2228` rule on its right edge, 48 px side padding and 32 px top and bottom at scale 1. Type at scale 1: subtitle Martian Mono 11 px caps in the accent, name 56 px / 600, setting 17 px, section heads Martian Mono 13 px caps, "What this is" 14 px with 11 px mono keys in the accent, choice cards 17 px names with "90 s" in 11 px mono at the right and 13 px lines, a 2 x 2 grid, controls 12 px with mono keys, footer 12 px. The street beside it is never dimmed; below 900 px wide the panel spans the view and the street behind drops to 40% brightness. It slides in from the left over `t-scene` with its text resolving top to bottom (the condense blur, 120 ms apart) and slides out over 450 ms. The end screen uses the same panel; behind it the street holds its last frame dimmed to 35% (the only place the street is ever dimmed besides the narrow start screen, both reviewer chrome) and the glasses are hidden. Its timeline is 36 px at scale 1: 2 px ticks in `--ink` for cards and in `--voice` at 50% for holds, crossings shaded `#1d2228`, the bands a 1 px stepped line under it, mono labels 0:00 and 1:30; it draws left to right over 900 ms `power2.out` and the ticks rise as the draw reaches them. "What it decided" is 13 px mono caps over 14 px lines, the reason in `--voice`. The Watch caption strip sits at the bottom center: Martian Mono 11 px caps on the same panel material, one line, fading over 320 ms. They use a plain dark panel style: `#0e1216` surfaces, `#1d2228` rules, Instrument Sans, Martian Mono for data, `#f0b429` for the one accent. They must never be mistaken for part of the world. The pace band readout and the focus zone outline (both reviewer chrome, both off by default) use the same style.
+The start screen is a panel on the left: 40% of the width (520 to 760 px at scale 1), full height, `#0e1216` at .94 with a 1 px `#1d2228` rule on its right edge, 48 px side padding and 32 px top and bottom at scale 1. Type at scale 1: subtitle Martian Mono 11 px caps in the accent, name 56 px / 600, setting 17 px, section heads Martian Mono 13 px caps, "What this is" 14 px with 11 px mono keys in the accent, choice cards 17 px names with "90 s" in 11 px mono at the right and 13 px lines, a 2 x 2 grid, controls 12 px with mono keys, footer 12 px. The street beside it is never dimmed; below 900 px wide the panel spans the view and the street behind drops to 40% brightness. It slides in from the left over `t-scene` with its text resolving top to bottom (the condense blur, 120 ms apart) and slides out over 450 ms. The end screen uses the same panel; behind it the street holds its last frame dimmed to 35% (the only place the street is ever dimmed besides the narrow start screen, both reviewer chrome) and the glasses are hidden. Its timeline is 36 px at scale 1: 2 px ticks in `--ink` for cards and in `--voice` at 50% for holds, crossings shaded `#1d2228`, the bands a 1 px stepped line under it, mono labels 0:00 and 1:30; it draws left to right over 900 ms `power2.out` and the ticks rise as the draw reaches them. "What it decided" is 13 px mono caps over 14 px lines, the reason in `--voice`.

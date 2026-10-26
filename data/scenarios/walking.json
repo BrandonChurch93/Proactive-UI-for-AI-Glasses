@@ -68,35 +68,6 @@
       "id": null
     },
     {
-      "t": 38,
-      "kind": "people",
-      "id": "conversation",
-      "count": 2,
-      "onPath": true,
-      "until": 46
-    },
-    {
-      "t": 40,
-      "kind": "inbox",
-      "type": "text",
-      "id": "maya-lunch",
-      "from": "Maya",
-      "text": "Lunch tomorrow?"
-    },
-    {
-      "t": 48,
-      "kind": "inbox",
-      "type": "call",
-      "id": "maya-call",
-      "from": "Maya"
-    },
-    {
-      "t": 51,
-      "kind": "choice",
-      "id": "maya-call",
-      "action": "decline"
-    },
-    {
       "t": 55.5,
       "kind": "lookUp",
       "seconds": 2.6

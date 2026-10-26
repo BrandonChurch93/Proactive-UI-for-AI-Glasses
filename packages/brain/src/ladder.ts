@@ -75,6 +75,8 @@ export interface LadderInput {
   visible?: boolean;
   far?: boolean;
   cardWait?: boolean;
+  growS?: number;
+  still?: boolean;
 }
 
 export interface LadderOut {
@@ -83,11 +85,11 @@ export interface LadderOut {
   gaze: boolean;
 }
 
-export function earnedByDwell(it: LadderItem, t: number, dwellS: number, band: Band, far: boolean, cfg: Config): PaneLevel {
-  if (dwellS < cfg.ladder.pipDwellS - 1e-9) return 'none';
-  if (band === 'brisk' || rank(it.level) < rank('label')) return 'label';
-  const held = t - Math.max(it.since, it.gazeSince ?? t);
-  return held >= cfg.ladder.growS - 1e-9 ? 'card' : 'label';
+export function earnedByDwell(it: LadderItem, inp: LadderInput, cfg: Config): PaneLevel {
+  if (inp.dwellS < cfg.ladder.pipDwellS - 1e-9) return 'none';
+  if (inp.band === 'brisk' || inp.still || rank(it.level) < rank('label')) return 'label';
+  const held = inp.t - Math.max(it.since, it.gazeSince ?? inp.t);
+  return held >= (inp.growS ?? cfg.ladder.growS) - 1e-9 ? 'card' : 'label';
 }
 
 export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
@@ -96,7 +98,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
   const held = t - it.since < cfg.ladder.minShownS - 1e-9;
   if (inp.target && !visible) return { level: maxLevel(it.level, 'pip'), via: 'hidden', gaze: true };
   if (inp.target) {
-    let earned = earnedByDwell(it, t, inp.dwellS, band, Boolean(inp.far), cfg);
+    let earned = earnedByDwell(it, inp, cfg);
     if (
       it.level === 'card' &&
       !inp.far &&

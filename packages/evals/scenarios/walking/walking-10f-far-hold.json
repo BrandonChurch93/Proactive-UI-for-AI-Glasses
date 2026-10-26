@@ -1,0 +1,11 @@
+{
+  "id": "walking-10f-far-hold",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 6,
+  "description": "A place beyond 35 m needs a full second of hold on its label before it grows; a place 31 m away needs half a second.",
+  "startN": 9,
+  "only": ["trattoria-da-lia", "grace-theater"],
+  "pace": [[0, 0]],
+  "gaze": [[1, "trattoria-da-lia"], [3.5, "grace-theater"]]
+}

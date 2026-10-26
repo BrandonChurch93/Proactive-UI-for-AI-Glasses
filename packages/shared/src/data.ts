@@ -78,7 +78,7 @@ export type Beat =
   | (BeatBase & { kind: 'signal'; leg: Leg; state: SignalState; secondsLeft: number })
   | (BeatBase & {
       kind: 'inbox';
-      type: 'text' | 'dm' | 'social' | 'app' | 'call';
+      type: 'text' | 'dm' | 'social' | 'app';
       id?: string;
       from?: string;
       text?: string;
@@ -98,7 +98,6 @@ export type Beat =
   | (BeatBase & { kind: 'people'; id: string; count: number; onPath: boolean; until: number })
   | (BeatBase & { kind: 'lookUp'; seconds: number })
   | (BeatBase & { kind: 'ask'; answer: 'yes' | 'no'; answerAt: number })
-  | (BeatBase & { kind: 'caption'; text: string })
   | (BeatBase & { kind: 'bike'; side: 'near' | 'far'; fromBehind: boolean; timeToPath: number });
 
 export type BeatKind = Beat['kind'];
@@ -132,7 +131,6 @@ const BEAT_KINDS: readonly BeatKind[] = [
   'people',
   'lookUp',
   'ask',
-  'caption',
   'bike',
 ];
 

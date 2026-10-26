@@ -313,7 +313,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (b.budget > a.budget) refills += b.budget - a.budget;
       }
       const exempt = (d: Decision): boolean =>
-        d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.component === 'call' || d.cause === 'gate' || d.cause === 'arrival';
+        d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'gate' || d.cause === 'arrival';
       const bound = r.entries.filter((e) => isShow(e.decision) && !exempt(e.decision)).length;
       if (bound > cfg.budget.shows + refills) return `${bound} budgeted shows > ${cfg.budget.shows} + ${refills}`;
       return null;
@@ -350,7 +350,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     check: (r) => {
       for (const e of r.entries) {
         const d = e.decision;
-        if (d.component !== 'toast' && d.component !== 'call') continue;
+        if (d.component !== 'toast') continue;
         if (d.action === 'show' && d.band !== 'stopped' && d.timing !== 'next-pause') return `t=${e.t} ${d.id} timing ${d.timing} while moving`;
         if (d.action === 'hold' && d.reason.kind === 'gate' && d.reason.text !== 'Snoozed' && d.timing !== 'after-gate') return `t=${e.t} ${d.id} held in a gate as ${d.timing}`;
       }
@@ -363,7 +363,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     check: (r) => {
       for (const f of r.frames) {
         if (!f.gate.path) continue;
-        const shown = r.entries.find((e) => Math.abs(e.t - f.t) < 1e-6 && e.decision.action === 'show' && (e.decision.component === 'toast' || e.decision.component === 'call'));
+        const shown = r.entries.find((e) => Math.abs(e.t - f.t) < 1e-6 && e.decision.action === 'show' && e.decision.component === 'toast');
         if (shown) return `t=${f.t} ${shown.decision.id} shown with someone on the path`;
       }
       return null;

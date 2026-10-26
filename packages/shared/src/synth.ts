@@ -70,9 +70,10 @@ export function synthesize(spec: CaseSpec, hz = 10): WorldSnapshot[] {
     for (const l of spec.live ?? []) if (Math.abs(l.t - t) < dt / 2) Object.assign(live.get(l.id) ?? {}, l.set);
     const x = crossing && spec.crossing ? BLOCK.wearerX - ((t - spec.crossing[0]) / (spec.crossing[1] - spec.crossing[0])) * 16.6 : BLOCK.wearerX;
     const pos = v3(x, 1.68, zOf(n));
-    const yaw = step(spec.yaw, t, 0);
-    const yawRate = i === 0 ? 0 : (yaw - prevYaw) / dt;
-    prevYaw = yaw;
+    const turned = step(spec.yaw, t, 0);
+    const yawRate = i === 0 ? 0 : (turned - prevYaw) / dt;
+    prevYaw = turned;
+    const yaw = spec.yaw ? turned : gazeId && i > 0 ? 0.12 : 0;
     const entities: Entity[] = PLACES.filter((p) => !spec.only || spec.only.includes(p.id)).map((p) => {
       const a = placeAnchor(p);
       const e: Entity = {

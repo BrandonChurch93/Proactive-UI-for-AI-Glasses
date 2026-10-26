@@ -6,7 +6,7 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- 2026-10-26 · Phase 18 (`docs/plan-ux-rework.md` section 7) done: 18.3, 18.1, 18.2, 18.4, 18.5, each committed on `build`, nothing pushed. The Final section ends with the Phase 18 paragraph. Nothing is in progress.
+- 2026-10-26 · Phase 18 accepted. Now: Phase 19 (`docs/plan-ux-rework.md` section 8, one walk): 19.0 and 19.1, then 19.2 to 19.6 in order, a STATUS entry and a commit after each, then a Final paragraph and stop. 19.7 (V3 in Figma) waits for the owner's approval.
 - Measuring the bar: `sh scripts/barall.sh http://localhost:5199/` runs `scripts/bar.ts` (now with the three Phase 17 rows: pane frames partly outside the view above 20% opacity, pane frames over the chrome, scale changes per pane inside 2.5 s, and since 18.1 labels per settle and cards grown per second) on all three walks at 1920 x 1080 and 3840 x 2160 (live: the head follows the beat sheet's aims through the live gaze path, stepped frame by frame) and the look probes. `scripts/shots.ts --base http://localhost:5199 --scenario <walk> --times a,b,c` takes beat stills; `scripts/devices.ts` runs the device matrix (13 sizes); `scripts/endshot.ts --scenario <walk>` shoots a scripted walk's end screen. The dev server is `cd apps/web && npx vite --port 5199`; the first load after a fresh start reloads once, so run a script twice if it fails.
 - Readings of the bar adopted: "one level change per 2.5 s" exempts gates, dismissals, look-away, dwell and pinch climbs, the world's right of way (a keep-out drop and its return), a return when the wearer looks back or the anchor comes back into view, and a hide of a pane no longer looked at.
 - Open decisions: none.
@@ -92,6 +92,15 @@ Each is written into the doc it changes (look for "As built").
 ## Reviews
 
 One entry per phase check: what you compared, what differed from the reference or the docs, what you fixed.
+
+### Phase 19.0 · 2026-10-26 · cuts (UX rework)
+- Watch and its captions: gone (the title's fourth card, the app mode, the caption strip, the `caption` beat kind, Play it yourself). The attract loop stays.
+- The call: gone (the `call` component, notification type and origin, its pane, its two focused evals, and the call in the budget-empty case). The social strip stays.
+- The conversation on the path and the text held behind it: gone from the Just walking file and its expectations. The social gate and its focused eval (`gate-conversation`, `note-text-behind-people`) stay.
+- Range reversed: any place in view within 70 m can be looked at live. Beyond 35 m a label needs 1.0 s of hold to grow (`ladder.growFarS`), and no label grows until the head has moved 5° (`ladder.moveRad`) since the walk began (the lap reset comes with 19.2). Synthesized cases model a look as the head turned 0.12 rad from the second tick on, and the walk begins facing forward. New suites: `walking-10f-far-hold` (36 m: card 1.0 s after the label; 26 m: 0.5 s) and `walking-10g-head-still` (a still head: label, no card). Hungry's compact card on Mega Burger (58 m) now grows at 15.5 recorded (was 14.8); the stale "no card at 0:16" case, which contradicted 18.2, is removed.
+- Bar fix: the scale-change row now forgets a pane's scale whenever it is not drawn, so a new life or a return after a fold at a new distance is not counted as a change (it reported 2 for the station at Hungry 0:39 for that reason).
+- Bar, live, 1920 x 1080 / 3840 x 2160, all three walks: every row at its bar (0 fast level changes, 1 birth per life, 0.0% far or over the road, 0 outside the view, 0 over the chrome, at most 1 scale change, 0 promotions while hidden, 3 dots, cards per second 1, 0 console errors).
+- Check: pnpm test 49, pnpm eval 41/41 (960 checks), lint and build green.
 
 ### Phase 18.5 · 2026-10-26 · the end screen (UX rework)
 - Backdrop: yes. The street holds its last frame and dims to 35% under the panel (reviewer chrome); the glasses layer and the in-scene lights are hidden (`Walk.setGlassesVisible`), and come back when the end screen leaves.
@@ -328,6 +337,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-26 · Phase 19.0 done. Watch, the call and the conversation beat cut; gaze to 70 m again with a 1.0 s grow beyond 35 m and a 5° head-moved gate. Docs rewritten: walking-rules 10, brain-spec 4.5, overlay-spec (panes, view edge, gaze), copy, scenarios, design-system, brief, world-spec, evals.
 - 2026-10-26 · Phase 18.5 done. Decisions: the end screen reuses the start panel over the dimmed last frame; counts recomputed from the log; card promotes count as shows in What it decided, one per name; See every decision opens the Shows filter at the first show. Docs rewritten: copy (Arrival and end), scenarios (End screen), design-system 9, inspector-spec (from the end screen).
 - 2026-10-26 · Phase 18.4 done. Decisions: the start screen is a left panel in reviewer chrome; Watch plays Hungry with ten captions and ends on the end screen with Play it yourself; the first caption says three lights, not four; panel padding 32 px vertical so it fits 800 units at every desktop size; no skip label. Docs rewritten: copy (Title screen, Captions), scenarios (Opening), design-system 9.
 - 2026-10-26 · Phase 18.2 done. Decisions: gaze reaches 70 m for lit places, 35 m for the rest; the compact card beyond 30 m never expands and becomes the full card in place; distance floor 0.7, never below scale 1. Conflict noted: the Hungry 0:26 resize is geometrically impossible on this route. Docs rewritten: walking-rules 10, brain-spec 4.5, overlay-spec 3 and gaze, design-system 5 and 6, copy (card), scenarios (Hungry 0:14).

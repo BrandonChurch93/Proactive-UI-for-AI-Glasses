@@ -20,6 +20,9 @@ export interface Config {
   };
   ladder: {
     growS: number;
+    growFarS: number;
+    nearM: number;
+    moveRad: number;
     swapGapS: number;
     cardHoldS: number;
     lookAwayS: number;
@@ -67,6 +70,9 @@ export const DEFAULT_CONFIG: Config = {
   },
   ladder: {
     growS: 0.5,
+    growFarS: 1,
+    nearM: 35,
+    moveRad: 0.0873,
     swapGapS: 1,
     cardHoldS: 2,
     lookAwayS: 1.2,

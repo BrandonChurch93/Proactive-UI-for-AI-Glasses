@@ -1,0 +1,12 @@
+{
+  "id": "walking-10g-head-still",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 5,
+  "description": "Until the head has moved 5 degrees since the walk began, a look lights a label and nothing grows.",
+  "startN": 20,
+  "only": ["grace-theater"],
+  "pace": [[0, 0]],
+  "yaw": [[0, 0]],
+  "gaze": [[1, "grace-theater"]]
+}

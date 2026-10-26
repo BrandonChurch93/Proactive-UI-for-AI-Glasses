@@ -135,14 +135,6 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       push(actions(c, d.id, h));
       return { cls: s.toast!, kids, why: w };
     }
-    case 'call': {
-      const head = node('div', s.row);
-      head.appendChild(keyed(node('div', `${s.toastFrom} ${s.t}`, c.name), 'name'));
-      if (c.fact) head.appendChild(keyed(node('div', `${s.year} ${s.t}`, c.fact.toUpperCase()), 'fact'));
-      push(head);
-      push(actions(c, d.id, h));
-      return { cls: s.toast!, kids, why: null };
-    }
     case 'strip': {
       push(keyed(node('div', `${s.toastFrom} ${s.t}`, c.name), 'name'));
       if (c.fact) push(keyed(node('div', `${s.stripCount} ${s.t}`, c.fact), 'fact'));

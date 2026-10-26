@@ -77,17 +77,6 @@
       }
     },
     {
-      "name": "0:16 \u00b7 no card at 50 m: a far place keeps its label until it is within 30 m",
-      "between": [
-        15.5,
-        18.5
-      ],
-      "mustNot": {
-        "id": "mega-burger",
-        "level": "card"
-      }
-    },
-    {
       "name": "0:22 \u00b7 pinch while walking saves",
       "between": [
         21.9,
@@ -134,10 +123,10 @@
       }
     },
     {
-      "name": "0:14.5 \u00b7 half a second later, a compact card: no reason, no rows, 58 m away",
+      "name": "0:15 \u00b7 a second of hold later (it is beyond 35 m), a compact card: no reason, no rows, 58 m away",
       "between": [
-        14.5,
-        15.5
+        15,
+        16
       ],
       "must": {
         "action": "promote",

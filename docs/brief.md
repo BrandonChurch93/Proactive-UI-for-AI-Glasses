@@ -54,7 +54,7 @@ In the roadway, or a vehicle approaching the path: everything recedes in one mot
 
 ## Messages and notifications
 
-A text from a person: glance at the next safe moment. Social: never one by one; a count on the glyph, one strip when stopped. A call: interrupts a walk, never a crossing, world untouched. App updates: batched under whatever is open.
+A text from a person: glance at the next safe moment. Social: never one by one; a count on the glyph, one strip when stopped. App updates: batched under whatever is open.
 
 ## Navigation
 

@@ -3,7 +3,7 @@
   "rule": "gates",
   "scenario": "hungry",
   "duration": 8,
-  "description": "Budget at zero: proactive content holds; a call and a dwell still come through.",
+  "description": "Budget at zero: proactive content holds; a look still comes through.",
   "startN": 4,
   "pace": [
     [
@@ -16,14 +16,6 @@
       4,
       "kathys-cupcakes"
     ]
-  ],
-  "inbox": [
-    {
-      "t": 3,
-      "id": "maya-call",
-      "type": "call",
-      "from": "Maya"
-    }
   ],
   "config": {
     "budget": {

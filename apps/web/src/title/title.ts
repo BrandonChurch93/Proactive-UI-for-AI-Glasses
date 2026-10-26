@@ -4,13 +4,12 @@ import css from './title.module.css';
 
 export const SCENARIO_NAMES: Record<ScenarioId, string> = { hungry: 'Hungry', errands: 'Errands', walking: 'Just walking' };
 
-export type Choice = ScenarioId | 'watch';
+export type Choice = ScenarioId;
 
 const CHOICES: { id: Choice; name: string; line: string }[] = [
   { id: 'hungry', name: 'Hungry', line: 'Find a place and get there.' },
   { id: 'errands', name: 'Errands', line: 'Three stops, one route.' },
   { id: 'walking', name: 'Just walking', line: 'See what it does when you want nothing.' },
-  { id: 'watch', name: 'Watch', line: 'Sit back. Ninety seconds with captions.' },
 ];
 
 const WHAT: [string, string][] = [
@@ -219,7 +218,6 @@ export class TitleScreen {
 
 export interface EndStats {
   scenario: ScenarioId;
-  watched: boolean;
   duration: number;
   places: number;
   cards: number;
@@ -235,7 +233,6 @@ export interface EndStats {
 export interface EndHandlers {
   again(): void;
   choose(id: ScenarioId): void;
-  play(): void;
   inspect(t: number, id: string): void;
 }
 
@@ -346,10 +343,9 @@ export class EndCard {
       actions.appendChild(b);
       return b;
     };
-    if (st.watched) button('Play it yourself', () => this.h.play(), true);
     if (st.first) {
       const f = st.first;
-      button('See every decision', () => this.h.inspect(f.t, f.id), !st.watched);
+      button('See every decision', () => this.h.inspect(f.t, f.id), true);
     }
     button('Walk again', () => this.h.again());
     for (const id of (['hungry', 'errands', 'walking'] as const).filter((x) => x !== st.scenario)) button(SCENARIO_NAMES[id], () => this.h.choose(id));

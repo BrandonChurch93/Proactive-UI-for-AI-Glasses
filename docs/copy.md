@@ -10,7 +10,7 @@ A panel on the left, reviewer chrome, over the live street; top to bottom:
 - Name: **Proactive UI for AI Glasses**
 - Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
 - What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
-- Choose a walk (mono caps), four cards, each with "90 s": Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing. / Watch · Sit back. Ninety seconds with captions.
+- Choose a walk (mono caps), three cards, each with "90 s": Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing.
 - Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
 - Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
 - Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)
@@ -75,9 +75,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 ## Messages
 
 - Text (Hungry): Maya · Running 10 late, order me the usual? · Reply · Later
-- Text (Just walking, held behind the conversation): Maya · Lunch tomorrow? · Reply · Later
 - DM (Errands, held in the crossing): Jules · Still on for tonight? · Reply · Later
-- Call: Maya · Calling · Answer · Decline
 - App: Package delivered · Front desk · 1 more / Order ready · 1 more
 
 ## What each place says
@@ -130,11 +128,9 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 
 - Seat's held, inside on the left.
 - End screen, in the start screen's panel: {Scenario} / In ninety seconds the glasses saw {places} places, showed you {cards}, held {held} while you crossed, and saved {saved} for the red light. (any clause whose number is zero is dropped; with nothing left: In ninety seconds the glasses stayed quiet.) / the timeline, 0:00 and 1:30 / What it decided (mono caps), three lines: {time} · {name} · {reason line} / See every decision · Walk again · {other two} · About
-- End after Watch: Play it yourself first, then the same buttons
 
 ## Reviewer chrome
 
 - I · INSPECTOR
-- Captions (Watch only, `caption` beats in `data/scenarios/hungry.json`, shown 6 s each): 0:02 Three lunch spots lit · the brain says one thing / 0:14 Looking at Mega Burger · it opens / 0:22 Pinch while walking · saved for later / 0:36 Light about to change · nothing new / 0:44 Brisk · one line at the bottom, no cards / 0:58 Red light · the pocket surfaces / 1:06 Hold a seat · the route draws / 1:14 Crossing · everything recedes / 1:24 Far curb · "Held that while you crossed" / 1:34 Arrival
 - Pace readout (reviewer chrome, off by default): PACE · WALK · 1.4 M/S
 - Inspector headers: Timeline · Decisions · Signals · Overrides · Evals · Export

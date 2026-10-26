@@ -11,7 +11,7 @@ packages/evals
     errands.walk.json
     walking.walk.json
     gates/*.json              short, focused cases: crossing, bike, conversation, budget empty
-    notifications/*.json      text at a light, DM in a crossing, social accumulation, call during a walk
+    notifications/*.json      text at a light, DM in a crossing, social accumulation
     moments/*.json            pace to signal, bus, which stairs (whisper), closed early, sidewalk closed, bike
     walking/*.json            one case per walking rule: focus zone per band, reading budget, auto-fold, peripheral entry, head scan, pocket save, pocket surface, right of way, backdrop, dwell ladder, whisper, snooze, budget
   expectations/
