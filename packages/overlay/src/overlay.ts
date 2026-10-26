@@ -58,6 +58,7 @@ interface Built {
   watch: ResizeObserver | null;
   tl?: gsap.core.Timeline;
   still?: boolean;
+  scale?: number;
 }
 
 interface Item {
@@ -954,9 +955,10 @@ export class Overlay {
             if (b.off && pr && nearView && !b.still) rect = { ...(b.rect ?? { w: 0, h: 0 }), x: pr.x + b.off.x, y: pr.y + b.off.y } as Rect;
             else if (b.rect) rect = b.rect;
             else continue;
-            scale = it.placed?.scale ?? 1;
+            scale = b.scale ?? it.placed?.scale ?? 1;
           } else {
             scale = placed.scale;
+            b.scale = scale;
             const w = b.w.at(t) * scale;
             const h = b.h.at(t) * scale;
             const at = corner ?? { x: placed.rect.x + placed.rect.w * fx, y: placed.rect.y + placed.rect.h * fy };
@@ -981,7 +983,7 @@ export class Overlay {
           const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
           scale = ui;
-          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0);
+          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0, ui);
           if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.h.at(t) * ui };
           if (b === it.cur) {
             const y = it.yieldS.update(t, yieldSide, rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right');

@@ -1,4 +1,4 @@
-import { isShow, type ScenarioId } from '@lumen/shared';
+import { isShow, uiScale, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
@@ -81,6 +81,7 @@ export class App {
 
   resize(): void {
     this.walk.sim.viewport = { w: innerWidth, h: innerHeight };
+    document.documentElement.style.setProperty('--ui', uiScale({ w: innerWidth, h: innerHeight }).toFixed(3));
     const upright = innerWidth < innerHeight && innerWidth < 700;
     if (upright === this.upright) return;
     this.upright = upright;

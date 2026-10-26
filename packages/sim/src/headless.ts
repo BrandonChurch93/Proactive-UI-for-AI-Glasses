@@ -208,7 +208,7 @@ export class HeadlessView {
     for (const d of this.frame?.items ?? []) {
       if (d.placement.zone !== 'view' || d.placement.anchor !== 'view:edge-top') continue;
       const size = VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!;
-      const r = placeView('view:edge-top', size, vp, stack.get('top') ?? 0);
+      const r = placeView('view:edge-top', size, vp, stack.get('top') ?? 0, 0, uiScale(vp));
       stack.set('top', (stack.get('top') ?? 0) + 1);
       below = Math.max(below, r.y + r.h + 10);
     }
@@ -220,7 +220,7 @@ export class HeadlessView {
         const size = d.level === 'expanded' ? NOMINAL_SIZE.expanded : (VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!);
         const i = stack.get(slot) ?? 0;
         stack.set(slot, i + 1);
-        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i, slot === 'view:edge-right' ? below : 0)), opacity: 1, gaze: Boolean(d.gaze), visible: true });
+        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i, slot === 'view:edge-right' ? below : 0, uiScale(vp))), opacity: 1, gaze: Boolean(d.gaze), visible: true });
         continue;
       }
       const p = this.items.get(d.id)?.pane;

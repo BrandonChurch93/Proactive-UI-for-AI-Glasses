@@ -13,6 +13,8 @@ const DEVICES: { name: string; w: number; h: number; dpr: number; touch: boolean
   { name: 'laptop-small', w: 1024, h: 768, dpr: 2, touch: false },
   { name: 'desktop', w: 1920, h: 1080, dpr: 1, touch: false },
   { name: 'ultrawide', w: 2560, h: 1080, dpr: 1, touch: false },
+  { name: 'qhd', w: 2560, h: 1440, dpr: 1, touch: false },
+  { name: 'uhd', w: 3840, h: 2160, dpr: 1, touch: false },
 ];
 
 const base = arg('base', 'http://localhost:5173/')!;

@@ -51,7 +51,8 @@ export const NOMINAL_SIZE: Record<'glance' | 'card' | 'expanded', { w: number; h
 export const REFERENCE_VIEW = { w: 1280, h: 800 };
 
 export function uiScale(vp: Viewport): number {
-  return clamp(Math.min(vp.w / REFERENCE_VIEW.w, vp.h / REFERENCE_VIEW.h) * 1.3, 0.74, 1);
+  const s = Math.min(vp.w / REFERENCE_VIEW.w, vp.h / REFERENCE_VIEW.h);
+  return s < 1 ? clamp(s * 1.3, 0.74, 1) : clamp(s, 1, 1.9);
 }
 
 export function distanceScale(distance: number): number {
@@ -175,16 +176,17 @@ export function placeWorld(inp: PlaceInput): Placed {
 
 export type ViewSlot = 'view:edge-right' | 'view:edge-top' | 'view:glyph' | 'view:bottom';
 
-export function placeView(slot: string, size: { w: number; h: number }, vp: Viewport, stackIndex = 0, below = 0): Rect {
+export function placeView(slot: string, size: { w: number; h: number }, vp: Viewport, stackIndex = 0, below = 0, ui = 1): Rect {
   const { w, h } = size;
+  const gap = 10 * ui;
   switch (slot) {
     case 'view:edge-top':
-      return { x: vp.w - 24 - w, y: 56 + stackIndex * (h + 10), w, h };
+      return { x: vp.w - 24 * ui - w, y: 56 * ui + stackIndex * (h + gap), w, h };
     case 'view:glyph':
-      return { x: MARGIN, y: vp.h - 44 - h, w, h };
+      return { x: MARGIN * ui, y: vp.h - 44 * ui - h, w, h };
     case 'view:bottom':
       return { x: (vp.w - w) / 2, y: vp.h - vp.h * 0.09 - h, w, h };
     default:
-      return { x: vp.w - 24 - w, y: Math.max(vp.h * 0.2, below) + stackIndex * (h + 10), w, h };
+      return { x: vp.w - 24 * ui - w, y: Math.max(vp.h * 0.2, below) + stackIndex * (h + gap), w, h };
   }
 }

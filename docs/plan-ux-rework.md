@@ -186,3 +186,71 @@ The owner and a second reviewer played the Phase 16 build (beat stills of all th
 7. **The Kathy's beat.** The scripted look at Just walking 0:30 stares at a blank awning fascia from 2 m, the glance arrives 1.3 s later and lives 0.5 s in the top-right corner. Move the gaze beat to 0:27.5 from about 8 m away (the frontage, not the fascia), hold it 2.5 s, and let the look move on at 0:30. Update `docs/scenarios.md` and the Just walking eval windows.
 
 Done: the four frames in item 1 and the two in item 2 re-shot and clean; the Trattoria look-away shot at 29.0, 29.2, 29.4 shows the card shrinking beside its sign and folding at the edge, never jumping; the three new bar rows at 0, 0 and at most 1 on all three walks at both sizes; `pnpm -w test`, `eval`, `lint`, `build` green; STATUS entry with the measured numbers; commit on `build`.
+
+## 7. Phase 18 · Look and see everything, and the two screens
+
+The owner played the Phase 17 build on a 4K monitor and asked for four things. They are one phase because the first two change what the overlay is, and the last two change how the project is read by the people it is for: hiring managers and engineers, not players. Read `CLAUDE.md`, this whole file and `docs/walking-rules.md` first. Rewrite the docs in place as before. No em dashes.
+
+### 18.1 · The attention model: labels, then one card
+
+Today a place at rest is a dot of light and a look starts a climb (glance, card, expanded), so the thing changes under the wearer before it can be read, and only the looked-at place answers. The new model:
+
+- **Dots stay sparse.** Awareness dots are unchanged: goal relevance 0.6 or more, or a scripted moment, at most three, lit in advance.
+- **Labels answer a look, together.** When the view settles (head yaw rate under 0.3 rad/s for 300 ms), every roster place whose storefront is in view and within 70 m shows its **label** at the same moment: the name and the `short` line, beside its storefront, scaled by distance (18.2). Up to six labels, nearest first. Labels are born with the condense move and die with the dissolve, all together on one timeline, staggered 40 ms by distance. Labels fade back to dots when the view moves on (yaw rate above 0.6 rad/s for 200 ms) or after 4 s of walking with no label under the center of the view; at Stopped they stay.
+- **The center grows.** The label under the center of the view (the gaze target, with Phase 12's 250 ms grace) grows into its **card** after 0.5 s of hold. Looking at another label shrinks the current card back to a label and grows the new one in one coordinated move: shrink and grow start together, 420 ms. One card at a time, always the one under the center.
+- **Cards hold.** A card holds at least 2.0 s before it can expand (`ladder.cardHoldS = 2.0`); expanded comes after 2.0 s more of hold at Stopped or Stroll, or on a pinch at any time in those bands. Looking away from a card shrinks it to its label (not to a dot) over 320 ms; the label then follows the label rules.
+- **Walking rules underneath.** Brisk: labels are the whisper form (name and one number) and never a card. The focus zone (rule 1) applies to labels while moving: a label whose place is inside the zone waits as a dot unless it is the gaze target; at Stopped and Stroll every label shows. Yield (rule 5), right of way (rule 8), the gates, the pocket and the notifications are unchanged. Labels are not shows for rule 13; cards and expanded views earned by a look stay free, as in Phase 14.
+- **Where it lives.** The brain emits `label` as a level between `pip` and `glance` (`packages/shared/src/types.ts`, `LEVEL_RANK`); `glance` is retired for places (the view-zone glances, toasts and whispers keep their components). The settle detector lives in `packages/sim/src/sim.ts` beside `updateGaze` so the scripted reviewer and live play share it; the brain reads `wearer.gaze.settled` from the snapshot. The label content is `glanceContent` with the short line; the card and expanded anatomies from Phase 15 are unchanged.
+- **Docs.** `docs/walking-rules.md` pace table and rule 10 rewritten around label, card, expanded; `docs/brain-spec.md` 3 and 4.5; `docs/design-system.md` 6 (components) and 4 (a "Labels" move: the shared timeline); `docs/brief.md` detail levels; `docs/scenarios.md` beats that say "glance".
+- **Evals.** Rewrite rule 10's ladder cases for the new levels and timings; add one case: a settled view over three places shows three labels within 0.5 s of settle and exactly one card after 0.5 s more; moving the gaze to a second place swaps the card within 0.5 s and the first is a label again. Keep the banned-word and copy checks.
+
+Done: live, on Just walking at 0:08 with the head turned to the theater row, three labels (theater, Trattoria, Lucky Lanes) appear together, the theater grows to its card at about 0.5 s, and moving the view to the Trattoria swaps the card with one shrink and one grow and no third state. Shot frame by frame at 1920 × 1080. Bar rows unchanged, plus: labels born per settle at most 6; card swaps per second at most 1.
+
+### 18.2 · Distance: anything lit can be looked at
+
+Phase 12's 35 m attention range and 30 m card limit left dots the wearer could see but not use. Remove `ATTENTION_M` in `apps/web/src/walk.ts`: any place in view within 70 m is a gaze candidate. Replace `cardWithinM` with a **compact card** beyond 30 m: name, say line and live line only, no rows, no reason, at the distance scale; the full card arrives when the place comes within 30 m, as a resize in place. Distance scale floor becomes 0.7 and is multiplied by the viewport scale from 18.3, so a far compact card is small but never under 12 px of text at any screen size.
+
+Done: Hungry at 0:14, view on Mega Burger (58 m): label at once, compact card after 0.5 s, beside the awning, not over the road; at 0:26 (under 30 m) it resizes to the full card in place with one morph.
+
+### 18.3 · Scale with the screen
+
+`uiScale` in `packages/shared/src/placement.ts` caps at 1.0, so on a 4K monitor every pane is laptop-sized in a frame three times bigger. New rule: `s = min(w / 1280, h / 800)`; below 1 keep today's `clamp(s × 1.3, 0.74, 1)`; above 1 use `clamp(s, 1, 1.9)`. The same value is set as `--ui` on the document root and drives the overlay, the held glyph, the whisper line, the chrome (Sound, Pause, the inspector hint, the pace readout), the title screen and the end screen. Everything that is in CSS pixels today in `apps/web/src/title/title.module.css` and the chrome styles multiplies by `var(--ui)`; the `clamp(..vw..)` sizes go. The focus zone, keep-outs and edge rules already take `ui`.
+
+Done: at 2560 × 1440 and 3840 × 2160 (device matrix rows added) the card's name reads at the same angular size as at 1280 × 800; nothing overlaps; `scripts/devices.ts` clean on all rows.
+
+### 18.4 · The start screen
+
+The audience reads before it plays. Keep the live street with the attract loop as the backdrop; put the words on a surface.
+
+- **Layout.** A panel on the left, 40 % of the width (min 520, max 760 CSS px at `--ui` 1), full height, reviewer chrome material (`#0e1216` at 0.94, a 1 px `#1d2228` rule on its right edge), 48 px padding at `--ui` 1. The street fills the rest, undimmed. No text sits over the street.
+- **Reading order inside the panel**, top to bottom, type at `--ui` 1:
+  1. Subtitle in Martian Mono caps 11 px (as now), then the name at 56 px / 600, then "You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet." at 17 px.
+  2. "What this is" · three lines at 14 px, each with a mono key: `BRAIN` A deterministic rules engine, not a model. Same walk, same decisions, every time. / `RULES` Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / `PROOF` Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
+  3. "Choose a walk" at 13 px mono caps, then four choice cards in a 2 × 2 grid, 17 px names: Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing. / **Watch** · Sit back. Ninety seconds with captions. Each card carries "90 s" in mono at the right.
+  4. Controls as one compact strip at 12 px: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector (touch wording on touch screens as today).
+  5. Footer at 12 px: "Built by Brandon Church · Three.js, TypeScript, GSAP · About this project" with About opening the existing panel; add a "Source" link if `README.md` names a repository URL, else leave it out.
+- **Watch.** Plays Hungry with the scripted reviewer, sound following the Sound control, and a caption strip in reviewer chrome at the bottom center (Martian Mono 11 px caps at `--ui` 1, the title's dark panel material, one line, 320 ms fade). Captions are a new `caption` beat kind in `data/scenarios/hungry.json`, ten of them, written into `docs/copy.md` under Captions (replace the current list): `0:02 Four lunch spots lit · the brain says one thing` / `0:14 Looking at Mega Burger · it opens` / `0:22 Pinch while walking · saved for later` / `0:36 Light about to change · nothing new` / `0:44 Brisk · one line at the bottom, no cards` / `0:58 Red light · the pocket surfaces` / `1:06 Hold a seat · the route draws` / `1:14 Crossing · everything recedes` / `1:24 Far curb · "Held that while you crossed"` / `1:34 Arrival`. Esc or a click ends Watch and returns to the start screen. Watch ends on the end screen with "Play it yourself" as the first button.
+- **Motion.** The panel slides in from the left over `t-scene` with the text revealing top to bottom (reuse the current stagger); choosing a walk slides the panel out and the walk starts within 2 s as today. The attract loop keeps running behind.
+- **Touch and small screens.** Below 900 px wide the panel becomes the full width with the street behind at 40 % brightness (this is reviewer chrome, not the glasses, so dimming is allowed here); the phone rotate prompt is unchanged.
+- **Docs.** `docs/copy.md` Title screen section rewritten with every line above; `docs/scenarios.md` Opening rewritten; `docs/design-system.md` 9 (reviewer chrome) gains the panel.
+
+Done: fresh screenshots at 1280 × 800, 1920 × 1080, 2560 × 1440 and 3840 × 2160 with the text legible and nothing over the street; Watch plays Hungry end to end with ten captions and lands on the end screen; the device matrix is clean.
+
+### 18.5 · The end screen
+
+The end is the payoff, not a menu. Replace the black screen.
+
+- **Backdrop.** The last frame of the street, held and dimmed to 35 % (reviewer chrome; allowed). The glasses overlay is hidden.
+- **Content**, in the same left panel as the start screen, so the two screens read as one piece:
+  1. The scenario name at 56 px, then one sentence built from the log at 17 px: "In ninety seconds the glasses saw {places} places, showed you {cards}, held {held} while you crossed, and saved {saved} for the red light." `places` is the number of roster places that came within 70 m; `cards` counts decisions at card or expanded level, not labels or whispers; `held` counts distinct items held during gates; `saved` is the pocket's count. Any zero clause is dropped from the sentence.
+  2. A timeline strip, full panel width, 36 px tall at `--ui` 1: ninety seconds left to right; a 2 px tick for every card or expanded show in `--ink`, a 2 px tick for every hold in `--voice` at 50 %, the gate periods shaded `#1d2228`, the bands drawn as a 1 px line under it whose height steps with the band. Mono labels `0:00` and `1:30`. Built from `walk.frames` in `apps/web/src/app.ts` beside `stats()`.
+  3. "What it decided" at 13 px mono caps, then the three shows with the highest score that carried a reason line, in time order, each as `time · name · reason line` at 14 px with the reason in `--voice`.
+  4. Buttons: **See every decision** (opens the inspector on this walk's log at its first show) · Walk again · the two other walks · About. After Watch, the first button is **Play it yourself**, which returns to the start screen with Hungry focused.
+- **Motion.** The panel slides in over `t-scene` as the street dims; the timeline draws left to right over 900 ms `power2.out`; the ticks pop in with the draw.
+- **Docs.** `docs/copy.md` Arrival and end rewritten; `docs/scenarios.md` End card rewritten; `docs/inspector-spec.md` notes the entry from the end screen.
+
+Done: all three walks end on the panel with a true sentence (checked against the inspector's counts), a timeline whose ticks match the log, three decisions with reason lines that pass the banned-word check, and "See every decision" opening the inspector at the first show; screenshots at the four sizes.
+
+### 18.6 · Order and checks
+
+18.3 first (everything after is measured at the new scale), then 18.1, 18.2, 18.4, 18.5. Each with `pnpm -w test`, `eval`, `lint`, `build`, the bar on all three walks at 1920 × 1080 and 3840 × 2160 (replace 1280 × 800 with 4K in the bar runs; keep 1280 in the device matrix), fresh screenshots beside the reference frames, and a STATUS entry with the numbers. Commit on `build` after each sub-phase. Never push. When 18.5 is done, add one paragraph to the Final section of `STATUS.md` and stop.
