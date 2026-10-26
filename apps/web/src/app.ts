@@ -1,8 +1,8 @@
-import { isShow, uiScale, type ScenarioId } from '@lumen/shared';
+import { SCENARIOS, isShow, uiScale, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
-import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
+import { EndCard, TOUCH, TitleScreen, type Choice, type EndStats } from './title/title';
 
 const LONG_PRESS_MS = 550;
 import { Walk } from './walk';
@@ -18,7 +18,10 @@ export interface AppOptions {
   scripted?: boolean;
 }
 
-type Mode = 'attract' | 'walk';
+type Mode = 'attract' | 'walk' | 'watch';
+
+const CAPTIONS = SCENARIOS.hungry.beats.flatMap((b) => (b.kind === 'caption' ? [{ t: b.t, text: b.text }] : []));
+const CAPTION_HOLD_S = 6;
 
 export class App {
   walk: Walk;
@@ -45,11 +48,12 @@ export class App {
     private opts: AppOptions & { pace?: boolean },
     start: ScenarioId | null,
   ) {
-    this.title = new TitleScreen(ui, (id) => this.choose(id));
+    this.title = new TitleScreen(ui, (id) => (id === 'watch' ? this.watch() : this.choose(id)));
     this.end = new EndCard(
       ui,
       () => this.again(),
       (id) => this.choose(id, true),
+      () => this.again('hungry'),
     );
     this.chrome = new Chrome(
       ui,
@@ -184,7 +188,7 @@ export class App {
     } else go();
   }
 
-  private again(): void {
+  private again(focus?: Choice): void {
     this.hideEnd();
     this.walk.dispose();
     this.inspector?.dispose();
@@ -192,7 +196,27 @@ export class App {
     this.mode = 'attract';
     this.walk = this.makeWalk('walking', true);
     this.chrome.setInspectorHint(false);
+    this.chrome.setCaption(null);
+    this.syncSound(this.walk);
     this.title.show(true);
+    if (focus) this.title.focus(focus);
+  }
+
+  private watch(): void {
+    this.walk.dispose();
+    this.hideEnd();
+    this.mode = 'watch';
+    this.walk = this.makeWalk('hungry', true);
+    this.chrome.setInspectorHint(false);
+    this.title.reveal();
+    this.syncSound(this.walk);
+  }
+
+  private updateCaption(): void {
+    if (this.mode !== 'watch') return;
+    const t = this.walk.t;
+    const c = [...CAPTIONS].reverse().find((x) => x.t <= t);
+    this.chrome.setCaption(c && t - c.t < CAPTION_HOLD_S ? c.text : null);
   }
 
   private stats(): EndStats {
@@ -205,11 +229,12 @@ export class App {
         if (isShow(d)) showed++;
       }
     }
-    return { scenario: this.walk.scenario, held: held.size, showed };
+    return { scenario: this.walk.scenario, held: held.size, showed, watched: this.mode === 'watch' };
   }
 
   private showEnd(): void {
     this.endShown = true;
+    this.chrome.setCaption(null);
     this.setPaused(true);
     this.chrome.setPaused(false);
     this.end.show(this.stats());
@@ -227,7 +252,7 @@ export class App {
   }
 
   private syncSound(w: Walk): void {
-    const live = this.soundOn && this.mode === 'walk';
+    const live = this.soundOn && this.mode !== 'attract';
     if (live !== this.ambient.on) this.ambient.toggle();
     w.setSound(this.ambient.context, live);
   }
@@ -241,6 +266,10 @@ export class App {
   private bindInput(): void {
     const canvas = this.canvas;
     canvas.addEventListener('pointerdown', (e) => {
+      if (this.mode === 'watch' && !this.end.visible) {
+        this.again('watch');
+        return;
+      }
       if (e.button !== 0 || this.mode !== 'walk') return;
       this.drag = { x: e.clientX, y: e.clientY, yaw: this.walk.head.yaw, pitch: this.walk.head.pitch, moved: false, pressed: false };
       this.walk.holding = true;
@@ -292,6 +321,10 @@ export class App {
         e.preventDefault();
         return;
       }
+      if (this.mode === 'watch' && e.key === 'Escape' && !this.end.visible) {
+        this.again('watch');
+        return;
+      }
       if (this.mode !== 'walk') return;
       if (e.key === 'i' || e.key === 'I') {
         this.inspector?.toggle();
@@ -313,14 +346,15 @@ export class App {
 
   frame(dt: number): void {
     const w = this.walk;
-    if (!w.paused && !(this.mode === 'walk' && w.ended)) {
+    if (!w.paused && !(this.mode !== 'attract' && w.ended)) {
       w.step();
       if (this.mode === 'attract' && w.ended) {
         w.dispose();
         this.walk = this.makeWalk('walking', true);
       }
     }
-    if (this.mode === 'walk' && w.ended && !this.endShown && !this.inspector?.isOpen) this.showEnd();
+    if (this.mode !== 'attract' && w.ended && !this.endShown && !this.inspector?.isOpen) this.showEnd();
+    this.updateCaption();
     this.updatePace();
     this.ambient.update(w.t, w.sim.wearer.speed);
     void dt;

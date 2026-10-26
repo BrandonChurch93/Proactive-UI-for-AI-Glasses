@@ -6,12 +6,10 @@ Scripts live in `data/scenarios/*.json` as timed events the sim injects into the
 
 ## Opening (shared)
 
-1. 0.0 s · Play. Title plate on black with the name and the subtitle. Pressing Play starts ambient audio.
-2. 0.0 to 0.9 s · The street fades up behind the text (`t-scene`). The wearer is already walking.
-3. The setting, two lines: "You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet."
-4. How to use it, four lines: LOOK · Drag to turn your head. The walk is on rails. DWELL · Hold your gaze on anything that lights up and it opens. Keep looking and it opens further. PINCH · Click to skip the wait or choose. Esc to dismiss. I · Open the inspector: every decision the brain made, the reasons, and the evals.
-5. "What are you up to?" with three cards: Hungry · Find a place and get there. Errands · Three stops, one route. Just walking · See what it does when you want nothing.
-6. Skippable with a click. Choosing folds the text and the walk starts within two seconds. Behind the title screen the street already plays the Just walking script with the scripted reviewer, muted, as an attract loop. "Walk again" at the end skips to the choice.
+1. The street fades up from black over `t-scene` (900 ms) as the panel slides in from the left over the same time; its text reveals top to bottom, 120 ms apart. Behind it the street plays the Just walking script with the scripted reviewer, muted, as an attract loop, undimmed.
+2. The panel (`docs/copy.md`, Title screen) reads, top to bottom: the subtitle and the name, the setting, "What this is" in three lines, "Choose a walk" with four cards (Hungry, Errands, Just walking, Watch), the controls and the footer. No text sits over the street; below 900 px wide the panel takes the full width and the street behind it drops to 40% brightness (reviewer chrome, not the glasses).
+3. A click skips the reveal. Choosing a walk slides the panel out over 450 ms and the walk starts within two seconds.
+4. Watch plays Hungry with the scripted reviewer, sound following the Sound control, with one caption at a time in a strip at the bottom center (ten, `docs/copy.md`). A click or Esc ends it and returns to the panel. At the end it lands on the end screen, whose first button, "Play it yourself", returns to the panel with Hungry focused.
 
 ## Hungry · discovery, the pocket, a choice
 

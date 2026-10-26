@@ -98,6 +98,7 @@ export type Beat =
   | (BeatBase & { kind: 'people'; id: string; count: number; onPath: boolean; until: number })
   | (BeatBase & { kind: 'lookUp'; seconds: number })
   | (BeatBase & { kind: 'ask'; answer: 'yes' | 'no'; answerAt: number })
+  | (BeatBase & { kind: 'caption'; text: string })
   | (BeatBase & { kind: 'bike'; side: 'near' | 'far'; fromBehind: boolean; timeToPath: number });
 
 export type BeatKind = Beat['kind'];
@@ -131,6 +132,7 @@ const BEAT_KINDS: readonly BeatKind[] = [
   'people',
   'lookUp',
   'ask',
+  'caption',
   'bike',
 ];
 

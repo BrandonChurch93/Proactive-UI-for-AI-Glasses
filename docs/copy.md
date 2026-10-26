@@ -4,15 +4,16 @@ Rules: plain, warm, short. Sentence case. The brain never apologizes, never expl
 
 ## Title screen
 
+A panel on the left, reviewer chrome, over the live street; top to bottom:
+
+- Subtitle (mono caps): A UX study in when an assistant should speak, and when it should stay quiet
 - Name: **Proactive UI for AI Glasses**
-- Subtitle: A UX study in when an assistant should speak, and when it should stay quiet
-- Setting, two lines: You're walking through a big city. / The AI in your glasses decides what to show you, how much, and when to stay quiet.
-- How: LOOK · Drag to turn your head. The walk is on rails. / DWELL · Hold your gaze on anything that lights up and it opens. Keep looking and it opens further. / PINCH · Click to skip the wait or choose. Esc to dismiss. / I · Open the inspector: every decision the brain made, the reasons, and the evals.
-- Question: What are you up to?
-- Choices: Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing.
-- Skip: CLICK TO SKIP (TAP TO SKIP on touch screens)
-- How, on touch screens: LOOK · Drag to turn your head. The walk is on rails. / DWELL · Hold the middle of the view on anything that lights up and it opens. Keep looking and it opens further. / PINCH · Tap to skip the wait or choose. Long-press to dismiss. / I · Tap I · INSPECTOR in the corner: every decision the brain made, the reasons, and the evals.
-- About link: About this project
+- Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
+- What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
+- Choose a walk (mono caps), four cards, each with "90 s": Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing. / Watch · Sit back. Ninety seconds with captions.
+- Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
+- Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
+- Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)
 - About panel: A browser simulation of a near-future pair of AI glasses on a city walk. / A real-time street is wired into a decision engine that reads your pace, surroundings, attention, goal and attention budget, then decides what to show, how much, when, and when to hold back. / The interface follows walking rules for a person who is moving: it shrinks as you speed up, yields when you check for traffic, saves what you pinched for the next red light, and never covers a face or a moving car. / The brain is a set of rules, not a model. Same walk, same decisions, every time. Press I during a walk to see every decision and its reasons, scrub the walk, and run the evals. / Built by Brandon Church with Three.js, TypeScript and GSAP. / Close
 
 ## Screens that cannot show it
@@ -133,6 +134,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## Reviewer chrome
 
 - I · INSPECTOR
-- Captions (optional, reviewer side only): Just walking · nothing shown / Looking at the marquee · dwell / Keep looking · it opens / Foot leaves the curb · exhale / Far curb · return / Pinch while walking · saved / Red light · the pocket / Truck passing · the card steps aside / Looking up · snooze
+- Captions (Watch only, `caption` beats in `data/scenarios/hungry.json`, shown 6 s each): 0:02 Three lunch spots lit · the brain says one thing / 0:14 Looking at Mega Burger · it opens / 0:22 Pinch while walking · saved for later / 0:36 Light about to change · nothing new / 0:44 Brisk · one line at the bottom, no cards / 0:58 Red light · the pocket surfaces / 1:06 Hold a seat · the route draws / 1:14 Crossing · everything recedes / 1:24 Far curb · "Held that while you crossed" / 1:34 Arrival
+- End after Watch: Play it yourself (first button)
 - Pace readout (reviewer chrome, off by default): PACE · WALK · 1.4 M/S
 - Inspector headers: Timeline · Decisions · Signals · Overrides · Evals · Export

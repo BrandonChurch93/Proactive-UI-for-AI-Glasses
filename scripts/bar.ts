@@ -121,7 +121,7 @@ if (probes) {
       }
       const chromeRects = [];
       for (const el of window.__app.chrome.el.children) {
-        if (el.getAttribute('role') === 'alert' || /PAUSED/.test(el.textContent || '') || getComputedStyle(el).display === 'none') continue;
+        if (el.getAttribute('role') === 'alert' || /PAUSED/.test(el.textContent || '') || getComputedStyle(el).display === 'none' || Number(getComputedStyle(el).opacity) < 0.05) continue;
         const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) chromeRects.push({ x: r.left, y: r.top, w: r.width, h: r.height });
       }
       if (Number(getComputedStyle(o.glyphEl).opacity) > 0.05) { const r = o.glyphEl.getBoundingClientRect(); if (r.width > 0) chromeRects.push({ x: r.left, y: r.top, w: r.width, h: r.height }); }

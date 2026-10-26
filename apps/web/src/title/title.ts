@@ -4,24 +4,35 @@ import css from './title.module.css';
 
 export const SCENARIO_NAMES: Record<ScenarioId, string> = { hungry: 'Hungry', errands: 'Errands', walking: 'Just walking' };
 
-const CHOICES: { id: ScenarioId; line: string }[] = [
-  { id: 'hungry', line: 'Find a place and get there.' },
-  { id: 'errands', line: 'Three stops, one route.' },
-  { id: 'walking', line: 'See what it does when you want nothing.' },
+export type Choice = ScenarioId | 'watch';
+
+const CHOICES: { id: Choice; name: string; line: string }[] = [
+  { id: 'hungry', name: 'Hungry', line: 'Find a place and get there.' },
+  { id: 'errands', name: 'Errands', line: 'Three stops, one route.' },
+  { id: 'walking', name: 'Just walking', line: 'See what it does when you want nothing.' },
+  { id: 'watch', name: 'Watch', line: 'Sit back. Ninety seconds with captions.' },
 ];
 
-const HOW: [string, string][] = [
-  ['LOOK', 'Drag to turn your head. The walk is on rails.'],
-  ['DWELL', 'Hold your gaze on anything that lights up and it opens. Keep looking and it opens further.'],
-  ['PINCH', 'Click to skip the wait or choose. Esc to dismiss.'],
-  ['I', 'Open the inspector: every decision the brain made, the reasons, and the evals.'],
+const WHAT: [string, string][] = [
+  ['BRAIN', 'A deterministic rules engine, not a model. Same walk, same decisions, every time.'],
+  ['RULES', 'Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car.'],
+  ['PROOF', 'Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.'],
 ];
 
-const HOW_TOUCH: [string, string][] = [
-  ['LOOK', 'Drag to turn your head. The walk is on rails.'],
-  ['DWELL', 'Hold the middle of the view on anything that lights up and it opens. Keep looking and it opens further.'],
-  ['PINCH', 'Tap to skip the wait or choose. Long-press to dismiss.'],
-  ['I', 'Tap I · INSPECTOR in the corner: every decision the brain made, the reasons, and the evals.'],
+const CONTROLS: [string, string][] = [
+  ['LOOK', 'drag'],
+  ['DWELL', 'hold'],
+  ['PINCH', 'click'],
+  ['ESC', 'dismiss'],
+  ['I', 'inspector'],
+];
+
+const CONTROLS_TOUCH: [string, string][] = [
+  ['LOOK', 'drag'],
+  ['DWELL', 'hold'],
+  ['PINCH', 'tap'],
+  ['LONG-PRESS', 'dismiss'],
+  ['I', 'inspector'],
 ];
 
 const ABOUT = [
@@ -47,46 +58,59 @@ function el(tag: string, cls?: string, text?: string): HTMLElement {
 export class TitleScreen {
   readonly el: HTMLElement;
   private plate: HTMLElement;
+  private panel: HTMLElement;
+  private reveals: HTMLElement[];
   private tl: gsap.core.Timeline | null = null;
-  private parts: { name: HTMLElement; sub: HTMLElement; setting: HTMLElement; how: HTMLElement; rows: HTMLElement[]; q: HTMLElement; choices: HTMLElement; skip: HTMLElement; about: HTMLElement };
   private buttons: HTMLButtonElement[] = [];
+  private aboutLink: HTMLButtonElement;
   private busy = false;
 
   constructor(
     parent: HTMLElement,
-    private onChoose: (id: ScenarioId) => void,
+    private onChoose: (id: Choice) => void,
   ) {
     this.el = el('section', css.screen);
     this.el.setAttribute('aria-label', 'Proactive UI for AI Glasses');
     this.plate = el('div', css.plate);
-    const text = el('div', css.text);
+    this.panel = el('div', css.panel);
     const sub = el('div', css.sub, 'A UX study in when an assistant should speak, and when it should stay quiet');
     const name = el('h1', css.name, 'Proactive UI for AI Glasses');
-    const setting = el('div', css.setting);
-    setting.append(el('span', undefined, "You're walking through a big city."), el('span', undefined, 'The AI in your glasses decides what to show you, how much, and when to stay quiet.'));
-    const how = el('div', css.how);
-    const rows = (TOUCH ? HOW_TOUCH : HOW).map(([k, v]) => {
+    const lede = el('p', css.lede, "You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.");
+    const whatHead = el('div', css.label, 'What this is');
+    const what = el('div', css.what);
+    for (const [k, v] of WHAT) {
       const r = el('div');
       r.append(el('i', undefined, k), el('span', undefined, v));
-      how.appendChild(r);
-      return r;
-    });
-    const q = el('div', css.q, 'What are you up to?');
+      what.appendChild(r);
+    }
+    const chooseHead = el('div', css.label, 'Choose a walk');
     const choices = el('div', css.choices);
-    CHOICES.forEach((c, i) => {
-      const b = el('button', i === 0 ? css.primary : undefined) as HTMLButtonElement;
+    for (const c of CHOICES) {
+      const b = el('button', c.id === 'hungry' ? css.primary : undefined) as HTMLButtonElement;
       b.type = 'button';
-      b.append(el('b', undefined, SCENARIO_NAMES[c.id]), el('span', undefined, c.line));
+      const top = el('div', css.choiceTop);
+      top.append(el('b', undefined, c.name), el('em', undefined, '90 s'));
+      b.append(top, el('span', undefined, c.line));
+      b.dataset.choice = c.id;
       b.addEventListener('click', (e) => {
         e.stopPropagation();
         this.choose(c.id);
       });
       this.buttons.push(b);
       choices.appendChild(b);
+    }
+    const controls = el('div', css.controls);
+    (TOUCH ? CONTROLS_TOUCH : CONTROLS).forEach(([k, v], i) => {
+      if (i) controls.appendChild(el('span', css.dot, '·'));
+      const c = el('span');
+      c.append(el('i', undefined, k), document.createTextNode(` ${v}`));
+      controls.appendChild(c);
     });
-    const skip = el('div', css.skip, TOUCH ? 'TAP TO SKIP' : 'CLICK TO SKIP');
-    const aboutLink = el('button', css.aboutLink, 'About this project') as HTMLButtonElement;
-    aboutLink.type = 'button';
+    const footer = el('div', css.footer);
+    footer.append(document.createTextNode('Built by Brandon Church · Three.js, TypeScript, GSAP · '));
+    this.aboutLink = el('button', css.aboutLink, 'About this project') as HTMLButtonElement;
+    this.aboutLink.type = 'button';
+    footer.appendChild(this.aboutLink);
     const about = el('div', css.about);
     about.setAttribute('role', 'dialog');
     about.setAttribute('aria-label', 'About this project');
@@ -97,7 +121,7 @@ export class TitleScreen {
     card.appendChild(close);
     about.appendChild(card);
     about.style.display = 'none';
-    aboutLink.addEventListener('click', (e) => {
+    this.aboutLink.addEventListener('click', (e) => {
       e.stopPropagation();
       this.skipToChoice();
       about.style.display = '';
@@ -107,7 +131,7 @@ export class TitleScreen {
     const hideAbout = (e: Event): void => {
       e.stopPropagation();
       about.style.display = 'none';
-      aboutLink.focus({ preventScroll: true });
+      this.aboutLink.focus({ preventScroll: true });
     };
     close.addEventListener('click', hideAbout);
     about.addEventListener('click', (e) => {
@@ -117,9 +141,9 @@ export class TitleScreen {
     about.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') hideAbout(e);
     });
-    text.append(sub, name, setting, how, q, choices, aboutLink);
-    this.el.append(this.plate, text, skip, about);
-    this.parts = { name, sub, setting, how, rows, q, choices, skip, about: aboutLink };
+    this.panel.append(sub, name, lede, whatHead, what, chooseHead, choices, controls, footer);
+    this.reveals = [sub, name, lede, whatHead, what, chooseHead, choices, controls, footer];
+    this.el.append(this.plate, this.panel, about);
     this.el.addEventListener('click', () => this.skipToChoice());
     this.el.style.display = 'none';
     parent.appendChild(this.el);
@@ -129,58 +153,51 @@ export class TitleScreen {
     return this.el.style.display !== 'none';
   }
 
+  private get narrow(): boolean {
+    return innerWidth < 900;
+  }
+
   show(atChoice = false): void {
     this.busy = false;
     this.el.style.display = '';
-    const p = this.parts;
     this.tl?.kill();
-    const reveal = [p.sub, p.name, p.setting, p.how, ...p.rows, p.q, p.choices, p.skip, p.about];
-    gsap.set(reveal, { opacity: 0, y: 0, filter: 'none' });
+    gsap.set(this.reveals, { opacity: 0, y: 0, filter: 'none' });
+    gsap.set(this.panel, { xPercent: -100 });
     gsap.set(this.plate, { opacity: 1 });
     const tl = gsap.timeline();
-    const up = (e: HTMLElement | HTMLElement[], at: number, d = 0.48): void => {
-      tl.fromTo(e, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: d, ease: EASE_OUT, clearProps: 'filter' }, at);
-    };
-    up(p.name, 0.1);
-    up(p.sub, 0.3, 0.36);
-    tl.to(this.plate, { opacity: 0.72, duration: 0.9, ease: 'power1.inOut' }, 0.15);
-    up(p.setting, 1.0);
-    tl.fromTo(p.skip, { opacity: 0 }, { opacity: 0.7, duration: 0.36 }, 1.4);
-    up(p.how, 2.4);
-    tl.fromTo(p.rows, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.36, stagger: 0.16, ease: EASE_OUT }, 2.6);
-    up(p.q, 4.6);
-    up(p.choices, 4.9);
-    tl.fromTo(p.about, { opacity: 0 }, { opacity: 1, duration: 0.36 }, 5.3);
-    tl.to(p.skip, { opacity: 0, duration: 0.22 }, 5.4);
+    tl.to(this.plate, { opacity: this.narrow ? 0.6 : 0, duration: 0.9, ease: 'power1.inOut' }, 0);
+    tl.to(this.panel, { xPercent: 0, duration: 0.9, ease: EASE_OUT }, 0);
+    tl.fromTo(this.reveals, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.48, ease: EASE_OUT, stagger: 0.12, clearProps: 'filter' }, 0.35);
+    tl.call(() => {
+      if (!TOUCH) this.buttons[0]?.focus({ preventScroll: true });
+    });
     this.tl = tl;
     if (atChoice) this.skipToChoice();
   }
 
   skipToChoice(): void {
-    if (this.tl && this.tl.progress() < 1) {
-      this.tl.progress(1);
-      if (!TOUCH) this.buttons[0]?.focus({ preventScroll: true });
-    }
+    if (this.tl && this.tl.progress() < 1) this.tl.progress(1);
   }
 
-  private choose(id: ScenarioId): void {
+  focus(id: Choice): void {
+    this.buttons.find((b) => b.dataset.choice === id)?.focus({ preventScroll: true });
+  }
+
+  private choose(id: Choice): void {
     if (this.busy) return;
     this.busy = true;
     this.tl?.kill();
-    const p = this.parts;
     const tl = gsap.timeline();
-    tl.to([p.about, p.choices, p.q, p.how, p.setting, p.name, p.sub, p.skip], { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.04 }, 0);
-    tl.to(this.plate, { opacity: 1, duration: 0.45, ease: 'power1.inOut' }, 0.1);
+    tl.to(this.reveals, { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.03 }, 0);
+    tl.to(this.panel, { xPercent: -100, duration: 0.45, ease: EASE_IN }, 0.15);
+    tl.to(this.plate, { opacity: 0, duration: 0.45, ease: 'power1.inOut' }, 0.15);
     tl.call(() => this.onChoose(id), [], 0.6);
     this.tl = tl;
   }
 
-  reveal(): gsap.core.Timeline {
+  reveal(): void {
     this.tl?.kill();
-    const tl = gsap.timeline({ onComplete: () => this.hide() });
-    tl.to(this.plate, { opacity: 0, duration: 0.9, ease: 'power1.inOut' });
-    this.tl = tl;
-    return tl;
+    this.hide();
   }
 
   hide(): void {
@@ -190,6 +207,7 @@ export class TitleScreen {
 
 export interface EndStats {
   scenario: ScenarioId;
+  watched: boolean;
   held: number;
   showed: number;
 }
@@ -204,6 +222,7 @@ export class EndCard {
     parent: HTMLElement,
     private onAgain: () => void,
     private onChoose: (id: ScenarioId) => void,
+    private onPlay: () => void,
   ) {
     this.el = el('section', `${css.screen} ${css.end}`);
     this.el.style.cursor = 'default';
@@ -223,7 +242,13 @@ export class EndCard {
     const name = el('h2', css.endName, SCENARIO_NAMES[stats.scenario]);
     const line = el('div', css.endLine, `Held ${stats.held} ${stats.held === 1 ? 'thing' : 'things'}, showed ${stats.showed}`);
     const actions = el('div', css.endActions);
-    const again = el('button', css.primary, 'Walk again') as HTMLButtonElement;
+    if (stats.watched) {
+      const play = el('button', css.primary, 'Play it yourself') as HTMLButtonElement;
+      play.type = 'button';
+      play.addEventListener('click', () => this.onPlay());
+      actions.appendChild(play);
+    }
+    const again = el('button', stats.watched ? undefined : css.primary, 'Walk again') as HTMLButtonElement;
     again.type = 'button';
     again.addEventListener('click', () => this.onAgain());
     actions.appendChild(again);
@@ -239,7 +264,7 @@ export class EndCard {
     gsap.set([name, line, actions], { opacity: 0 });
     tl.fromTo(this.plate, { opacity: 0 }, { opacity: 1, duration: 0.9, ease: 'power1.inOut' }, 0);
     tl.fromTo([name, line, actions], { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.48, ease: EASE_OUT, stagger: 0.12, clearProps: 'filter' }, 1.0);
-    tl.call(() => again.focus({ preventScroll: true }), [], 1.5);
+    tl.call(() => (actions.firstElementChild as HTMLButtonElement).focus({ preventScroll: true }), [], 1.5);
     this.tl = tl;
   }
 

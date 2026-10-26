@@ -9,6 +9,8 @@ export class Chrome {
   private pausedEl: HTMLElement;
   private pauseBtn: HTMLButtonElement;
   readonly rotate: HTMLElement;
+  private caption: HTMLElement;
+  private captionText = '';
 
   constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean) {
     this.el = document.createElement('div');
@@ -52,7 +54,10 @@ export class Chrome {
     this.rotate.className = css.rotate!;
     this.rotate.setAttribute('role', 'alert');
     this.rotate.innerHTML = '<div><i></i><b>Turn your phone sideways</b><span>The glasses see the street wide, and so does this demo.</span></div>';
-    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
+    this.caption = document.createElement('div');
+    this.caption.className = css.caption!;
+    this.caption.setAttribute('aria-live', 'polite');
+    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.caption, this.rotate);
     parent.appendChild(this.el);
     addEventListener('resize', () => (this.cache = null));
   }
@@ -61,7 +66,7 @@ export class Chrome {
   private cache: Rect[] | null = null;
 
   rects(): Rect[] {
-    this.cache ??= [this.sound, this.pauseBtn, this.hint, this.pace]
+    this.cache ??= [this.sound, this.pauseBtn, this.hint, this.pace, ...(this.captionText ? [this.caption] : [])]
       .filter((e) => e.style.display !== 'none' && e.offsetWidth > 0)
       .map((e) => {
         const r = e.getBoundingClientRect();
@@ -78,6 +83,21 @@ export class Chrome {
 
   setRotate(on: boolean): void {
     this.rotate.style.display = on ? 'grid' : 'none';
+  }
+
+  setCaption(text: string | null): void {
+    const next = text ?? '';
+    if (next === this.captionText) return;
+    this.captionText = next;
+    this.cache = null;
+    if (!next) {
+      this.caption.classList.remove(css.on!);
+      return;
+    }
+    this.caption.classList.remove(css.on!);
+    void this.caption.offsetWidth;
+    this.caption.textContent = next;
+    this.caption.classList.add(css.on!);
   }
 
   setPace(text: string | null): void {
