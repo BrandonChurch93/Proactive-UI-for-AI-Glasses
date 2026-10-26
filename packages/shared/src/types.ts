@@ -1,4 +1,4 @@
-import type { Band, EntityKind, LiveValue, PlaceCopy, ScenarioId, Side, SignalState } from './data';
+import type { Band, EntityKind, Leg, LiveValue, PlaceCopy, ScenarioId, Side, SignalState } from './data';
 import type { Box3, Rect, Vec3 } from './vec';
 
 export type Level = 'pip' | 'label' | 'glance' | 'card' | 'expanded' | 'whisper';
@@ -54,7 +54,7 @@ export interface Stop {
 
 export interface Crosswalk {
   id: string;
-  leg: 'avenue' | 'cross';
+  leg: Leg;
   distance: number;
   signal: SignalState;
   secondsLeft: number;
@@ -148,7 +148,7 @@ export interface WorldSnapshot {
   social: { inConversation: boolean; companions: number };
   entities: Entity[];
   inbox: Notification[];
-  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; end?: string };
+  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; lap?: number; corner?: boolean; intentAt?: number };
   wearerModel: WearerModel;
   view?: { w: number; h: number; panes: PaneReport[] };
 }
@@ -254,6 +254,7 @@ export type Cause =
   | 'band'
   | 'gate'
   | 'choice'
+  | 'reply'
   | 'dismiss'
   | 'notification'
   | 'goal'

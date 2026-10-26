@@ -1,0 +1,315 @@
+{
+  "_note": "The one walk: a loop around the block that never ends on its own. World beats with after: intent are timed from the moment an intent starts, and only fire for that intent. recordings script the reviewer for pnpm record, ?still= and the attract loop. The brain never reads this file. Positions are n, metres north of the south crossing. Full beat sheet in docs/scenarios.md.",
+  "speeds": {
+    "stopped": 0,
+    "stroll": 0.6,
+    "walk": 1.38,
+    "brisk": 1.9
+  },
+  "pace": [
+    {
+      "side": "E",
+      "fromN": 11,
+      "toN": 25.5,
+      "band": "stroll"
+    },
+    {
+      "side": "E",
+      "fromN": 60,
+      "toN": 84,
+      "band": "brisk"
+    }
+  ],
+  "signal": {
+    "state": "dont",
+    "secondsLeft": 5
+  },
+  "holdS": 12,
+  "beats": [
+    {
+      "t": 75.5,
+      "kind": "inbox",
+      "type": "text",
+      "id": "maya-usual",
+      "from": "Maya",
+      "text": "Running 10 late, order me the usual?",
+      "after": "intent",
+      "intent": "hungry"
+    },
+    {
+      "t": 92,
+      "kind": "inbox",
+      "type": "app",
+      "id": "order-ready",
+      "text": "Order ready",
+      "more": 1,
+      "after": "intent",
+      "intent": "hungry"
+    },
+    {
+      "t": 56,
+      "kind": "bus",
+      "id": "m4-stop",
+      "arrivesIn": 2,
+      "after": "intent",
+      "intent": "hungry"
+    },
+    {
+      "t": 0,
+      "kind": "stops",
+      "ids": [
+        "main-street-pharmacy",
+        "corner-hardware",
+        "post-office"
+      ],
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 33,
+      "kind": "sidewalkNarrows",
+      "fromN": 46,
+      "toN": 52,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 58,
+      "kind": "bus",
+      "id": "m4-stop",
+      "arrivesIn": 2,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 50,
+      "kind": "live",
+      "id": "corner-hardware",
+      "set": {
+        "closedEarly": true
+      },
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 51,
+      "kind": "inbox",
+      "type": "social",
+      "count": 1,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 54,
+      "kind": "inbox",
+      "type": "social",
+      "count": 1,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 57,
+      "kind": "inbox",
+      "type": "social",
+      "count": 1,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 87.5,
+      "kind": "person",
+      "id": "passerby",
+      "path": "corner-crossing",
+      "speed": 1.25,
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 101,
+      "kind": "inbox",
+      "type": "dm",
+      "id": "jules-tonight",
+      "from": "Jules",
+      "text": "Still on for tonight?",
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 13,
+      "kind": "vehicle",
+      "id": "truck",
+      "lane": "far",
+      "speed": 3.2,
+      "fromN": 5,
+      "toN": 45,
+      "after": "intent",
+      "intent": "walking"
+    },
+    {
+      "t": 56,
+      "kind": "bus",
+      "id": "m4-stop",
+      "arrivesIn": 2,
+      "after": "intent",
+      "intent": "walking"
+    },
+    {
+      "t": 90,
+      "kind": "bike",
+      "side": "near",
+      "fromBehind": true,
+      "timeToPath": 2,
+      "after": "intent",
+      "intent": "walking"
+    }
+  ],
+  "recordings": {
+    "hungry": {
+      "duration": 118,
+      "beats": [
+        {
+          "t": 1,
+          "kind": "intent",
+          "id": "hungry"
+        },
+        {
+          "t": 35,
+          "kind": "gaze",
+          "id": "mega-burger"
+        },
+        {
+          "t": 41,
+          "kind": "pinch",
+          "id": "mega-burger"
+        },
+        {
+          "t": 47,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 51,
+          "kind": "gaze",
+          "id": "47th-st-station"
+        },
+        {
+          "t": 55,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 79,
+          "kind": "gaze",
+          "id": "pocket:mega-burger"
+        },
+        {
+          "t": 79,
+          "kind": "pinch",
+          "id": "pocket:mega-burger"
+        },
+        {
+          "t": 83,
+          "kind": "choice",
+          "id": "mega-burger",
+          "action": "hold-seat"
+        },
+        {
+          "t": 85,
+          "kind": "gaze",
+          "id": null
+        }
+      ]
+    },
+    "errands": {
+      "duration": 136,
+      "beats": [
+        {
+          "t": 11.5,
+          "kind": "intent",
+          "id": "errands"
+        },
+        {
+          "t": 37,
+          "kind": "gaze",
+          "id": "main-street-pharmacy"
+        },
+        {
+          "t": 42,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 97,
+          "kind": "gaze",
+          "id": "post-office"
+        },
+        {
+          "t": 100,
+          "kind": "headScan",
+          "sequence": [
+            "left",
+            "right",
+            "center"
+          ]
+        }
+      ]
+    },
+    "walking": {
+      "duration": 112,
+      "beats": [
+        {
+          "t": 1,
+          "kind": "intent",
+          "id": "walking"
+        },
+        {
+          "t": 10.5,
+          "kind": "gaze",
+          "id": "grace-theater"
+        },
+        {
+          "t": 28.0,
+          "kind": "gaze",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 30.0,
+          "kind": "gaze",
+          "id": "kathys-cupcakes",
+          "dy": 1.6
+        },
+        {
+          "t": 32.5,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 48.0,
+          "kind": "lookUp",
+          "seconds": 2.6
+        },
+        {
+          "t": 51.0,
+          "kind": "gaze",
+          "id": "atlas-books"
+        },
+        {
+          "t": 54.3,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 55.0,
+          "kind": "lookUp",
+          "seconds": 2.6
+        },
+        {
+          "t": 78,
+          "kind": "ask",
+          "answer": "no",
+          "answerAt": 80
+        }
+      ]
+    }
+  }
+}

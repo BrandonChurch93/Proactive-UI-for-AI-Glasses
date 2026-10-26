@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PLACE_BY_ID, groundY, placeDoor, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
-import { keepOuts, nearestS, pointAt, type Sim } from '@lumen/sim';
+import { keepOuts, pointAt, type Sim } from '@lumen/sim';
 import {
   LIGHT_COLOR,
   LIGHT_SIZE,
@@ -147,18 +147,11 @@ export class ThreeBridge implements SceneBridge {
     return keepOuts(this.sim, (v) => this.project(v), this.viewport(), { x: eye.x, y: eye.y, z: eye.z }, maxDepth);
   }
 
-  routePath(to: string, offset: 'center' | 'curb'): Vec3[] {
+  routePath(_to: string, offset: 'center' | 'curb'): Vec3[] {
     const sim = this.sim;
     const r = sim.route;
     const s0 = sim.wearer.s + 0.8;
-    let end = r.length;
-    const place = PLACE_BY_ID.get(to);
-    if (place) {
-      const door = placeDoor(place);
-      const sd = nearestS(r, door);
-      if (sd > s0) end = sd;
-    }
-    const s1 = Math.min(end, s0 + 30);
+    const s1 = Math.min(r.length, s0 + 30);
     const out: Vec3[] = [];
     for (let s = s0; s <= s1 + 1e-6; s += 0.5) {
       const p = pointAt(r, Math.min(s, s1)).pos;
@@ -171,15 +164,21 @@ export class ThreeBridge implements SceneBridge {
 
   safetyAnchor(id: string): { pos: Vec3; yaw: number } | undefined {
     const sim = this.sim;
-    if (id.startsWith('bike:') || sim.wearer.state === 'crossing') {
-      const h = sim.wearer.heading;
-      const cross = sim.route.stops.find((st) => sim.wearer.s >= st.s - 0.01 && sim.wearer.s <= st.crossEnd);
-      const ahead = cross ? Math.min(5.5, Math.max(1.5, cross.crossEnd - sim.wearer.s - 1.2)) : 5.5;
-      const x = sim.wearer.pos.x + h.x * ahead;
-      const z = sim.wearer.pos.z + h.z * ahead;
+    const w = sim.wearer;
+    if (id.startsWith('bike:') || w.state === 'crossing') {
+      const h = w.heading;
+      const cross = w.crossing;
+      const ahead = cross ? Math.min(5.5, Math.max(1.5, cross.to - w.s - 1.2)) : 5.5;
+      const x = w.pos.x + h.x * ahead;
+      const z = w.pos.z + h.z * ahead;
       return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: Math.atan2(-h.x, -h.z) };
     }
-    const st = sim.route.stops[0];
+    if (sim.holding) {
+      const x = w.pos.x - 0.7;
+      const z = w.pos.z - 4.4;
+      return { pos: { x, y: groundY(x, z) + 0.014, z }, yaw: 0 };
+    }
+    const st = w.nextStop();
     if (!st) return undefined;
     const a = pointAt(sim.route, st.s).pos;
     const b = pointAt(sim.route, st.s + 2.4).pos;

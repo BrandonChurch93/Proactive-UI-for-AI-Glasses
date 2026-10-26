@@ -2,20 +2,33 @@
   "walk": "walking",
   "cases": [
     {
-      "name": "0:00 to 0:08 \u00b7 nothing",
+      "name": "0:00 \u00b7 the light is held at the corner",
       "between": [
         0,
-        8
+        0.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "safety:signal",
+        "nameIs": "WAIT",
+        "zone": "ground"
+      }
+    },
+    {
+      "name": "0:00 to 0:10 \u00b7 nothing",
+      "between": [
+        0,
+        10.5
       ],
       "max": {
         "shows": 0
       }
     },
     {
-      "name": "0:08 \u00b7 the marquee lights its label on the look",
+      "name": "0:11 \u00b7 the marquee lights its label on the look",
       "between": [
-        8.4,
-        10.5
+        10.8,
+        12
       ],
       "must": {
         "action": "show",
@@ -25,10 +38,10 @@
       }
     },
     {
-      "name": "0:08.5 \u00b7 the view settles: the theater row labels together",
+      "name": "0:11 \u00b7 the view settles: the theater row labels together",
       "between": [
-        8.5,
-        9.4
+        11,
+        12
       ],
       "must": {
         "action": "show",
@@ -38,10 +51,10 @@
       }
     },
     {
-      "name": "0:09 \u00b7 card at Stroll",
+      "name": "0:12 \u00b7 card at Stroll",
       "between": [
-        9,
-        10.5
+        11.5,
+        12.5
       ],
       "must": {
         "action": "promote",
@@ -51,10 +64,10 @@
       }
     },
     {
-      "name": "0:11 \u00b7 expanded in place on continued hold",
+      "name": "0:14 \u00b7 expanded in place on continued hold",
       "between": [
-        11,
-        13
+        13,
+        15
       ],
       "must": {
         "action": "promote",
@@ -64,10 +77,10 @@
       }
     },
     {
-      "name": "0:17 to 0:22 \u00b7 the truck passes; not a gate, the level holds (the overlay drops it to a pip)",
+      "name": "0:17 to 0:24 \u00b7 the truck passes; not a gate, the level holds",
       "between": [
         17,
-        22
+        24
       ],
       "state": {
         "safety": false,
@@ -77,10 +90,10 @@
       }
     },
     {
-      "name": "0:25.5 \u00b7 the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
+      "name": "0:29 \u00b7 the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
       "between": [
-        25.8,
-        27.5
+        28.5,
+        29.8
       ],
       "must": {
         "action": "promote",
@@ -90,10 +103,10 @@
       }
     },
     {
-      "name": "0:25.5 \u00b7 the theater shrinks back to its label in the same move",
+      "name": "0:29 \u00b7 the theater shrinks back to its label in the same move",
       "between": [
-        25.8,
-        27.5
+        28.5,
+        29.8
       ],
       "must": {
         "action": "demote",
@@ -103,10 +116,10 @@
       }
     },
     {
-      "name": "0:27.5 \u00b7 Kathy's from the shopfront lights its label",
+      "name": "0:31 \u00b7 Kathy's from the shopfront lights its label",
       "between": [
-        28,
-        29.5
+        30.5,
+        31.5
       ],
       "must": {
         "action": "show",
@@ -115,22 +128,10 @@
       }
     },
     {
-      "name": "0:27.5 \u00b7 Kathy's from the shopfront lights its label",
+      "name": "0:31 \u00b7 its card while the look holds",
       "between": [
-        28,
-        29.5
-      ],
-      "must": {
-        "action": "show",
-        "id": "kathys-cupcakes",
-        "level": "label"
-      }
-    },
-    {
-      "name": "0:29 \u00b7 its card while the look holds",
-      "between": [
-        28.8,
-        30.2
+        31,
+        32.2
       ],
       "must": {
         "action": "promote",
@@ -139,9 +140,9 @@
       }
     },
     {
-      "name": "0:30 \u00b7 the look moves on before it would expand",
+      "name": "0:30 to 0:36 \u00b7 the look moves on before it would expand",
       "between": [
-        27.5,
+        30,
         36
       ],
       "mustNot": {
@@ -150,20 +151,20 @@
       }
     },
     {
-      "name": "0:57 \u00b7 the glyph says it is about to snooze",
+      "name": "0:48 \u00b7 the glyph says it is about to snooze",
       "between": [
-        57,
-        58.3
+        48.3,
+        50.3
       ],
       "stateSome": {
         "glyph": "Snoozing"
       }
     },
     {
-      "name": "0:56 \u00b7 look up: \"Snoozing\" while the look holds, then the countdown",
+      "name": "0:50 \u00b7 look up: the countdown once it holds",
       "between": [
-        58.3,
-        59.5
+        50.3,
+        51.5
       ],
       "stateSome": {
         "snooze": true,
@@ -171,10 +172,10 @@
       }
     },
     {
-      "name": "0:58 \u00b7 Atlas Books held, snoozed",
+      "name": "0:51 \u00b7 Atlas Books held, snoozed",
       "between": [
-        58.5,
-        61.5
+        51,
+        53
       ],
       "must": {
         "action": "hold",
@@ -183,41 +184,30 @@
       }
     },
     {
-      "name": "0:58 to 1:02 \u00b7 nothing shows",
+      "name": "0:51 to 0:56 \u00b7 nothing shows",
       "between": [
-        58.4,
-        62
+        50.5,
+        56
       ],
       "max": {
         "shows": 0
       }
     },
     {
-      "name": "1:04 \u00b7 looking up again cancels",
+      "name": "0:58 \u00b7 looking up again cancels",
       "between": [
-        64.6,
-        66
+        57.8,
+        59
       ],
       "state": {
         "snooze": false
       }
     },
     {
-      "name": "1:03 \u00b7 Mega Burger passes; nothing is looked at, nothing shows",
+      "name": "1:18 \u00b7 stopped after two food glances: the ask",
       "between": [
-        63,
-        79
-      ],
-      "mustNot": {
-        "id": "mega-burger",
-        "action": "show"
-      }
-    },
-    {
-      "name": "1:21 \u00b7 stopped after two food glances: the ask",
-      "between": [
-        79.5,
-        82.5
+        77,
+        78.5
       ],
       "must": {
         "action": "show",
@@ -226,10 +216,10 @@
       }
     },
     {
-      "name": "1:23 \u00b7 no",
+      "name": "1:20 \u00b7 no",
       "between": [
-        83,
-        83.3
+        79.9,
+        80.3
       ],
       "must": {
         "action": "dismiss",
@@ -237,10 +227,21 @@
       }
     },
     {
-      "name": "1:25 to 1:35 \u00b7 crossing, everything holds",
+      "name": "1:20 to 1:52 \u00b7 the answer is no: the walk stays Just walk with no destination",
       "between": [
-        85,
-        95
+        80.5,
+        112
+      ],
+      "state": {
+        "goal": "walking",
+        "destination": null
+      }
+    },
+    {
+      "name": "1:29 to 1:39 \u00b7 crossing, everything holds",
+      "between": [
+        89.2,
+        98.8
       ],
       "must": {
         "action": "hold",
@@ -250,10 +251,20 @@
       }
     },
     {
-      "name": "1:26 \u00b7 BIKE on the pavement",
+      "name": "1:29 to 1:39 \u00b7 nothing opens in a crossing",
       "between": [
-        85,
-        88.5
+        89.2,
+        98.8
+      ],
+      "max": {
+        "shows": 0
+      }
+    },
+    {
+      "name": "1:30 \u00b7 BIKE on the pavement",
+      "between": [
+        89.5,
+        91.5
       ],
       "must": {
         "action": "show",
@@ -263,22 +274,23 @@
       }
     },
     {
-      "name": "1:35 \u00b7 the bench, benches in the shade",
+      "name": "1:41 \u00b7 far curb: the view settles and the west side labels",
       "between": [
-        94.5,
-        98
+        99.5,
+        102
       ],
       "must": {
         "action": "show",
-        "id": "pocket-park",
-        "level": "label"
+        "id": "lucky-lanes",
+        "level": "label",
+        "cause": "settle"
       }
     },
     {
       "name": "restraint \u00b7 at most four non-gaze items",
       "between": [
         0,
-        98
+        112
       ],
       "max": {
         "nonGazeShows": 4,

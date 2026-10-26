@@ -1,7 +1,8 @@
 import {
   PLACE_BY_ID,
   PLACES,
-  SCENARIOS,
+  WALK,
+  isScenarioId,
   angleOffAxis,
   angleWrap,
   pitchToward,
@@ -23,7 +24,7 @@ import {
   type Notification,
   type PaneReport,
   type PersonInfo,
-  type ScenarioData,
+  type Beat,
   type ScenarioId,
   type SignalAnchor,
   type Vec3,
@@ -34,11 +35,12 @@ import {
 } from '@lumen/shared';
 import { Backdrop, type Dynamic } from './backdrop';
 import { ALBEDO, buildLayout, type BlockLayout } from './layout';
-import { People, type Waypoint } from './people';
+import { SouthSignal } from './crossing';
+import { People, type ScriptedPerson } from './people';
 import { Head, STEEP, ScriptedReviewer, type Events } from './reviewer';
-import { buildRoute, nearestS, type Route } from './route';
+import { START, crossingAnchor, doorSpur, nearestS, routeLoop, routeTo, type Route } from './route';
 import { LANE_BY_ID, Traffic, type ScriptedVehicle, type Vehicle } from './traffic';
-import { Wearer } from './wearer';
+import { DOOR_S, Wearer } from './wearer';
 
 export const SIM_HZ = 60;
 export const TICK_HZ = 10;
@@ -60,18 +62,17 @@ const GAZE_ACQUIRE = (3.5 * Math.PI) / 180;
 const GAZE_RELEASE = (6.0 * Math.PI) / 180;
 const GAZE_FLICKER_S = 0.6;
 
-function signalAnchorOf(data: ScenarioData): SignalAnchor {
-  const b = data.beats.find((x) => x.kind === 'signal');
-  if (b && b.kind === 'signal') return { at: b.t, leg: b.leg, state: b.state, secondsLeft: b.secondsLeft };
-  return { at: 0, leg: 'avenue', state: 'walk', secondsLeft: 18 };
+const PICKUP_S = 3;
+
+export interface Plan {
+  destination?: string;
 }
 
 export class Sim {
   readonly scenario: ScenarioId;
-  readonly data: ScenarioData;
   readonly layout: BlockLayout;
-  readonly route: Route;
   readonly signal: SignalAnchor;
+  readonly south: SouthSignal;
   readonly wearer: Wearer;
   readonly traffic: Traffic;
   readonly people: People;
@@ -83,44 +84,60 @@ export class Sim {
   t: number;
   scripted = true;
   live: LiveInput = {};
+  intent: ScenarioId | null = null;
+  intentAt = -Infinity;
+  lap = 0;
+  holdUntil: number;
+  reroutes: { t: number; to: string }[] = [];
+  private timeline: Beat[];
+  private want = 'start';
+  private lastArrived: string | null = null;
   private liveData = new Map<string, Record<string, LiveValue>>();
   private gazeTarget: string | null = null;
   private gazeSince = 0;
   private lostGaze: { id: string; at: number; since: number } | null = null;
   private lastTickT = -Infinity;
   private pendingLive: Events = {};
-  private conversation: string[] = [];
   private anchors = new Map<string, Vec3>();
 
   constructor(scenario: ScenarioId, opts: SimOptions = {}) {
     const seed = opts.seed ?? 47;
     this.scenario = scenario;
-    this.data = SCENARIOS[scenario];
     this.layout = opts.layout ?? buildLayout(seed);
-    this.route = buildRoute(scenario);
-    this.signal = signalAnchorOf(this.data);
-    this.wearer = new Wearer(this.data, this.route);
-    this.reviewer = new ScriptedReviewer(this.data);
+    this.signal = { at: 0, leg: 'avenue', state: WALK.signal.state, secondsLeft: WALK.signal.secondsLeft };
+    this.south = new SouthSignal(-WARMUP, false);
+    this.wearer = new Wearer(
+      {
+        speeds: WALK.speeds,
+        pace: WALK.pace,
+        signal: (leg, t) => (leg === 'south' ? this.south.read(t) : readSignal(this.signal, leg, t)),
+        ask: (leg, t) => {
+          if (leg === 'south') this.south.request(t);
+        },
+      },
+      routeLoop(START),
+    );
+    this.holdUntil = WALK.holdS;
+    this.reviewer = new ScriptedReviewer(WALK.recordings[scenario].beats);
     this.viewport = opts.viewport ?? { w: 1280, h: 800 };
     this.backdrop = new Backdrop(this.layout.colliders, this.layout.sunDir);
     for (const p of PLACES) {
       this.liveData.set(p.id, { ...p.live });
       this.anchors.set(p.id, placeAnchor(p));
     }
-    this.traffic = new Traffic(seed, this.signal, this.scriptedVehicles(), -WARMUP);
-    this.people = new People(
-      {
-        seed,
-        signal: this.signal,
-        avoidCrosswalks: this.route.stops.map((s) => s.leg),
-        scripted: this.scriptedPeople(),
-      },
-      -WARMUP,
-    );
+    this.timeline = WALK.beats.filter((b) => !b.after);
+    this.traffic = new Traffic(seed, this.signal, this.scriptedVehicles(this.timeline), -WARMUP, () => this.south.vehicle());
+    this.people = new People({ seed, signal: this.signal, avoidCrosswalks: ['avenue', 'cross'], scripted: this.scriptedPeople(this.timeline) }, -WARMUP);
     this.head = new Head(this.wearer.bodyYaw + 0.26, 0.05);
     this.t = -WARMUP;
     const dt = 1 / SIM_HZ;
+    let held = false;
     while (this.t < -1e-9) {
+      if (!held && this.t >= -6) {
+        this.south.hold(this.t);
+        held = true;
+      }
+      this.south.step(this.t);
       this.traffic.step(this.t, dt);
       this.people.step(this.t, dt, this.wearer.pos, true);
       this.t = Math.round((this.t + dt) * 1e6) / 1e6;
@@ -128,9 +145,17 @@ export class Sim {
     this.t = 0;
   }
 
-  private scriptedVehicles(): ScriptedVehicle[] {
+  get route(): Route {
+    return this.wearer.route;
+  }
+
+  get holding(): boolean {
+    return this.wearer.holding;
+  }
+
+  private scriptedVehicles(beats: readonly Beat[]): ScriptedVehicle[] {
     const out: ScriptedVehicle[] = [];
-    for (const b of this.data.beats) {
+    for (const b of beats) {
       if (b.kind === 'vehicle') {
         const startN = b.fromN - 27;
         out.push({
@@ -153,25 +178,85 @@ export class Sim {
         out.push({ id: 'bike', body: 'bike', lane: 'nb-out', spawnAt: b.t - 2, spawnS: startN + 180, lateral: 1.35, ignoresSignal: true, v0: speed });
       }
     }
-    if (!this.data.beats.some((b) => b.kind === 'bus')) {
-      out.push({ id: 'm4-bus', body: 'bus', lane: 'nb-out', spawnAt: 24, spawnS: 120, dwell: { at: 0, until: 52, s: 180 + 60.6 }, v0: 8.5 });
-    }
     return out;
   }
 
-  private scriptedPeople(): { id: string; path: Waypoint[]; speed: number; spawnAt: number; anim?: 'talk'; facePoint?: Vec3 }[] {
-    const out: { id: string; path: Waypoint[]; speed: number; spawnAt: number; anim?: 'talk'; facePoint?: Vec3 }[] = [];
-    for (const b of this.data.beats) {
-      if (b.kind === 'people') {
-        out.push({ id: `${b.id}-a`, path: [{ x: 9.15, n: 44.9 }], speed: 0, spawnAt: -WARMUP, anim: 'talk', facePoint: v3(9.85, 1.6, zOf(44.1)) });
-        out.push({ id: `${b.id}-b`, path: [{ x: 9.85, n: 44.1 }], speed: 0, spawnAt: -WARMUP, anim: 'talk', facePoint: v3(9.15, 1.6, zOf(44.9)) });
-        this.conversation = [`${b.id}-a`, `${b.id}-b`];
-      }
+  private scriptedPeople(beats: readonly Beat[]): ScriptedPerson[] {
+    const out: ScriptedPerson[] = [];
+    for (const b of beats) {
       if (b.kind === 'person') {
         out.push({ id: b.id, path: [{ x: 6.2, n: 89.9 }, { x: 16, n: 89.85 }, { x: 24, n: 89.2 }, { x: 31.5, n: 84.2 }], speed: b.speed, spawnAt: b.t - 1 });
       }
     }
     return out;
+  }
+
+  private startIntent(id: ScenarioId, t: number): void {
+    this.intent = id;
+    this.intentAt = t;
+    const beats = WALK.beats.filter((b) => b.after === 'intent' && b.intent === id).map((b) => ({ ...b, t: Math.round((t + b.t) * 1e6) / 1e6 }));
+    this.timeline = [...this.timeline, ...beats].sort((a, b) => a.t - b.t);
+    for (const b of beats) if (b.kind === 'stops') for (const sid of b.ids) this.liveData.set(sid, { ...PLACE_BY_ID.get(sid)?.live });
+    for (const v of this.scriptedVehicles(beats)) this.traffic.add(v);
+    for (const p of this.scriptedPeople(beats)) this.people.add(p);
+    this.release(t);
+  }
+
+  private release(t: number): void {
+    if (!this.wearer.holding) return;
+    this.wearer.holding = false;
+    this.south.release(t);
+  }
+
+  plan(p: Plan): void {
+    if (p.destination !== this.lastArrived) this.lastArrived = null;
+    const dest = p.destination && p.destination !== this.lastArrived && doorSpur(p.destination) ? p.destination : 'start';
+    this.want = dest;
+  }
+
+  private dwelling(t: number): boolean {
+    const w = this.wearer;
+    return w.arrivedAt !== null && w.route.target !== 'start' && t - w.arrivedAt < DOOR_S;
+  }
+
+  private navigate(t: number): void {
+    const w = this.wearer;
+    if (w.holding && t >= this.holdUntil - 1e-9) this.release(t);
+    if (w.arrivedAt !== null && w.route.target === 'start') {
+      this.lap++;
+      w.setRoute(routeLoop(START));
+      w.holding = true;
+      this.holdUntil = t + WALK.holdS;
+      this.south.hold(t);
+      this.want = 'start';
+      return;
+    }
+    if (w.arrivedAt !== null && !this.dwelling(t)) {
+      this.lastArrived = w.route.target;
+      if (this.want === w.route.target) this.want = 'start';
+      this.reroute(this.want, t);
+      return;
+    }
+    if (w.arrivedAt !== null && t - w.arrivedAt >= PICKUP_S && this.stopIds().includes(w.route.target)) {
+      const live = this.liveData.get(w.route.target);
+      if (live && live.pickedUp !== true) live.pickedUp = true;
+    }
+    if (this.want !== w.route.target && w.state !== 'crossing' && !this.dwelling(t)) {
+      this.reroute(this.want, t);
+      if (this.want !== 'start') this.release(t);
+    }
+  }
+
+  private reroute(target: string, t: number): void {
+    const w = this.wearer;
+    const at = w.where();
+    w.setRoute(target === 'start' ? routeLoop(at) : routeTo(at, target));
+    this.reroutes.push({ t, to: target });
+  }
+
+  private stopIds(): string[] {
+    const b = this.timeline.filter((x) => x.kind === 'stops' && x.t <= this.t + 1e-9).at(-1);
+    return b && b.kind === 'stops' ? b.ids : [];
   }
 
   anchorOf = (id: string): Vec3 | undefined => {
@@ -188,9 +273,8 @@ export class Sim {
       return p ? v3(p.pos.x, p.height * 0.78, p.pos.z) : undefined;
     }
     if (id.startsWith('signal:')) {
-      const st = this.route.stops[0];
-      if (!st) return undefined;
-      return st.leg === 'avenue' ? v3(-7.6, 3.35, zOf(89.7)) : v3(7.6, 3.35, zOf(104.3));
+      const leg = id === 'signal:south' ? 'south' : id === 'signal:cross-east' ? 'cross' : 'avenue';
+      return crossingAnchor(leg, this.wearer.pos.x < 0);
     }
     if (id === 'scaffolding') return v3(10.4, 2.8, zOf(52.6));
     return undefined;
@@ -205,7 +289,7 @@ export class Sim {
   }
 
   private applyLiveBeats(a: number, b: number): void {
-    for (const beat of this.data.beats) {
+    for (const beat of this.timeline) {
       if (beat.kind === 'live' && beat.t > a + 1e-9 && beat.t <= b + 1e-9) Object.assign(this.liveData.get(beat.id) ?? {}, beat.set);
     }
     const bus = this.traffic.vehicles.find((v) => v.id === 'm4-bus');
@@ -216,7 +300,9 @@ export class Sim {
   step(dt: number): void {
     const t0 = this.t;
     const t1 = Math.round((t0 + dt) * 1e6) / 1e6;
-    this.wearer.setLateralTarget(this.threadOffset());
+    if (this.scripted) for (const x of this.reviewer.intents) if (x.t > t0 + 1e-9 && x.t <= t1 + 1e-9) this.startIntent(x.id, t1);
+    this.south.step(t1);
+    this.navigate(t1);
     this.wearer.step(t1, dt);
     this.traffic.step(t1, dt);
     this.people.step(t1, dt, this.wearer.pos, this.wearer.speed > 0.2);
@@ -237,16 +323,6 @@ export class Sim {
   advanceTo(t: number): void {
     const dt = 1 / SIM_HZ;
     while (this.t < t - 1e-7) this.step(dt);
-  }
-
-  private threadOffset(): number {
-    for (const id of this.conversation) {
-      const p = this.people.people.find((q) => q.id === id);
-      if (!p) continue;
-      const ahead = nOf(p.pos.z) - nOf(this.wearer.pos.z);
-      if (ahead > -2.5 && ahead < 9) return -0.62;
-    }
-    return 0;
   }
 
   private updateGaze(t: number): void {
@@ -286,6 +362,7 @@ export class Sim {
   }
 
   setLiveEvents(ev: Events): void {
+    if (ev.choice?.id === 'intent' && isScenarioId(ev.choice.action)) this.startIntent(ev.choice.action, this.t);
     this.pendingLive = { ...this.pendingLive, ...ev };
   }
 
@@ -295,12 +372,16 @@ export class Sim {
 
   private crosswalk(): Crosswalk | undefined {
     const w = this.wearer;
-    const stop = this.route.stops.find((s) => s.crossEnd > w.s + 0.05);
+    if (w.holding) {
+      const left = Math.max(0, this.holdUntil - this.t) + 0.6;
+      return { id: 'south', leg: 'south', distance: 0, signal: 'dont', secondsLeft: r2(left), toWalk: r2(left), inRoadway: false, onRoute: true };
+    }
+    const stop = w.nextStop();
     if (!stop) return undefined;
-    const reading = readSignal(this.signal, stop.leg, this.t);
+    const reading = stop.leg === 'south' ? this.south.read(this.t) : readSignal(this.signal, stop.leg, this.t);
     const crossing = w.state === 'crossing';
     return {
-      id: stop.leg === 'avenue' ? 'avenue-south' : 'cross-east',
+      id: stop.leg === 'avenue' ? 'avenue-south' : stop.leg === 'cross' ? 'cross-east' : 'south',
       leg: stop.leg,
       distance: crossing ? 0 : Math.max(0, stop.s - w.s),
       signal: reading.state,
@@ -326,9 +407,8 @@ export class Sim {
       if (ttp !== undefined) info.timeToPath = Math.round(ttp * 100) / 100;
       if (v.kind === 'bike') {
         info.fromBehind = vel.z < 0 && nOf(pose.pos.z) < nOf(w.pos.z) + 1;
-        info.wearerSide = Math.sign(pose.pos.x) === Math.sign(this.route.points[0]!.x);
-        const st = this.route.stops[0];
-        if (st && w.state === 'crossing' && v.v > 0.5) {
+        info.wearerSide = Math.sign(pose.pos.x) === Math.sign(w.pos.x);
+        if (w.crossing?.leg === 'avenue' && v.v > 0.5) {
           const lineZ = zOf(87.6);
           const t = (lineZ - (pose.pos.z - (lane.dir.z * v.len) / 2)) / vel.z;
           if (t > 0 && t < 4) info.timeToPath = Math.round(t * 100) / 100;
@@ -431,7 +511,7 @@ export class Sim {
   private inbox(): Notification[] {
     const out: Notification[] = [];
     let social = 0;
-    for (const b of this.data.beats) {
+    for (const b of this.timeline) {
       if (b.kind !== 'inbox' || b.t > this.t + 1e-9) continue;
       const id = b.id ?? `${b.type}-${social++}`;
       const n: Notification = { id, type: b.type, at: b.t };
@@ -465,7 +545,7 @@ export class Sim {
       const dyn = this.dynamicColliders();
       for (const p of view.panes) if (p.visible && p.rect.w > 0) backdrop[p.id] = this.backdrop.sampleRect(pose, view, p.rect, dyn);
     }
-    const narrows = this.data.beats.find((b) => b.kind === 'sidewalkNarrows' && b.t <= this.t + 1e-9);
+    const narrows = this.timeline.find((b) => b.kind === 'sidewalkNarrows' && b.t <= this.t + 1e-9);
     const snap: WorldSnapshot = {
       t: Math.round(this.t * 1000) / 1000,
       wearer: {
@@ -488,7 +568,7 @@ export class Sim {
       social: { inConversation: false, companions: 0 },
       entities: this.entities(pose),
       inbox: this.inbox(),
-      goal: { scenario: this.scenario },
+      goal: { scenario: this.intent ?? 'walking', lap: this.lap },
       wearerModel: { dismissed: {}, accepted: {}, budgetUsed: 0, budget: 7, pocket: [] },
     };
     if (events.pinch) snap.wearer.pinch = { target: events.pinch };
@@ -500,14 +580,12 @@ export class Sim {
       const n = nOf(w.pos.z);
       if (n < narrows.toN) snap.env.sidewalkNarrowsAhead = { fromN: narrows.fromN, toN: narrows.toN, distance: round(narrows.fromN - n) };
     }
-    const stops = this.data.beats.find((b) => b.kind === 'stops' && b.t <= this.t + 1e-9);
-    if (stops && stops.kind === 'stops') snap.goal.stops = stops.ids.map((id) => ({ id }));
-    if (this.scenario === 'errands') snap.goal.destination = this.data.destination;
-    if (this.data.destination) snap.goal.end = this.data.destination;
-    if (w.arrived) {
-      snap.goal.arrived = true;
-      snap.goal.destination = this.data.destination;
-    }
+    const stops = this.stopIds();
+    if (stops.length) snap.goal.stops = stops.map((id) => ({ id }));
+    if (this.intent) snap.goal.intentAt = round(this.intentAt);
+    if (w.holding) snap.goal.corner = true;
+    if (w.route.target !== 'start') snap.goal.destination = w.route.target;
+    if (this.dwelling(this.t)) snap.goal.arrived = true;
     if (view) {
       snap.view = view;
       snap.env.panes = view.panes.map((p) => (p.hiddenBy ? { id: p.id, visible: p.visible, hiddenBy: p.hiddenBy } : { id: p.id, visible: p.visible }));

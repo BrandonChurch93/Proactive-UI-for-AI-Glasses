@@ -99,9 +99,9 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (i > 0 && r.frames[i - 1]!.band !== f.band) bandAt = f.t;
         const view = s.view;
         if (!view) continue;
-        for (const p of view.panes) if (p.gaze) lookedAt.set(p.id, f.t);
+        for (const p of view.panes) if (p.gaze || (s.goal.arrived && s.goal.destination === p.id)) lookedAt.set(p.id, f.t);
         if (f.t - bandAt < 0.32 + TICK) continue;
-        const zone = focusRect(f.band, view.w, view.h);
+        const zone = reported(focusRect(f.band, view.w, view.h));
         for (const p of view.panes) {
           if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.label) continue;
           if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < MOVE.minShown + 0.32 + TICK) continue;
@@ -164,7 +164,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const prev = i > 0 ? r.frames[i - 1] : undefined;
         const placedBy = i > 1 ? r.frames[i - 2] : prev;
         const band = prev?.band ?? f.band;
-        const zone = focusRect(band, view.w, view.h);
+        const zone = reported(focusRect(band, view.w, view.h));
         const now = new Set<string>();
         for (const p of view.panes) {
           if (p.zone !== 'world' || !p.visible || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.label) continue;
@@ -227,7 +227,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-10',
-    name: 'the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards',
+    name: 'the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards',
     check: (r, cfg) => {
       const cardAt = new Map<string, number>();
       for (let i = 0; i < r.frames.length; i++) {
@@ -243,7 +243,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
           const pinched = s.wearer.pinch?.target === d.id;
           if (d.level === 'card') {
             cardAt.set(d.id, f.t);
-            if (d.id.startsWith('pocket:')) continue;
+            if (d.id.startsWith('pocket:') || (d.cause === 'arrival' && s.goal.arrived && s.goal.destination === d.id)) continue;
             const need = (f.band === 'brisk' ? Infinity : cfg.ladder.growS) * 1000 - 1;
             const ok = (pinched && (f.band === 'stopped' || f.band === 'stroll')) || (s.wearer.gaze.target === d.id && s.wearer.gaze.dwellMs >= need);
             if (!ok) return `t=${f.t} card on ${d.id} without dwell (${s.wearer.gaze.dwellMs} ms in ${f.band})`;
@@ -383,6 +383,12 @@ const checks: { rule: string; name: string; check: Check }[] = [
     },
   },
 ];
+
+
+// Pane rects are reported to 0.1 px, so a pane flush against the zone edge can read 0.05 px inside it.
+function reported(r: { x: number; y: number; w: number; h: number }): { x: number; y: number; w: number; h: number } {
+  return { x: r.x + 0.05, y: r.y + 0.05, w: r.w - 0.1, h: r.h - 0.1 };
+}
 
 export function invariants(r: RunResult, cfg: Config = DEFAULT_CONFIG): CaseResult[] {
   return checks.map((c) => {

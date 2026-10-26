@@ -1,6 +1,7 @@
-export { Sim, SIM_HZ, TICK_HZ, WARMUP, type LiveInput, type SimOptions } from './sim';
+export { Sim, SIM_HZ, TICK_HZ, WARMUP, type LiveInput, type Plan, type SimOptions } from './sim';
 export { buildLayout, lotBox, sunDirection, ALBEDO, type BlockLayout, type Lot, type Prop, type Storefront, type FacadeStyle, type SignFormat, type Collider, type BackgroundTower } from './layout';
-export { buildRoute, pointAt, headingAt, nearestS, type Route } from './route';
+export { pointAt, headingAt, nearestS, crossingAnchor, routeTo, routeLoop, START, type Route } from './route';
+export { SouthSignal, SOUTH } from './crossing';
 export { Traffic, LANES, LANE_BY_ID, type Vehicle, type BodyKind } from './traffic';
 export { People, type Person, type PersonAnim } from './people';
 export { Backdrop, SHADE } from './backdrop';

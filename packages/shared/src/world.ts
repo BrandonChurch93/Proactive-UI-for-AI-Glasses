@@ -22,6 +22,7 @@ export const nOf = (z: number): number => -z;
 export const AVENUE_CROSSWALK = { n: 87.6, half: 1.8 } as const;
 export const CROSS_CROSSWALK = { x: 9.6, half: 1.8 } as const;
 export const AVENUE_CROSSWALK_N = AVENUE_CROSSWALK.n;
+export const SOUTH_CROSSWALK = { n: 0, half: 1.8 } as const;
 
 export const POST_OFFICE = { x: 19.5, n: BLOCK.northLineN, door: { x: 19.5, n: BLOCK.northLineN - 0.4 } } as const;
 

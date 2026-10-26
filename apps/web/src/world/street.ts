@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK } from '@lumen/shared';
+import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, SOUTH_CROSSWALK } from '@lumen/shared';
 import { aabbBox, GeoBucket, worldUV } from './geom';
 import type { MaterialLibrary } from './materials';
 
@@ -47,22 +47,25 @@ export function buildStreet(mats: MaterialLibrary): THREE.Group {
   const paint = new THREE.MeshStandardMaterial({ color: 0xc9c6bc, roughness: 0.75, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   const yellow = new THREE.MeshStandardMaterial({ color: 0xd9a92b, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   const marks: { x: number; n: number; w: number; l: number; yellow?: boolean }[] = [];
-  const inX = (n: number): boolean => n > BLOCK.crossFrom - 0.5 && n < BLOCK.crossTo + 0.5;
+  const inX = (n: number): boolean => (n > BLOCK.crossFrom - 0.5 && n < BLOCK.crossTo + 0.5) || Math.abs(n - SOUTH_CROSSWALK.n) < SOUTH_CROSSWALK.half + 1.4;
   for (let n = -250; n < 680; n += 9) {
     if (inX(n) || inX(n + 3)) continue;
     for (const x of [-3.5, 3.5]) marks.push({ x, n: n + 1.5, w: 0.13, l: 3 });
   }
   for (const [a, b] of [
-    [-260, 83.4],
+    [-260, SOUTH_CROSSWALK.n - SOUTH_CROSSWALK.half - 0.3],
+    [SOUTH_CROSSWALK.n + SOUTH_CROSSWALK.half + 0.3, 83.4],
     [109.8, 700],
   ] as const) {
     for (const off of [-0.12, 0.12]) marks.push({ x: off, n: (a + b) / 2, w: 0.1, l: b - a, yellow: true });
   }
-  for (const n of [AVENUE_CROSSWALK.n, NORTH_AVE_CW]) {
+  for (const n of [AVENUE_CROSSWALK.n, NORTH_AVE_CW, SOUTH_CROSSWALK.n]) {
     for (let x = -half + 0.5; x < half - 0.3; x += 1.1) marks.push({ x: x + 0.3, n, w: 0.55, l: AVENUE_CROSSWALK.half * 2 });
   }
   marks.push({ x: half / 2, n: AVENUE_CROSSWALK.n - AVENUE_CROSSWALK.half - 1.0, w: half, l: 0.4 });
   marks.push({ x: -half / 2, n: NORTH_AVE_CW + AVENUE_CROSSWALK.half + 1.0, w: half, l: 0.4 });
+  marks.push({ x: half / 2, n: SOUTH_CROSSWALK.n - SOUTH_CROSSWALK.half - 1.0, w: half, l: 0.4 });
+  marks.push({ x: -half / 2, n: SOUTH_CROSSWALK.n + SOUTH_CROSSWALK.half + 1.0, w: half, l: 0.4 });
   const crossMid = (BLOCK.crossFrom + BLOCK.crossTo) / 2;
   const group2: { x: number; n: number; w: number; l: number; yellow?: boolean }[] = [];
   for (const cx of [CROSS_CROSSWALK.x, -CROSS_CROSSWALK.x]) {

@@ -148,6 +148,7 @@ export class Brain {
   private cardGrownAt = -Infinity;
   private yaw0: number | null = null;
   private headMoved = false;
+  private lap = 0;
   private budgetUsed = 0;
   private dismissed: Record<string, number> = {};
   private accepted: Record<string, number> = {};
@@ -169,7 +170,10 @@ export class Brain {
   private whisper: { content: Content; reason: Reason; until: number; from: string } | null = null;
   private moments = new Set<string>();
   private needToRunUntil = -1;
-  private arrived = false;
+  private arrival: string | null = null;
+  private routeCause: Cause = 'goal';
+  private routeCauseNext: Cause | null = null;
+  private routeShown: string | undefined;
   private overrides: { band: Band | null; gate: boolean; muteSocial: boolean } = {
     band: null,
     gate: false,
@@ -226,9 +230,7 @@ export class Brain {
     this.frameEvents = [];
     this.dismissedNow.clear();
     if (snap.goal.scenario && this.snapRef === 0) this.goal = snap.goal.scenario;
-    if (snap.goal.destination && !this.destination && snap.goal.scenario === 'errands') {
-      this.destination = snap.goal.destination;
-    }
+    this.trackArrival(snap);
 
     const band = this.pace.update(snap.wearer.speed, t, this.overrides.band);
     this.bandNow = band;
@@ -258,11 +260,16 @@ export class Brain {
     if (gateStarted) this.onGateStart(t);
     if (gateEnded) this.onGateEnd(t);
 
-    if (snap.goal.stops && this.stops.length === 0) this.stops = snap.goal.stops.map((s) => s.id);
+    if (snap.goal.stops && this.stops.length === 0 && this.goal === 'errands') this.stops = snap.goal.stops.map((s) => s.id);
     this.ingestInbox(snap, t, dt, band);
     this.applyChoice(snap, t);
     this.applyDismiss(snap, t);
 
+    if ((snap.goal.lap ?? 0) !== this.lap) {
+      this.lap = snap.goal.lap ?? 0;
+      this.yaw0 = null;
+      this.headMoved = false;
+    }
     this.yaw0 ??= snap.wearer.gaze.yaw;
     if (Math.abs(angleWrap(snap.wearer.gaze.yaw - this.yaw0)) >= this.cfg.ladder.moveRad) this.headMoved = true;
     const wants: Want[] = [];
@@ -302,11 +309,32 @@ export class Brain {
       },
       goal: {
         scenario: this.goal,
-        ...(this.destination ? { destination: this.destination } : {}),
+        ...(this.routeTarget(snap) ? { destination: this.routeTarget(snap)! } : {}),
         stops: this.openStops(snap),
       },
       stoppedFor,
     };
+  }
+
+  private routeTarget(snap: WorldSnapshot): string | undefined {
+    return this.goal === 'errands' ? this.openStops(snap)[0] : this.destination;
+  }
+
+  private setDestination(id: string | undefined, cause: Cause): void {
+    if (id === this.destination) return;
+    this.destination = id;
+    this.routeCauseNext = cause;
+  }
+
+  private trackArrival(snap: WorldSnapshot): void {
+    const at = snap.goal.arrived ? (snap.goal.destination ?? null) : null;
+    const left = this.arrival;
+    this.arrival = at;
+    if (!left || at === left) return;
+    if (this.destination === left) this.setDestination(undefined, 'arrival');
+    if (this.goal === 'errands' && this.openStops(snap).length > 0) return;
+    if (this.goal !== 'errands') this.stops = [];
+    this.goal = 'walking';
   }
 
   private updateSnooze(snap: WorldSnapshot, t: number): void {
@@ -423,6 +451,17 @@ export class Brain {
       else this.bump(this.dismissed, inb.n.type);
       return;
     }
+    if (c.id === 'intent') {
+      if (c.action === 'hungry' || c.action === 'errands' || c.action === 'walking') {
+        this.goal = c.action;
+        this.stops = [];
+        this.ask = 'none';
+        this.foodGlances.clear();
+        this.setDestination(undefined, 'choice');
+        this.routeCauseNext = 'choice';
+      }
+      return;
+    }
     if (c.id === 'ask') {
       this.ask = 'done';
       if (c.action === 'yes' || c.action === 'find-lunch') this.goal = 'hungry';
@@ -454,7 +493,7 @@ export class Brain {
     this.chosen.set(id, c.action);
     this.bump(this.accepted, this.kindOf(id));
     if (c.action === 'hold-seat' || c.action === 'hold-table') {
-      this.destination = id;
+      this.setDestination(id, 'choice');
       this.goal = 'hungry';
     }
   }
@@ -599,7 +638,7 @@ export class Brain {
       } else {
         it.gazeSince = null;
         if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
-        if (snap.goal.end === e.id && e.distance < this.cfg.arrival.distanceM * 2) it.lastGazeAt = t;
+        if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2) it.lastGazeAt = t;
       }
       it.wasTarget = isT;
 
@@ -623,7 +662,7 @@ export class Brain {
       const far = e.distance > this.cfg.ladder.cardWithinM;
       if (it.level === 'card' && it.far && !far) it.cardAt = t;
       it.far = far;
-      const labelled = this.labels.has(e.id) || (snap.goal.end === e.id && e.distance < this.cfg.arrival.distanceM * 2);
+      const labelled = this.labels.has(e.id) || (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2);
       const visible = this.paneVisible(e.id);
       const dtL = Number.isFinite(it.lastT) ? Math.max(0, t - it.lastT) : 0;
       it.lastT = t;
@@ -889,7 +928,7 @@ export class Brain {
   private errandsWants(snap: WorldSnapshot, t: number, _dt: number, band: Band, wants: Want[]): void {
     if (this.stops.length === 0) return;
     const ents = new Map(snap.entities.map((e) => [e.id, e]));
-    const ordered = [...this.stops].sort((a, b) => (ents.get(a)?.routeS ?? 0) - (ents.get(b)?.routeS ?? 0));
+    const ordered = [...this.stops];
     const short = (id: string): string =>
       (ents.get(id)?.name ?? id).replace('Main Street ', '').replace('Corner ', '');
     const done = ordered.filter((id) => ents.get(id)?.live.pickedUp === true);
@@ -900,7 +939,10 @@ export class Brain {
       { signal: 'stops', value: ordered.length, weight: 1 },
       { signal: 'order', value: ordered.map(short).join(' > '), weight: 1 },
     ]);
-    if (closed.length > 0) {
+    if (open.length === 0 && done.length > 0) {
+      name = 'All done';
+      r = reason('goal', 'Every stop done', [{ signal: 'stops.done', value: done.length, weight: 1 }]);
+    } else if (closed.length > 0) {
       name = 'Hardware closed early. One stop left.';
       r = reason('world', 'Hardware closed early. One stop left.', [
         { signal: 'live.closedEarly', value: short(closed[0]!), weight: 1 },
@@ -918,9 +960,9 @@ export class Brain {
     if (key !== this.errands.key) {
       this.errands = { key, shownAt: t, movingS: 0, stillS: 0, folded: false };
     }
-    if (this.errands.folded) return;
-    if (viewFoldDue(this.errands.movingS, this.errands.stillS, false, this.cfg)) {
-      this.errands.folded = true;
+    if (!this.errands.folded && viewFoldDue(this.errands.movingS, this.errands.stillS, false, this.cfg)) this.errands.folded = true;
+    if (this.errands.folded) {
+      if (open.length === 0 && this.goal !== 'errands') this.stops = [];
       return;
     }
     wants.push({
@@ -1228,9 +1270,8 @@ export class Brain {
   }
 
   private arrivalWants(snap: WorldSnapshot, t: number, wants: Want[]): void {
-    if (!snap.goal.arrived) return;
-    if (!this.arrived) this.arrived = true;
-    const id = snap.goal.destination ?? this.destination;
+    if (!this.arrival) return;
+    const id = this.arrival;
     const e = snap.entities.find((x) => x.id === id);
     if (!e) return;
     if (this.goal === 'hungry' && this.chosen.get(e.id) === 'hold-seat') {
@@ -1244,30 +1285,42 @@ export class Brain {
         content: { name: "Seat's held, inside on the left.", reason: r, showReason: false },
         reason: r,
         origin: 'arrival',
+        zoneOk: true,
       });
       return;
     }
-    const existing = this.standing.get(e.id);
-    if (existing && LEVEL_RANK[existing.level] >= LEVEL_RANK.label) return;
-    const r = reason('goal', e.reasons.goal ?? 'End of the walk', [{ signal: 'arrived', value: e.id, weight: 1 }]);
+    const level: Level = this.stops.includes(e.id) ? 'card' : 'label';
+    const own = wants.findIndex((w) => w.id === e.id);
+    const mine = own >= 0 && !wants[own]!.remove ? wants[own]! : null;
+    if (mine) {
+      mine.anchor = `door:${e.id}`;
+      mine.zoneOk = true;
+      if (LEVEL_RANK[mine.level] >= LEVEL_RANK[level]) return;
+      if (isPane(mine.level) && !this.paneVisible(e.id)) return;
+    }
+    if (own >= 0) wants.splice(own, 1);
+    const r = reason('goal', e.reasons.goal ?? 'You made it', [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const it = this.item(e.id);
     wants.push({
       id: e.id,
       component: 'place',
       zone: 'world',
-      level: 'label',
-      anchor: e.id,
-      content: { name: e.name, fact: e.glance, reason: r, showReason: true },
+      level,
+      anchor: `door:${e.id}`,
+      content: level === 'card' ? cardContent(e, r, 'stopped', this.goal) : { name: e.name, fact: e.glance, reason: r, showReason: true },
       reason: r,
       origin: 'arrival',
+      zoneOk: true,
+      ...(level === 'card' ? { announce: 'c:full' } : {}),
       onCommit: () => {
-        if (!isPane(it.level)) {
-          it.level = 'label';
+        if (LEVEL_RANK[it.level] < LEVEL_RANK[level]) {
+          it.level = level;
           it.since = t;
           it.shownAt = t;
           it.dwelt = true;
-          it.lastGazeAt = t + 1e6;
+          if (level === 'card') it.cardAt = t;
         }
+        it.lastGazeAt = t;
       },
     });
   }
@@ -1337,9 +1390,13 @@ export class Brain {
       });
     }
 
-    const stops = this.openStops(snap);
-    const routeTo = this.goal === 'errands' ? stops[0] : this.destination;
-    if (routeTo && !this.arrived) {
+    const routeTo = this.routeTarget(snap);
+    if (routeTo !== this.routeShown) {
+      this.routeShown = routeTo;
+      this.routeCause = this.routeCauseNext ?? 'goal';
+      this.routeCauseNext = null;
+    }
+    if (routeTo && !this.arrival) {
       const nar = snap.env.sidewalkNarrowsAhead;
       const r = reason('goal', 'On your route', [
         { signal: 'route.to', value: routeTo, weight: 1 },
@@ -1361,12 +1418,13 @@ export class Brain {
         origin: 'ground',
         channel: 'ground',
         announce: routeTo,
+        cause: this.routeCause,
       });
     }
-    const dest = this.destination ?? (this.goal === 'errands' ? this.stops[this.stops.length - 1] : undefined);
+    const dest = this.arrival ?? routeTo;
     const de = dest ? snap.entities.find((e) => e.id === dest) : undefined;
-    if (de && (routeTo || this.arrived) && (de.distance < 45 || this.arrived)) {
-      const r = reason('goal', this.arrived ? 'You made it' : 'On your route', [
+    if (de && (de.distance < 45 || this.arrival)) {
+      const r = reason('goal', this.arrival ? 'You made it' : 'On your route', [
         { signal: 'destination', value: de.id, weight: 1 },
         { signal: 'distance', value: Math.round(de.distance), weight: 1 },
       ]);
@@ -1374,7 +1432,7 @@ export class Brain {
         id: 'destination',
         component: 'destination',
         zone: 'ground',
-        level: this.arrived ? 'pip' : 'glance',
+        level: this.arrival ? 'pip' : 'glance',
         anchor: de.id,
         content: { name: de.name, reason: r },
         reason: r,

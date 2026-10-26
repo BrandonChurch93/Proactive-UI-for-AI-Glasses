@@ -1,3 +1,4 @@
+import { WALK_SECONDS, isScenarioId } from '@lumen/shared';
 import { arg, ensureServer, launch } from './lib/browser';
 
 // Measures the section 2 bar of docs/plan-ux-rework.md on one walk, live, at one view size. The head follows
@@ -11,6 +12,10 @@ const h = Number(arg('h', '1080'));
 const probes = process.argv.includes('--probes');
 const nolookup = process.argv.includes('--nolookup');
 const wander = process.argv.includes('--wander');
+const lapRun = process.argv.includes('--lap');
+const end = Number(arg('until', lapRun ? '330' : String(isScenarioId(scenario) ? WALK_SECONDS[scenario] : 112)));
+const shots = (arg('shots') ?? '').split(',').filter(Boolean).map(Number).sort((a, b) => a - b);
+const shotDir = arg('shotdir', '.')!;
 const server = await ensureServer(base);
 const b = await launch();
 const p = await b.newPage({ viewport: { width: w, height: h } });
@@ -38,11 +43,11 @@ async function open(sc: string): Promise<void> {
 const PROBES: Record<string, { t: number; id: string; dy?: number }[]> = {
   hungry: [
     { t: 6, id: 'kathys-cupcakes', dy: 0.2 },
-    { t: 29, id: 'post-office' },
+    { t: 44, id: 'post-office' },
   ],
   errands: [
     { t: 66, id: 'post-office' },
-    { t: 17, id: 'main-street-pharmacy' },
+    { t: 46, id: 'main-street-pharmacy', dy: 0.2 },
   ],
   walking: [
     { t: 4, id: 'grace-theater' },
@@ -55,7 +60,10 @@ if (probes) {
     await open(scenario);
     const r = (await p.evaluate(`(async () => {
       const id = ${JSON.stringify(pr.id)};
-      const walk = window.__app.walk; walk.paused = true; walk.seek(${pr.t});
+      const walk = window.__app.walk; walk.paused = true; walk.autoIntent = false;
+      if (walk.t > 0) walk.seek(0);
+      for (const x of walk.sim.reviewer.intents) { walk.seek(x.t); walk.queue({ choice: { id: 'intent', action: x.id } }); }
+      walk.seek(${pr.t});
       const sim = walk.sim; const o = walk.overlay;
       const aim = () => { const a = sim.anchorOf(id); const e = sim.wearer.pos; walk.look(Math.atan2(-(a.x - e.x), -(a.z - e.z)) - sim.wearer.bodyYaw, Math.atan2(a.y - ${pr.dy ?? 1.6} - e.y, Math.hypot(a.x - e.x, a.z - e.z))); };
       aim(); walk.lookedAt = -Infinity;
@@ -79,23 +87,54 @@ if (probes) {
   }
 } else {
   await open(scenario);
-  const out = (await p.evaluate(`(async () => {
-    const walk = window.__app.walk; walk.paused = true;
+  await p.evaluate(`(() => {
+    const walk = window.__app.walk; walk.paused = true; walk.autoIntent = ${lapRun};
+    if (walk.t > 0) walk.seek(0);
     const sim = walk.sim; const o = walk.overlay;
     if (${nolookup}) sim.reviewer.lookUps = [];
+    const lap = { laps: 0, pauses: [], stillFrom: null, crossBirths: [], crossFrames: 0, routes: [], destAt: null, dest: null };
     const vp = { w: innerWidth, h: innerHeight };
     const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {} };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
-    while (walk.t < walk.duration - 0.02 && !walk.ended) {
+    const birthsBefore = () => walk.overlayLog.length;
+    window.__bar = { m, lap };
+    window.__bar.step = (until) => {
+    while (walk.t < until - 0.02 && !walk.ended) {
       const ai = sim.reviewer.aim(sim.t, sim.wearer.pos, sim.wearer.bodyYaw, sim.anchorOf, sim.wearer.state === 'crossing');
-      if (${wander}) walk.look(0.6 * Math.sin(sim.t * 0.5), 0.35 + 0.35 * Math.sin(sim.t * 0.37));
+      if (${lapRun}) walk.look(0.22, 0.04);
+      else if (${wander}) walk.look(0.6 * Math.sin(sim.t * 0.5), 0.35 + 0.35 * Math.sin(sim.t * 0.37));
       else walk.look(ai.yaw - sim.wearer.bodyYaw, ai.pitch);
       const prevT = sim.t;
+      const logFrom = birthsBefore();
       walk.seek(walk.t + 1 / 60);
-      const ev = sim.reviewer.eventsBetween(prevT, sim.t);
-      if (Object.keys(ev).length) walk.queue(ev);
+      if (!${lapRun}) {
+        const ev = sim.reviewer.eventsBetween(prevT, sim.t);
+        if (Object.keys(ev).length) walk.queue(ev);
+      }
       m.frames++;
+      const w = sim.wearer;
+      const crossing = w.state === 'crossing';
+      if (crossing) {
+        for (const e of walk.overlayLog.slice(logFrom)) if (e.kind === 'birth' && e.level !== 'pip') lap.crossBirths.push([+e.t.toFixed(2), e.id, e.level]);
+      }
+      const cw = walk.last()?.snap.env.crosswalk;
+      const atLight = cw && cw.distance < 0.6 && cw.signal !== 'walk';
+      const explained = crossing || sim.holding || atLight || w.arrivedAt !== null;
+      if (w.speed < 0.05 && !explained) lap.stillFrom ??= sim.t;
+      else {
+        if (lap.stillFrom !== null && sim.t - lap.stillFrom > 1) lap.pauses.push([+lap.stillFrom.toFixed(1), +(sim.t - lap.stillFrom).toFixed(1)]);
+        lap.stillFrom = null;
+      }
+      lap.laps = sim.lap;
+      const goalDest = walk.last()?.frame.goal.destination ?? null;
+      if (goalDest !== lap.dest) {
+        lap.dest = goalDest;
+        if (goalDest) { lap.destAt = sim.t; lap.routes.push([+sim.t.toFixed(2), goalDest, null]); }
+      }
+      const rv = o.route;
+      const open = lap.routes.find((r) => r[2] === null && r[1] === goalDest);
+      if (open && rv && rv.to === goalDest && rv.drawn.at(sim.t) >= 0.99 && rv.op.at(sim.t) >= 0.99) open[2] = +(sim.t - open[0]).toFixed(2);
       const kos = walk.bridge.keepOuts();
       const road = kos.filter((k) => k.kind === 'roadway');
       for (const k of kos) { m.keepW = Math.max(m.keepW, k.rect.w / vp.w); m.keepH = Math.max(m.keepH, k.rect.h / vp.h); }
@@ -152,11 +191,19 @@ if (probes) {
         }
       }
     }
-    return { m, log: walk.overlayLog, t: walk.t };
-  })()`)) as {
+    };
+  })()`);
+  for (const at of [...shots.filter((x) => x < end), end]) {
+    await p.evaluate(`window.__bar.step(${at})`);
+    if (at === end) break;
+    await p.evaluate('window.__app.world.render()');
+    await p.screenshot({ path: `${shotDir}/${scenario}-live-${at}.png` });
+  }
+  const out = (await p.evaluate(`(() => { const walk = window.__app.walk; return { m: window.__bar.m, log: walk.overlayLog, t: walk.t, lap: window.__bar.lap }; })()`)) as {
     m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
+    lap: { laps: number; pauses: [number, number][]; crossBirths: unknown[]; routes: [number, string, number | null][] };
   };
   const { m, log } = out;
   const only = arg('id');
@@ -250,6 +297,11 @@ if (probes) {
   console.log(`  pane frames overlapping chrome: ${mm.chromeFrames}${mm.chromeFrames ? `  ${JSON.stringify(mm.chromeAt)}` : ''}`);
   console.log(`  most scale changes per pane inside 2.5 s: ${scaleMax}${scaleMax ? ` (${scaleWorst})` : ''}`);
   console.log(`  promotions while the pane was not visible: ${m.hiddenPromotes.length}${m.hiddenPromotes.length ? `  ${JSON.stringify(m.hiddenPromotes.slice(0, 6))}` : ''}`);
+  const L = out.lap;
+  const slow = L.routes.filter((r) => r[2] === null || r[2] > 2);
+  console.log(`  route drawn within 2 s of a choice or a Yes: ${L.routes.length - slow.length} of ${L.routes.length}${L.routes.length ? `  ${JSON.stringify(L.routes)}` : ''}`);
+  console.log(`  panes born during a crossing: ${L.crossBirths.length}${L.crossBirths.length ? `  ${JSON.stringify(L.crossBirths.slice(0, 6))}` : ''}`);
+  console.log(`  laps completed: ${L.laps}; stops longer than 1 s not at a light, a door or the corner: ${L.pauses.length}${L.pauses.length ? `  ${JSON.stringify(L.pauses.slice(0, 6))}` : ''}`);
 }
 console.log(`  console errors: ${errors.length}${errors.length ? `\n${errors.slice(0, 5).join('\n')}` : ''}`);
 await b.close();

@@ -2,6 +2,19 @@
   "walk": "hungry",
   "cases": [
     {
+      "name": "0:00 \u00b7 the light is held at the corner and the glasses say so",
+      "between": [
+        0,
+        0.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "safety:signal",
+        "nameIs": "WAIT",
+        "zone": "ground"
+      }
+    },
+    {
       "name": "0:00 to 0:01 \u00b7 nothing before the street has faded up",
       "between": [
         0,
@@ -12,18 +25,14 @@
       }
     },
     {
-      "name": "0:02 \u00b7 one label, the best fit, reason in the log only",
+      "name": "0:01 \u00b7 Hungry at the corner: the walk starts with no destination",
       "between": [
-        1.5,
-        3
+        1.1,
+        2
       ],
-      "must": {
-        "action": "show",
-        "id": "goldies-counter",
-        "level": "label",
-        "band": "walk",
-        "factIs": "3 min",
-        "showReason": false
+      "state": {
+        "goal": "hungry",
+        "destination": null
       }
     },
     {
@@ -54,20 +63,20 @@
       }
     },
     {
-      "name": "0:00 to 0:10 \u00b7 no card",
+      "name": "0:00 to 0:34 \u00b7 no card",
       "between": [
         0,
-        10
+        34
       ],
       "mustNot": {
         "level": "card"
       }
     },
     {
-      "name": "0:14 \u00b7 a look at Mega Burger lights its label",
+      "name": "0:35 \u00b7 a look at Mega Burger lights its label",
       "between": [
-        14,
-        16
+        35,
+        36.2
       ],
       "must": {
         "action": "show",
@@ -77,10 +86,23 @@
       }
     },
     {
-      "name": "0:22 \u00b7 pinch while walking saves",
+      "name": "0:36 \u00b7 a second of hold later (it is beyond 35 m), a compact card: no reason, no rows",
       "between": [
-        21.9,
-        22.4
+        36,
+        37.2
+      ],
+      "must": {
+        "action": "promote",
+        "id": "mega-burger",
+        "level": "card",
+        "showReason": false
+      }
+    },
+    {
+      "name": "0:41 \u00b7 pinch while walking saves",
+      "between": [
+        40.9,
+        41.4
       ],
       "must": {
         "action": "save",
@@ -88,10 +110,10 @@
       }
     },
     {
-      "name": "0:22 \u00b7 nothing opens",
+      "name": "0:35 to 0:47 \u00b7 a far place never expands",
       "between": [
-        22,
-        30
+        35,
+        47
       ],
       "mustNot": {
         "id": "mega-burger",
@@ -99,20 +121,20 @@
       }
     },
     {
-      "name": "0:22 to 0:58 \u00b7 Pocket 1 on the glyph",
+      "name": "0:41 to 1:17 \u00b7 Pocket 1 on the glyph",
       "between": [
-        22.5,
-        57
+        41.5,
+        76
       ],
       "state": {
         "glyph": "Pocket 1"
       }
     },
     {
-      "name": "0:30 to 0:34 \u00b7 the look moves on; with no label under the center the label fades after 4 s of walking",
+      "name": "0:48 \u00b7 the look moves on and the card shrinks back to its label",
       "between": [
-        33.5,
-        35.5
+        47.5,
+        49
       ],
       "must": {
         "id": "mega-burger",
@@ -123,45 +145,10 @@
       }
     },
     {
-      "name": "0:15 \u00b7 a second of hold later (it is beyond 35 m), a compact card: no reason, no rows, 58 m away",
+      "name": "0:51 \u00b7 a look at the station stair lights its label",
       "between": [
-        15,
-        16
-      ],
-      "must": {
-        "action": "promote",
-        "id": "mega-burger",
-        "level": "card",
-        "showReason": false
-      }
-    },
-    {
-      "name": "0:14 to 0:30 \u00b7 a far place never expands",
-      "between": [
-        14,
-        31
-      ],
-      "mustNot": {
-        "id": "mega-burger",
-        "level": "expanded"
-      }
-    },
-    {
-      "name": "0:44 to 0:57 \u00b7 Brisk: labels at most, never a card",
-      "between": [
-        46,
-        56.5
-      ],
-      "state": {
-        "band": "brisk",
-        "levelsAtMost": "label"
-      }
-    },
-    {
-      "name": "0:40 \u00b7 a look at the station stair lights its label",
-      "between": [
-        40.4,
-        41.2
+        51.3,
+        52.2
       ],
       "must": {
         "action": "show",
@@ -171,10 +158,21 @@
       }
     },
     {
-      "name": "0:58 \u00b7 no need to run",
+      "name": "1:00 to 1:13 \u00b7 Brisk: labels at most, never a card",
       "between": [
-        57,
-        61
+        60.5,
+        72.5
+      ],
+      "state": {
+        "band": "brisk",
+        "levelsAtMost": "label"
+      }
+    },
+    {
+      "name": "1:13 \u00b7 no need to run",
+      "between": [
+        72.5,
+        74
       ],
       "must": {
         "action": "show",
@@ -183,22 +181,23 @@
       }
     },
     {
-      "name": "0:58 \u00b7 the text from Maya at the next safe moment",
+      "name": "1:16 \u00b7 the text from Maya at the red light",
       "between": [
-        57,
-        61
+        76.4,
+        77.2
       ],
       "must": {
         "action": "show",
         "id": "maya-usual",
-        "component": "toast"
+        "component": "toast",
+        "reasonText": "Long red light"
       }
     },
     {
-      "name": "1:02 \u00b7 the pocket surfaces with the time available",
+      "name": "1:17 \u00b7 the pocket surfaces with the time available",
       "between": [
-        59,
-        63
+        77,
+        78.5
       ],
       "must": {
         "action": "surface",
@@ -207,10 +206,10 @@
       }
     },
     {
-      "name": "1:04 \u00b7 pinch opens its card",
+      "name": "1:19 \u00b7 pinch opens its card",
       "between": [
-        63.9,
-        65.5
+        78.9,
+        79.5
       ],
       "must": {
         "action": "show",
@@ -219,10 +218,10 @@
       }
     },
     {
-      "name": "1:06 \u00b7 held gaze expands it in place",
+      "name": "1:21 \u00b7 held gaze expands it in place",
       "between": [
-        65.5,
-        68
+        80.5,
+        82
       ],
       "must": {
         "action": "promote",
@@ -231,22 +230,33 @@
       }
     },
     {
-      "name": "1:08 \u00b7 hold a seat, the route draws",
+      "name": "1:23 \u00b7 hold a seat: the destination is set by the choice and the route draws",
       "between": [
-        68,
-        69
+        83,
+        83.5
       ],
       "must": {
         "action": "show",
         "id": "route",
-        "zone": "ground"
+        "zone": "ground",
+        "cause": "choice"
       }
     },
     {
-      "name": "1:14 to 1:24 \u00b7 crossing, everything holds",
+      "name": "1:24 \u00b7 the route goes to Mega Burger",
       "between": [
-        74,
-        84
+        83.5,
+        88
+      ],
+      "state": {
+        "destination": "mega-burger"
+      }
+    },
+    {
+      "name": "1:29 to 1:39 \u00b7 crossing, everything holds",
+      "between": [
+        89.2,
+        98.8
       ],
       "must": {
         "action": "hold",
@@ -255,10 +265,20 @@
       }
     },
     {
-      "name": "1:18 \u00b7 the app update is held",
+      "name": "1:29 to 1:39 \u00b7 nothing opens in a crossing",
       "between": [
-        78,
-        78.3
+        89.2,
+        98.8
+      ],
+      "max": {
+        "shows": 0
+      }
+    },
+    {
+      "name": "1:33 \u00b7 the app update is held",
+      "between": [
+        93,
+        93.3
       ],
       "must": {
         "action": "hold",
@@ -267,10 +287,10 @@
       }
     },
     {
-      "name": "1:24 \u00b7 far curb, the held update arrives with its reason",
+      "name": "1:39 \u00b7 far curb, the held update arrives with its reason",
       "between": [
-        84,
-        88
+        99,
+        101
       ],
       "must": {
         "action": "show",
@@ -280,20 +300,20 @@
       }
     },
     {
-      "name": "1:26 \u00b7 the destination column at the door",
+      "name": "1:40 \u00b7 the destination column on the way to the door",
       "between": [
-        87,
-        93
+        100,
+        108
       ],
       "stateSome": {
         "has": "destination"
       }
     },
     {
-      "name": "1:34 \u00b7 arrival",
+      "name": "1:48 \u00b7 arrival",
       "between": [
-        93,
-        98
+        107.5,
+        108.5
       ],
       "must": {
         "action": "show",
@@ -302,10 +322,25 @@
       }
     },
     {
+      "name": "1:52 \u00b7 four seconds at the door, then the loop resumes with no destination and no intent",
+      "between": [
+        112.5,
+        118
+      ],
+      "state": {
+        "goal": "walking",
+        "destination": null,
+        "hasNot": [
+          "route",
+          "arrival"
+        ]
+      }
+    },
+    {
       "name": "restraint \u00b7 shows within the budget",
       "between": [
         0,
-        90
+        112
       ],
       "max": {
         "shows": 9

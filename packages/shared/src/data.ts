@@ -1,13 +1,11 @@
 import placesJson from '../../../data/places.json';
-import hungryJson from '../../../data/scenarios/hungry.json';
-import errandsJson from '../../../data/scenarios/errands.json';
-import walkingJson from '../../../data/scenarios/walking.json';
+import walkJson from '../../../data/scenarios/walk.json';
 
 export type ScenarioId = 'hungry' | 'errands' | 'walking';
 export type Band = 'stopped' | 'stroll' | 'walk' | 'brisk';
 export type Side = 'W' | 'E' | 'X';
 export type EntityKind = 'food' | 'cafe' | 'theater' | 'venue' | 'shop' | 'service' | 'transit' | 'park' | 'sign';
-export type Leg = 'avenue' | 'cross';
+export type Leg = 'avenue' | 'cross' | 'south';
 export type SignalState = 'walk' | 'flash' | 'dont';
 export type LiveValue = number | string | boolean;
 
@@ -62,20 +60,22 @@ export interface PlaceData extends PlaceCopy {
   year?: number;
 }
 
-export interface PaceSegment {
-  t: number;
+export interface PaceZone {
+  side: 'E' | 'W';
+  fromN: number;
+  toN: number;
   band: Band;
-  until?: number | 'signal';
 }
 
 interface BeatBase {
   t: number;
+  after?: 'intent';
+  intent?: ScenarioId;
 }
 
 export type Beat =
   | (BeatBase & { kind: 'gaze'; id: string | null; dy?: number })
   | (BeatBase & { kind: 'pinch'; id: string })
-  | (BeatBase & { kind: 'signal'; leg: Leg; state: SignalState; secondsLeft: number })
   | (BeatBase & {
       kind: 'inbox';
       type: 'text' | 'dm' | 'social' | 'app';
@@ -86,8 +86,6 @@ export type Beat =
       more?: number;
     })
   | (BeatBase & { kind: 'choice'; id: string; action: string })
-  | (BeatBase & { kind: 'crossing'; leg: Leg; seconds: number })
-  | (BeatBase & { kind: 'arrive'; id: string })
   | (BeatBase & { kind: 'stops'; ids: string[] })
   | (BeatBase & { kind: 'live'; id: string; set: Record<string, LiveValue> })
   | (BeatBase & { kind: 'sidewalkNarrows'; fromN: number; toN: number })
@@ -98,17 +96,26 @@ export type Beat =
   | (BeatBase & { kind: 'people'; id: string; count: number; onPath: boolean; until: number })
   | (BeatBase & { kind: 'lookUp'; seconds: number })
   | (BeatBase & { kind: 'ask'; answer: 'yes' | 'no'; answerAt: number })
-  | (BeatBase & { kind: 'bike'; side: 'near' | 'far'; fromBehind: boolean; timeToPath: number });
+  | (BeatBase & { kind: 'bike'; side: 'near' | 'far'; fromBehind: boolean; timeToPath: number })
+  | (BeatBase & { kind: 'intent'; id: ScenarioId })
+  | (BeatBase & { kind: 'choose'; id: string })
+  | (BeatBase & { kind: 'reply'; id: string; reply: string })
+  | (BeatBase & { kind: 'go'; id: string });
 
 export type BeatKind = Beat['kind'];
 
-export interface ScenarioData {
-  scenario: ScenarioId;
-  route: string[];
-  destination: string;
-  speeds: Record<Band, number>;
-  pace: PaceSegment[];
+export interface Recording {
+  duration: number;
   beats: Beat[];
+}
+
+export interface WalkData {
+  speeds: Record<Band, number>;
+  pace: PaceZone[];
+  signal: { state: SignalState; secondsLeft: number };
+  holdS: number;
+  beats: Beat[];
+  recordings: Record<ScenarioId, Recording>;
 }
 
 const KINDS: readonly EntityKind[] = ['food', 'cafe', 'theater', 'venue', 'shop', 'service', 'transit', 'park', 'sign'];
@@ -116,11 +123,8 @@ const BANDS: readonly Band[] = ['stopped', 'stroll', 'walk', 'brisk'];
 const BEAT_KINDS: readonly BeatKind[] = [
   'gaze',
   'pinch',
-  'signal',
   'inbox',
   'choice',
-  'crossing',
-  'arrive',
   'stops',
   'live',
   'sidewalkNarrows',
@@ -132,6 +136,10 @@ const BEAT_KINDS: readonly BeatKind[] = [
   'lookUp',
   'ask',
   'bike',
+  'intent',
+  'choose',
+  'reply',
+  'go',
 ];
 
 function fail(where: string, what: string): never {
@@ -170,26 +178,33 @@ function validatePlace(raw: unknown, i: number): PlaceData {
   return raw as unknown as PlaceData;
 }
 
-function validateScenario(raw: unknown, id: ScenarioId): ScenarioData {
-  const where = `scenarios/${id}`;
-  if (!isRecord(raw)) fail(where, 'not an object');
-  if (raw.scenario !== id) fail(where, `scenario field is ${String(raw.scenario)}`);
-  if (!Array.isArray(raw.pace) || raw.pace.length === 0) fail(where, 'pace must be a non-empty array');
-  let lastT = -1;
-  for (const [i, seg] of (raw.pace as unknown[]).entries()) {
-    if (!isRecord(seg) || typeof seg.t !== 'number' || !BANDS.includes(seg.band as Band)) {
-      fail(where, `pace[${i}] malformed`);
-    }
-    if (seg.t < lastT) fail(where, `pace[${i}] out of order`);
-    lastT = seg.t;
-  }
-  if (!Array.isArray(raw.beats)) fail(where, 'beats must be an array');
-  for (const [i, b] of (raw.beats as unknown[]).entries()) {
+function validateBeats(raw: unknown, where: string): void {
+  if (!Array.isArray(raw)) fail(where, 'beats must be an array');
+  for (const [i, b] of (raw as unknown[]).entries()) {
     if (!isRecord(b) || typeof b.t !== 'number') fail(where, `beats[${i}] needs a numeric t`);
     if (!BEAT_KINDS.includes(b.kind as BeatKind)) fail(where, `beats[${i}] unknown kind ${String(b.kind)}`);
+    if (b.after !== undefined && b.after !== 'intent') fail(where, `beats[${i}] after must be intent`);
   }
+}
+
+function validateWalk(raw: unknown): WalkData {
+  const where = 'scenarios/walk';
+  if (!isRecord(raw)) fail(where, 'not an object');
   if (!isRecord(raw.speeds)) fail(where, 'speeds must be an object');
-  return raw as unknown as ScenarioData;
+  if (!Array.isArray(raw.pace)) fail(where, 'pace must be an array');
+  for (const [i, z] of (raw.pace as unknown[]).entries()) {
+    if (!isRecord(z) || (z.side !== 'E' && z.side !== 'W') || typeof z.fromN !== 'number' || typeof z.toN !== 'number' || !BANDS.includes(z.band as Band)) fail(where, `pace[${i}] malformed`);
+  }
+  if (!isRecord(raw.signal) || typeof raw.signal.secondsLeft !== 'number') fail(where, 'signal needs a state and secondsLeft');
+  if (typeof raw.holdS !== 'number') fail(where, 'holdS must be a number');
+  validateBeats(raw.beats, where);
+  if (!isRecord(raw.recordings)) fail(where, 'recordings must be an object');
+  for (const id of ['hungry', 'errands', 'walking']) {
+    const r = raw.recordings[id];
+    if (!isRecord(r) || typeof r.duration !== 'number') fail(where, `recording ${id} needs a duration`);
+    validateBeats(r.beats, `${where}/${id}`);
+  }
+  return raw as unknown as WalkData;
 }
 
 export const PLACES: readonly PlaceData[] = (() => {
@@ -205,15 +220,15 @@ export const PLACES: readonly PlaceData[] = (() => {
 
 export const PLACE_BY_ID: ReadonlyMap<string, PlaceData> = new Map(PLACES.map((p) => [p.id, p]));
 
-export const SCENARIOS: Readonly<Record<ScenarioId, ScenarioData>> = {
-  hungry: validateScenario(hungryJson, 'hungry'),
-  errands: validateScenario(errandsJson, 'errands'),
-  walking: validateScenario(walkingJson, 'walking'),
-};
+export const WALK: Readonly<WalkData> = validateWalk(walkJson);
 
 export const SCENARIO_IDS: readonly ScenarioId[] = ['hungry', 'errands', 'walking'];
 
-export const WALK_SECONDS: Record<ScenarioId, number> = { hungry: 98, errands: 100, walking: 102 };
+export const WALK_SECONDS: Record<ScenarioId, number> = {
+  hungry: WALK.recordings.hungry.duration,
+  errands: WALK.recordings.errands.duration,
+  walking: WALK.recordings.walking.duration,
+};
 
 export function isScenarioId(v: unknown): v is ScenarioId {
   return v === 'hungry' || v === 'errands' || v === 'walking';

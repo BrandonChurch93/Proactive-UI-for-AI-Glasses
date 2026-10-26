@@ -55,7 +55,16 @@ export interface PeopleOptions {
   seed: number;
   signal: SignalAnchor;
   avoidCrosswalks: Leg[];
-  scripted: { id: string; path: Waypoint[]; speed: number; spawnAt: number; anim?: PersonAnim; facePoint?: Vec3 }[];
+  scripted: ScriptedPerson[];
+}
+
+export interface ScriptedPerson {
+  id: string;
+  path: Waypoint[];
+  speed: number;
+  spawnAt: number;
+  anim?: PersonAnim;
+  facePoint?: Vec3;
 }
 
 const EAST_DOORS = [-30, -14, 2, 14, 21, 27, 32, 38, 44, 49, 54, 72, 81];
@@ -74,17 +83,19 @@ export class People {
     this.rng = new Rng(opts.seed * 13 + 5);
     this.seedAmbient(start);
     this.seedIdle();
-    for (const s of opts.scripted) {
-      this.queue.push({
-        at: s.spawnAt,
-        make: () => {
-          const p = this.person(s.id, s.path, s.speed, s.spawnAt, true);
-          if (s.anim) p.anim = s.anim;
-          if (s.facePoint) p.facePoint = s.facePoint;
-          return p;
-        },
-      });
-    }
+    for (const s of opts.scripted) this.add(s);
+  }
+
+  add(s: ScriptedPerson): void {
+    this.queue.push({
+      at: s.spawnAt,
+      make: () => {
+        const p = this.person(s.id, s.path, s.speed, s.spawnAt, true);
+        if (s.anim) p.anim = s.anim;
+        if (s.facePoint) p.facePoint = s.facePoint;
+        return p;
+      },
+    });
   }
 
   private person(id: string, path: Waypoint[], speed: number, at: number, scripted = false): Person {
@@ -172,15 +183,15 @@ export class People {
 
   private seedIdle(): void {
     const idle: [number, number, number, PersonAnim][] = [
-      [-11.7, 36.6, Math.PI / 2, 'talk'],
-      [-11.0, 37.3, -Math.PI / 2, 'talk'],
+      [-12.5, 36.6, Math.PI / 2, 'talk'],
+      [-11.85, 37.3, -Math.PI / 2, 'talk'],
       [11.6, 67.4, -Math.PI / 2, 'idle'],
       [-12.35, 80.0, Math.PI / 2, 'sit'],
       [-12.0, 40.4, Math.PI / 2, 'sit'],
       [12.4, 50.6, -Math.PI / 2, 'sit'],
       [-10.4, 106.6, 0, 'wait'],
       [6.6, 108.6, Math.PI / 2, 'wait'],
-      [-11.9, 22.6, Math.PI / 2, 'idle'],
+      [-12.1, 22.6, Math.PI / 2, 'idle'],
       [12.2, 15.2, -Math.PI / 2, 'idle'],
     ];
     for (const [x, n, h, anim] of idle) {

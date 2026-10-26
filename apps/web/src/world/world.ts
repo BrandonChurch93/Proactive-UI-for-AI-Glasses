@@ -50,7 +50,7 @@ export class World {
     scene.add(props.group);
     scene.add(buildRooftops(this.sim.layout.lots, this.mats, atlas));
     scene.add(atlas.build(this.core.renderer));
-    this.dynamic.push({ update: (_s, _dt, t) => props.update(t) });
+    this.dynamic.push({ update: (s, _dt, t) => props.update(t, s.south) });
     const vehicles = new VehicleView(this.mats, this.core.renderer);
     const people = new PeopleView();
     await Promise.all([vehicles.load(), people.load()]);

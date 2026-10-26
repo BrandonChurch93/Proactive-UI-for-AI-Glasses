@@ -1,4 +1,4 @@
-import { angleWrap, clamp, pitchToward, yawToward, type ScenarioData, type Vec3 } from '@lumen/shared';
+import { angleWrap, clamp, pitchToward, yawToward, type Beat, type ScenarioId, type Vec3 } from '@lumen/shared';
 
 export class Head {
   yaw: number;
@@ -49,13 +49,19 @@ export class ScriptedReviewer {
   private lookUps: { t: number; seconds: number }[];
   private scans: { t: number; sequence: string[] }[];
 
-  constructor(data: ScenarioData) {
-    const b = data.beats;
+  readonly intents: { t: number; id: ScenarioId }[];
+
+  constructor(b: readonly Beat[]) {
+    this.intents = b.flatMap((x) => (x.kind === 'intent' ? [{ t: x.t, id: x.id }] : []));
     this.gazes = b.flatMap((x) => (x.kind === 'gaze' ? [{ t: x.t, id: x.id, dy: x.dy ?? 0 }] : []));
     this.pinches = b.flatMap((x) => (x.kind === 'pinch' ? [{ t: x.t, id: x.id }] : []));
     this.choices = b.flatMap((x) => {
       if (x.kind === 'choice') return [{ t: x.t, id: x.id, action: x.action }];
       if (x.kind === 'ask') return [{ t: x.answerAt, id: 'ask', action: x.answer === 'no' ? 'no' : 'find-lunch' }];
+      if (x.kind === 'intent') return [{ t: x.t, id: 'intent', action: x.id }];
+      if (x.kind === 'choose') return [{ t: x.t, id: 'picker', action: x.id }];
+      if (x.kind === 'reply') return [{ t: x.t, id: x.id, action: x.reply }];
+      if (x.kind === 'go') return [{ t: x.t, id: 'offer', action: x.id }];
       return [];
     });
     this.lookUps = b.flatMap((x) => (x.kind === 'lookUp' ? [{ t: x.t, seconds: x.seconds }] : []));

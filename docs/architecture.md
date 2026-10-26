@@ -35,16 +35,17 @@ Dependency direction: `apps/web → overlay, inspector, sim, brain, shared`; `ov
 ```
 sim.tick(dt) → WorldSnapshot            (includes backdrop luminance per visible pane)
 brain.tick(snapshot) → Decision[]       (10 Hz, deterministic)
+sim.plan(frame.goal)                    (the brain's destination; the sim routes to it)
 overlay.apply(decisions, t)             (every frame; placement, walking-rule geometry, motion)
 log.append(snapshot, decisions)
 inspector.observe(log)
 ```
 
-The overlay reports back which panes are visible and where, through the bridge, so the sim can sample the backdrop behind them and the brain can reason about the focus zone. That round trip is one frame late and that is fine.
+The overlay reports back which panes are visible and where, through the bridge, so the sim can sample the backdrop behind them and the brain can reason about the focus zone. That round trip is one frame late and that is fine. The plan is the other round trip: the brain decides where the wearer is going (an intent, a chosen place, the next errand) and the sim's router walks there, one tick later, without the brain knowing any geometry.
 
 ## Determinism
 
-The sim is seeded. The clock is the sim's, never wall time. Scripted beats are data. GSAP is driven from the sim clock in `?still=` mode (`gsap.ticker.remove(gsap.updateRoot)` then `gsap.updateRoot(t)` per step) so a frame at `t` is the same frame every time. Given a scenario and a seed, the walk, the log and the evals are identical run to run; that is what makes scrubbing and replay in the inspector possible.
+The sim is seeded. The clock is the sim's, never wall time. Scripted beats are data. GSAP is driven from the sim clock in `?still=` mode (`gsap.ticker.remove(gsap.updateRoot)` then `gsap.updateRoot(t)` per step) so a frame at `t` is the same frame every time. Given a recording and a seed, the walk, the log and the evals are identical run to run; that is what makes scrubbing and replay in the inspector possible.
 
 ## Modes
 

@@ -16,6 +16,7 @@ export function recordWalk(scenario: WalkFile['scenario'], seed = 47): WalkFile 
     headless.advanceTo(sim, i / TICK_HZ);
     const snap = sim.snapshot(view);
     const frame = brain.tick(snap);
+    sim.plan(frame.goal);
     snap.wearerModel = frame.model;
     snapshots.push(snap);
     headless.apply(frame);

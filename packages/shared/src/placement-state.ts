@@ -299,7 +299,11 @@ export class Placement {
       return req.focusOk || Boolean(req.zoneOk) || !rectsOverlap(span, zoneNow);
     };
     if (jump !== null && this.shown && this.shownBox && !resized && pathClear(this.shownBox)) {
-      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump);
+      // A replace during a fast head turn starts no farther back than the pane's width, so it never trails its light.
+      const fromX = this.shownBox.x + this.shownBox.w * fx - c.x;
+      const fromY = this.shownBox.y + this.shownBox.h * fy - c.y;
+      const k = Math.min(1, (rect.w * MOVE.kickReach) / Math.max(1e-6, Math.hypot(fromX, fromY)));
+      this.kickFrom(t, { x: c.x + fromX * k, y: c.y + fromY * k }, c, jump);
     } else if (this.shown && jump === null) {
       const d = Math.hypot(c.x - this.shown.x, c.y - this.shown.y);
       const rel = this.shownRel ? Math.hypot(c.x - a.x - this.shownRel.x, c.y - a.y - this.shownRel.y) : 0;
@@ -536,7 +540,7 @@ export class Yield {
     } else if (this.side && inp.t - this.lastFast > 0.08) {
       const back = this.from === null || inp.yaw === undefined || Math.abs(angleWrap(inp.yaw - this.from)) < MOVE.yieldBack;
       const elsewhere = Boolean(inp.target) && inp.target !== this.target;
-      if (back || elsewhere) {
+      if (back || elsewhere || inp.curbDistance >= 8) {
         this.side = null;
         this.from = null;
       }

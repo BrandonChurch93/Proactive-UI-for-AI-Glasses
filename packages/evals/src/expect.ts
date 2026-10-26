@@ -8,6 +8,7 @@ import {
   type Decision,
   type Level,
   type ReasonKind,
+  type ScenarioId,
   type Timing,
   type Zone,
 } from '@lumen/shared';
@@ -51,6 +52,8 @@ export interface StateMatch {
   levelsAtMost?: Level;
   level?: Record<string, Level | 'none'>;
   pocket?: number;
+  goal?: ScenarioId;
+  destination?: string | null;
 }
 
 export interface ExpCase {
@@ -125,6 +128,8 @@ function frameOk(f: FrameRecord, s: StateMatch): string | null {
     if (got !== lvl) return `${id} at ${got}, want ${lvl}`;
   }
   if (s.pocket !== undefined && f.pocket.length !== s.pocket) return `pocket ${f.pocket.length}`;
+  if (s.goal !== undefined && f.goal.scenario !== s.goal) return `goal ${f.goal.scenario}`;
+  if (s.destination !== undefined && (f.goal.destination ?? null) !== s.destination) return `destination ${f.goal.destination ?? 'none'}`;
   return null;
 }
 

@@ -22,7 +22,10 @@ describe('placement on every beat of the three walks', () => {
       const seen = new Set<string>();
       for (let i = 1; i <= 98 * 60; i++) {
         sim.step(STEP);
-        if (i % (60 / TICK_HZ) === 0) frame = brain.tick(sim.snapshot());
+        if (i % (60 / TICK_HZ) === 0) {
+          frame = brain.tick(sim.snapshot());
+          sim.plan(frame.goal);
+        }
         const pose = sim.cameraPose();
         const kos: KeepOut[] = keepOuts(sim, (v) => project(pose, VP, v), VP, pose.pos);
         const ctx: FrameCtx = { t: sim.t, band: frame.band, vp: VP, keepOuts: kos };
@@ -88,6 +91,14 @@ describe('rule 5 · head-scan yielding', () => {
   it('does not yield away from the curb', () => {
     const y = new Yield();
     expect(y.update({ t: 0, yawRate: 2, curbDistance: 12 })).toBeNull();
+  });
+
+  it('ends a yield left open at the curb once the curb is behind', () => {
+    const y = new Yield();
+    y.update({ t: 0, yawRate: 0, curbDistance: 3, yaw: 0 });
+    expect(y.update({ t: 0.1, yawRate: 2, curbDistance: 3, yaw: 0.2 })).toBe('left');
+    expect(y.update({ t: 0.5, yawRate: 0, curbDistance: 3, yaw: 1.5 })).toBe('left');
+    expect(y.update({ t: 9, yawRate: 0, curbDistance: 40, yaw: 1.5 })).toBeNull();
   });
 });
 

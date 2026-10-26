@@ -1,4 +1,4 @@
-import { boxAround, v3, vehicleLight, zOf, type Box3, type SignalAnchor, type Vec3, type VehicleKind } from '@lumen/shared';
+import { SOUTH_CROSSWALK, boxAround, v3, vehicleLight, zOf, type Box3, type SignalAnchor, type Vec3, type VehicleKind, type VehicleLight } from '@lumen/shared';
 import { Rng } from './random';
 
 export type BodyKind = 'sedan' | 'taxi' | 'suv' | 'van' | 'bus' | 'truck' | 'bike';
@@ -11,6 +11,7 @@ export interface Lane {
   length: number;
   stopS: number;
   conflictEndS: number;
+  southS?: number;
   spawnRate: number;
 }
 
@@ -45,10 +46,12 @@ const L = (id: string, road: 'avenue' | 'cross', origin: Vec3, dir: Vec3, length
   spawnRate,
 });
 
+const SOUTH_STOP = SOUTH_CROSSWALK.half + 1.0;
+
 export const LANES: Lane[] = [
-  L('nb-in', 'avenue', v3(1.75, 0, zOf(-180)), v3(0, 0, -1), 760, 180 + 84.6, 180 + 108.6, 1 / 7.5),
-  L('nb-out', 'avenue', v3(5.25, 0, zOf(-180)), v3(0, 0, -1), 760, 180 + 84.6, 180 + 108.6, 1 / 11),
-  L('sb-in', 'avenue', v3(-1.75, 0, zOf(580)), v3(0, 0, 1), 780, 580 - 108.8, 580 - 84.4, 1 / 6.5),
+  { ...L('nb-in', 'avenue', v3(1.75, 0, zOf(-180)), v3(0, 0, -1), 760, 180 + 84.6, 180 + 108.6, 1 / 7.5), southS: 180 + SOUTH_CROSSWALK.n - SOUTH_STOP },
+  { ...L('nb-out', 'avenue', v3(5.25, 0, zOf(-180)), v3(0, 0, -1), 760, 180 + 84.6, 180 + 108.6, 1 / 11), southS: 180 + SOUTH_CROSSWALK.n - SOUTH_STOP },
+  { ...L('sb-in', 'avenue', v3(-1.75, 0, zOf(580)), v3(0, 0, 1), 780, 580 - 108.8, 580 - 84.4, 1 / 6.5), southS: 580 - SOUTH_CROSSWALK.n - SOUTH_STOP },
   L('eb-out', 'cross', v3(-240, 0, zOf(91.75)), v3(1, 0, 0), 480, 240 - 12.4, 240 + 12.6, 1 / 14),
   L('eb-in', 'cross', v3(-240, 0, zOf(95.25)), v3(1, 0, 0), 480, 240 - 12.4, 240 + 12.6, 1 / 10),
   L('wb-in', 'cross', v3(240, 0, zOf(98.75)), v3(-1, 0, 0), 480, 240 - 12.4, 240 + 12.6, 1 / 11),
@@ -97,6 +100,7 @@ export class Traffic {
     private readonly signal: SignalAnchor,
     scripted: ScriptedVehicle[],
     start: number,
+    private readonly south: () => VehicleLight = () => 'green',
   ) {
     this.scripted = [...scripted].sort((a, b) => a.spawnAt - b.spawnAt);
     for (const [i, lane] of LANES.entries()) {
@@ -104,6 +108,11 @@ export class Traffic {
       this.rngs.set(lane.id, rng);
       this.nextSpawn.set(lane.id, start + rng.range(0, 3));
     }
+  }
+
+  add(sv: ScriptedVehicle): void {
+    this.scripted.push(sv);
+    this.scripted.sort((a, b) => a.spawnAt - b.spawnAt);
   }
 
   private make(lane: Lane, body: BodyKind, s: number, rng: Rng | null, id?: string): Vehicle {
@@ -199,6 +208,15 @@ export class Traffic {
           }
         }
         if (front >= lane.stopS) v.committed = true;
+        if (!v.ignoresSignal && lane.southS !== undefined && front < lane.southS + 0.5 && front > lane.southS - 60) {
+          const sl = this.south();
+          const toStop = lane.southS - front;
+          const canStop = toStop > (v.v * v.v) / (2 * 3.2) || sl === 'red';
+          if (sl !== 'green' && canStop && toStop > -0.2 && toStop < gap) {
+            gap = Math.max(0.05, toStop);
+            dv = v.v;
+          }
+        }
         if (v.dwell && t < v.dwell.until) {
           const toDwell = v.dwell.s - front;
           if (toDwell > -0.5 && toDwell < gap) {

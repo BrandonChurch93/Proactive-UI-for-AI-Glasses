@@ -58,6 +58,7 @@ export const MOVE = {
   minShown: 2.5,
   deadBand: 4,
   ropeJump: 80,
+  kickReach: 0.9,
   offscreenMs: 250,
   clampMax: 24,
   foldHold: 40,

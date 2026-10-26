@@ -3,8 +3,8 @@
  "totals": {
   "suites": 41,
   "passed": 41,
-  "cases": 960,
-  "casesPassed": 960
+  "cases": 972,
+  "casesPassed": 972
  },
  "byGroup": {
   "walks": {
@@ -101,7 +101,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -149,107 +149,147 @@
      "detail": ""
     },
     {
-     "name": "0:02 · three stops in one card, in the order chosen",
+     "name": "0:00 to 0:11 · the light is held while the wearer decides",
      "pass": true,
-     "detail": "t=2 show errands card"
+     "detail": "114 frames"
     },
     {
-     "name": "0:02 · the route draws",
+     "name": "0:00 to 0:11 · nothing proactive before an intent",
      "pass": true,
-     "detail": "t=2 show route glance"
+     "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:06 · the card folds to the route while walking",
+     "name": "0:12 · Errands: three stops in one card, in the order chosen",
      "pass": true,
-     "detail": "t=6 dismiss errands card"
+     "detail": "t=11.6 show errands card"
     },
     {
-     "name": "0:24 · the pharmacy lights its label on the look",
+     "name": "0:12 · the route draws to the first stop, caused by the choice",
      "pass": true,
-     "detail": "t=24.8 show main-street-pharmacy label"
+     "detail": "t=11.6 show route glance"
     },
     {
-     "name": "0:25 · its card after half a second of hold",
+     "name": "0:12 · the first stop is the destination",
      "pass": true,
-     "detail": "t=25.301 promote main-street-pharmacy card"
+     "detail": "380 frames"
     },
     {
-     "name": "0:28 · picked up, the errands card returns with the stop ticked",
+     "name": "0:16 · the card folds to the route while walking",
      "pass": true,
-     "detail": "t=28.001 show errands card"
+     "detail": "t=16.5 dismiss errands card"
     },
     {
-     "name": "0:28 · the route redraws",
+     "name": "0:38 · the pharmacy lights its label on the look",
      "pass": true,
-     "detail": "t=28.001 show route glance"
+     "detail": "t=37.701 show main-street-pharmacy label"
     },
     {
-     "name": "0:34 · scaffolding: one glance says why",
+     "name": "0:38 · its card after half a second of hold",
      "pass": true,
-     "detail": "t=34.001 show scaffolding glance"
+     "detail": "t=38.201 promote main-street-pharmacy card"
     },
     {
-     "name": "0:40 · the bus is held at pip, not on the goal",
+     "name": "0:45 · scaffolding: one glance says why",
+     "pass": true,
+     "detail": "t=44.501 show scaffolding glance"
+    },
+    {
+     "name": "0:52 · at the pharmacy door its card shows",
+     "pass": true,
+     "detail": "t=52.601 promote main-street-pharmacy card"
+    },
+    {
+     "name": "0:55 · picked up, the errands card returns with the stop ticked",
+     "pass": true,
+     "detail": "t=55.401 show errands card"
+    },
+    {
+     "name": "0:56 · four seconds at the door, then the route redraws to the next stop",
+     "pass": true,
+     "detail": "t=56.401 show route glance"
+    },
+    {
+     "name": "1:02 · hardware closed early, said and redrawn",
+     "pass": true,
+     "detail": "t=61.501 promote errands card"
+    },
+    {
+     "name": "1:02 · the route skips the closed stop",
+     "pass": true,
+     "detail": "330 frames"
+    },
+    {
+     "name": "1:03 to 1:33 · social never one by one",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:46 · hardware closed early, said and redrawn",
+     "name": "1:09 to 1:33 · three on the glyph",
      "pass": true,
-     "detail": "t=46.001 show errands card"
+     "detail": "245 frames"
     },
     {
-     "name": "0:52 to 1:10 · social never one by one",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "0:58 · three on the glyph",
-     "pass": true,
-     "detail": "117 frames"
-    },
-    {
-     "name": "1:10 · the social strip surfaces once at the light",
-     "pass": true,
-     "detail": "t=71.401 show social glance"
-    },
-    {
-     "name": "1:10 · the Post Office card up on dwell",
-     "pass": true,
-     "detail": "t=71.101 promote post-office card"
-    },
-    {
-     "name": "1:12 · head scans and a passerby change no level",
+     "name": "1:10 to 1:20 · the bus is held at pip, not on the goal",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "1:18 to 1:28 · crossing, everything holds",
+     "name": "1:34 · the social strip surfaces once at the red light",
+     "pass": true,
+     "detail": "t=94.302 show social glance"
+    },
+    {
+     "name": "1:38 · the Post Office card up on dwell",
+     "pass": true,
+     "detail": "t=98.102 promote post-office card"
+    },
+    {
+     "name": "1:40 · head scans and a passerby change no level",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "1:50 to 2:00 · crossing, everything holds",
      "pass": true,
      "detail": "1 decisions"
     },
     {
-     "name": "1:22 · the DM is held",
+     "name": "1:50 to 2:00 · nothing opens in a crossing",
      "pass": true,
-     "detail": "t=82.002 hold jules-tonight glance"
+     "detail": "shows 0, non-gaze 0, holds 1"
     },
     {
-     "name": "1:28 · one message came in",
+     "name": "1:52 · the DM is held",
      "pass": true,
-     "detail": "t=88.002 show followup glance"
+     "detail": "t=112.502 hold jules-tonight glance"
     },
     {
-     "name": "1:35 · the Post Office card with its line",
+     "name": "2:00 · one message came in",
      "pass": true,
-     "detail": "t=93.002"
+     "detail": "t=120.102 show followup glance"
+    },
+    {
+     "name": "2:08 · at the Post Office door its card holds",
+     "pass": true,
+     "detail": "t=128.003"
+    },
+    {
+     "name": "2:11 · after the last stop: All done",
+     "pass": true,
+     "detail": "t=130.803 show errands card"
+    },
+    {
+     "name": "2:11 · after the last stop: All done, then the loop resumes with no intent",
+     "pass": true,
+     "detail": "35 frames"
     },
     {
      "name": "restraint · shows within the budget",
      "pass": true,
-     "detail": "shows 8, non-gaze 6, holds 4"
+     "detail": "shows 9, non-gaze 7, holds 4"
     }
    ],
-   "description": "Recorded walk · 1001 snapshots at 10 Hz"
+   "description": "Recorded walk · 1361 snapshots at 10 Hz"
   },
   {
    "id": "hungry",
@@ -323,7 +363,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -371,137 +411,152 @@
      "detail": ""
     },
     {
+     "name": "0:00 · the light is held at the corner and the glasses say so",
+     "pass": true,
+     "detail": "t=0 show safety:signal glance"
+    },
+    {
      "name": "0:00 to 0:01 · nothing before the street has faded up",
      "pass": true,
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:02 · one label, the best fit, reason in the log only",
+     "name": "0:01 · Hungry at the corner: the walk starts with no destination",
      "pass": true,
-     "detail": "t=2 show goldies-counter label"
+     "detail": "9 frames"
     },
     {
      "name": "0:02 · one label, the best fit, reason in the log only",
      "pass": true,
-     "detail": "t=2 show goldies-counter label"
+     "detail": "t=2.2 show goldies-counter label"
     },
     {
      "name": "0:05 · not looked at, it folds itself",
      "pass": true,
-     "detail": "t=4.5 demote goldies-counter pip"
+     "detail": "t=4.7 demote goldies-counter pip"
     },
     {
-     "name": "0:00 to 0:10 · no card",
+     "name": "0:00 to 0:34 · no card",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:14 · a look at Mega Burger lights its label",
+     "name": "0:35 · a look at Mega Burger lights its label",
      "pass": true,
-     "detail": "t=14.5 show mega-burger label"
+     "detail": "t=35.501 show mega-burger label"
     },
     {
-     "name": "0:22 · pinch while walking saves",
+     "name": "0:36 · a second of hold later (it is beyond 35 m), a compact card: no reason, no rows",
      "pass": true,
-     "detail": "t=22 save mega-burger card"
+     "detail": "t=36.501 promote mega-burger card"
     },
     {
-     "name": "0:22 · nothing opens",
+     "name": "0:41 · pinch while walking saves",
+     "pass": true,
+     "detail": "t=41.001 save mega-burger card"
+    },
+    {
+     "name": "0:35 to 0:47 · a far place never expands",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:22 to 0:58 · Pocket 1 on the glyph",
+     "name": "0:41 to 1:17 · Pocket 1 on the glyph",
      "pass": true,
      "detail": "345 frames"
     },
     {
-     "name": "0:30 to 0:34 · the look moves on; with no label under the center the label fades after 4 s of walking",
+     "name": "0:48 · the look moves on and the card shrinks back to its label",
      "pass": true,
-     "detail": "t=34.801 dismiss mega-burger label"
+     "detail": "t=48.101 demote mega-burger label"
     },
     {
-     "name": "0:15 · a second of hold later (it is beyond 35 m), a compact card: no reason, no rows, 58 m away",
+     "name": "0:51 · a look at the station stair lights its label",
      "pass": true,
-     "detail": "t=15.5 promote mega-burger card"
+     "detail": "t=51.601 show 47th-st-station label"
     },
     {
-     "name": "0:14 to 0:30 · a far place never expands",
+     "name": "1:00 to 1:13 · Brisk: labels at most, never a card",
      "pass": true,
-     "detail": ""
+     "detail": "120 frames"
     },
     {
-     "name": "0:44 to 0:57 · Brisk: labels at most, never a card",
+     "name": "1:13 · no need to run",
      "pass": true,
-     "detail": "105 frames"
+     "detail": "t=73.001 show need-to-run glance"
     },
     {
-     "name": "0:40 · a look at the station stair lights its label",
+     "name": "1:16 · the text from Maya at the red light",
      "pass": true,
-     "detail": "t=40.601 show 47th-st-station label"
+     "detail": "t=76.502 show maya-usual glance"
     },
     {
-     "name": "0:58 · no need to run",
+     "name": "1:17 · the pocket surfaces with the time available",
      "pass": true,
-     "detail": "t=58.001 show need-to-run glance"
+     "detail": "t=77.602 surface pocket card"
     },
     {
-     "name": "0:58 · the text from Maya at the next safe moment",
+     "name": "1:19 · pinch opens its card",
      "pass": true,
-     "detail": "t=58.001 show maya-usual glance"
+     "detail": "t=79.002 show pocket:mega-burger card"
     },
     {
-     "name": "1:02 · the pocket surfaces with the time available",
+     "name": "1:21 · held gaze expands it in place",
      "pass": true,
-     "detail": "t=62.701 surface pocket card"
+     "detail": "t=81.002 promote pocket:mega-burger expanded"
     },
     {
-     "name": "1:04 · pinch opens its card",
+     "name": "1:23 · hold a seat: the destination is set by the choice and the route draws",
      "pass": true,
-     "detail": "t=64.001 show pocket:mega-burger card"
+     "detail": "t=83.002 show route glance"
     },
     {
-     "name": "1:06 · held gaze expands it in place",
+     "name": "1:24 · the route goes to Mega Burger",
      "pass": true,
-     "detail": "t=66.001 promote pocket:mega-burger expanded"
+     "detail": "45 frames"
     },
     {
-     "name": "1:08 · hold a seat, the route draws",
-     "pass": true,
-     "detail": "t=68.001 show route glance"
-    },
-    {
-     "name": "1:14 to 1:24 · crossing, everything holds",
+     "name": "1:29 to 1:39 · crossing, everything holds",
      "pass": true,
      "detail": "1 decisions"
     },
     {
-     "name": "1:18 · the app update is held",
+     "name": "1:29 to 1:39 · nothing opens in a crossing",
      "pass": true,
-     "detail": "t=78.002 hold order-ready glance"
+     "detail": "shows 0, non-gaze 0, holds 1"
     },
     {
-     "name": "1:24 · far curb, the held update arrives with its reason",
+     "name": "1:33 · the app update is held",
      "pass": true,
-     "detail": "t=84.002 show order-ready glance"
+     "detail": "t=93.002 hold order-ready glance"
     },
     {
-     "name": "1:26 · the destination column at the door",
+     "name": "1:39 · far curb, the held update arrives with its reason",
      "pass": true,
-     "detail": "t=87.002"
+     "detail": "t=99.702 show order-ready glance"
     },
     {
-     "name": "1:34 · arrival",
+     "name": "1:40 · the destination column on the way to the door",
      "pass": true,
-     "detail": "t=93.502 show arrival glance"
+     "detail": "t=100.002"
+    },
+    {
+     "name": "1:48 · arrival",
+     "pass": true,
+     "detail": "t=107.902 show arrival glance"
+    },
+    {
+     "name": "1:52 · four seconds at the door, then the loop resumes with no destination and no intent",
+     "pass": true,
+     "detail": "55 frames"
     },
     {
      "name": "restraint · shows within the budget",
      "pass": true,
-     "detail": "shows 7, non-gaze 4, holds 1"
+     "detail": "shows 8, non-gaze 5, holds 2"
     }
    ],
-   "description": "Recorded walk · 981 snapshots at 10 Hz"
+   "description": "Recorded walk · 1181 snapshots at 10 Hz"
   },
   {
    "id": "walking",
@@ -575,7 +630,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -623,127 +678,132 @@
      "detail": ""
     },
     {
-     "name": "0:00 to 0:08 · nothing",
+     "name": "0:00 · the light is held at the corner",
+     "pass": true,
+     "detail": "t=0 show safety:signal glance"
+    },
+    {
+     "name": "0:00 to 0:10 · nothing",
      "pass": true,
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:08 · the marquee lights its label on the look",
+     "name": "0:11 · the marquee lights its label on the look",
      "pass": true,
-     "detail": "t=8.8 show grace-theater label"
+     "detail": "t=11.3 show grace-theater label"
     },
     {
-     "name": "0:08.5 · the view settles: the theater row labels together",
+     "name": "0:11 · the view settles: the theater row labels together",
      "pass": true,
-     "detail": "t=8.9 show trattoria-da-lia label"
+     "detail": "t=11.4 show trattoria-da-lia label"
     },
     {
-     "name": "0:09 · card at Stroll",
+     "name": "0:12 · card at Stroll",
      "pass": true,
-     "detail": "t=9.3 promote grace-theater card"
+     "detail": "t=11.8 promote grace-theater card"
     },
     {
-     "name": "0:11 · expanded in place on continued hold",
+     "name": "0:14 · expanded in place on continued hold",
      "pass": true,
-     "detail": "t=11.3 promote grace-theater expanded"
+     "detail": "t=13.8 promote grace-theater expanded"
     },
     {
-     "name": "0:17 to 0:22 · the truck passes; not a gate, the level holds (the overlay drops it to a pip)",
+     "name": "0:17 to 0:24 · the truck passes; not a gate, the level holds",
      "pass": true,
-     "detail": "50 frames"
+     "detail": "70 frames"
     },
     {
-     "name": "0:25.5 · the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
+     "name": "0:29 · the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
      "pass": true,
-     "detail": "t=26.401 promote trattoria-da-lia card"
+     "detail": "t=28.901 promote trattoria-da-lia card"
     },
     {
-     "name": "0:25.5 · the theater shrinks back to its label in the same move",
+     "name": "0:29 · the theater shrinks back to its label in the same move",
      "pass": true,
-     "detail": "t=26.401 demote grace-theater label"
+     "detail": "t=28.901 demote grace-theater label"
     },
     {
-     "name": "0:27.5 · Kathy's from the shopfront lights its label",
+     "name": "0:31 · Kathy's from the shopfront lights its label",
      "pass": true,
-     "detail": "t=28.401 show kathys-cupcakes label"
+     "detail": "t=30.901 show kathys-cupcakes label"
     },
     {
-     "name": "0:27.5 · Kathy's from the shopfront lights its label",
+     "name": "0:31 · its card while the look holds",
      "pass": true,
-     "detail": "t=28.401 show kathys-cupcakes label"
+     "detail": "t=31.401 promote kathys-cupcakes card"
     },
     {
-     "name": "0:29 · its card while the look holds",
-     "pass": true,
-     "detail": "t=28.901 promote kathys-cupcakes card"
-    },
-    {
-     "name": "0:30 · the look moves on before it would expand",
+     "name": "0:30 to 0:36 · the look moves on before it would expand",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:57 · the glyph says it is about to snooze",
+     "name": "0:48 · the glyph says it is about to snooze",
      "pass": true,
-     "detail": "t=57.001"
+     "detail": "t=49.501"
     },
     {
-     "name": "0:56 · look up: \"Snoozing\" while the look holds, then the countdown",
+     "name": "0:50 · look up: the countdown once it holds",
      "pass": true,
-     "detail": "t=58.301"
+     "detail": "t=50.601"
     },
     {
-     "name": "0:58 · Atlas Books held, snoozed",
+     "name": "0:51 · Atlas Books held, snoozed",
      "pass": true,
-     "detail": "t=59.301 hold atlas-books label"
+     "detail": "t=51.801 hold atlas-books label"
     },
     {
-     "name": "0:58 to 1:02 · nothing shows",
+     "name": "0:51 to 0:56 · nothing shows",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 4"
+     "detail": "shows 0, non-gaze 0, holds 7"
     },
     {
-     "name": "1:04 · looking up again cancels",
+     "name": "0:58 · looking up again cancels",
      "pass": true,
-     "detail": "14 frames"
+     "detail": "12 frames"
     },
     {
-     "name": "1:03 · Mega Burger passes; nothing is looked at, nothing shows",
+     "name": "1:18 · stopped after two food glances: the ask",
      "pass": true,
-     "detail": ""
+     "detail": "t=77.602 show ask glance"
     },
     {
-     "name": "1:21 · stopped after two food glances: the ask",
+     "name": "1:20 · no",
      "pass": true,
-     "detail": "t=81.102 show ask glance"
+     "detail": "t=80.002 dismiss ask glance"
     },
     {
-     "name": "1:23 · no",
+     "name": "1:20 to 1:52 · the answer is no: the walk stays Just walk with no destination",
      "pass": true,
-     "detail": "t=83.002 dismiss ask glance"
+     "detail": "315 frames"
     },
     {
-     "name": "1:25 to 1:35 · crossing, everything holds",
+     "name": "1:29 to 1:39 · crossing, everything holds",
      "pass": true,
      "detail": "no decisions in window"
     },
     {
-     "name": "1:26 · BIKE on the pavement",
+     "name": "1:29 to 1:39 · nothing opens in a crossing",
      "pass": true,
-     "detail": "t=85.402 show safety:bike glance"
+     "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "1:35 · the bench, benches in the shade",
+     "name": "1:30 · BIKE on the pavement",
      "pass": true,
-     "detail": "t=96.202 show pocket-park label"
+     "detail": "t=90.402 show safety:bike glance"
+    },
+    {
+     "name": "1:41 · far curb: the view settles and the west side labels",
+     "pass": true,
+     "detail": "t=100.602 show lucky-lanes label"
     },
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 3, non-gaze 1, holds 5"
+     "detail": "shows 4, non-gaze 2, holds 7"
     }
    ],
-   "description": "Recorded walk · 1021 snapshots at 10 Hz"
+   "description": "Recorded walk · 1121 snapshots at 10 Hz"
   },
   {
    "id": "gate-bike",
@@ -817,7 +877,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -958,7 +1018,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1093,7 +1153,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1234,7 +1294,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1387,7 +1447,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1528,7 +1588,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1675,7 +1735,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1810,7 +1870,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1951,7 +2011,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2086,7 +2146,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2221,7 +2281,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2362,7 +2422,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2509,7 +2569,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2644,7 +2704,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2785,7 +2845,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2914,7 +2974,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3061,7 +3121,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3196,7 +3256,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3325,7 +3385,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3466,7 +3526,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3607,7 +3667,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3736,7 +3796,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3871,7 +3931,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4006,7 +4066,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4147,7 +4207,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4282,7 +4342,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4417,7 +4477,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4552,7 +4612,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4687,7 +4747,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4834,7 +4894,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4975,7 +5035,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5116,7 +5176,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5287,7 +5347,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5434,7 +5494,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5581,7 +5641,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5716,7 +5776,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5863,7 +5923,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -6022,7 +6082,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""

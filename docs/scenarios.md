@@ -1,72 +1,74 @@
-# Scenarios · beat sheets
+# Scenarios · the walk and its three recordings
 
-Three ninety-second walks on the same block, each using it differently. Beats are fixed in time and place; the reviewer's gaze changes which places show their labels and which grows to its card. Each walk has a destination and ends. Nothing loops. Every walk demonstrates several walking rules on purpose; the rule numbers refer to `docs/walking-rules.md`.
+One walk on one block: a loop that never ends on its own. The intent (Hungry, Errands, or nothing, Just walk) is a layer on top that adds a list, a route and an arrival; after an arrival the loop resumes with no intent. Every recording demonstrates several walking rules on purpose; the rule numbers refer to `docs/walking-rules.md`.
 
-Scripts live in `data/scenarios/*.json` as timed events the sim injects into the `WorldSnapshot` (pace changes, inbox items, scripted people and vehicles, live-data changes, signal phase). The brain reacts; it never reads the script.
+`data/scenarios/walk.json` holds it all: the pace track, the signal phase, the corner hold, world beats (absolute, or `after: intent` and timed from the moment that intent starts), and three recordings that script the reviewer (gaze, pinch, choice, look up, head scan, the ask answer, and the new `intent`, `choose`, `reply` and `go`). The brain never reads the file; the sim injects what it says into the `WorldSnapshot`. Positions are n, metres north of the south crossing.
 
-## Opening (shared)
+## The loop
 
-1. The street fades up from black over `t-scene` (900 ms) as the panel slides in from the left over the same time; its text reveals top to bottom, 120 ms apart. Behind it the street plays the Just walking script with the scripted reviewer, muted, as an attract loop, undimmed.
-2. The panel (`docs/copy.md`, Title screen) reads, top to bottom: the subtitle and the name, the setting, "What this is" in three lines, "Choose a walk" with three cards (Hungry, Errands, Just walking), the controls and the footer. No text sits over the street; below 900 px wide the panel takes the full width and the street behind it drops to 40% brightness (reviewer chrome, not the glasses).
-3. A click skips the reveal. Choosing a walk slides the panel out over 450 ms and the walk starts within two seconds.
+1. Start corner, south-east, n = 0. The walk begins Stopped with the south crossing's light held red for 12 s and WAIT counting down on the pavement ahead. An intent chosen in that time (the recording's `intent` beat, or the title's choice at 0:01 until the intent panel of Phase 19.3) releases it; otherwise it releases at 0:12 and the walk is Just walk.
+2. East sidewalk north: Walk, Stroll on the theater stretch (n 11 to 25.5, about 0:10 to 0:34), Walk past the scaffold and the M4 shelter, Brisk on the north stretch (n 60 to 84, about 1:00 to 1:13), Walk to the corner.
+3. North corner, about 1:15: the avenue light is red with 14 s to go (the walk file's phase). Crossing 10 s.
+4. West sidewalk south at Walk, about 1:39 to 2:28. The wearer asks the south crossing 12 m out; it turns within seconds (actuated, at least 18 s of green first).
+5. South crossing, 10 s, back to the start corner at about 2:39, and the light is held again: 12 s, every lap.
+
+A destination replaces the loop with the router's shortest path to its door: 4 s stopped at the door facing it, then the loop resumes from there. Errands takes its stops in list order; a closed stop drops out and the route redraws.
 
 ## Hungry · discovery, the pocket, a choice
 
-Route: east sidewalk north to the corner, cross the avenue, a few steps back south to Mega Burger. Destination: a seat.
+Recording: Hungry at 0:01. Destination chosen at the red light: Mega Burger, across the avenue a few steps south.
 
-1. 0:02 · Pips bloom on Goldie's Counter, Kathy's Cupcakes, Trattoria da Lia and Mega Burger. The brain shows one label, the best fit: Goldie's, "3 min". A label is the short form of what it would say ("3 min, 9 seats"), and in Walk the reading budget allows three words and one number, so the second fact is dropped by rule; the card would carry the whole sentence, "Fastest lunch on this side · 3 min, 9 seats". The reason, "Short wait, on your side of the street", is in the log and never on a label (Rule 2). The label is born beside its light, outside the focus zone (Rule 4), and, not being looked at, folds itself at 0:04.5 (Rule 3).
-2. 0:14 · A look at Mega Burger across the street, 58 m ahead: its label in about half a second, then its compact card half a second later (the say line and the live line, no reason), beside the awning, not over the road; it never expands while it is beyond 30 m. (Rule 10.)
-3. 0:22 · The wearer pinches the Mega Burger label while walking. Nothing opens; "Saved" at the pip, the held glyph reads Pocket 1. (Rule 6.)
-4. 0:30 · Look away. With nothing under the center for 4 s of walking, the label fades back to its light. (Rule 10.)
-5. 0:40 · A look at the station stair at the corner lights its label, "Uptown in 4", with the corner's other places beside it as the view settles, and its card half a second later: "Uptown in 4 · stairs at the corner". (Rule 10.)
-6. 0:44 · Pace to signal: the light ahead is about to change. The wearer speeds up to Brisk on the script until 0:57; the station's card folds with the band, nothing is looked at, nothing but the whisper channel is allowed, and the focus zone is at its largest. (Rules 1, 2, 11.)
-7. 0:58 · Red light at the corner anyway; the wearer eases onto the stop line by 1:00. "No need to run" at the curb. Stopped. A text from Maya arrives: "Running 10 late, order me the usual?", glance toast, reply or later.
-8. 1:02 · The pocket surfaces: "11 s · what you saved", Mega Burger with its live line, grown beside the held glyph. (Rule 7.) At 1:04 a pinch opens its card; the gaze stays on it and 2 s later it expands in place: "Hold a seat · Not now". At 1:08, hold a seat. The route draws on the pavement, across the avenue and a few steps south.
-9. 1:14 · Crossing, 10 s. Everything recedes. An app update arrives mid-crossing and is held. Far curb at 1:24: everything returns, then "Held that while you crossed" with "Order ready · 1 more" batched under the route glance.
-10. 1:26 · A few steps south on the west sidewalk. The destination column stands at the door.
-11. 1:34 · Arrival. The column settles to a pip. "Seat's held, inside on the left." Fade.
+1. 0:00 · Held at the corner: WAIT on the pavement. Hungry at 0:01; the light releases and the walk starts with no destination.
+2. 0:02 · One label, the best fit: Goldie's Counter, "3 min". The reason, "Short wait, on your side of the street", is in the log and never on a label (Rule 2). Born outside the focus zone (Rule 4); not looked at, it folds at 0:04.7 (Rule 3).
+3. 0:35 · A look at Mega Burger across the avenue, about 48 m ahead: its label at 0:35.5, its compact card a second of hold later (beyond 35 m), no reason, no rows; it never expands while beyond 30 m. (Rule 10.)
+4. 0:41 · A pinch while walking saves it. Nothing opens; Pocket 1 on the glyph. (Rule 6.)
+5. 0:47 · Look away: the card shrinks back to its label at 0:48.
+6. 0:51 · A look at the station stair: its label and, as the view settles, the corner's other places beside it; its card at 0:52.
+7. 1:00 to 1:13 · Brisk on the north stretch: labels at most, never a card. (Rules 1, 11.)
+8. 1:13 · "No need to run" at the curb. 1:15, red light, 14 s. 1:16.5, a text from Maya, "Running 10 late, order me the usual?", reason "Long red light".
+9. 1:17.6 · The pocket surfaces: "11 s · what you saved". (Rule 7.) 1:19, a pinch opens Mega Burger's card; 1:21 it expands in place; 1:23, hold a seat: Mega Burger becomes the destination (cause `choice`) and the route draws across the avenue and a few steps south.
+10. 1:29 to 1:39 · Crossing. Nothing opens; "Order ready" arrives at 1:33 and is held; at the far curb it shows, "Held that while you crossed".
+11. 1:40 · The destination column on the way to the door. 1:48, at the door, facing it: "Seat's held, inside on the left."
+12. 1:52 · After 4 s the loop resumes south with no destination and no intent. The recording ends at 1:58.
 
 ## Errands · navigation, sequencing, the curb
 
-Route: east sidewalk north, a stop at the pharmacy, cross the cross street at the corner to the Post Office. Destination: the last stop.
+Recording: the reviewer stands at the light and chooses Errands at 0:11.5. Stops: Pharmacy, Hardware, Post Office, in that order.
 
-1. 0:02 · The brain lists the three stops in one card at the view edge, in the order it chose, with why ("In order along the way"): Pharmacy, Hardware, Post Office. Route draws on the pavement. The card folds to the route after 4 s because the band is Walk. (Rules 1, 4.)
-2. 0:24 · The pharmacy door. The wearer stops; its card unfolds from the sign: "Prescription's ready · counter 2, no line". At 0:28 the live data ticks "Picked up"; the errands card returns at the edge with the stop ticked, "Two to go", and the route redraws. At 0:29 the walk resumes.
-3. 0:34 · Scaffolding over The Big Bean's frontage narrows the sidewalk ahead: the route band shifts to the curb side and one glance says why, "Scaffolding ahead. Keep to the curb." The glance hangs from the scaffold's far end (n 52.6, under the deck's edge), which stays ahead of the wearer for the whole approach, so it reads from 0:34 until it folds by rule at 0:36.5. A route shown as a decision.
-4. 0:40 · Bus at the M4 stop ahead: its light is one of the three awareness lights. Not on the goal, so a label only if looked at or when the view settles on it: "M4 in 2", and on a card "M4 in 2 min · not on today's route".
-5. 0:46 · Corner Hardware's live data changes: closed early. The brain says so, drops the stop, and the route redraws. The wearer watches the decision happen: "Hardware closed early. One stop left."
-6. 0:52 · Social notifications accumulate on the held glyph while walking (1, 2, 3 · social by 0:58). Never one by one.
-7. 1:10 · Red light at the corner, 8 s. The social strip surfaces once: "3 notifications · later". The card for the Post Office across the cross street is up on dwell. The wearer checks left and right before the light changes: the card yields to each head scan and returns. A passerby crosses between the wearer and the sign; the card steps aside with a trace, then comes back. (Rules 5, 8.)
-8. 1:18 · Crossing the cross street, 10 s. A DM arrives mid-crossing: held. Far curb at 1:28: "One message came in. Read it?"
-9. 1:35 · Post Office, 10 m on. "Line of 8, about 12 min · you'll make the counter" on its card. Package in hand, route folds back to the feet. Fade.
+1. 0:00 to 0:11.5 · Held at the corner, WAIT counting down, nothing proactive.
+2. 0:11.5 · Errands. The three stops in one card at the edge, "Three stops · one route", reason "In order along the way". The route draws to the pharmacy (cause `choice`). The card folds to the route by 0:16.5. (Rules 1, 4.)
+3. 0:37 · A look at the pharmacy ahead: label, card half a second later, expanded on continued hold at Stroll.
+4. 0:44.5 · The scaffold narrows the sidewalk ahead: the route band shifts to the curb and one glance, "Scaffolding ahead. Keep to the curb."
+5. 0:52.4 · The pharmacy door: stopped, facing it, its card at the door. 0:55.4 the prescription is picked up; the errands card returns, "Two to go". 0:56.4 the route redraws to Hardware (cause `goal`).
+6. 1:01.5 · Corner Hardware closes early: "Hardware closed early. One stop left." The route redraws to the Post Office.
+7. 1:02.5 to 1:08.5 · Three social notifications on the glyph, never one by one. 1:11.5, the bus at the M4 stop: a pip, not on the goal.
+8. 1:34 · Red at the cross street, 15 s. The social strip once, "3 notifications · later". The Post Office card up on dwell at 1:38. Head scans at 1:40 and a passerby: no level changes. (Rules 5, 8.)
+9. 1:50 to 2:00 · Crossing the cross street. A DM from Jules at 1:52.5 is held; at the far curb, "One message came in. Read it?"
+10. 2:07 · The Post Office door; its card holds. 2:10.8 done: "All done", reason "Every stop done". 2:11.8 the loop resumes, back across the cross street, with no intent. The recording ends at 2:16.
 
 ## Just walking · restraint, right of way, snooze
 
-Route: east sidewalk north, the theater across the street near the start, end on the bench in Pocket Park at the far corner after crossing. No destination until the end.
+Recording: Just walk at 0:01. No destination.
 
-1. 0:00 to 0:08 · Nothing. A pip or two on things the wearer looks at. Nothing else.
-2. 0:08 · The wearer slows to Stroll and dwells on the Grace Theater marquee ahead across the street, the composition of `reference/hero-block.html`. As the view settles on the row, the theater, Trattoria da Lia, Lucky Lanes and Atlas Books show their labels together; the theater's, under the center, grows into its card half a second later, then the expanded view on continued hold, grown in place: "Night Market at 8 has 40 seats · earlier shows filling" over the three shows, "Hold two for 8:00" and "Not now". Nothing happens to the world behind it. (Rule 10.)
-3. 0:16 · Still at Stroll, still on the marquee. A delivery truck crawls up the inner northbound lane from 10 m behind and passes between the wearer and the marquee from about 0:17 to 0:22. The expanded view cannot clear it, drops to a dimmed pip, and returns when the truck has passed. (Rule 8.)
-4. 0:25.5 · The look moves to the Trattoria da Lia sign ahead across the street, in Italian: its label, already up, grows into the translation card ("The sign says home cooking · open till 11", with the reason "Read from Italian") as the theater's view shrinks back to its label, one exchange. The look moves on at 0:27.5, before the card would expand. First food look.
-5. 0:27.5 · Gaze on Kathy's Cupcakes on the wearer's own side, aimed at the shopfront (the window and the awning, not the fascia above it) from about 6 m: its label, "Batch at 2", then its card, "Brown butter batch at 2 · 80 min from now". The look holds 2.5 s and moves on at 0:30, before the card would expand, and the card shrinks back to its label beside its light. Second food look. (Rule 10.)
-6. 0:32 · Back to Walk.
-7. 0:55.5 · On the straight past the bus shelter, the wearer looks up at the sky and holds it. Through the second second the glyph reads "Snoozing"; at 0:58.5 everything folds and the glyph counts down from 60; the label that would have shown on Atlas Books ahead (looked at from 0:58.5) is held with the reason "Snoozed". (Rule 12.)
-8. 1:02 · Looking up again the same way cancels the snooze at 1:04. Mega Burger comes up beside the wearer across the street; nothing shows, because nothing is looked at.
-9. 1:19 · Red light at the corner, 6 s. Stopped, and two food places have been looked at, so the ask glance appears once at the edge at 1:21: "Hungry? · Find lunch · No". No, at 1:23.
-10. 1:25 · Crossing, 10 s: recede and return, same as always. A bike comes up the bike lane from behind on this side as the wearer steps off: `BIKE · 2 s` on the pavement with its arrow, stop tone, gone when the rider passes.
-11. 1:35 · The bench in Pocket Park at the far corner. Its label: "Benches in the shade · end of the walk". End of the walk. Fade. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
+1. 0:00 to 0:10 · Nothing.
+2. 0:10.5 · Stroll. The look rests on the Grace Theater marquee: its label at 0:11.3, the theater row labels together as the view settles, the card at 0:11.8, the expanded view in place at 0:13.8 (Rule 10). 0:17 to 0:24, the delivery truck crawls past between the wearer and the marquee; not a gate, the level holds while the overlay steps it out of the way (Rule 8).
+3. 0:28 · The look moves to Trattoria da Lia: its label grows into the card, "Read from Italian"; the theater shrinks back to its label in the same move. 0:30, Kathy's Cupcakes: label, then card; the look moves on at 0:32.5 before it would expand.
+4. 0:48 · On the straight past the scaffold the wearer looks up and holds it: "Snoozing", then the countdown from 0:50.3; Atlas Books, looked at from 0:51, is held "Snoozed". 0:55 looking up again cancels it by 0:57.5. (Rule 12.)
+5. 1:13 · "No need to run". 1:15 red light; two food places were looked at, so at 1:17.6, "Hungry? · Find lunch · No". No, at 1:20; the walk stays Just walk.
+6. 1:29 to 1:39 · Crossing: nothing opens. A bike comes up the lane from behind as the wearer steps off: `BIKE` on the pavement with its arrow.
+7. 1:40.6 · The far curb: the view settles on the west side and its places label together. The loop continues south. The recording ends at 1:52. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
 ## Timing as built
 
-The wearer decelerates into a stop line at 0.9 m/s² rather than stopping dead, so the curb arrivals land within a second of the beat sheet: Hungry eases onto the stop line at 1:00.5 and the pocket surfaces at 1:02.8 with 11 s on the light; Errands stops at the cross street at 1:10.8; Just walking at 1:18.4. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.
+The wearer decelerates into a stop line or a door at 0.9 m/s² rather than stopping dead, and turns its body at 3.2 rad/s, standing still while the turn is over a radian. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.
 
 ## Pace script
 
-Every walk carries a pace track in its scenario file: a band per segment, with the sim's speed per band (Stroll 0.6 m/s, Walk 1.38 m/s, Brisk 1.9 m/s, Stopped 0). Default Walk. Hungry: Brisk 0:44 to 0:57, Walk to the stop line, Stopped 1:00 to 1:14. Errands: Stopped 0:24 to 0:29 at the pharmacy, Stopped 1:10 to 1:18 at the corner. Just walking: Stroll 0:08 to 0:32, Stopped 1:19 to 1:25. Speed eases between bands over about a second, and the sim clamps the wearer at a stop line, so the arithmetic of speed × time lands the wearer at the corner (n = 90) within a metre on every walk. The reviewer never controls pace; the inspector shows the band live.
+The pace track is by place, not time: Stroll on the east sidewalk from n 11 to 25.5, Brisk from n 60 to 84, Walk everywhere else (Stroll 0.6 m/s, Walk 1.38 m/s, Brisk 1.9 m/s, Stopped 0). Speed eases between bands over about a second; lights, doors and the corner hold stop the wearer. The reviewer never controls pace; the inspector shows the band live.
 
 ## The scripted reviewer
 
-The scenario files also script what the reviewer does: gaze targets, pinches, choices, looking up, head scans, the ask answer. These drive three things: `pnpm record` for the evals, `?still=` frames for screenshots, and the attract loop behind the title screen (the Just walking script, muted, looping until a scenario is chosen). In the live demo the reviewer's own input replaces them: a gaze event in the script is where the beat sheet expects the reviewer to look, and the reviewer-chrome captions (`docs/copy.md`) nudge toward it. A beat that depends on the reviewer's input simply does not happen if they never do the thing; the brain reacts to what is actually looked at, which is the point. A scripted gaze holds until the next gaze event; `"id": null` releases it.
+The recordings script what the reviewer does. They drive `pnpm record` for the evals, `?still=` frames for screenshots (`&live=1` steps the unscripted walk instead, for frames past a recording's end) and the attract loop behind the title screen. In the live demo the reviewer's own input replaces them; a beat that depends on the reviewer simply does not happen if they never do the thing. A scripted gaze holds until the next gaze event; `"id": null` releases it. The inspector's Overrides tab has "End the walk".
 
 ## Notifications (fixed behaviors)
 
@@ -80,7 +82,7 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 
 | Moment | Line | Where | Scenarios |
 | --- | --- | --- | --- |
-| Pace to signal | "No need to run" | Glance at the curb | Hungry |
+| Pace to signal | "No need to run" | Glance at the curb | Every recording |
 | Bus at the stop | "M4 in 2 min · not on today's route" | Pip on the stop; a label only when looked at or when the view settles on it | Errands |
 | Which stairs | "Uptown in 4 · stairs at the corner" | Label on the station stair when looked at, three words and a number even in Brisk | Hungry |
 | Closed early | "Hardware closed early. One stop left." | The errands card, reordered | Errands |
@@ -90,4 +92,4 @@ The scenario files also script what the reviewer does: gaze targets, pinches, ch
 
 ## End screen (shared)
 
-The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: the scenario name; one sentence built from the log ("In ninety seconds the glasses saw 14 places, showed you 3, held 1 while you crossed, and saved 1 for the red light", every number counted from this walk: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, and pinches saved; a zero clause is dropped); a timeline of the walk, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", the three highest-scoring things shown that carried a reason line, one per name, in time order; and the buttons See every decision, Walk again, the other two walks and About. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.
+Reached from "End the walk" in the inspector or at the end of a recording. The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: the scenario name; one sentence built from the log ("In ninety seconds the glasses saw 14 places, showed you 3, held 1 while you crossed, and saved 1 for the red light", every number counted from this walk: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, and pinches saved; a zero clause is dropped); a timeline of the walk, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", the three highest-scoring things shown that carried a reason line, one per name, in time order; and the buttons See every decision, Walk again, the other two walks and About. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.

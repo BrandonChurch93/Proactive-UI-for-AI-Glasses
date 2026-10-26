@@ -113,7 +113,13 @@ export class App {
     let outline = Boolean(this.opts.focusOutline);
     return {
       scenario: w.scenario,
-      duration: w.duration,
+      get duration() {
+        return w.duration;
+      },
+      endWalk: () => {
+        w.end();
+        this.inspector?.close();
+      },
       report: REPORT,
       now: () => w.t,
       known: () => w.known,

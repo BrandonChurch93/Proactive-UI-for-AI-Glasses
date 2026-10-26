@@ -67,7 +67,7 @@ async function boot(): Promise<void> {
       focusOutline: params.get('focus') === '1',
       pace: params.get('pace') === '1',
       exact: still,
-      scripted: still || params.get('scripted') === '1',
+      scripted: (still && params.get('live') !== '1') || params.get('scripted') === '1',
     },
     isScenarioId(scenario) ? scenario : null,
   );

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { readSignal, vehicleLight, type SignalAnchor } from '@lumen/shared';
+import { readSignal, vehicleLight, type SignalAnchor, type SignalReading, type VehicleLight } from '@lumen/shared';
 import type { BlockLayout, Prop } from '@lumen/sim';
 import { GeoBucket, hash } from './geom';
 import type { MaterialLibrary } from './materials';
@@ -18,7 +18,7 @@ const cyl = (r0: number, r1: number, h: number, x = 0, y = 0, z = 0, seg = 12): 
 
 export interface PropsOutput {
   group: THREE.Group;
-  update(t: number): void;
+  update(t: number, south: SouthLight): void;
 }
 
 function leafTexture(): THREE.CanvasTexture {
@@ -292,9 +292,9 @@ export function buildProps(layout: BlockLayout, mats: MaterialLibrary, renderer:
 
   return {
     group,
-    update(t: number) {
+    update(t: number, south: SouthLight) {
       sway.value = t;
-      signals.update(signal, t);
+      signals.update(signal, south, t);
     },
   };
 }
@@ -344,21 +344,30 @@ function glyph(kind: 'walk' | 'hand'): THREE.CanvasTexture {
   return t;
 }
 
-function buildSignals(group: THREE.Group, bucket: GeoBucket, dark: THREE.Material): { update(a: SignalAnchor, t: number): void } {
+export interface SouthLight {
+  read(t: number): SignalReading;
+  vehicle(): VehicleLight;
+}
+
+type Road = 'avenue' | 'cross' | 'south';
+
+function buildSignals(group: THREE.Group, bucket: GeoBucket, dark: THREE.Material): { update(a: SignalAnchor, south: SouthLight, t: number): void } {
   const walkT = glyph('walk');
   const handT = glyph('hand');
   const pedWalk = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: walkT, emissiveIntensity: 2.0 });
   const pedHand = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: handT, emissiveIntensity: 2.2 });
   const pedOff = new THREE.MeshStandardMaterial({ color: 0x101112, roughness: 0.4 });
-  const corners: { x: number; n: number; veh: { road: 'avenue' | 'cross'; yaw: number }; ped: { leg: 'avenue' | 'cross'; yaw: number }[] }[] = [
+  const corners: { x: number; n: number; veh: { road: Road; yaw: number }; ped: { leg: Road; yaw: number }[] }[] = [
     { x: 7.6, n: 89.7, veh: { road: 'cross', yaw: -Math.PI / 2 }, ped: [{ leg: 'avenue', yaw: -Math.PI / 2 }, { leg: 'cross', yaw: Math.PI }] },
     { x: -7.6, n: 89.7, veh: { road: 'avenue', yaw: Math.PI }, ped: [{ leg: 'avenue', yaw: Math.PI / 2 }, { leg: 'cross', yaw: Math.PI }] },
     { x: 7.6, n: 104.3, veh: { road: 'avenue', yaw: 0 }, ped: [{ leg: 'cross', yaw: 0 }, { leg: 'avenue', yaw: -Math.PI / 2 }] },
     { x: -7.6, n: 104.3, veh: { road: 'cross', yaw: Math.PI / 2 }, ped: [{ leg: 'cross', yaw: 0 }, { leg: 'avenue', yaw: Math.PI / 2 }] },
+    { x: 7.6, n: -2.1, veh: { road: 'south', yaw: 0 }, ped: [{ leg: 'south', yaw: -Math.PI / 2 }] },
+    { x: -7.6, n: 2.1, veh: { road: 'south', yaw: Math.PI }, ped: [{ leg: 'south', yaw: Math.PI / 2 }] },
   ];
-  const lampSlots: { road: 'avenue' | 'cross'; index: number; color: THREE.Color }[] = [];
+  const lampSlots: { road: Road; index: number; color: THREE.Color }[] = [];
   const lampMats: THREE.Matrix4[] = [];
-  const faceSlots: { leg: 'avenue' | 'cross'; m: THREE.Matrix4 }[] = [];
+  const faceSlots: { leg: Road; m: THREE.Matrix4 }[] = [];
   const colors = [new THREE.Color(3.2, 0.5, 0.35), new THREE.Color(3.0, 1.7, 0.3), new THREE.Color(0.6, 3.0, 1.5)];
   for (const c of corners) {
     const base = new THREE.Vector3(c.x, 0, -c.n);
@@ -390,15 +399,15 @@ function buildSignals(group: THREE.Group, bucket: GeoBucket, dark: THREE.Materia
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
   const off = new THREE.Color(0.02, 0.02, 0.02);
   return {
-    update(a: SignalAnchor, t: number) {
-      const light = { avenue: vehicleLight(a, 'avenue', t), cross: vehicleLight(a, 'cross', t) };
+    update(a: SignalAnchor, south: SouthLight, t: number) {
+      const light = { avenue: vehicleLight(a, 'avenue', t), cross: vehicleLight(a, 'cross', t), south: south.vehicle() };
       lampSlots.forEach((sl, i) => {
         const l = light[sl.road];
         const on = (sl.index === 0 && l === 'red') || (sl.index === 1 && l === 'yellow') || (sl.index === 2 && l === 'green');
         lamps.setColorAt(i, on ? sl.color : off);
       });
       if (lamps.instanceColor) lamps.instanceColor.needsUpdate = true;
-      const read = { avenue: readSignal(a, 'avenue', t), cross: readSignal(a, 'cross', t) };
+      const read = { avenue: readSignal(a, 'avenue', t), cross: readSignal(a, 'cross', t), south: south.read(t) };
       faceSlots.forEach((f, i) => {
         const r = read[f.leg];
         const blinkOff = r.state === 'flash' && Math.floor(t * 2) % 2 === 1;

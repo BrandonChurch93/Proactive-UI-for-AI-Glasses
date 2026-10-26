@@ -178,3 +178,22 @@ describe('walking rules, unit level', () => {
     expect(step?.level).toBe('pip');
   });
 });
+
+describe('the head-moved gate', () => {
+  const spec: CaseSpec = { id: 'lap-still', scenario: 'walking', duration: 5, startN: 20, only: ['grace-theater'], pace: [[0, 0]], yaw: [[0, 0], [0.5, 0.2]], gaze: [[3, 'grace-theater']] };
+  const levels = (lap: boolean): string[] => {
+    const brain = new Brain({ scenario: 'walking' });
+    const out: string[] = [];
+    for (const s of synthesize(spec)) {
+      if (lap && s.t >= 2) s.goal.lap = 1;
+      for (const d of brain.tick(s).events) if (d.id === 'grace-theater') out.push(d.level);
+    }
+    return out;
+  };
+
+  it('starts again with every lap: a look grows to a card only once the head has moved since the lap began', () => {
+    expect(levels(false)).toContain('card');
+    expect(levels(true)).not.toContain('card');
+    expect(levels(true)).toContain('label');
+  });
+});

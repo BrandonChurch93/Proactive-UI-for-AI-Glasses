@@ -9,10 +9,12 @@ const sim = new Sim(s);
 const brain = new Brain({ scenario: s });
 const headless = new HeadlessView();
 let view;
-for (let i = 0; i <= 99 * TICK_HZ; i++) {
+const secs = Number(process.argv.find((a) => a.startsWith('--s='))?.slice(4) ?? 112);
+for (let i = 0; i <= secs * TICK_HZ; i++) {
   headless.advanceTo(sim, i / TICK_HZ);
   const snap = sim.snapshot(view);
   const f = brain.tick(snap);
+  sim.plan(f.goal);
   headless.apply(f);
   view = headless.report(sim);
   for (const d of f.events) {

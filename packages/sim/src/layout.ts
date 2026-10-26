@@ -270,7 +270,7 @@ export function buildLayout(seed = 47): BlockLayout {
   const curbE = BLOCK.avenueHalf;
   for (const n of [27.5, 40.5, 63.5, 73.5]) prop('tree', curbE + 0.58, n);
   for (const n of [9.5, 29.5, 46.2, 56.8, 75]) prop('tree', -(curbE + 0.62), n);
-  for (const n of [-10, 3, 38, 66, 82]) prop('lamp', curbE + 0.5, n, Math.PI / 2);
+  for (const n of [-10, 12, 38, 66, 82]) prop('lamp', curbE + 0.5, n, Math.PI / 2);
   for (const n of [-4, 22, 44, 70]) prop('lamp', -(curbE + 0.5), n, -Math.PI / 2);
   prop('hydrant', curbE + 0.45, 8.6);
   prop('hydrant', -(curbE + 0.45), 33.2);
@@ -290,7 +290,7 @@ export function buildLayout(seed = 47): BlockLayout {
   prop('cafe-seating', 12.2, 49.5, 0, v3(0.9, 1, 4));
   prop('planter', -12.4, 63, 0, v3(0.8, 0.7, 2.4));
   prop('taxi-sign', -(curbE + 0.4), 12.5);
-  prop('no-standing', curbE + 0.35, 2.0);
+  prop('no-standing', curbE + 0.35, 8.5);
   prop('no-standing', curbE + 0.35, 52.5);
   for (const n of [79.6, 82.4]) prop('bench', -12.35, n, Math.PI / 2);
   prop('bench', -10.6, 86.4, Math.PI);

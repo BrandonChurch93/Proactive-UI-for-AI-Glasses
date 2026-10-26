@@ -69,6 +69,7 @@ const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
 const SEED = 47;
 const ATTENTION_M = 70;
+const INTENT_TICK = 10;
 
 const clock = gsap.timeline({ autoRemoveChildren: true });
 gsap.globalTimeline.remove(clock);
@@ -116,7 +117,6 @@ export class Walk {
   private stepIndex = 0;
   private tickIndex = 0;
   private view: { w: number; h: number; panes: PaneReport[] } | undefined;
-  private arrivedAt: number | null = null;
   private listeners = new Set<() => void>();
   private focusOutline: boolean;
   private pursuit: { id: string; dyaw: number; dpitch: number } | null = null;
@@ -124,6 +124,7 @@ export class Walk {
   private following = false;
   private pick: { step: number; cur: string | null; cand: string | null; candSince: number; outSince: number | null } = { step: -2, cur: null, cand: null, candSince: 0, outSince: null };
   holding = false;
+  autoIntent = true;
   private sound: { ctx: AudioContext | null; enabled: boolean } = { ctx: null, enabled: false };
 
   constructor(
@@ -149,7 +150,12 @@ export class Walk {
   }
 
   get duration(): number {
-    return WALK_SECONDS[this.scenario];
+    return this.opts.scripted ? WALK_SECONDS[this.scenario] : Math.max(this.known, this.sim.t);
+  }
+
+  end(): void {
+    this.ended = true;
+    for (const fn of this.listeners) fn();
   }
 
   get known(): number {
@@ -200,13 +206,12 @@ export class Walk {
   private reset(): void {
     this.sim = new Sim(this.scenario, { seed: SEED, viewport: { w: innerWidth, h: innerHeight } });
     this.sim.scripted = this.opts.scripted;
-    this.brain = new Brain({ scenario: this.scenario });
+    this.brain = new Brain();
     this.bridge.setSim(this.sim);
     this.world.setSim(this.sim);
     this.stepIndex = 0;
     this.tickIndex = 0;
     this.view = undefined;
-    this.arrivedAt = null;
     this.ended = false;
   }
 
@@ -420,6 +425,7 @@ export class Walk {
     const k = this.tickIndex;
     const sim = this.sim;
     if (!sim.scripted) {
+      if (k === INTENT_TICK && this.autoIntent && !this.events.has(k)) this.pending = { choice: { id: 'intent', action: this.scenario }, ...this.pending };
       let ev = this.events.get(k);
       if (!ev && Object.keys(this.pending).length > 0) {
         ev = this.pending;
@@ -437,6 +443,7 @@ export class Walk {
     for (const o of ovs ?? []) this.brain.applyOverride(o, sim.t);
     const snap = sim.snapshot(fast ? undefined : (this.overlay?.report() ?? this.view));
     const frame = this.brain.tick(snap);
+    sim.plan(frame.goal);
     snap.wearerModel = frame.model;
     this.frames[k] = frame;
     if (!fast || !this.snapshots[k]) this.snapshots[k] = snap;
@@ -445,13 +452,12 @@ export class Walk {
       this.overlay.apply(frame, snap);
       this.view = this.overlay.report();
     }
-    if (sim.wearer.arrived && this.arrivedAt === null) this.arrivedAt = sim.t;
-    if (!this.ended && (sim.t >= this.duration - 1e-6 || (this.arrivedAt !== null && sim.t - this.arrivedAt >= 4))) this.ended = true;
+    if (!this.ended && this.opts.scripted && sim.t >= this.duration - 1e-6) this.ended = true;
     if (!fast) for (const fn of this.listeners) fn();
   }
 
   seek(t: number): void {
-    const target = Math.max(0, Math.min(Math.round(t * SIM_HZ), Math.round(this.duration * SIM_HZ)));
+    const target = Math.max(0, this.opts.scripted ? Math.min(Math.round(t * SIM_HZ), Math.round(this.duration * SIM_HZ)) : Math.round(t * SIM_HZ));
     if (target === this.stepIndex) return;
     const back = target < this.stepIndex;
     if (back || (!this.opts.exact && target - this.stepIndex > WARM_STEPS)) {

@@ -45,5 +45,6 @@ export interface InspectorStore {
   paceReadout(): boolean;
   setPaceReadout(on: boolean): void;
   exportRun(): RunExport;
+  endWalk(): void;
   subscribe(fn: () => void): () => void;
 }

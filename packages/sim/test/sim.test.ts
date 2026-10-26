@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { SCENARIO_IDS, readSignal } from '@lumen/shared';
-import { Sim, LANE_BY_ID } from '../src';
+import { SCENARIO_IDS, SOUTH_CROSSWALK, WALK } from '@lumen/shared';
+import { Sim, LANE_BY_ID, START, routeLoop, routeTo } from '../src';
 
-const WALK_END = { hungry: 98, errands: 98, walking: 99 } as const;
+const LAP_END = 190;
 
 function footprint(sim: Sim, id: string) {
   const v = sim.traffic.vehicles.find((x) => x.id === id)!;
@@ -11,10 +11,15 @@ function footprint(sim: Sim, id: string) {
 
 describe.each(SCENARIO_IDS)('sim · %s', (scenario) => {
   const sim = new Sim(scenario);
-  const log: { t: number; minPerson: number; overlap: string | null; stuck: string | null; s: number; state: string }[] = [];
-  const scripted = new Set(['passerby', 'conversation-a', 'conversation-b']);
-  while (sim.t < WALK_END[scenario]) {
+  const log: { t: number; minPerson: number; overlap: string | null; stuck: string | null }[] = [];
+  const starts: { t: number; leg: string; state: string }[] = [];
+  const scripted = new Set(['passerby']);
+  let held = 0;
+  while (sim.t < LAP_END) {
     sim.advanceTo(Math.round((sim.t + 0.1) * 10) / 10);
+    const c = sim.wearer.crossing;
+    if (c && !starts.some((x) => x.t === c.at)) starts.push({ t: c.at, leg: c.leg, state: sim.wearer.state });
+    if (sim.holding && sim.lap > 0) held += 0.1;
     let minPerson = Infinity;
     for (const p of sim.people.people) {
       if (!p.alive || scripted.has(p.id)) continue;
@@ -38,15 +43,16 @@ describe.each(SCENARIO_IDS)('sim · %s', (scenario) => {
       const lane = LANE_BY_ID.get(v.lane)!;
       const rear = v.s - v.len;
       if (v.s > lane.stopS + 0.6 && rear < lane.stopS + 24) stuck = v.id;
+      if (lane.southS !== undefined && v.s > lane.southS + 0.6 && rear < lane.southS + SOUTH_CROSSWALK.half * 2 + 1) stuck = v.id;
     }
-    log.push({ t: sim.t, minPerson, overlap, stuck, s: sim.wearer.s, state: sim.wearer.state });
+    log.push({ t: sim.t, minPerson, overlap, stuck });
   }
 
   it('no two vehicles ever overlap', () => {
     expect(log.find((l) => l.overlap)?.overlap ?? null).toBeNull();
   });
 
-  it('no vehicle stops inside the intersection', () => {
+  it('no vehicle stops inside the intersection or the south crosswalk', () => {
     expect(log.find((l) => l.stuck)?.stuck ?? null).toBeNull();
   });
 
@@ -55,12 +61,41 @@ describe.each(SCENARIO_IDS)('sim · %s', (scenario) => {
     expect(worst).toBeGreaterThanOrEqual(3);
   });
 
-  it('crosses only on a walk signal and ends at the destination', () => {
-    const stop = sim.route.stops[0]!;
-    for (const l of log.filter((x) => x.state === 'crossing')) {
-      const sig = readSignal(sim.signal, stop.leg, l.t);
-      expect(sig.state, `t=${l.t}`).not.toBe('dont');
-    }
-    expect(sim.wearer.arrived).toBe(true);
+  it('starts every crossing on a walk signal', () => {
+    expect(starts.length).toBeGreaterThan(0);
+    for (const s of starts) expect(s.state, `t=${s.t} ${s.leg}`).toBe('crossing');
+  });
+
+  it('completes a lap and holds the light at the corner again', () => {
+    expect(sim.lap).toBeGreaterThanOrEqual(1);
+    expect(held).toBeGreaterThan(WALK.holdS - 1);
+  });
+});
+
+describe('router', () => {
+  it('reaches a west-side door from the start corner across the south crossing', () => {
+    const r = routeTo(START, 'mega-burger');
+    expect(r.stops.map((s) => s.leg)).toEqual(['south']);
+  });
+
+  it('reaches the Post Office across the cross street', () => {
+    expect(routeTo(START, 'post-office').stops.map((s) => s.leg)).toEqual(['cross']);
+  });
+
+  it('the loop crosses the avenue at the north corner and again at the south', () => {
+    expect(routeLoop(START).stops.map((s) => s.leg)).toEqual(['avenue', 'south']);
+  });
+
+  it('a new destination asked for in a crossing waits for the far curb', () => {
+    const sim = new Sim('walking');
+    while (sim.wearer.crossing?.leg !== 'avenue') sim.advanceTo(Math.round((sim.t + 0.1) * 10) / 10);
+    const to = sim.wearer.crossing!.to;
+    sim.plan({ destination: 'goldies-counter' });
+    sim.advanceTo(sim.t + 1);
+    expect(sim.wearer.crossing?.to).toBe(to);
+    while (sim.wearer.crossing) sim.advanceTo(Math.round((sim.t + 0.1) * 10) / 10);
+    sim.advanceTo(sim.t + 0.2);
+    expect(sim.route.target).toBe('goldies-counter');
+    expect(sim.wearer.pos.x).toBeLessThan(0);
   });
 });

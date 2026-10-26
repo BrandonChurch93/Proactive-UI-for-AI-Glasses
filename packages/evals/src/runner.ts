@@ -24,6 +24,7 @@ export interface FrameRecord {
   pocket: string[];
   stoppedFor: number;
   dwell: BrainFrame['dwell'];
+  goal: BrainFrame['goal'];
 }
 
 export interface RunResult {
@@ -65,6 +66,7 @@ export function run(
       pocket: f.model.pocket,
       stoppedFor: f.stoppedFor,
       dwell: f.dwell,
+      goal: f.goal,
     });
   }
   return { id, snapshots, frames, entries: brain.log.entries, brain };
