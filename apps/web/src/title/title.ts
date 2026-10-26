@@ -3,8 +3,6 @@ import type { Band, ScenarioId } from '@lumen/shared';
 import css from './title.module.css';
 
 
-export const SCENARIO_NAMES: Record<ScenarioId, string> = { hungry: 'Hungry', errands: 'Errands', walking: 'Just walking' };
-
 export type Choice = ScenarioId;
 
 const CHIPS: { id: Choice; name: string }[] = [
@@ -236,12 +234,13 @@ export class TitleScreen {
 }
 
 export interface EndStats {
-  scenario: ScenarioId;
   duration: number;
   places: number;
   cards: number;
   held: number;
   saved: number;
+  reached: string[];
+  replies: number;
   ticks: { t: number; kind: 'card' | 'hold' }[];
   gates: [number, number][];
   bands: { t: number; band: Band }[];
@@ -251,21 +250,26 @@ export interface EndStats {
 
 export interface EndHandlers {
   again(): void;
-  choose(id: ScenarioId): void;
+  keepWalking(): void;
   inspect(t: number, id: string): void;
 }
 
 const BAND_STEP: Record<Band, number> = { stopped: 0, stroll: 1, walk: 2, brisk: 3 };
 
-export function endSentence(st: Pick<EndStats, 'places' | 'cards' | 'held' | 'saved'>): string {
+const and = (xs: string[]): string => (xs.length === 1 ? xs[0]! : xs.length === 2 ? `${xs[0]} and ${xs[1]}` : `${xs.slice(0, -1).join(', ')}, and ${xs[xs.length - 1]}`);
+
+export function endSentence(st: Pick<EndStats, 'duration' | 'places' | 'cards' | 'held' | 'saved' | 'reached' | 'replies'>): string {
+  const m = Math.max(1, Math.round(st.duration / 60));
+  const span = `In ${m} ${m === 1 ? 'minute' : 'minutes'}`;
   const parts: string[] = [];
   if (st.places) parts.push(`saw ${st.places} places`);
   if (st.cards) parts.push(`showed you ${st.cards}`);
   if (st.held) parts.push(`held ${st.held} while you crossed`);
-  if (st.saved) parts.push(`saved ${st.saved} for the red light`);
-  if (!parts.length) return 'In ninety seconds the glasses stayed quiet.';
-  const list = parts.length === 1 ? parts[0] : parts.length === 2 ? `${parts[0]} and ${parts[1]}` : `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
-  return `In ninety seconds the glasses ${list}.`;
+  if (st.saved) parts.push(`saved ${st.saved} for a red light`);
+  if (st.reached.length) parts.push(`got you to ${st.reached.length > 2 ? `${st.reached.length} places` : and(st.reached.map((n) => n.replace(/^The /, 'the ')))}`);
+  if (st.replies) parts.push(`sent ${st.replies} ${st.replies === 1 ? 'reply' : 'replies'}`);
+  if (!parts.length) return `${span} the glasses stayed quiet.`;
+  return `${span} the glasses ${and(parts)}.`;
 }
 
 const clockOf = (t: number): string => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
@@ -332,16 +336,14 @@ export class EndCard {
     svg.appendChild(line);
     strip.appendChild(svg);
     const labels = el('div', css.tlLabels);
-    const end = el('span', undefined, '1:30');
-    end.style.left = x(90);
-    labels.append(el('span', undefined, '0:00'), end);
+    labels.append(el('span', undefined, '0:00'), el('span', undefined, clockOf(st.duration)));
     wrap.append(strip, labels);
     return { el: wrap, ticks, strip };
   }
 
   show(st: EndStats): void {
     this.el.style.display = '';
-    const name = el('h2', css.name, SCENARIO_NAMES[st.scenario]);
+    const name = el('h2', css.name, 'The walk');
     const line = el('p', css.lede, endSentence(st));
     const tl = this.timeline(st);
     const head = el('div', css.label, 'What it decided');
@@ -367,7 +369,7 @@ export class EndCard {
       button('See every decision', () => this.h.inspect(f.t, f.id), true);
     }
     button('Walk again', () => this.h.again());
-    for (const id of (['hungry', 'errands', 'walking'] as const).filter((x) => x !== st.scenario)) button(SCENARIO_NAMES[id], () => this.h.choose(id));
+    button('Keep walking', () => this.h.keepWalking());
     const about = button('About', () => this.about.open(about));
     const parts = [name, line, tl.el, head, decided, actions];
     this.panel.replaceChildren(...parts);

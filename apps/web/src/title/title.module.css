@@ -280,7 +280,7 @@
 }
 
 .tlLabels span:last-child {
-  transform: translateX(-50%);
+  right: 0;
 }
 
 .decided {

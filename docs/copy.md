@@ -141,7 +141,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## Arrival and end
 
 - Seat's held, inside on the left.
-- End screen, in the start screen's panel: {Scenario} / In ninety seconds the glasses saw {places} places, showed you {cards}, held {held} while you crossed, and saved {saved} for the red light. (any clause whose number is zero is dropped; with nothing left: In ninety seconds the glasses stayed quiet.) / the timeline, 0:00 and 1:30 / What it decided (mono caps), three lines: {time} · {name} · {reason line} / See every decision · Walk again · {other two} · About
+- End screen, in the start screen's panel: The walk / In {m} minutes the glasses saw {places} places, showed you {cards}, held {held} while you crossed, saved {saved} for a red light, got you to {destinations}, and sent {replies} replies. ({m} is the session in whole minutes, at least 1, "minute" when 1; {destinations} names the doors reached, "the Big Bean" or "Main Street Pharmacy and Post Office", or counts them past two, "3 places"; "1 reply"; any clause whose number is zero is dropped; with nothing left: In {m} minutes the glasses stayed quiet.) / the timeline, 0:00 and the session's length / What it decided (mono caps), three lines: {time} · {name} · {reason line}, never the intent panel or the picker / See every decision · Walk again · Keep walking · About
 
 ## Reviewer chrome
 

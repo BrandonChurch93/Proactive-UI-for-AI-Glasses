@@ -1,4 +1,4 @@
-import { LEVEL_RANK, isShow, reasonIsClean, uiScale, type Band, type ScenarioId } from '@lumen/shared';
+import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, type Band, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
@@ -50,7 +50,7 @@ export class App {
     this.title = new TitleScreen(ui, (id) => this.start(id));
     this.end = new EndCard(ui, {
       again: () => this.again(),
-      choose: (id) => this.choose(id, true),
+      keepWalking: () => this.choose('walking', true, null),
       inspect: (t, id) => this.inspect(t, id),
     });
     this.chrome = new Chrome(
@@ -247,6 +247,17 @@ export class App {
     const shows: { t: number; id: string; name: string; reason: string; score: number }[] = [];
     let cards = 0;
     let saved = 0;
+    let replies = 0;
+    const reached: string[] = [];
+    let at: string | null = null;
+    for (const snap of w.snapshots) {
+      if (!snap) continue;
+      const door = snap.goal.arrived ? (snap.goal.destination ?? null) : null;
+      if (door && door !== at) reached.push(PLACE_BY_ID.get(door)?.name ?? door);
+      at = door;
+      const c = snap.wearer.choice;
+      if (c && snap.inbox.some((n) => n.id === c.id && n.replies?.some((r) => r.id === c.action))) replies++;
+    }
     let gateFrom: number | null = null;
     let first: EndStats['first'] = null;
     for (const f of w.frames) {
@@ -272,7 +283,7 @@ export class App {
         }
         if (d.action === 'save') saved++;
         if (isShow(d)) first ??= { t: f.t, id: d.id };
-        if (isShow(d) || (d.action === 'promote' && now >= LEVEL_RANK.card)) {
+        if ((isShow(d) || (d.action === 'promote' && now >= LEVEL_RANK.card)) && d.component !== 'intent' && d.component !== 'picker') {
           if (d.reason.text && d.reason.text !== d.content.name && d.reason.kind !== 'gate' && reasonIsClean(d.reason.text)) shows.push({ t: f.t, id: d.id, name: d.content.name, reason: d.reason.text, score: d.score });
         }
       }
@@ -285,7 +296,7 @@ export class App {
       .slice(0, 3)
       .sort((a, b) => a.t - b.t)
       .map(({ t, name, reason }) => ({ t, name, reason }));
-    return { scenario: w.scenario, duration: w.duration, places: places.size, cards, held: held.size, saved, ticks, gates, bands, decided, first };
+    return { duration: w.duration, places: places.size, cards, held: held.size, saved, reached, replies, ticks, gates, bands, decided, first };
   }
 
   private inspect(t: number, id: string): void {
