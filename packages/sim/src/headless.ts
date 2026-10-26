@@ -142,11 +142,18 @@ export class HeadlessView {
       const a = sim.anchorOf(d.placement.anchor);
       if (!a) continue;
       anchors.set(d.id, a);
-      if (LEVEL_RANK[d.level] >= LEVEL_RANK.glance && d.level !== 'whisper') reach = Math.max(reach, proj(a).depth);
+      if (LEVEL_RANK[d.level] >= LEVEL_RANK.label && d.level !== 'whisper') reach = Math.max(reach, proj(a).depth);
     }
     const side = this.scan.update({ t: sim.t, yawRate: sim.head.yawRate, curbDistance: sim.wearer.curbDistance(), yaw: sim.head.yaw, target: sim.gaze.target });
     const ctx: FrameCtx = { t: sim.t, band: frame.band, vp, keepOuts: keepOuts(sim, proj, vp, pose.pos, reach), ui: uiScale(vp), scanning: side !== null };
-    for (const d of frame.items) {
+    const taken: Rect[] = [];
+    const rankOf = (d: (typeof frame.items)[number]): number => (d.placement.focusOk ? 0 : LEVEL_RANK[d.level] > LEVEL_RANK.label ? 1 : 2);
+    const depthOf = (d: (typeof frame.items)[number]): number => {
+      const a = anchors.get(d.id);
+      return a ? proj(a).depth : Infinity;
+    };
+    const order = [...frame.items].sort((a, b) => rankOf(a) - rankOf(b) || depthOf(a) - depthOf(b));
+    for (const d of order) {
       const a = anchors.get(d.id);
       if (!a) continue;
       let it = this.items.get(d.id);
@@ -154,10 +161,10 @@ export class HeadlessView {
         it = { place: new Placement(), aside: new Aside(), yieldS: new PaneYield(), pane: null, lookedAt: -Infinity, frozen: null };
         this.items.set(d.id, it);
       }
-      const lv = d.level === 'glance' || d.level === 'card' || d.level === 'expanded' ? d.level : 'glance';
+      const lv = d.level === 'label' || d.level === 'glance' || d.level === 'card' || d.level === 'expanded' ? d.level : 'label';
       const pr = proj(a);
       if (d.placement.focusOk) it.lookedAt = sim.t;
-      if (it.frozen && it.yieldS.on && it.pane?.visible && LEVEL_RANK[d.level] >= LEVEL_RANK.glance) {
+      if (it.frozen && it.yieldS.on && it.pane?.visible && LEVEL_RANK[d.level] >= LEVEL_RANK.label) {
         const paneSide = it.frozen.x + it.frozen.w / 2 < vp.w / 2 ? 'left' : 'right';
         const y = it.yieldS.update(sim.t, side !== null ? paneSide : null, paneSide);
         if (it.yieldS.on) {
@@ -168,15 +175,19 @@ export class HeadlessView {
       }
       const exempt = Boolean(d.placement.focusOk) || leftRecently(sim.t, it.lookedAt);
       const placed = it.place.update(
-        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: exempt, left: exempt && !d.placement.focusOk },
-        ctx,
+        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: exempt, zoneOk: Boolean(d.placement.zoneOk), left: exempt && !d.placement.focusOk },
+        taken.length ? { ...ctx, chrome: [...(ctx.chrome ?? []), ...taken] } : ctx,
       );
+      if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && d.level !== 'whisper') {
+        const r = placed.rect;
+        taken.push({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 });
+      }
       const gaze = Boolean(d.gaze);
       if (placed.mode === 'edge') {
         it.pane = hidden(d.id, d.level, gaze, placed.behind ? 'offscreen' : 'edge');
         continue;
       }
-      if (LEVEL_RANK[d.level] < LEVEL_RANK.glance || d.level === 'whisper') {
+      if (LEVEL_RANK[d.level] < LEVEL_RANK.label || d.level === 'whisper') {
         it.pane = { id: d.id, level: d.level, zone: 'world', rect: { x: 0, y: 0, w: 0, h: 0 }, opacity: 0, gaze, visible: true };
         continue;
       }
@@ -185,7 +196,7 @@ export class HeadlessView {
         continue;
       }
       const home = { x: placed.rect.x + it.place.jumpX.at(sim.t), y: placed.rect.y + it.place.jumpY.at(sim.t), w: placed.rect.w, h: placed.rect.h };
-      const s = it.aside.update(home, ctx, exempt, pr.depth);
+      const s = it.aside.update(home, ctx, exempt || Boolean(d.placement.zoneOk), pr.depth);
       if (s.dropped) {
         it.pane = hidden(d.id, d.level, gaze, 'keepout');
         continue;

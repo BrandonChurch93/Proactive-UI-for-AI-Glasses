@@ -30,9 +30,8 @@ import {
   cardContent,
   entityReason,
   expandedContent,
-  glanceContent,
+  labelContent,
   pipContent,
-  sayFor,
   reason,
   whisperContent,
 } from './content';
@@ -76,6 +75,7 @@ interface Want {
   channel?: Channel;
   announce?: string;
   focusOk?: boolean;
+  zoneOk?: boolean;
   gaze?: boolean;
   cause?: Cause;
   remove?: boolean;
@@ -144,6 +144,10 @@ export class Brain {
   private briskAt = -Infinity;
   private quietS = 0;
   private budget: number;
+  private labels = new Map<string, number>();
+  private labelsCenterAt = -Infinity;
+  private wasSettled = true;
+  private cardGrownAt = -Infinity;
   private budgetUsed = 0;
   private dismissed: Record<string, number> = {};
   private accepted: Record<string, number> = {};
@@ -458,13 +462,14 @@ export class Brain {
     const targetId =
       d.target ??
       [...this.standing.values()]
-        .filter((x) => x.placement.zone !== 'ground' && LEVEL_RANK[x.level] >= LEVEL_RANK.glance)
+        .filter((x) => x.placement.zone !== 'ground' && LEVEL_RANK[x.level] >= LEVEL_RANK.label)
         .sort((a, b) => LEVEL_RANK[b.level] - LEVEL_RANK[a.level])[0]?.id;
     if (!targetId) return;
     this.dismissedNow.add(targetId);
     const li = this.items.get(targetId);
     if (li && isPane(li.level)) {
-      li.level = li.level === 'glance' ? 'pip' : li.level === 'card' ? 'glance' : 'card';
+      li.level = li.level === 'label' ? 'pip' : li.level === 'card' ? 'label' : 'card';
+      this.labels.delete(targetId);
       li.since = t;
       li.stepAt = t;
       li.gazeSince = null;
@@ -506,9 +511,9 @@ export class Brain {
     return false;
   }
 
-  private glancesUp(): number {
+  private proactiveUp(): number {
     let n = 0;
-    for (const d of this.standing.values()) if (d.level === 'glance' && d.placement.zone === 'world') n++;
+    for (const d of this.standing.values()) if (d.level === 'label' && d.placement.zone === 'world' && !this.labels.has(d.id) && !d.gaze) n++;
     return n;
   }
 
@@ -527,6 +532,7 @@ export class Brain {
     const stops = this.openStops(snap);
     const frozen = this.gateNow.safety;
     const noticed = target && dwellS >= this.cfg.ladder.pipDwellS - 1e-9 ? target : undefined;
+    this.updateLabels(snap, t, band, noticed);
     const list = candidates(
       snap.entities,
       {
@@ -611,6 +617,7 @@ export class Brain {
         this.whisper = { content: whisperContent(e, why, this.goal), reason: why, until: t + this.cfg.whisper.seconds, from: e.id };
       }
 
+      const labelled = this.labels.has(e.id) || (snap.goal.end === e.id && e.distance < this.cfg.arrival.distanceM * 2);
       const visible = this.paneVisible(e.id);
       const dtL = Number.isFinite(it.lastT) ? Math.max(0, t - it.lastT) : 0;
       it.lastT = t;
@@ -630,11 +637,13 @@ export class Brain {
           dwellS: Math.max(0, dwellS - it.hiddenS),
           visible,
           far: e.distance > this.cfg.ladder.cardWithinM,
+          cardWait: t - this.cardGrownAt < this.cfg.ladder.swapGapS - 1e-9,
           pinch: pinch === e.id,
           floor: aware.has(e.id) ? 'pip' : 'none',
+          labelled,
           proactive: true,
           scoreAbove: sc.score > this.cfg.score.glanceThreshold,
-          canProactive: this.glancesUp() < this.cfg.ladder.maxGlances,
+          canProactive: this.proactiveUp() < this.cfg.ladder.maxProactive,
         },
         this.cfg,
       );
@@ -648,7 +657,7 @@ export class Brain {
           if (id !== e.id && (d.level === 'card' || d.level === 'expanded')) {
             const other = this.items.get(id);
             if (other) {
-              other.level = 'glance';
+              other.level = 'label';
               other.since = t;
               other.stepAt = t;
               this.forcedDown.add(id);
@@ -657,7 +666,7 @@ export class Brain {
         }
       }
       if (level === 'none' && rank(it.level) === 0) continue;
-      const gazeDriven = out.via === 'dwell' || out.via === 'pinch' || it.dwelt || isT;
+      const gazeDriven = out.via === 'dwell' || out.via === 'pinch' || out.via === 'settle' || it.dwelt || isT || labelled;
       const prevLevel = it.level;
       const commitLevel = level;
       const via = out.via;
@@ -675,6 +684,7 @@ export class Brain {
         distance: e.distance,
         gaze: isT,
         focusOk: isT,
+        zoneOk: level === 'label' && (band === 'stopped' || band === 'stroll'),
         announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
         cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),
@@ -694,15 +704,45 @@ export class Brain {
         const e = snap.entities.find((x) => x.id === w.id);
         const li = this.items.get(w.id);
         if (!e || !li) continue;
-        li.level = 'glance';
+        li.level = 'label';
         li.since = t;
         li.stepAt = t;
-        w.level = 'glance';
+        w.level = 'label';
         w.cause = 'look-away';
-        w.content = this.entityContent(e, 'glance', w.reason, band);
+        w.content = this.entityContent(e, 'label', w.reason, band);
         w.onCommit = undefined;
       }
     }
+  }
+
+  private updateLabels(snap: WorldSnapshot, t: number, band: Band, target: string | undefined): void {
+    const settled = snap.wearer.gaze.settled !== false;
+    const rose = settled && !this.wasSettled;
+    this.wasSettled = settled;
+    const lc = this.cfg.labels;
+    if (!settled) {
+      for (const e of snap.entities) if (this.labels.has(e.id) && !e.visible && e.id !== target) this.labels.delete(e.id);
+    }
+    if (rose) {
+      const inView = snap.entities.filter((e) => e.visible && e.distance <= lc.rangeM).sort((a, b) => a.distance - b.distance).slice(0, lc.max);
+      const next = new Map<string, number>();
+      for (const e of inView) next.set(e.id, this.labels.get(e.id) ?? t);
+      this.labels = next;
+      this.labelsCenterAt = t;
+    }
+    if (target && snap.entities.some((e) => e.id === target)) {
+      if (!this.labels.has(target)) {
+        if (this.labels.size >= lc.max) {
+          const far = snap.entities.filter((e) => this.labels.has(e.id)).sort((a, b) => b.distance - a.distance)[0];
+          if (far) this.labels.delete(far.id);
+        }
+        if (this.labels.size === 0) this.labelsCenterAt = t;
+        this.labels.set(target, t);
+      }
+      this.labelsCenterAt = t;
+    }
+    if (band === 'stopped') this.labelsCenterAt = t;
+    else if (this.labels.size && t - this.labelsCenterAt >= lc.walkingS - 1e-9) this.labels.clear();
   }
 
   private commitLadder(
@@ -718,11 +758,18 @@ export class Brain {
     if (rank(level) < rank(prev)) it.stepAt = t;
     if (!isPane(prev) && isPane(level)) {
       it.shownAt = t;
-      it.dwelt = via === 'dwell' || via === 'pinch';
-      if (it.dwelt && (e.kind === 'food' || e.kind === 'cafe')) this.foodGlances.add(e.id);
+      it.dwelt = false;
+      it.byLabels = via === 'settle';
+    }
+    if (isPane(level) && (via === 'dwell' || via === 'pinch')) {
+      it.dwelt = true;
+      if (e.kind === 'food' || e.kind === 'cafe') this.foodGlances.add(e.id);
     }
     if (isPane(prev) && !isPane(level)) this.presented.set(e.id, contentKey);
-    if (level === 'card') it.cardAt = t;
+    if (level === 'card') {
+      it.cardAt = t;
+      if (rank(prev) < rank('card')) this.cardGrownAt = t;
+    }
     if (!isPane(level)) it.dwelt = rank(level) > 0 && it.dwelt && t - it.lastGazeAt < this.cfg.ladder.lookAwayS;
     it.level = level;
     it.since = t;
@@ -731,10 +778,7 @@ export class Brain {
   private entityContent(e: Entity, level: PaneLevel, why: Reason, band: Band): Content {
     if (level === 'expanded') return expandedContent(e, why, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id));
     if (level === 'card') return cardContent(e, why, band, this.goal);
-    if (level === 'glance') {
-      const c = glanceContent(e, why, this.goal);
-      return trimForPace(c, band, sayFor(e, this.goal).short, this.cfg);
-    }
+    if (level === 'label') return trimForPace(labelContent(e, why, this.goal), band === 'stopped' ? 'stroll' : band, undefined, this.cfg);
     return pipContent(e, why);
   }
 
@@ -1075,6 +1119,7 @@ export class Brain {
           dwellS: snap.wearer.gaze.dwellMs / 1000,
           pinch: pinch === id && !openedNow.has(id),
           floor: 'none',
+          labelled: false,
           proactive: false,
           scoreAbove: false,
           canProactive: false,
@@ -1096,7 +1141,7 @@ export class Brain {
           ? expandedContent(e, r, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id))
           : level === 'card'
             ? cardContent(e, r, band, this.goal)
-            : trimForPace(glanceContent(e, r, this.goal), band, sayFor(e, this.goal).short, this.cfg);
+            : trimForPace(labelContent(e, r, this.goal), band === 'stopped' ? 'stroll' : band, undefined, this.cfg);
       wants.push({
         id,
         component: 'place',
@@ -1201,21 +1246,21 @@ export class Brain {
       return;
     }
     const existing = this.standing.get(e.id);
-    if (existing && LEVEL_RANK[existing.level] >= LEVEL_RANK.glance) return;
+    if (existing && LEVEL_RANK[existing.level] >= LEVEL_RANK.label) return;
     const r = reason('goal', e.reasons.goal ?? 'End of the walk', [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const it = this.item(e.id);
     wants.push({
       id: e.id,
       component: 'place',
       zone: 'world',
-      level: 'glance',
+      level: 'label',
       anchor: e.id,
       content: { name: e.name, fact: e.glance, reason: r, showReason: true },
       reason: r,
       origin: 'arrival',
       onCommit: () => {
         if (!isPane(it.level)) {
-          it.level = 'glance';
+          it.level = 'label';
           it.since = t;
           it.shownAt = t;
           it.dwelt = true;
@@ -1381,6 +1426,7 @@ export class Brain {
         zone: w.zone,
         prefer: w.zone === 'ground' ? 'below' : 'side',
         focusOk: w.focusOk === true,
+        ...(w.zoneOk ? { zoneOk: true } : {}),
       },
       content: w.content,
       reason: w.reason,
@@ -1463,7 +1509,7 @@ export class Brain {
         continue;
       }
       if (v !== 'pass') {
-        const wouldShow = LEVEL_RANK[w.level] >= LEVEL_RANK.glance || w.level === 'whisper';
+        const wouldShow = LEVEL_RANK[w.level] >= LEVEL_RANK.label || w.level === 'whisper';
         const isNewPip = w.level === 'pip' && !prev && !remove;
         if ((wouldShow || isNewPip) && !(prev && prev.level === w.level && v.keep)) {
           if (!remove && (!prev || LEVEL_RANK[w.level] > LEVEL_RANK[prev.level] || !v.keep)) {
@@ -1487,7 +1533,7 @@ export class Brain {
       if (action) {
         this.log.append(t, d, this.snapRef);
         this.frameEvents.push(d);
-        if (isShow(d) && d.cause !== 'dwell' && d.cause !== 'pinch') this.spendBudget();
+        if (isShow(d) && d.cause !== 'dwell' && d.cause !== 'pinch' && d.cause !== 'settle') this.spendBudget();
       }
       w.onCommit?.();
       next.set(w.id, d);

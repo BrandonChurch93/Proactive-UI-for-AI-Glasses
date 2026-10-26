@@ -12,7 +12,7 @@
       }
     },
     {
-      "name": "0:02 \u00b7 one glance, the best fit, reason in the log only",
+      "name": "0:02 \u00b7 one label, the best fit, reason in the log only",
       "between": [
         1.5,
         3
@@ -20,22 +20,25 @@
       "must": {
         "action": "show",
         "id": "goldies-counter",
-        "level": "glance",
+        "level": "label",
         "band": "walk",
         "factIs": "3 min",
         "showReason": false
       }
     },
     {
-      "name": "0:02 \u00b7 pips bloom on the food places",
+      "name": "0:02 \u00b7 one label, the best fit, reason in the log only",
       "between": [
-        0.5,
+        1.5,
         3
       ],
       "must": {
         "action": "show",
-        "id": "mega-burger",
-        "level": "pip"
+        "id": "goldies-counter",
+        "level": "label",
+        "band": "walk",
+        "factIs": "3 min",
+        "showReason": false
       }
     },
     {
@@ -61,7 +64,7 @@
       }
     },
     {
-      "name": "0:14 \u00b7 dwell on Mega Burger gives the glance",
+      "name": "0:14 \u00b7 a look at Mega Burger lights its label; 58 m away, no card",
       "between": [
         14,
         16
@@ -69,7 +72,7 @@
       "must": {
         "action": "show",
         "id": "mega-burger",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
       }
     },
@@ -117,39 +120,51 @@
       }
     },
     {
-      "name": "0:31 \u00b7 look away, back down to its light",
+      "name": "0:30 to 0:34 \u00b7 the look moves on; with no label under the center the label fades after 4 s of walking",
       "between": [
-        30.5,
-        32
+        33.5,
+        35.5
       ],
       "must": {
-        "action": "demote",
         "id": "mega-burger",
-        "level": "pip",
-        "cause": "look-away"
+        "action": [
+          "demote",
+          "dismiss"
+        ]
       }
     },
     {
-      "name": "0:44 to 0:57 \u00b7 Brisk, nothing looked at: nothing but whisper",
+      "name": "0:14 to 0:34 \u00b7 a far place never becomes a card",
+      "between": [
+        14,
+        35
+      ],
+      "mustNot": {
+        "id": "mega-burger",
+        "level": "card"
+      }
+    },
+    {
+      "name": "0:44 to 0:57 \u00b7 Brisk: labels at most, never a card",
       "between": [
         46,
         56.5
       ],
       "state": {
         "band": "brisk",
-        "levelsAtMost": "whisper"
+        "levelsAtMost": "label"
       }
     },
     {
-      "name": "0:40 \u00b7 a dwell on the station stair gives its glance",
+      "name": "0:40 \u00b7 a look at the station stair lights its label",
       "between": [
-        40.5,
+        40.4,
         41.2
       ],
       "must": {
         "action": "show",
         "id": "47th-st-station",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
       }
     },

@@ -21,19 +21,19 @@
       ],
       "mustNot": {
         "id": "m4-stop",
-        "levelAtLeast": "glance"
+        "levelAtLeast": "label"
       }
     },
     {
       "rule": "moments",
       "between": [
-        6.4,
-        6.6
+        6.2,
+        6.4
       ],
       "must": {
         "action": "show",
         "id": "m4-stop",
-        "level": "glance",
+        "level": "label",
         "factIs": "M4 in 2"
       }
     }

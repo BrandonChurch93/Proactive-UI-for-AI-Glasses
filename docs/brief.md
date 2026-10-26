@@ -38,7 +38,7 @@ LinkedIn: Proactive UI for AI Glasses is a UX study I built to answer one questi
 
 ## Detail levels
 
-Pip (a point of light on the object) → Glance (one line beside it) → Card (compact panel with a leader) → Expanded (grown in place from the card). Pips can be many; glances at most three; one card; one expanded. Every level above pip carries a reason line. The dwell ladder in `docs/walking-rules.md` rule 10 says how attention alone climbs them; the pace band says how far it may climb.
+Pip (a point of light on the object) → Label (its name and a few words beside it) → Card (compact panel with a leader) → Expanded (grown in place from the card). Pips are sparse; labels answer a look, up to six at once when the view settles; one card, always the place under the center of the view; one expanded. Every level above pip carries a reason line in the log. `docs/walking-rules.md` rule 10 says how a look climbs them; the pace band says how far it may climb.
 
 ## Input model
 
@@ -46,7 +46,7 @@ Look (drag turns the head, full 180°), Dwell (0.8 s on a pip promotes it), Pinc
 
 ## Placement
 
-World zone, ground zone, view zone. Anchor at sign height. Offset toward the nearer edge with a leader; below the anchor when there is no room above. Focus zone scaled by pace band (33×40 stopped to 52×58 brisk, percent of view), nothing persistent inside it except a glance on the thing being looked at. Keep-outs: roadway, vehicles, people, path, faces; dynamic, per frame. Hysteresis 1.2 s. Edge collapse. Content whose anchor leaves the view folds to an edge light. Full rules in `docs/overlay-spec.md`.
+World zone, ground zone, view zone. Anchor at sign height. Offset toward the nearer edge with a leader; below the anchor when there is no room above. Focus zone scaled by pace band (33×40 stopped to 52×58 brisk, percent of view), nothing persistent inside it except the pane on the thing being looked at, and labels at Stopped or Stroll. Keep-outs: roadway, vehicles, people, path, faces; dynamic, per frame. Hysteresis 1.2 s. Edge collapse. Content whose anchor leaves the view folds to an edge light. Full rules in `docs/overlay-spec.md`.
 
 ## Safety gate and the held state
 

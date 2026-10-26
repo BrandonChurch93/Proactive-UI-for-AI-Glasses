@@ -15,7 +15,7 @@
     {
       "rule": "walking-9",
       "between": [
-        5.0,
+        4.7,
         8
       ],
       "must": {

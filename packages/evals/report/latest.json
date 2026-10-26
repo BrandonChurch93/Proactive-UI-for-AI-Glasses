@@ -1,10 +1,10 @@
 {
  "version": 1,
  "totals": {
-  "suites": 39,
-  "passed": 39,
-  "cases": 912,
-  "casesPassed": 912
+  "suites": 40,
+  "passed": 40,
+  "cases": 941,
+  "casesPassed": 941
  },
  "byGroup": {
   "walks": {
@@ -24,8 +24,8 @@
    "passed": 6
   },
   "walking": {
-   "suites": 19,
-   "passed": 19
+   "suites": 20,
+   "passed": 20
   }
  },
  "suites": [
@@ -65,25 +65,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -164,14 +164,14 @@
      "detail": "t=6 dismiss errands card"
     },
     {
-     "name": "0:24 · the pharmacy unfolds from the sign",
+     "name": "0:24 · the pharmacy lights its label on the look",
      "pass": true,
-     "detail": "t=25.001 show main-street-pharmacy glance"
+     "detail": "t=24.8 show main-street-pharmacy label"
     },
     {
-     "name": "0:25 · its card",
+     "name": "0:25 · its card after half a second of hold",
      "pass": true,
-     "detail": "t=25.601 promote main-street-pharmacy card"
+     "detail": "t=25.301 promote main-street-pharmacy card"
     },
     {
      "name": "0:28 · picked up, the errands card returns with the stop ticked",
@@ -216,7 +216,7 @@
     {
      "name": "1:10 · the Post Office card up on dwell",
      "pass": true,
-     "detail": "t=71.401 promote post-office card"
+     "detail": "t=71.101 promote post-office card"
     },
     {
      "name": "1:12 · head scans and a passerby change no level",
@@ -287,25 +287,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -376,14 +376,14 @@
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:02 · one glance, the best fit, reason in the log only",
+     "name": "0:02 · one label, the best fit, reason in the log only",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance"
+     "detail": "t=2 show goldies-counter label"
     },
     {
-     "name": "0:02 · pips bloom on the food places",
+     "name": "0:02 · one label, the best fit, reason in the log only",
      "pass": true,
-     "detail": "t=0.8 show mega-burger pip"
+     "detail": "t=2 show goldies-counter label"
     },
     {
      "name": "0:05 · not looked at, it folds itself",
@@ -396,9 +396,9 @@
      "detail": ""
     },
     {
-     "name": "0:14 · dwell on Mega Burger gives the glance",
+     "name": "0:14 · a look at Mega Burger lights its label; 58 m away, no card",
      "pass": true,
-     "detail": "t=14.7 show mega-burger glance"
+     "detail": "t=14.5 show mega-burger label"
     },
     {
      "name": "0:16 · no card at 50 m: a far place keeps its label until it is within 30 m",
@@ -408,7 +408,7 @@
     {
      "name": "0:22 · pinch while walking saves",
      "pass": true,
-     "detail": "t=22 save mega-burger glance"
+     "detail": "t=22 save mega-burger label"
     },
     {
      "name": "0:22 · nothing opens",
@@ -421,19 +421,24 @@
      "detail": "345 frames"
     },
     {
-     "name": "0:31 · look away, back down to its light",
+     "name": "0:30 to 0:34 · the look moves on; with no label under the center the label fades after 4 s of walking",
      "pass": true,
-     "detail": "t=31.101 demote mega-burger pip"
+     "detail": "t=34.801 dismiss mega-burger label"
     },
     {
-     "name": "0:44 to 0:57 · Brisk, nothing looked at: nothing but whisper",
+     "name": "0:14 to 0:34 · a far place never becomes a card",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "0:44 to 0:57 · Brisk: labels at most, never a card",
      "pass": true,
      "detail": "105 frames"
     },
     {
-     "name": "0:40 · a dwell on the station stair gives its glance",
+     "name": "0:40 · a look at the station stair lights its label",
      "pass": true,
-     "detail": "t=40.801 show 47th-st-station glance"
+     "detail": "t=40.601 show 47th-st-station label"
     },
     {
      "name": "0:58 · no need to run",
@@ -458,7 +463,7 @@
     {
      "name": "1:06 · held gaze expands it in place",
      "pass": true,
-     "detail": "t=65.601 promote pocket:mega-burger expanded"
+     "detail": "t=66.001 promote pocket:mega-burger expanded"
     },
     {
      "name": "1:08 · hold a seat, the route draws",
@@ -534,25 +539,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -623,19 +628,24 @@
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:08 · the marquee, glance on dwell",
+     "name": "0:08 · the marquee lights its label on the look",
      "pass": true,
-     "detail": "t=9 show grace-theater glance"
+     "detail": "t=8.8 show grace-theater label"
+    },
+    {
+     "name": "0:08.5 · the view settles: the theater row labels together",
+     "pass": true,
+     "detail": "t=8.9 show trattoria-da-lia label"
     },
     {
      "name": "0:09 · card at Stroll",
      "pass": true,
-     "detail": "t=9.8 promote grace-theater card"
+     "detail": "t=9.3 promote grace-theater card"
     },
     {
-     "name": "0:11 · expanded in place on continued dwell",
+     "name": "0:11 · expanded in place on continued hold",
      "pass": true,
-     "detail": "t=11.4 promote grace-theater expanded"
+     "detail": "t=11.3 promote grace-theater expanded"
     },
     {
      "name": "0:17 to 0:22 · the truck passes; not a gate, the level holds (the overlay drops it to a pip)",
@@ -643,29 +653,29 @@
      "detail": "50 frames"
     },
     {
-     "name": "0:25.5 · Trattoria da Lia, translated",
+     "name": "0:25.5 · the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
      "pass": true,
-     "detail": "t=26.401 show trattoria-da-lia glance"
+     "detail": "t=26.401 promote trattoria-da-lia card"
     },
     {
-     "name": "0:26.5 · its card, read from Italian",
+     "name": "0:25.5 · the theater shrinks back to its label in the same move",
      "pass": true,
-     "detail": "t=27.201 promote trattoria-da-lia card"
+     "detail": "t=26.401 demote grace-theater label"
     },
     {
-     "name": "0:27.5 · the look moves on before it would expand",
+     "name": "0:27.5 · Kathy's from the shopfront lights its label",
      "pass": true,
-     "detail": ""
+     "detail": "t=28.401 show kathys-cupcakes label"
     },
     {
-     "name": "0:27.5 · Kathy's from the shopfront, a glance",
+     "name": "0:27.5 · Kathy's from the shopfront lights its label",
      "pass": true,
-     "detail": "t=28.601 show kathys-cupcakes glance"
+     "detail": "t=28.401 show kathys-cupcakes label"
     },
     {
      "name": "0:29 · its card while the look holds",
      "pass": true,
-     "detail": "t=29.401 promote kathys-cupcakes card"
+     "detail": "t=28.901 promote kathys-cupcakes card"
     },
     {
      "name": "0:30 · the look moves on before it would expand",
@@ -710,12 +720,12 @@
     {
      "name": "0:58 · Atlas Books held, snoozed",
      "pass": true,
-     "detail": "t=59.301 hold atlas-books pip"
+     "detail": "t=59.301 hold atlas-books label"
     },
     {
      "name": "0:58 to 1:02 · nothing shows",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 3"
+     "detail": "shows 0, non-gaze 0, holds 4"
     },
     {
      "name": "1:04 · looking up again cancels",
@@ -750,12 +760,12 @@
     {
      "name": "1:35 · the bench, benches in the shade",
      "pass": true,
-     "detail": "t=97.102 show pocket-park glance"
+     "detail": "t=96.202 show pocket-park label"
     },
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 7, non-gaze 4, holds 5"
+     "detail": "shows 5, non-gaze 3, holds 6"
     }
    ],
    "description": "Recorded walk · 1021 snapshots at 10 Hz"
@@ -796,25 +806,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -937,25 +947,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1023,7 +1033,7 @@
     {
      "name": "[1.5, 3) must {\"action\":\"hold\",\"id\":\"goldies-counter\",\"reasonKind\":\"budget\"}",
      "pass": true,
-     "detail": "t=2 hold goldies-counter glance",
+     "detail": "t=2 hold goldies-counter label",
      "rule": "gates"
     },
     {
@@ -1033,9 +1043,9 @@
      "rule": "gates"
     },
     {
-     "name": "[4.4, 4.6) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[4.2, 4.4) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"level\":\"label\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=4.5 show kathys-cupcakes glance",
+     "detail": "t=4.3 show kathys-cupcakes label",
      "rule": "gates"
     }
    ],
@@ -1078,25 +1088,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1219,25 +1229,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1372,25 +1382,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1507,25 +1517,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1642,25 +1652,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1783,25 +1793,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -1930,25 +1940,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2065,25 +2075,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2206,25 +2216,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2341,25 +2351,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2476,25 +2486,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2566,15 +2576,15 @@
      "rule": "moments"
     },
     {
-     "name": "[1.5, 6) mustNot {\"id\":\"m4-stop\",\"levelAtLeast\":\"glance\"}",
+     "name": "[1.5, 6) mustNot {\"id\":\"m4-stop\",\"levelAtLeast\":\"label\"}",
      "pass": true,
      "detail": "",
      "rule": "moments"
     },
     {
-     "name": "[6.4, 6.6) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"glance\",\"factIs\":\"M4 in 2\"}",
+     "name": "[6.2, 6.4) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"label\",\"factIs\":\"M4 in 2\"}",
      "pass": true,
-     "detail": "t=6.5 show m4-stop glance",
+     "detail": "t=6.3 show m4-stop label",
      "rule": "moments"
     }
    ],
@@ -2617,25 +2627,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2764,25 +2774,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -2899,25 +2909,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3040,25 +3050,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3124,9 +3134,9 @@
      "detail": ""
     },
     {
-     "name": "[1.4, 1.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
+     "name": "[1.2, 1.4) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"label\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=1.5 show 47th-st-station glance",
+     "detail": "t=1.3 show 47th-st-station label",
      "rule": "moments"
     }
    ],
@@ -3169,25 +3179,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3253,21 +3263,21 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"focusOk\":false}",
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\",\"focusOk\":false}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-1"
     },
     {
-     "name": "[3, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"glance\",\"gaze\":true,\"focusOk\":true}",
+     "name": "[3, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"label\",\"gaze\":true,\"focusOk\":true}",
      "pass": true,
-     "detail": "t=3.5 show kathys-cupcakes glance",
+     "detail": "t=3.3 show kathys-cupcakes label",
      "rule": "walking-1"
     },
     {
-     "name": "[4, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"card\",\"gaze\":true,\"focusOk\":true}",
+     "name": "[3.7, 4.5) must {\"id\":\"kathys-cupcakes\",\"level\":\"card\",\"gaze\":true,\"focusOk\":true}",
      "pass": true,
-     "detail": "t=4.1 promote kathys-cupcakes card",
+     "detail": "t=3.8 promote kathys-cupcakes card",
      "rule": "walking-1"
     },
     {
@@ -3316,25 +3326,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3400,9 +3410,9 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"walk\",\"factIs\":\"3 min\",\"showReason\":false}",
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\",\"band\":\"walk\",\"factIs\":\"3 min\",\"showReason\":false}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-2"
     },
     {
@@ -3451,25 +3461,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3535,9 +3545,9 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"stopped\",\"showReason\":false,\"sayIs\":\"Fastest lunch on this side · 3 min, 9 seats\"}",
+     "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\",\"band\":\"stopped\",\"showReason\":false,\"factIs\":\"3 min, 9 seats\"}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-2"
     }
    ],
@@ -3580,25 +3590,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3664,9 +3674,9 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\"}",
+     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\"}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-3"
     },
     {
@@ -3721,25 +3731,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3805,13 +3815,13 @@
      "detail": ""
     },
     {
-     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"glance\",\"band\":\"stroll\"}",
+     "name": "[1.5, 2.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\",\"band\":\"stroll\"}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-3"
     },
     {
-     "name": "[2.6, 5.8) state {\"level\":{\"goldies-counter\":\"glance\"}}",
+     "name": "[2.6, 5.8) state {\"level\":{\"goldies-counter\":\"label\"}}",
      "pass": true,
      "detail": "32 frames",
      "rule": "walking-3"
@@ -3862,25 +3872,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -3946,7 +3956,7 @@
      "detail": ""
     },
     {
-     "name": "[2.5, 12) state {\"level\":{\"goldies-counter\":\"glance\"}}",
+     "name": "[2.5, 12) state {\"level\":{\"goldies-counter\":\"label\"}}",
      "pass": true,
      "detail": "95 frames",
      "rule": "walking-3"
@@ -3991,25 +4001,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4077,13 +4087,13 @@
     {
      "name": "[1.5, 3) must {\"action\":\"show\",\"id\":\"goldies-counter\"}",
      "pass": true,
-     "detail": "t=2 show goldies-counter glance",
+     "detail": "t=2 show goldies-counter label",
      "rule": "walking-4"
     },
     {
      "name": "[10, 12) must {\"action\":\"show\",\"id\":\"kathys-cupcakes\",\"band\":\"stopped\"}",
      "pass": true,
-     "detail": "t=10.3 show kathys-cupcakes pip",
+     "detail": "t=10.3 show kathys-cupcakes label",
      "rule": "walking-4"
     }
    ],
@@ -4126,25 +4136,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4261,25 +4271,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4347,7 +4357,7 @@
     {
      "name": "[5.95, 6.05) must {\"action\":\"save\",\"id\":\"mega-burger\",\"reasonKind\":\"pocket\"}",
      "pass": true,
-     "detail": "t=6 save mega-burger glance",
+     "detail": "t=6 save mega-burger label",
      "rule": "walking-6"
     },
     {
@@ -4402,25 +4412,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4537,25 +4547,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4672,25 +4682,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4807,25 +4817,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -4893,13 +4903,13 @@
     {
      "name": "[1, 4) must {\"id\":\"goldies-counter\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=1.1 promote goldies-counter card",
+     "detail": "t=1.3 promote goldies-counter card",
      "rule": "walking-9"
     },
     {
-     "name": "[5, 8) must {\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
+     "name": "[4.7, 8) must {\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=5.1 promote trattoria-da-lia card",
+     "detail": "t=4.8 promote trattoria-da-lia card",
      "rule": "walking-9"
     }
    ],
@@ -4942,25 +4952,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5026,21 +5036,21 @@
      "detail": ""
     },
     {
-     "name": "[1.45, 1.55) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[1.25, 1.35) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=1.5 show grace-theater glance",
+     "detail": "t=1.3 show grace-theater label",
      "rule": "walking-10"
     },
     {
-     "name": "[2.05, 2.15) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
+     "name": "[1.75, 1.85) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
      "pass": true,
-     "detail": "t=2.1 promote grace-theater card",
+     "detail": "t=1.8 promote grace-theater card",
      "rule": "walking-10"
     },
     {
-     "name": "[3.65, 3.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\"}",
+     "name": "[3.75, 3.85) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\"}",
      "pass": true,
-     "detail": "t=3.7 promote grace-theater expanded",
+     "detail": "t=3.8 promote grace-theater expanded",
      "rule": "walking-10"
     },
     {
@@ -5089,25 +5099,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5173,9 +5183,9 @@
      "detail": ""
     },
     {
-     "name": "[2.65, 2.75) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
+     "name": "[2.35, 2.45) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
      "pass": true,
-     "detail": "t=2.7 promote grace-theater card",
+     "detail": "t=2.4 promote grace-theater card",
      "rule": "walking-10"
     },
     {
@@ -5230,25 +5240,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5314,26 +5324,197 @@
      "detail": ""
     },
     {
-     "name": "[6.45, 6.75) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"card\",\"cause\":\"look-away\"}",
+     "name": "[6.45, 6.75) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
      "pass": true,
-     "detail": "t=6.5 demote grace-theater card",
+     "detail": "t=6.5 demote grace-theater label",
      "rule": "walking-10"
     },
     {
-     "name": "[7.65, 7.95) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"glance\",\"cause\":\"look-away\"}",
+     "name": "[6.75, 12) mustNot {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
      "pass": true,
-     "detail": "t=7.7 demote grace-theater glance",
+     "detail": "",
      "rule": "walking-10"
     },
     {
-     "name": "[8.85, 9.15) must {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
+     "name": "@11.5 state {\"level\":{\"grace-theater\":\"label\"}}",
      "pass": true,
-     "detail": "t=8.9 demote grace-theater pip",
+     "detail": "1 frames",
      "rule": "walking-10"
     }
    ],
    "rule": "walking-10",
-   "description": "Looking away walks back down one level every 1.2 s."
+   "description": "Looking away shrinks the expanded view straight to its label after 1.2 s; at Stopped the label stays."
+  },
+  {
+   "id": "walking-10d-labels",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world label outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1, 1.5) must {\"action\":\"show\",\"id\":\"trattoria-da-lia\",\"level\":\"label\",\"cause\":\"settle\"}",
+     "pass": true,
+     "detail": "t=1 show trattoria-da-lia label",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[1, 1.5) must {\"action\":\"show\",\"id\":\"lucky-lanes\",\"level\":\"label\",\"cause\":\"settle\"}",
+     "pass": true,
+     "detail": "t=1 show lucky-lanes label",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[1, 1.5) must {\"action\":\"show\",\"id\":\"grace-theater\",\"level\":\"label\"}",
+     "pass": true,
+     "detail": "t=1 show grace-theater label",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[1.5, 2) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\"}",
+     "pass": true,
+     "detail": "t=1.5 promote grace-theater card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "@3 state {\"level\":{\"grace-theater\":\"card\",\"trattoria-da-lia\":\"label\",\"lucky-lanes\":\"label\"}}",
+     "pass": true,
+     "detail": "1 frames",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[3.5, 4.1) must {\"action\":\"promote\",\"id\":\"trattoria-da-lia\",\"level\":\"card\"}",
+     "pass": true,
+     "detail": "t=4 promote trattoria-da-lia card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[3.5, 4.1) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
+     "pass": true,
+     "detail": "t=4 demote grace-theater label",
+     "rule": "walking-10"
+    },
+    {
+     "name": "@4.5 state {\"level\":{\"grace-theater\":\"label\",\"trattoria-da-lia\":\"card\",\"lucky-lanes\":\"label\"}}",
+     "pass": true,
+     "detail": "1 frames",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "The view settles over three places: all three label together, the one under the center grows to its card; moving the look to a second place swaps the card in one move."
   },
   {
    "id": "walking-11-whisper",
@@ -5371,25 +5552,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5467,9 +5648,9 @@
      "rule": "walking-11"
     },
     {
-     "name": "[1.4, 1.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
+     "name": "[1.2, 1.4) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"label\",\"band\":\"brisk\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=1.5 show 47th-st-station glance",
+     "detail": "t=1.3 show 47th-st-station label",
      "rule": "walking-11"
     },
     {
@@ -5518,25 +5699,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5614,9 +5795,9 @@
      "rule": "walking-12"
     },
     {
-     "name": "[6.4, 6.6) must {\"action\":\"hold\",\"id\":\"atlas-books\",\"reasonText\":\"Snoozed\"}",
+     "name": "[6.2, 6.4) must {\"action\":\"hold\",\"id\":\"atlas-books\",\"reasonText\":\"Snoozed\"}",
      "pass": true,
-     "detail": "t=6.5 hold atlas-books glance",
+     "detail": "t=6.3 hold atlas-books label",
      "rule": "walking-12"
     },
     {
@@ -5632,9 +5813,9 @@
      "rule": "walking-12"
     },
     {
-     "name": "[22.4, 22.7) must {\"action\":\"show\",\"id\":\"atlas-books\",\"level\":\"glance\"}",
+     "name": "[21.4, 22.7) must {\"action\":\"show\",\"id\":\"atlas-books\",\"level\":\"label\"}",
      "pass": true,
-     "detail": "t=22.5 show atlas-books glance",
+     "detail": "t=21.5 show atlas-books label",
      "rule": "walking-12"
     }
    ],
@@ -5677,25 +5858,25 @@
      "detail": ""
     },
     {
-     "name": "focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
      "rule": "walking-1",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap",
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
      "rule": "walking-2",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "auto-fold: no proactive world glance outlives its band limit",
+     "name": "auto-fold: no proactive world label outlives its band limit",
      "rule": "walking-3",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at",
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
      "rule": "walking-4",
      "pass": true,
      "detail": ""
@@ -5767,9 +5948,9 @@
      "rule": "walking-13"
     },
     {
-     "name": "[30.4, 30.6) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"glance\",\"cause\":\"dwell\"}",
+     "name": "[30.2, 30.4) must {\"action\":\"show\",\"id\":\"47th-st-station\",\"level\":\"label\",\"cause\":\"dwell\"}",
      "pass": true,
-     "detail": "t=30.5 show 47th-st-station glance",
+     "detail": "t=30.3 show 47th-st-station label",
      "rule": "walking-13"
     }
    ],

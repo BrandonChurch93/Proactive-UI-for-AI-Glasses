@@ -18,6 +18,7 @@ export interface PlaceInput {
   band: Band;
   viewport: Viewport;
   focusOk: boolean;
+  zoneOk?: boolean;
   keepOuts: readonly Rect[];
   road?: readonly Rect[];
   chrome?: readonly Rect[];
@@ -42,7 +43,8 @@ export const MARGIN = 16;
 export const PIP_GAP = { beside: 24, above: 22 } as const;
 const BESIDE_RISE = 0.85;
 
-export const NOMINAL_SIZE: Record<'glance' | 'card' | 'expanded', { w: number; h: number }> = {
+export const NOMINAL_SIZE: Record<'label' | 'glance' | 'card' | 'expanded', { w: number; h: number }> = {
+  label: { w: 150, h: 52 },
   glance: { w: 214, h: 60 },
   card: { w: 292, h: 152 },
   expanded: { w: 392, h: 318 },
@@ -125,7 +127,7 @@ export function configRect(
   const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= MOVE.clampMax : dy < 0.5 && dx <= MOVE.clampMax);
   const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k)) && !(inp.chrome ?? []).some((k) => rectsOverlap(r, k));
   const gap = Math.hypot(Math.max(r.x - inp.anchor.x, 0, inp.anchor.x - (r.x + r.w)), Math.max(r.y - inp.anchor.y, 0, inp.anchor.y - (r.y + r.h)));
-  const ok = inView(r, vp) && fits && clear && (inp.focusOk || !rectsOverlap(r, zone)) && (!pushed || gap <= r.w * 0.9);
+  const ok = inView(r, vp) && fits && clear && (inp.focusOk || inp.zoneOk || !rectsOverlap(r, zone)) && (!pushed || gap <= r.w * 0.9);
   const { fx, fy } = anchorFactors(side, vertical);
   const held = pushed ? 'zone' : dx > 0.5 || dy > 0.5 ? 'clamp' : null;
   return { rect: r, ok, held, leader: { x: r.x + r.w * fx, y: r.y + r.h * fy } };
@@ -140,8 +142,8 @@ export function placeWorld(inp: PlaceInput): Placed {
 
   const edgeFrac = Math.min(anchor.x, vp.w - anchor.x) / vp.w;
   let collapsed: Level | undefined;
-  if (!inp.focusOk && (inp.level === 'card' || inp.level === 'expanded') && edgeFrac < 0.08) collapsed = 'glance';
-  if (!inp.focusOk && inp.level === 'glance' && edgeFrac < 0.04) collapsed = 'pip';
+  if (!inp.focusOk && (inp.level === 'card' || inp.level === 'expanded') && edgeFrac < 0.08) collapsed = 'label';
+  if (!inp.focusOk && (inp.level === 'label' || inp.level === 'glance') && edgeFrac < 0.04) collapsed = 'pip';
   if (collapsed === 'pip') return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip', collapsed };
 
   const ui = inp.ui ?? 1;
@@ -170,7 +172,9 @@ export function placeWorld(inp: PlaceInput): Placed {
     if (c.ok && !inp.keepOuts.some((k) => rectsOverlap(c.rect, k))) return done(c.rect, start, 'center', 'above', true, c.leader);
   }
   const lift = configRect(inp, 'center', 'lift', start);
-  if (lift.ok) return done(lift.rect, start, 'center', 'lift', false, lift.leader);
+  const r = lift.rect;
+  const gap = Math.hypot(Math.max(r.x - anchor.x, 0, anchor.x - (r.x + r.w)), Math.max(r.y - anchor.y, 0, anchor.y - (r.y + r.h)));
+  if (lift.ok && (inp.focusOk || gap <= r.w * 0.9)) return done(lift.rect, start, 'center', 'lift', false, lift.leader);
   return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip' };
 }
 

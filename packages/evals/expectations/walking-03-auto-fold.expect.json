@@ -10,7 +10,7 @@
       "must": {
         "action": "show",
         "id": "goldies-counter",
-        "level": "glance"
+        "level": "label"
       }
     },
     {

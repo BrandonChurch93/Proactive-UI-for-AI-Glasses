@@ -12,7 +12,7 @@
       }
     },
     {
-      "name": "0:08 \u00b7 the marquee, glance on dwell",
+      "name": "0:08 \u00b7 the marquee lights its label on the look",
       "between": [
         8.4,
         10.5
@@ -20,15 +20,28 @@
       "must": {
         "action": "show",
         "id": "grace-theater",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
+      }
+    },
+    {
+      "name": "0:08.5 \u00b7 the view settles: the theater row labels together",
+      "between": [
+        8.5,
+        9.4
+      ],
+      "must": {
+        "action": "show",
+        "id": "trattoria-da-lia",
+        "level": "label",
+        "cause": "settle"
       }
     },
     {
       "name": "0:09 \u00b7 card at Stroll",
       "between": [
-        9.4,
-        12
+        9,
+        10.5
       ],
       "must": {
         "action": "promote",
@@ -38,10 +51,10 @@
       }
     },
     {
-      "name": "0:11 \u00b7 expanded in place on continued dwell",
+      "name": "0:11 \u00b7 expanded in place on continued hold",
       "between": [
-        11.4,
-        14.5
+        11,
+        13
       ],
       "must": {
         "action": "promote",
@@ -64,22 +77,10 @@
       }
     },
     {
-      "name": "0:25.5 \u00b7 Trattoria da Lia, translated",
+      "name": "0:25.5 \u00b7 the look moves to Trattoria da Lia: its label grows into the card, read from Italian",
       "between": [
         25.8,
         27.5
-      ],
-      "must": {
-        "action": "show",
-        "id": "trattoria-da-lia",
-        "level": "glance"
-      }
-    },
-    {
-      "name": "0:26.5 \u00b7 its card, read from Italian",
-      "between": [
-        26.8,
-        28.5
       ],
       "must": {
         "action": "promote",
@@ -89,18 +90,20 @@
       }
     },
     {
-      "name": "0:27.5 \u00b7 the look moves on before it would expand",
+      "name": "0:25.5 \u00b7 the theater shrinks back to its label in the same move",
       "between": [
-        25.5,
-        34
+        25.8,
+        27.5
       ],
-      "mustNot": {
-        "id": "trattoria-da-lia",
-        "level": "expanded"
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
+        "level": "label",
+        "cause": "look-away"
       }
     },
     {
-      "name": "0:27.5 \u00b7 Kathy's from the shopfront, a glance",
+      "name": "0:27.5 \u00b7 Kathy's from the shopfront lights its label",
       "between": [
         28,
         29.5
@@ -108,7 +111,19 @@
       "must": {
         "action": "show",
         "id": "kathys-cupcakes",
-        "level": "glance"
+        "level": "label"
+      }
+    },
+    {
+      "name": "0:27.5 \u00b7 Kathy's from the shopfront lights its label",
+      "between": [
+        28,
+        29.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "kathys-cupcakes",
+        "level": "label"
       }
     },
     {
@@ -314,7 +329,7 @@
       "must": {
         "action": "show",
         "id": "pocket-park",
-        "level": "glance"
+        "level": "label"
       }
     },
     {

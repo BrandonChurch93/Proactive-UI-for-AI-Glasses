@@ -83,9 +83,9 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 The clock: every walk starts at 12:40, and a line that names a time is written from it.
 
-Each place has a say line per scenario, the one sentence the assistant would say about it, and its short form. The brain uses the scenario's line, else the default. The say line is the glance's text in Stopped only and the first line of the card and the expanded view; in Stroll, Walk and Brisk the glance shows the short form, which the reading budget still caps at three words and a number (a second fact after a comma is dropped by rule). Live data can replace the table (Corner Hardware closed early, the prescription picked up).
+Each place has a say line per scenario, the one sentence the assistant would say about it, and its short form. The brain uses the scenario's line, else the default. The say line is the first line of the card and the expanded view; a label shows the short form in every band, which the reading budget still caps at three words and a number (a second fact after a comma is dropped by rule). Live data can replace the table (Corner Hardware closed early, the prescription picked up).
 
-Rules for a say line: under 60 characters, and 56 or fewer for a line a Stopped glance can show (two lines of the glance at reference scale); at most two numbers (a unit counts with its number); never repeats the place's name; never a banned word; written from the 12:40 clock. The eval checks every say line the brain shows against these.
+Rules for a say line: under 60 characters; at most two numbers (a unit counts with its number); never repeats the place's name; never a banned word; written from the 12:40 clock. The eval checks every say line the brain shows against these.
 
 | Place | Hungry | Errands | Default (Just walking) | Short form |
 | --- | --- | --- | --- | --- |
@@ -110,7 +110,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 
 ## What a pane shows
 
-- Glance: the name and the say line in Stopped, the short form in every other band. Nothing else.
+- Label: the name and the say line's short form (in Brisk, the name and one number). Nothing else.
 - Card: the name, the say line, one live line, and the reason line in Stopped and Stroll unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
 - Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 

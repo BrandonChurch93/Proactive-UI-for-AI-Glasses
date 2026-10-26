@@ -1,0 +1,102 @@
+{
+  "walk": "walking-10d-labels",
+  "cases": [
+    {
+      "rule": "walking-10",
+      "between": [
+        1,
+        1.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "trattoria-da-lia",
+        "level": "label",
+        "cause": "settle"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        1,
+        1.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "lucky-lanes",
+        "level": "label",
+        "cause": "settle"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        1,
+        1.5
+      ],
+      "must": {
+        "action": "show",
+        "id": "grace-theater",
+        "level": "label"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        1.5,
+        2
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "card"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "at": 3,
+      "state": {
+        "level": {
+          "grace-theater": "card",
+          "trattoria-da-lia": "label",
+          "lucky-lanes": "label"
+        }
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        3.5,
+        4.1
+      ],
+      "must": {
+        "action": "promote",
+        "id": "trattoria-da-lia",
+        "level": "card"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        3.5,
+        4.1
+      ],
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
+        "level": "label",
+        "cause": "look-away"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "at": 4.5,
+      "state": {
+        "level": {
+          "grace-theater": "label",
+          "trattoria-da-lia": "card",
+          "lucky-lanes": "label"
+        }
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ The overlay renders the brain's decisions. It owns placement, motion and the lig
 packages/overlay
   src/
     index.ts           mount(sceneBridge, root): Overlay
-    panes/             glance, card, expanded, toast, strip, call, ask, reminder, followup, pocket, whisper
+    panes/             label, glance, card, expanded, toast, strip, call, ask, reminder, followup, pocket, whisper
     ground/            route band, turn arc, destination marker, safety text
     light/             pip, aura, flare, head, leader, seed, edge light, trace
     place.ts           projection, speed-scaled focus zone, dynamic keep-outs, yielding, step-aside, hysteresis, edge folding, below-anchor fallback, scale by distance
@@ -28,7 +28,7 @@ Two render layers:
 overlay.apply(decisions: Decision[], t: number)
 ```
 
-The overlay diffs against what is on screen and runs the matching move: a new `show` at glance → mark (if no pip yet) then travel and condense; `promote` → grow the same surface; `demote` that keeps a pane → shrink it; `demote` to a pip → dissolve, retract; `hold` while shown → nothing until a gate; gate on → recede; gate off → return and the held reason line; `save` → the save bloom and the glyph count; `surface` → the pocket pane; a `whisper` level → the whisper line. The overlay also reports back, through the bridge, the rect of every visible pane so the sim can sample the backdrop behind it, and it keeps a log of what the glass actually did: every pane birth, resize, move over 40 px, drop, hide, edge fold, step-aside and death, with its cause and rect, keyed by sim time. The walk stores the log beside the brain frames, exports it, and the inspector interleaves it with the brain's decisions.
+The overlay diffs against what is on screen and runs the matching move: a new `show` at label or glance → mark (if no pip yet, and only for proactive content; a label that answers a look or a settle condenses with its light) then travel and condense; `promote` → grow the same surface; `demote` that keeps a pane → shrink it; `demote` to a pip → dissolve, retract; `hold` while shown → nothing until a gate; gate on → recede; gate off → return and the held reason line; `save` → the save bloom and the glyph count; `surface` → the pocket pane; a `whisper` level → the whisper line. The overlay also reports back, through the bridge, the rect of every visible pane so the sim can sample the backdrop behind it, and it keeps a log of what the glass actually did: every pane birth, resize, move over 40 px, drop, hide, edge fold, step-aside and death, with its cause and rect, keyed by sim time. The walk stores the log beside the brain frames, exports it, and the inspector interleaves it with the brain's decisions.
 
 Moves are queued per anchor so two decisions on the same object never fight. Recede interrupts anything.
 
@@ -43,7 +43,7 @@ Moves are queued per anchor so two decisions on the same object never fight. Rec
 5. Yielding: within 8 m of a curb, a head turn faster than 0.8 rad/s toward a pane's side runs the yield move. A yielding pane's rect is frozen where it was when the yield began; it stays yielded until the scan ends (the head is back within 0.3 rad of where the scan began, or the look settles on a different place), and then placement resumes with a 320 ms ease from the frozen spot (walking rule 5).
 6. Backdrop: apply the sampled luminance from the snapshot to the pane's fill alpha and weight (walking rule 9).
 7. Hysteresis: a placed position is kept while it stays valid. The corner the pane grows from follows its light with a 4 px dead band on reprojection jitter; a change of more than 80 px in where the pane sits relative to its light animates over 320 ms, and so does a re-placement, unless the path would cross the focus zone for a pane that is not looked at. During a head scan at the curb (rule 5) nothing is re-placed: a pane stays with its store, and one that has ended up somewhere it could not normally be yields to 15% with the scan.
-8. Edge collapse, for panes not looked at (including the one the look has just left): card within 8% of the edge → glance; glance within 4% → it folds. A new pane is born at its placed position with the condense move (walking rule 4).
+8. Edge collapse, for panes not looked at (including the one the look has just left): card within 8% of the edge → label; label within 4% → it folds. A new pane is born at its placed position with the condense move (walking rule 4).
 9. Fold before the cut: a pane folds over `t-quick` when keeping it in the view would move it more than 24 px, when any part of it would lie outside the view, when it would cover the reviewer chrome, or when its anchor leaves the view. The fold fades the pane where it stands (it no longer follows its anchor); the edge light shows only when the anchor itself is off the view. A folded pane stays folded until it fits again 40 px clear of every view edge; a pane the look has just left stays folded. No pane is ever drawn partly outside the view above 20% opacity.
 
 The expanded view grows in place from the card's position and is placed by the same rules with a larger box. It never docks to a screen edge and never changes the world.
@@ -51,7 +51,7 @@ The expanded view grows in place from the card's position and is placed by the s
 ## 4. Input model (sim side, but the overlay consumes it)
 
 - Drag turns the head; the center of the view is the gaze point. A full 180°.
-- Dwell: 450 ms on a place promotes it to a glance, and continued dwell keeps climbing per the dwell ladder (walking rule 10). The brain receives `gaze.dwellMs`; the overlay only shows the tell: aura and flare.
+- Dwell: 250 ms on a place lights its label, and 0.5 s more of hold grows it into the card (walking rule 10). The brain receives `gaze.dwellMs` and `gaze.settled`; the overlay only shows the tell: aura and flare. Panes are placed in priority order each frame (the place under the center, then cards, then labels nearest first), and each pane placed is a hard rect, padded 6 px, for the ones after it, so labels never overlap; a label with no room waits as its light. A hidden pane keeps its measured size for placement, so it does not flicker between fitting and not.
 - Pinch: a click with under 4 px of movement skips the wait on the gazed item or picks a choice; clicking a pane directly also works. Tap on touch. While the band is Walk or Brisk a pinch saves to the pocket instead.
 - Snooze: looking up past 0.55 rad at nothing for 2 s, the head held still for the last second; the glyph reads "Snoozing" meanwhile. Looking up again the same way cancels.
 - Dismiss: right-click, Esc, or looking away for 1.2 s per level.

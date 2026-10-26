@@ -28,13 +28,13 @@
     {
       "rule": "gates",
       "between": [
-        4.4,
-        4.6
+        4.2,
+        4.4
       ],
       "must": {
         "action": "show",
         "id": "kathys-cupcakes",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
       }
     }

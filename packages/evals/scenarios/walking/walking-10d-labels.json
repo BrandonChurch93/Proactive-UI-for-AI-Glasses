@@ -1,0 +1,15 @@
+{
+  "id": "walking-10d-labels",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 6,
+  "description": "The view settles over three places: all three label together, the one under the center grows to its card; moving the look to a second place swaps the card in one move.",
+  "startN": 20,
+  "only": ["grace-theater", "trattoria-da-lia", "lucky-lanes"],
+  "pace": [[0, 0]],
+  "settled": [[0, false], [1, true]],
+  "gaze": [
+    [1, "grace-theater"],
+    [3.5, "trattoria-da-lia"]
+  ]
+}

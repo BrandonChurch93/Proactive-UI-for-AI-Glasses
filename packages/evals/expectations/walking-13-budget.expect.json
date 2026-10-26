@@ -16,13 +16,13 @@
     {
       "rule": "walking-13",
       "between": [
-        30.4,
-        30.6
+        30.2,
+        30.4
       ],
       "must": {
         "action": "show",
         "id": "47th-st-station",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
       }
     }

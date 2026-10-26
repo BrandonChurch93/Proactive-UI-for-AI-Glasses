@@ -10,7 +10,7 @@
       "must": {
         "action": "show",
         "id": "goldies-counter",
-        "level": "glance",
+        "level": "label",
         "band": "stroll"
       }
     },
@@ -22,7 +22,7 @@
       ],
       "state": {
         "level": {
-          "goldies-counter": "glance"
+          "goldies-counter": "label"
         }
       }
     },

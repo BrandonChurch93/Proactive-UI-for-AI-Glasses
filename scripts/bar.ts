@@ -69,7 +69,7 @@ if (probes) {
         if (band === null && walk.last()) band = walk.last().frame.band;
         if (on === null && g === id) { on = dt; const it = o.items.get(id); if (it && it.cur) pre = it.cur.level; }
         if (on === null) continue;
-        if (glance === null && (shown('glance') || shown('card') || shown('expanded'))) glance = dt - on;
+        if (glance === null && (shown('label') || shown('glance') || shown('card') || shown('expanded'))) glance = dt - on;
         if (card === null && (shown('card') || shown('expanded'))) card = dt - on;
       }
       return { glance, card, targets, band, on, pre };
@@ -101,7 +101,7 @@ if (probes) {
       for (const k of kos) { m.keepW = Math.max(m.keepW, k.rect.w / vp.w); m.keepH = Math.max(m.keepH, k.rect.h / vp.h); }
       let lit = 0; const litIds = [];
       for (const it of o.items.values()) {
-        if (it.kind === 'world' && it.lights && !it.dying && it.L.pip > 0.5) {
+        if (it.kind === 'world' && it.lights && !it.dying && it.L.pip > 0.5 && it.d.level === 'pip') {
           const a = walk.bridge.anchor(it.d.placement.anchor); const pr = a && walk.bridge.project(a);
           if (pr && pr.inFront && pr.x > 0 && pr.x < vp.w && pr.y > 0 && pr.y < vp.h) { lit++; litIds.push(it.id + ':' + it.d.level); }
         }
@@ -160,9 +160,14 @@ if (probes) {
   };
   const { m, log } = out;
   const only = arg('id');
+  const span = arg('span');
+  if (span) {
+    const [a, z] = span.split(',').map(Number);
+    for (const e of log) if (e.t >= a! && e.t <= z!) console.log(`  ${e.t.toFixed(2)} ${e.id} ${e.kind} ${e.from ?? ''}>${e.level} ${e.cause} ${e.detail ?? ''}`);
+  }
   if (only) for (const e of log) if (e.id === only) console.log(`  ${e.t.toFixed(2)} ${e.kind} ${e.from ?? ''}>${e.level} ${e.cause} ${e.detail ?? ''}`);
   const EXEMPT = /gate|safety|dismiss|look-away|band|choice/;
-  const RANK: Record<string, number> = { none: 0, pip: 1, whisper: 1, glance: 2, card: 3, expanded: 4 };
+  const RANK: Record<string, number> = { none: 0, pip: 1, whisper: 1, label: 2, glance: 2, card: 3, expanded: 4 };
   const changes = new Map<string, { t: number; exempt: boolean }[]>();
   const births = new Map<string, number>();
   let maxBirths = 0;
@@ -217,6 +222,30 @@ if (probes) {
       }
     }
   }
+  const labelBirths = log.filter((e) => (e.kind === 'birth' || e.kind === 'return') && e.level === 'label').map((e) => e.t).sort((a, b) => a - b);
+  let perSettle = 0;
+  let perSettleAt = 0;
+  for (let i = 0; i < labelBirths.length; i++) {
+    let n = 0;
+    for (let j = i; j < labelBirths.length && labelBirths[j]! - labelBirths[i]! < 0.5; j++) n++;
+    if (n > perSettle) {
+      perSettle = n;
+      perSettleAt = labelBirths[i]!;
+    }
+  }
+  const grows = log.filter((e) => e.kind === 'resize' && e.level === 'card' && e.from === 'label').map((e) => e.t);
+  let swaps = 0;
+  let swapsAt = 0;
+  for (let i = 0; i < grows.length; i++) {
+    let n = 0;
+    for (let j = i; j < grows.length && grows[j]! - grows[i]! < 1; j++) n++;
+    if (n > swaps) {
+      swaps = n;
+      swapsAt = grows[i]!;
+    }
+  }
+  console.log(`  most labels born per settle (within 0.5 s): ${perSettle}${perSettle ? ` at ${perSettleAt.toFixed(2)}` : ''}`);
+  console.log(`  most cards grown in any second: ${swaps}${swaps ? ` at ${swapsAt.toFixed(2)}` : ''}`);
   console.log(`  pane frames partly outside the view above 20% opacity: ${mm.outFrames}${mm.outFrames ? `  ${JSON.stringify(mm.outAt)}` : ''}`);
   console.log(`  pane frames overlapping chrome: ${mm.chromeFrames}${mm.chromeFrames ? `  ${JSON.stringify(mm.chromeAt)}` : ''}`);
   console.log(`  most scale changes per pane inside 2.5 s: ${scaleMax}${scaleMax ? ` (${scaleWorst})` : ''}`);

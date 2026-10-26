@@ -26,8 +26,8 @@
     {
       "rule": "walking-12",
       "between": [
-        6.4,
-        6.6
+        6.2,
+        6.4
       ],
       "must": {
         "action": "hold",
@@ -62,13 +62,13 @@
     {
       "rule": "walking-12",
       "between": [
-        22.4,
+        21.4,
         22.7
       ],
       "must": {
         "action": "show",
         "id": "atlas-books",
-        "level": "glance"
+        "level": "label"
       }
     }
   ]

@@ -8,6 +8,7 @@ export interface FrameItem {
   zone: Decision['placement']['zone'];
   action: Decision['action'];
   gaze?: boolean;
+  zoneOk?: boolean;
   cause?: Decision['cause'];
   seconds?: number;
 }
@@ -54,6 +55,7 @@ export function run(
       items: f.items.map((d) => {
         const out: FrameItem = { id: d.id, level: d.level, component: d.component, zone: d.placement.zone, action: d.action };
         if (d.gaze) out.gaze = true;
+        if (d.placement.zoneOk) out.zoneOk = true;
         if (d.cause) out.cause = d.cause;
         if (d.content.seconds !== undefined) out.seconds = d.content.seconds;
         return out;

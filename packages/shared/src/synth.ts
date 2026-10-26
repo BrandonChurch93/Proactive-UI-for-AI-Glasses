@@ -18,6 +18,7 @@ export interface CaseSpec {
   dismiss?: [number, string | null][];
   pitch?: [number, number][];
   yaw?: [number, number][];
+  settled?: [number, boolean][];
   crossing?: [number, number];
   signal?: { at: number; state: SignalState; secondsLeft: number };
   inbox?: { t: number; id: string; type: NotificationType; from?: string; text?: string; count?: number; more?: number }[];
@@ -140,6 +141,7 @@ export function synthesize(spec: CaseSpec, hz = 10): WorldSnapshot[] {
           pitch: step(spec.pitch, t, 0),
           yaw,
           yawRate,
+          settled: step(spec.settled, t, true),
           ...(gazeId ? { target: gazeId } : {}),
         },
       },

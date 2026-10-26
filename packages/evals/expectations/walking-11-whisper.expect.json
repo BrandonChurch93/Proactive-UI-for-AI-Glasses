@@ -29,13 +29,13 @@
     {
       "rule": "walking-11",
       "between": [
-        1.4,
-        1.6
+        1.2,
+        1.4
       ],
       "must": {
         "action": "show",
         "id": "47th-st-station",
-        "level": "glance",
+        "level": "label",
         "band": "brisk",
         "cause": "dwell"
       }

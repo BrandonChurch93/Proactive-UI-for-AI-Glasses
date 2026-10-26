@@ -3,7 +3,7 @@
   "rule": "walking-10",
   "scenario": "walking",
   "duration": 12,
-  "description": "Looking away walks back down one level every 1.2 s.",
+  "description": "Looking away shrinks the expanded view straight to its label after 1.2 s; at Stopped the label stays.",
   "startN": 10,
   "pace": [
     [

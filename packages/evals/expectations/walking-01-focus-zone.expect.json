@@ -10,7 +10,7 @@
       "must": {
         "action": "show",
         "id": "goldies-counter",
-        "level": "glance",
+        "level": "label",
         "focusOk": false
       }
     },
@@ -22,7 +22,7 @@
       ],
       "must": {
         "id": "kathys-cupcakes",
-        "level": "glance",
+        "level": "label",
         "gaze": true,
         "focusOk": true
       }
@@ -30,7 +30,7 @@
     {
       "rule": "walking-1",
       "between": [
-        4.0,
+        3.7,
         4.5
       ],
       "must": {

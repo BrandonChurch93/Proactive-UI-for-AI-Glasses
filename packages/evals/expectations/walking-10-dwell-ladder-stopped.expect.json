@@ -4,21 +4,21 @@
     {
       "rule": "walking-10",
       "between": [
-        1.45,
-        1.55
+        1.25,
+        1.35
       ],
       "must": {
         "action": "show",
         "id": "grace-theater",
-        "level": "glance",
+        "level": "label",
         "cause": "dwell"
       }
     },
     {
       "rule": "walking-10",
       "between": [
-        2.05,
-        2.15
+        1.75,
+        1.85
       ],
       "must": {
         "action": "promote",
@@ -29,8 +29,8 @@
     {
       "rule": "walking-10",
       "between": [
-        3.65,
-        3.75
+        3.75,
+        3.85
       ],
       "must": {
         "action": "promote",

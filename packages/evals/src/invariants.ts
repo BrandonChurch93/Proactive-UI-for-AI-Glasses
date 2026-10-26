@@ -89,7 +89,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-1',
-    name: 'focus zone: no world pane intersects the zone for its band, except the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)',
+    name: 'focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)',
     check: (r) => {
       let bandAt = -Infinity;
       const lookedAt = new Map<string, number>();
@@ -103,8 +103,9 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (f.t - bandAt < 0.32 + TICK) continue;
         const zone = focusRect(f.band, view.w, view.h);
         for (const p of view.panes) {
-          if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
+          if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.label) continue;
           if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < MOVE.minShown + 0.32 + TICK) continue;
+          if (!f.items.some((i) => i.id === p.id) || f.items.some((i) => i.id === p.id && i.zoneOk)) continue;
           return `t=${s.t} ${p.id} ${p.level} in the ${f.band} zone`;
         }
       }
@@ -113,25 +114,21 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-2',
-    name: 'reading budget: walk glances fit three words and a number with no reason; no card in Walk without its dwell; in Brisk only the place being looked at gets a pane, a glance within the same cap',
+    name: 'reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap',
     check: (r, cfg) => {
       for (const e of r.entries) {
         const d = e.decision;
-        if (d.placement.zone === 'world' && d.level === 'glance' && d.band === 'walk' && (d.action === 'show' || d.action === 'promote' || d.action === 'demote')) {
-          if (d.content.showReason) return `t=${e.t} ${d.id} shows a reason in Walk`;
+        const moving = d.band === 'walk' || d.band === 'brisk';
+        if (d.placement.zone === 'world' && d.level === 'label' && moving && (d.action === 'show' || d.action === 'promote' || d.action === 'demote')) {
+          if (d.content.showReason) return `t=${e.t} ${d.id} shows a reason in ${d.band}`;
+          if (d.content.say) return `t=${e.t} ${d.id} label carries a say line in ${d.band}`;
           if (d.content.fact) {
             const c = countCopy(d.content.fact);
             if (c.words > cfg.reading.glanceWords || c.numbers > cfg.reading.glanceNumbers) return `t=${e.t} ${d.id} fact over cap: ${d.content.fact}`;
           }
         }
-        if (d.band === 'brisk' && (d.action === 'show' || d.action === 'promote') && d.placement.zone !== 'ground' && LEVEL_RANK[d.level] >= LEVEL_RANK.glance) {
-          const looked = d.placement.zone === 'world' && d.level === 'glance' && d.gaze && d.cause === 'dwell';
-          if (!looked) return `t=${e.t} ${d.id} ${d.level} appeared in Brisk`;
-          if (d.content.showReason) return `t=${e.t} ${d.id} shows a reason in Brisk`;
-          if (d.content.fact) {
-            const c = countCopy(d.content.fact);
-            if (c.words > cfg.reading.glanceWords || c.numbers > cfg.reading.glanceNumbers) return `t=${e.t} ${d.id} fact over cap in Brisk: ${d.content.fact}`;
-          }
+        if (d.band === 'brisk' && (d.action === 'show' || d.action === 'promote') && d.placement.zone === 'world' && LEVEL_RANK[d.level] > LEVEL_RANK.label) {
+          return `t=${e.t} ${d.id} ${d.level} appeared in Brisk`;
         }
       }
       return null;
@@ -139,11 +136,11 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-3',
-    name: 'auto-fold: no proactive world glance outlives its band limit',
+    name: 'auto-fold: no proactive world label outlives its band limit',
     check: (r, cfg) => {
       const open = new Map<string, number>();
       for (const f of r.frames) {
-        const glances = new Set(f.items.filter((i) => i.zone === 'world' && i.level === 'glance' && i.cause === 'score' && !i.gaze).map((i) => i.id));
+        const glances = new Set(f.items.filter((i) => i.zone === 'world' && i.level === 'label' && i.cause === 'score' && !i.gaze).map((i) => i.id));
         for (const id of [...open.keys()]) if (!glances.has(id)) open.delete(id);
         for (const id of glances) {
           if (!open.has(id)) open.set(id, f.t);
@@ -156,7 +153,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-4',
-    name: 'entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at',
+    name: 'entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll',
     check: (r) => {
       const shown = new Set<string>();
       for (let i = 0; i < r.snapshots.length; i++) {
@@ -164,13 +161,16 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const f = r.frames[i]!;
         const view = s.view;
         if (!view) continue;
-        const zone = focusRect(f.band, view.w, view.h);
+        const prev = i > 0 ? r.frames[i - 1] : undefined;
+        const placedBy = i > 1 ? r.frames[i - 2] : prev;
+        const band = prev?.band ?? f.band;
+        const zone = focusRect(band, view.w, view.h);
         const now = new Set<string>();
         for (const p of view.panes) {
-          if (p.zone !== 'world' || !p.visible || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.glance) continue;
+          if (p.zone !== 'world' || !p.visible || p.opacity < 0.05 || LEVEL_RANK[p.level] < LEVEL_RANK.label) continue;
           now.add(p.id);
-          if (shown.has(p.id) || f.band === 'stopped' || p.gaze) continue;
-          if (rectsOverlap(p.rect, zone)) return `t=${s.t} ${p.id} born inside the ${f.band} zone`;
+          if (shown.has(p.id) || band === 'stopped' || placedBy?.band === 'stopped' || p.gaze || [prev, placedBy].some((fr) => fr?.items.some((it) => it.id === p.id && it.zoneOk))) continue;
+          if (rectsOverlap(p.rect, zone)) return `t=${s.t} ${p.id} born inside the ${band} zone`;
         }
         shown.clear();
         for (const id of now) shown.add(id);
@@ -244,14 +244,14 @@ const checks: { rule: string; name: string; check: Check }[] = [
           if (d.level === 'card') {
             cardAt.set(d.id, f.t);
             if (d.id.startsWith('pocket:')) continue;
-            const need = (cfg.ladder.glanceDwellS + (cfg.ladder.cardDwellS[f.band] ?? Infinity)) * 1000 - 1;
+            const need = (f.band === 'brisk' ? Infinity : cfg.ladder.growS) * 1000 - 1;
             const ok = (pinched && (f.band === 'stopped' || f.band === 'stroll')) || (s.wearer.gaze.target === d.id && s.wearer.gaze.dwellMs >= need);
             if (!ok) return `t=${f.t} card on ${d.id} without dwell (${s.wearer.gaze.dwellMs} ms in ${f.band})`;
           }
           if (d.level === 'expanded') {
             if (f.band !== 'stopped' && f.band !== 'stroll') return `t=${f.t} expanded ${d.id} in ${f.band}`;
             const c = cardAt.get(d.id);
-            const ok = pinched || (c !== undefined && f.t - c >= cfg.ladder.expandDwellS - 1e-6 && s.wearer.gaze.target === d.id);
+            const ok = pinched || (c !== undefined && f.t - c >= cfg.ladder.cardHoldS - 1e-6 && s.wearer.gaze.target === d.id);
             if (!ok) return `t=${f.t} expanded ${d.id} without 2 s on the card`;
           }
         }
@@ -302,7 +302,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     rule: 'walking-13',
     name: 'budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count',
     check: (r, cfg) => {
-      const shows = r.entries.filter((e) => isShow(e.decision) && e.decision.cause !== 'dwell' && e.decision.cause !== 'pinch').length;
+      const shows = r.entries.filter((e) => isShow(e.decision) && e.decision.cause !== 'dwell' && e.decision.cause !== 'pinch' && e.decision.cause !== 'settle').length;
       const last = r.frames[r.frames.length - 1];
       if (!last) return null;
       if (last.budgetUsed !== shows) return `meter ${last.budgetUsed} but ${shows} shows`;
@@ -313,7 +313,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         if (b.budget > a.budget) refills += b.budget - a.budget;
       }
       const exempt = (d: Decision): boolean =>
-        d.cause === 'dwell' || d.cause === 'pinch' || d.component === 'call' || d.cause === 'gate' || d.cause === 'arrival';
+        d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.component === 'call' || d.cause === 'gate' || d.cause === 'arrival';
       const bound = r.entries.filter((e) => isShow(e.decision) && !exempt(e.decision)).length;
       if (bound > cfg.budget.shows + refills) return `${bound} budgeted shows > ${cfg.budget.shows} + ${refills}`;
       return null;

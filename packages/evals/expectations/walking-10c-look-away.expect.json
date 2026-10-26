@@ -10,35 +10,31 @@
       "must": {
         "action": "demote",
         "id": "grace-theater",
-        "level": "card",
+        "level": "label",
         "cause": "look-away"
       }
     },
     {
       "rule": "walking-10",
       "between": [
-        7.65,
-        7.95
+        6.75,
+        12
       ],
-      "must": {
-        "action": "demote",
-        "id": "grace-theater",
-        "level": "glance",
-        "cause": "look-away"
-      }
-    },
-    {
-      "rule": "walking-10",
-      "between": [
-        8.85,
-        9.15
-      ],
-      "must": {
+      "mustNot": {
         "id": "grace-theater",
         "action": [
           "demote",
           "dismiss"
         ]
+      }
+    },
+    {
+      "rule": "walking-10",
+      "at": 11.5,
+      "state": {
+        "level": {
+          "grace-theater": "label"
+        }
       }
     }
   ]

@@ -19,17 +19,18 @@ export interface Config {
     acceptFactor: number;
   };
   ladder: {
-    glanceDwellS: number;
-    cardDwellS: Record<Band, number | null>;
-    expandDwellS: number;
+    growS: number;
+    swapGapS: number;
+    cardHoldS: number;
     lookAwayS: number;
-    maxGlances: number;
+    maxProactive: number;
     awarenessPips: number;
     awarenessRelevance: number;
     minShownS: number;
     cardWithinM: number;
     pipDwellS: number;
   };
+  labels: { max: number; rangeM: number; walkingS: number };
   hysteresisS: number;
   autoFoldS: Record<Band, number | null>;
   viewFoldS: number;
@@ -65,17 +66,18 @@ export const DEFAULT_CONFIG: Config = {
     acceptFactor: 1.2,
   },
   ladder: {
-    glanceDwellS: 0.45,
-    cardDwellS: { stopped: 0.6, stroll: 0.8, walk: 1.2, brisk: null },
-    expandDwellS: 1.6,
+    growS: 0.5,
+    swapGapS: 1,
+    cardHoldS: 2,
     lookAwayS: 1.2,
-    maxGlances: 3,
+    maxProactive: 3,
     awarenessPips: 3,
     awarenessRelevance: 0.6,
     minShownS: 2.5,
     cardWithinM: 30,
     pipDwellS: 0.25,
   },
+  labels: { max: 6, rangeM: 70, walkingS: 4 },
   hysteresisS: 1.2,
   autoFoldS: { stopped: null, stroll: 4, walk: 2.5, brisk: 0 },
   viewFoldS: 4,

@@ -73,6 +73,7 @@ export interface PlaceRequest {
   distance: number;
   size: { w: number; h: number };
   focusOk: boolean;
+  zoneOk?: boolean;
   left?: boolean;
   sizeOf?: (level: Level) => { w: number; h: number };
 }
@@ -107,7 +108,7 @@ export function leftRecently(t: number, lookedAt: number): boolean {
   return t - lookedAt < MOVE.minShown;
 }
 
-const STEP_DOWN: Partial<Record<Level, Level[]>> = { expanded: ['card', 'glance'], card: ['glance'] };
+const STEP_DOWN: Partial<Record<Level, Level[]>> = { expanded: ['card', 'label'], card: ['label'] };
 
 export class Placement {
   private cfg: Config | null = null;
@@ -165,9 +166,9 @@ export class Placement {
       this.collapsed = undefined;
       this.step = undefined;
     } else if (big) {
-      if (edgeFrac < 0.08) this.collapsed = 'glance';
+      if (edgeFrac < 0.08) this.collapsed = 'label';
       else if (edgeFrac > 0.1) this.collapsed = undefined;
-    } else if (req.level === 'glance') {
+    } else if (req.level === 'label' || req.level === 'glance') {
       if (edgeFrac < 0.04) this.collapsed = 'pip';
       else if (edgeFrac > 0.055) this.collapsed = undefined;
     } else this.collapsed = undefined;
@@ -186,7 +187,7 @@ export class Placement {
     const rects = near.map((k) => k.rect);
     const road = near.filter((k) => k.kind === 'roadway').map((k) => k.rect);
     const sizeFor = (lv: Level): { w: number; h: number } =>
-      lv === req.level ? req.size : (req.sizeOf?.(lv) ?? NOMINAL_SIZE[lv as 'glance' | 'card' | 'expanded'] ?? NOMINAL_SIZE.glance);
+      lv === req.level ? req.size : (req.sizeOf?.(lv) ?? NOMINAL_SIZE[lv as 'label' | 'card' | 'expanded'] ?? NOMINAL_SIZE.label);
     const make = (lv: Level): PlaceInput => ({
       level: lv,
       anchor: a,
@@ -195,6 +196,7 @@ export class Placement {
       band: ctx.band,
       viewport: vp,
       focusOk: req.focusOk,
+      zoneOk: Boolean(req.zoneOk),
       keepOuts: rects,
       road,
       chrome: ctx.chrome ?? [],
@@ -208,7 +210,7 @@ export class Placement {
       return pf ? { ...inp, prefer: pf } : inp;
     };
     let level: Level = req.level;
-    if (this.collapsed === 'glance' && LEVEL_RANK[level] > LEVEL_RANK.glance) level = 'glance';
+    if (this.collapsed === 'label' && LEVEL_RANK[level] > LEVEL_RANK.label) level = 'label';
     if (this.step && LEVEL_RANK[this.step] < LEVEL_RANK[level]) {
       if (t - this.cfgAt > MOVE.hysteresis) {
         const up = placeWorld(withPrefer(make(level)));
@@ -294,7 +296,7 @@ export class Placement {
       const x = Math.min(from.x, rect.x);
       const y = Math.min(from.y, rect.y);
       const span = { x, y, w: Math.max(from.x + from.w, rect.x + rect.w) - x, h: Math.max(from.y + from.h, rect.y + rect.h) - y };
-      return req.focusOk || !rectsOverlap(span, zoneNow);
+      return req.focusOk || Boolean(req.zoneOk) || !rectsOverlap(span, zoneNow);
     };
     if (jump !== null && this.shown && this.shownBox && !resized && pathClear(this.shownBox)) {
       this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump);
@@ -314,7 +316,7 @@ export class Placement {
         const nx = d > MOVE.ropeJump ? c.x : rope(c.x, this.shown.x);
         const ny = d > MOVE.ropeJump ? c.y : rope(c.y, this.shown.y);
         const held = { ...rect, x: nx - rect.w * fx, y: ny - rect.h * fy };
-        if (req.focusOk || !rectsOverlap(held, zone)) {
+        if (req.focusOk || req.zoneOk || !rectsOverlap(held, zone)) {
           c.x = nx;
           c.y = ny;
         }
@@ -326,7 +328,7 @@ export class Placement {
     rect.x = c.x - rect.w * fx;
     rect.y = c.y - rect.h * fy;
     this.shownBox = { ...rect };
-    if (!req.focusOk) {
+    if (!req.focusOk && !req.zoneOk) {
       const jx = this.jumpX.at(t);
       const jy = this.jumpY.at(t);
       if ((jx !== 0 || jy !== 0) && rectsOverlap({ ...rect, x: rect.x + jx, y: rect.y + jy }, zoneNow)) {
@@ -340,7 +342,7 @@ export class Placement {
     if (stilled) placed.stilled = true;
     if (level !== req.level) {
       placed.collapsed = level;
-      placed.why = this.collapsed === 'glance' && level === 'glance' ? 'collapse' : 'step-down';
+      placed.why = this.collapsed === 'label' && level === 'label' ? 'collapse' : 'step-down';
     }
     return this.remember(placed);
   }

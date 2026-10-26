@@ -35,8 +35,10 @@ export function sayFor(e: Entity, scenario: ScenarioId): SayLine {
   return table[scenario] ?? table.default;
 }
 
-export function glanceContent(e: Entity, r: Reason, scenario: ScenarioId): Content {
-  return { name: e.name, say: sayFor(e, scenario).line, reason: r, showReason: false, depthRef: e.depth ?? undefined };
+export function labelContent(e: Entity, r: Reason, scenario: ScenarioId): Content {
+  const c: Content = { name: e.name, fact: sayFor(e, scenario).short, reason: r, showReason: false };
+  if (e.depth) c.depthRef = e.depth;
+  return c;
 }
 
 export function cardContent(e: Entity, r: Reason, band: Band, scenario: ScenarioId): Content {

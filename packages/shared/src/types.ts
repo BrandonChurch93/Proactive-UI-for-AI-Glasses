@@ -1,7 +1,7 @@
 import type { Band, EntityKind, LiveValue, PlaceCopy, ScenarioId, Side, SignalState } from './data';
 import type { Box3, Rect, Vec3 } from './vec';
 
-export type Level = 'pip' | 'glance' | 'card' | 'expanded' | 'whisper';
+export type Level = 'pip' | 'label' | 'glance' | 'card' | 'expanded' | 'whisper';
 export type Action = 'show' | 'hold' | 'promote' | 'demote' | 'dismiss' | 'save' | 'surface';
 export type Timing = 'now' | 'next-pause' | 'batched' | 'after-gate';
 export type Channel = 'visual' | 'ground' | 'edge';
@@ -15,9 +15,10 @@ export const LEVEL_RANK: Record<Level | 'none', number> = {
   none: 0,
   pip: 1,
   whisper: 2,
-  glance: 3,
-  card: 4,
-  expanded: 5,
+  label: 3,
+  glance: 4,
+  card: 5,
+  expanded: 6,
 };
 
 export interface Entity extends PlaceCopy {
@@ -131,7 +132,7 @@ export interface WorldSnapshot {
     speed: number;
     state: WearerState;
     curbDistance: number;
-    gaze: { target?: string; dwellMs: number; dir: Vec3; pitch: number; yaw: number; yawRate: number };
+    gaze: { target?: string; dwellMs: number; dir: Vec3; pitch: number; yaw: number; yawRate: number; settled?: boolean };
     pinch?: { target: string };
     dismiss?: { target?: string };
     choice?: { id: string; action: string };
@@ -231,6 +232,7 @@ export interface Decision {
     zone: Zone;
     prefer: 'side' | 'above' | 'below';
     focusOk?: boolean;
+    zoneOk?: boolean;
   };
   content: Content;
   reason: Reason;
@@ -245,6 +247,7 @@ export interface Decision {
 
 export type Cause =
   | 'dwell'
+  | 'settle'
   | 'pinch'
   | 'score'
   | 'look-away'

@@ -29,16 +29,16 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     pinch: [[22, 'mega-burger']],
   };
 
-  it('glances at the best fit, labels a far place on dwell without a card, saves on pinch and walks back down', () => {
+  it('labels the best fit, labels a far place on a look without a card, saves on pinch and fades with the labels', () => {
     const lines = runSpec(spec).filter((e) => e.line.includes('goldies') || e.line.includes('mega-burger'));
     const at = (line: string): number | undefined => lines.find((e) => e.line === line)?.t;
-    expect(at('show goldies-counter glance')).toBeCloseTo(2.0, 5);
+    expect(at('show goldies-counter label')).toBeCloseTo(2.0, 5);
     expect(at('demote goldies-counter pip')).toBeCloseTo(4.5, 5);
-    expect(at('show mega-burger glance')).toBeCloseTo(14.5, 5);
+    expect(at('show mega-burger label')).toBeCloseTo(14.3, 5);
     expect(at('promote mega-burger card')).toBeUndefined();
-    expect(at('save mega-burger glance')).toBeCloseTo(22.0, 5);
-    expect(at('demote mega-burger pip')).toBeCloseTo(31.1, 5);
-    expect(lines.filter((e) => e.line === 'show mega-burger glance')).toHaveLength(1);
+    expect(at('save mega-burger label')).toBeCloseTo(22.0, 5);
+    expect(at('demote mega-burger pip')).toBeCloseTo(33.9, 5);
+    expect(lines.filter((e) => e.line === 'show mega-burger label')).toHaveLength(1);
   });
 
   it('is deterministic: two runs give identical logs', () => {
@@ -107,25 +107,30 @@ describe('walking rules, unit level', () => {
     expect(JSON.stringify(c)).not.toContain('…');
   });
 
-  it('rule 3 and rule 10: a proactive glance auto-folds; a dwelt one walks down on look-away', () => {
-    const it0 = { ...newLadderItem('x'), level: 'glance' as const, since: 0, shownAt: 0 };
-    const inp = { t: 2.5, band: 'walk' as const, target: false, dwellS: 0, pinch: false, floor: 'pip' as const, proactive: true, scoreAbove: true, canProactive: true };
+  it('rule 3 and rule 10: a proactive label auto-folds; a card the look has left shrinks to its label', () => {
+    const it0 = { ...newLadderItem('x'), level: 'label' as const, since: 0, shownAt: 0 };
+    const inp = { t: 2.5, band: 'walk' as const, target: false, dwellS: 0, pinch: false, floor: 'pip' as const, labelled: false, proactive: true, scoreAbove: true, canProactive: true };
     expect(step(it0, inp, cfg).via).toBe('auto-fold');
+    expect(step(it0, { ...inp, labelled: true }, cfg)).toMatchObject({ level: 'label', via: 'hold' });
     const dwelt = { ...it0, level: 'card' as const, dwelt: true, lastGazeAt: 1 };
-    expect(step(dwelt, { ...inp, t: 2.2 }, cfg)).toMatchObject({ level: 'glance', via: 'look-away' });
+    expect(step(dwelt, { ...inp, t: 2.2 }, cfg)).toMatchObject({ level: 'label', via: 'look-away' });
   });
 
-  it('rule 10: dwell alone climbs to expanded in Stopped and stops at card in Walk', () => {
-    const climb = (band: 'stopped' | 'walk'): string => {
+  it('rule 10: a look lights the label, holds grow the card, and only Stopped or Stroll expand', () => {
+    const climb = (band: 'stopped' | 'walk'): string[] => {
       let it = newLadderItem('x');
-      for (let t = 0; t <= 4.4 + 1e-9; t += 0.1) {
-        const out = step(it, { t, band, target: true, dwellS: t, pinch: false, floor: 'pip', proactive: false, scoreAbove: false, canProactive: false }, cfg);
-        if (out.level !== it.level) it = { ...it, level: out.level, since: t, cardAt: out.level === 'card' ? t : it.cardAt, gazeSince: 0 };
+      const seen: string[] = [];
+      for (let t = 0; t <= 3 + 1e-9; t += 0.1) {
+        const out = step(it, { t, band, target: true, dwellS: t, pinch: false, floor: 'none', labelled: false, proactive: false, scoreAbove: false, canProactive: false }, cfg);
+        if (out.level !== it.level) {
+          seen.push(`${out.level}@${t.toFixed(1)}`);
+          it = { ...it, level: out.level, since: t, cardAt: out.level === 'card' ? t : it.cardAt, gazeSince: 0 };
+        }
       }
-      return it.level;
+      return seen;
     };
-    expect(climb('stopped')).toBe('expanded');
-    expect(climb('walk')).toBe('card');
+    expect(climb('stopped')).toEqual(['label@0.3', 'card@0.8', 'expanded@2.8']);
+    expect(climb('walk')).toEqual(['label@0.3', 'card@0.8']);
   });
 
   it('rule 6 and 7: the pocket holds an item once and surfaces only with 6 s or more', () => {

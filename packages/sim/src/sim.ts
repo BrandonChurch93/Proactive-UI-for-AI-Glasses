@@ -30,6 +30,7 @@ import {
   type VehicleInfo,
   type Viewport,
   type WorldSnapshot,
+  Settle,
 } from '@lumen/shared';
 import { Backdrop, type Dynamic } from './backdrop';
 import { ALBEDO, buildLayout, type BlockLayout } from './layout';
@@ -75,6 +76,7 @@ export class Sim {
   readonly traffic: Traffic;
   readonly people: People;
   readonly head: Head;
+  private readonly settle = new Settle();
   readonly reviewer: ScriptedReviewer;
   readonly backdrop: Backdrop;
   viewport: Viewport;
@@ -227,6 +229,7 @@ export class Sim {
       this.head.step(dt, ty, tp, 11);
     }
     this.applyLiveBeats(t0, t1);
+    this.settle.step(this.head.yawRate, dt);
     this.updateGaze(t1);
     this.t = t1;
   }
@@ -477,6 +480,7 @@ export class Sim {
           pitch: round(this.head.pitch),
           yaw: round(this.head.yaw),
           yawRate: round(this.head.yawRate),
+          settled: this.settle.settled,
           ...(this.gazeTarget ? { target: this.gazeTarget } : {}),
         },
       },

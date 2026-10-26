@@ -4,8 +4,8 @@
     {
       "rule": "walking-10",
       "between": [
-        2.65,
-        2.75
+        2.35,
+        2.45
       ],
       "must": {
         "action": "promote",
