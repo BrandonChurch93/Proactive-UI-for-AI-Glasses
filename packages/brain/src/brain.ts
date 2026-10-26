@@ -298,6 +298,7 @@ export class Brain {
         ...(target ? { target } : {}),
         dwellMs: snap.wearer.gaze.dwellMs,
         earned: (tItem?.level ?? 'none') as Level | 'none',
+        ...(target && tItem ? this.markFor(snap, t, band, target, tItem) : {}),
       },
       goal: {
         scenario: this.goal,
@@ -720,6 +721,20 @@ export class Brain {
         w.onCommit = undefined;
       }
     }
+  }
+
+  private markFor(snap: WorldSnapshot, t: number, band: Band, id: string, it: LadderItem): { mark?: { p: number; rate: number } } {
+    const e = snap.entities.find((x) => x.id === id);
+    if (!e) return {};
+    const L = this.cfg.ladder;
+    const ramp = (from: number, s: number): { p: number; rate: number } => ({ p: Math.min(1, Math.max(0, (t - from) / s)), rate: 1 / s });
+    if (it.level === 'expanded') return { mark: { p: 1, rate: 0 } };
+    if (it.level === 'card') {
+      const opens = (band === 'stopped' || band === 'stroll') && e.distance <= L.cardWithinM && it.gazeSince !== null && it.gazeSince <= it.cardAt + 1e-9;
+      return { mark: opens ? ramp(it.cardAt, L.cardHoldS) : { p: 1, rate: 0 } };
+    }
+    if (it.level === 'label' && band !== 'brisk' && this.headMoved) return { mark: ramp(Math.max(it.since, it.gazeSince ?? t), e.distance > L.nearM ? L.growFarS : L.growS) };
+    return { mark: { p: 0, rate: 0 } };
   }
 
   private updateLabels(snap: WorldSnapshot, t: number, band: Band, target: string | undefined): void {

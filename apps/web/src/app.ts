@@ -31,6 +31,8 @@ export class App {
   private soundOn = false;
   private endShown = false;
   private pace = false;
+  private gazeMark = true;
+  private snapTarget: string | null = null;
   private upright = false;
   private pausedForRotate = false;
   private lastDismiss = -Infinity;
@@ -133,6 +135,10 @@ export class App {
         outline = on;
         w.setFocusOutline(on);
       },
+      gazeMark: () => this.gazeMark,
+      setGazeMark: (on) => {
+        this.gazeMark = on;
+      },
       paceReadout: () => this.pace,
       setPaceReadout: (on) => {
         this.pace = on;
@@ -153,6 +159,27 @@ export class App {
         this.setPaused(false);
       } else this.setPaused(this.walk.paused);
     });
+  }
+
+  private pinch(): void {
+    this.snapTarget = this.walk.sim.gaze.target ?? null;
+    this.walk.pinch();
+  }
+
+  private updateMark(): void {
+    const w = this.walk;
+    const f = w.last()?.frame;
+    const show = this.gazeMark && this.mode === 'walk' && !this.title.visible && !this.end.visible && !w.hoverId && !f?.gate.safety;
+    if (!show) {
+      this.chrome.setMark(null);
+      return;
+    }
+    const target = f?.dwell.target;
+    const mark = target ? f?.dwell.mark : undefined;
+    if (this.snapTarget && this.snapTarget !== w.sim.gaze.target) this.snapTarget = null;
+    const reduced = this.opts.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const p = mark ? (this.snapTarget === target ? 1 : Math.min(1, mark.p + mark.rate * Math.max(0, w.t - f!.t))) : null;
+    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p });
   }
 
   private updatePace(): void {
@@ -315,7 +342,7 @@ export class App {
     canvas.addEventListener('pointerup', () => {
       this.walk.holding = false;
       if (this.press) clearTimeout(this.press);
-      if (this.drag && !this.drag.moved && !this.drag.pressed) this.walk.pinch();
+      if (this.drag && !this.drag.moved && !this.drag.pressed) this.pinch();
       this.drag = null;
     });
     canvas.addEventListener('pointercancel', () => {
@@ -351,7 +378,7 @@ export class App {
         else this.dismiss();
       } else if (e.key === 'Enter') {
         if ((e.target as HTMLElement).closest('button')) return;
-        this.walk.pinch();
+        this.pinch();
       } else if (e.key === ' ') {
         if ((e.target as HTMLElement).closest('button')) return;
         if (this.end.visible) return;
@@ -372,6 +399,7 @@ export class App {
     }
     if (this.mode !== 'attract' && w.ended && !this.endShown && !this.inspector?.isOpen) this.showEnd();
     this.updatePace();
+    this.updateMark();
     this.ambient.update(w.t, w.sim.wearer.speed);
     void dt;
   }

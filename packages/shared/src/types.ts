@@ -288,7 +288,7 @@ export interface BrainFrame {
   glyph: Glyph | null;
   focus: { w: number; h: number };
   model: WearerModel;
-  dwell: { target?: string; dwellMs: number; earned: Level | 'none' };
+  dwell: { target?: string; dwellMs: number; earned: Level | 'none'; mark?: { p: number; rate: number } };
   goal: { scenario: ScenarioId; destination?: string; stops: string[] };
   stoppedFor: number;
 }

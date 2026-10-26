@@ -23,6 +23,7 @@ export class Overrides {
   private mute: HTMLButtonElement;
   private focus: HTMLButtonElement;
   private pace: HTMLButtonElement;
+  private mark: HTMLButtonElement;
   private bands = new Map<Band | 'auto', HTMLButtonElement>();
   private log: HTMLElement;
 
@@ -61,6 +62,11 @@ export class Overrides {
       this.update();
     });
     control('Show the pace readout', 'Band and speed in the corner. Reviewer chrome.', this.pace);
+    this.mark = button('On', () => {
+      this.store.setGazeMark(!this.store.gazeMark());
+      this.update();
+    });
+    control('Gaze mark', 'A ring at the center of the view, standing in for eye tracking. Reviewer chrome.', this.mark);
     this.log = el('div');
     this.el.append(controls, el('div', s.section, 'Applied'), this.log);
   }
@@ -86,6 +92,9 @@ export class Overrides {
     const focus = this.store.focusOutline();
     this.focus.textContent = focus ? 'On' : 'Off';
     this.focus.setAttribute('aria-pressed', String(focus));
+    const mark = this.store.gazeMark();
+    this.mark.textContent = mark ? 'On' : 'Off';
+    this.mark.setAttribute('aria-pressed', String(mark));
     const pace = this.store.paceReadout();
     this.pace.textContent = pace ? 'On' : 'Off';
     this.pace.setAttribute('aria-pressed', String(pace));

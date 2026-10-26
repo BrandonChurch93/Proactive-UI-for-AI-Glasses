@@ -40,6 +40,8 @@ export interface InspectorStore {
   override(o: Override): void;
   focusOutline(): boolean;
   setFocusOutline(on: boolean): void;
+  gazeMark(): boolean;
+  setGazeMark(on: boolean): void;
   paceReadout(): boolean;
   setPaceReadout(on: boolean): void;
   exportRun(): RunExport;

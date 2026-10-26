@@ -9,6 +9,9 @@ export class Chrome {
   private pausedEl: HTMLElement;
   private pauseBtn: HTMLButtonElement;
   readonly rotate: HTMLElement;
+  private mark: HTMLElement;
+  private arc: SVGCircleElement;
+  private markKey = '';
 
   constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean) {
     this.el = document.createElement('div');
@@ -52,7 +55,12 @@ export class Chrome {
     this.rotate.className = css.rotate!;
     this.rotate.setAttribute('role', 'alert');
     this.rotate.innerHTML = '<div><i></i><b>Turn your phone sideways</b><span>The glasses see the street wide, and so does this demo.</span></div>';
-    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
+    this.mark = document.createElement('div');
+    this.mark.className = css.mark!;
+    this.mark.setAttribute('aria-hidden', 'true');
+    this.mark.innerHTML = '<svg viewBox="0 0 12 12"><circle class="' + css.ring + '" cx="6" cy="6" r="5"/><circle class="' + css.arc + '" cx="6" cy="6" r="5" pathLength="1"/></svg>';
+    this.arc = this.mark.querySelector(`.${css.arc}`)!;
+    this.el.append(this.mark, this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
     parent.appendChild(this.el);
     addEventListener('resize', () => (this.cache = null));
   }
@@ -78,6 +86,17 @@ export class Chrome {
 
   setRotate(on: boolean): void {
     this.rotate.style.display = on ? 'grid' : 'none';
+  }
+
+  setMark(state: { lit: boolean; p: number | null } | null): void {
+    const key = state ? `${state.lit}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
+    if (key === this.markKey) return;
+    this.markKey = key;
+    this.mark.style.display = state ? '' : 'none';
+    if (!state) return;
+    this.mark.classList.toggle(css.lit!, state.lit);
+    this.arc.style.display = state.p === null ? 'none' : '';
+    this.arc.style.strokeDashoffset = String(1 - (state.p ?? 0));
   }
 
   setPace(text: string | null): void {

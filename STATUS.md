@@ -93,6 +93,13 @@ Each is written into the doc it changes (look for "As built").
 
 One entry per phase check: what you compared, what differed from the reference or the docs, what you fixed.
 
+### Phase 19.1 · 2026-10-26 · the gaze mark (UX rework)
+- Mark: yes. A ring at the center of the view, 10 px drawn on a 12 px box at scale 1 (scales with `max(1, --ui)`), 1 px `--ink` at 18%. Over a lookable place it turns `--voice` at 55% and a 1.5 px arc fills clockwise from the top. The brain reports each frame's `dwell.mark` (progress and rate toward the next level: label to card over 0.5 s, or 1.0 s beyond 35 m; card toward expanded over 2 s at Stopped or Stroll when the place is within 30 m), and the app interpolates between ticks so the fill is smooth at 60 Hz. A pinch snaps it full until the look moves. Hidden on the title, the end screen, during a crossing, and while the pointer is over a view-zone pane; reduced motion keeps the ring and drops the arc. Inspector Overrides: "Gaze mark", on by default.
+- Deviation: the mark is reviewer chrome but not a keep-out (it sits where the look is, and the looked-at pane belongs beside it), so the bar's chrome row skips it (it counted up to 115 frames at Errands 4K before that).
+- Done check: frames at 1920 x 1080 (crops at Just walking 5.0 over empty street, 9.05 over the theater label at p 0.4 plus interpolation, 9.5 on the card filling toward expanded at p 0.1); the device matrix, 13 sizes, clean.
+- Bar, live, 1920 x 1080 / 3840 x 2160, all three walks: every row at its bar.
+- Check: pnpm test 49, pnpm eval 41/41 (960 checks), lint and build green.
+
 ### Phase 19.0 · 2026-10-26 · cuts (UX rework)
 - Watch and its captions: gone (the title's fourth card, the app mode, the caption strip, the `caption` beat kind, Play it yourself). The attract loop stays.
 - The call: gone (the `call` component, notification type and origin, its pane, its two focused evals, and the call in the budget-empty case). The social strip stays.
@@ -337,6 +344,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-26 · Phase 19.1 done. The gaze mark, fed by the brain's `dwell.mark`; not a keep-out. Docs: design-system 9, inspector-spec, brain-spec 4.5.
 - 2026-10-26 · Phase 19.0 done. Watch, the call and the conversation beat cut; gaze to 70 m again with a 1.0 s grow beyond 35 m and a 5° head-moved gate. Docs rewritten: walking-rules 10, brain-spec 4.5, overlay-spec (panes, view edge, gaze), copy, scenarios, design-system, brief, world-spec, evals.
 - 2026-10-26 · Phase 18.5 done. Decisions: the end screen reuses the start panel over the dimmed last frame; counts recomputed from the log; card promotes count as shows in What it decided, one per name; See every decision opens the Shows filter at the first show. Docs rewritten: copy (Arrival and end), scenarios (End screen), design-system 9, inspector-spec (from the end screen).
 - 2026-10-26 · Phase 18.4 done. Decisions: the start screen is a left panel in reviewer chrome; Watch plays Hungry with ten captions and ends on the end screen with Play it yourself; the first caption says three lights, not four; panel padding 32 px vertical so it fits 800 units at every desktop size; no skip label. Docs rewritten: copy (Title screen, Captions), scenarios (Opening), design-system 9.
