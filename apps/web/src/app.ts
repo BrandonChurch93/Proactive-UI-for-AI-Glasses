@@ -47,7 +47,7 @@ export class App {
     private opts: AppOptions & { pace?: boolean },
     start: ScenarioId | null,
   ) {
-    this.title = new TitleScreen(ui, (id) => this.choose(id));
+    this.title = new TitleScreen(ui, (id) => this.start(id));
     this.end = new EndCard(ui, {
       again: () => this.again(),
       choose: (id) => this.choose(id, true),
@@ -67,7 +67,7 @@ export class App {
     );
     if (start) {
       this.mode = 'walk';
-      this.walk = this.makeWalk(start, Boolean(opts.scripted));
+      this.walk = this.makeWalk(start, Boolean(opts.scripted), start);
       this.mountInspector();
     } else {
       this.mode = 'attract';
@@ -97,9 +97,10 @@ export class App {
     }
   }
 
-  private makeWalk(id: ScenarioId, scripted: boolean): Walk {
+  private makeWalk(id: ScenarioId, scripted: boolean, suggest?: ScenarioId | null): Walk {
     const w = new Walk(this.world, id, this.layer, {
       scripted,
+      ...(suggest !== undefined ? { suggest } : {}),
       ...(this.opts.exact ? { exact: true } : {}),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       ...(this.opts.focusOutline ? { focusOutline: true } : {}),
@@ -198,12 +199,16 @@ export class App {
     this.chrome.setPaused(p && this.mode === 'walk' && !this.inspector?.isOpen);
   }
 
-  private choose(id: ScenarioId, fromEnd = false): void {
+  private start(suggest: ScenarioId | null): void {
+    this.choose(suggest ?? 'walking', false, suggest);
+  }
+
+  private choose(id: ScenarioId, fromEnd = false, suggest: ScenarioId | null = id): void {
     const go = (): void => {
       this.walk.dispose();
       this.hideEnd();
       this.mode = 'walk';
-      this.walk = this.makeWalk(id, false);
+      this.walk = this.makeWalk(id, false, suggest);
       this.mountInspector();
       this.chrome.setInspectorHint(true);
       this.title.reveal();

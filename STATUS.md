@@ -6,7 +6,7 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
-- 2026-10-26 · 19.0 to 19.4 done and committed. Next: 19.5 (the start panel: Start the walk, the line, three chips that preselect), then 19.6 (the end panel sentence, Walk again, Keep walking), then the Final paragraph and stop. The bar has all four 19.8 rows. `scripts/lap.ts <walk>` prints a headless trace of states, routes and lights; `scripts/bar.ts --shots a,b --shotdir dir` saves live frames mid-run; `?still=1&live=1&t=` steps the unscripted walk.
+- 2026-10-26 · 19.0 to 19.5 done and committed. Next: 19.6 (the end panel sentence, Walk again, Keep walking), then the Final paragraph and stop. The bar has all four 19.8 rows. `scripts/lap.ts <walk>` prints a headless trace of states, routes and lights; `scripts/bar.ts --shots a,b --shotdir dir` saves live frames mid-run; `?still=1&live=1&t=` steps the unscripted walk.
 - 2026-10-26 · Phase 18 accepted. Now: Phase 19 (`docs/plan-ux-rework.md` section 8, one walk): 19.0 and 19.1, then 19.2 to 19.6 in order, a STATUS entry and a commit after each, then a Final paragraph and stop. 19.7 (V3 in Figma) waits for the owner's approval.
 - Measuring the bar: `sh scripts/barall.sh http://localhost:5199/` runs `scripts/bar.ts` (now with the three Phase 17 rows: pane frames partly outside the view above 20% opacity, pane frames over the chrome, scale changes per pane inside 2.5 s, and since 18.1 labels per settle and cards grown per second) on all three walks at 1920 x 1080 and 3840 x 2160 (live: the head follows the beat sheet's aims through the live gaze path, stepped frame by frame) and the look probes. `scripts/shots.ts --base http://localhost:5199 --scenario <walk> --times a,b,c` takes beat stills; `scripts/devices.ts` runs the device matrix (13 sizes); `scripts/endshot.ts --scenario <walk>` shoots a scripted walk's end screen. The dev server is `cd apps/web && npx vite --port 5199`; the first load after a fresh start reloads once, so run a script twice if it fails.
 - Readings of the bar adopted: "one level change per 2.5 s" exempts gates, dismissals, look-away, dwell and pinch climbs, the world's right of way (a keep-out drop and its return), a return when the wearer looks back or the anchor comes back into view, and a hide of a pane no longer looked at.
@@ -93,6 +93,12 @@ Each is written into the doc it changes (look for "As built").
 ## Reviews
 
 One entry per phase check: what you compared, what differed from the reference or the docs, what you fixed.
+
+### Phase 19.5 · 2026-10-26 · the start panel, revised (UX rework)
+- 18.4's panel and reading order stay; the choice block is now one primary "Start the walk", under it "At the first red light the glasses ask what you're up to." and three chips, Hungry · Errands · Just walk. A chip is optional and toggles; the picked one fills its answer on the intent panel (the sim's suggestion, first lap only). With no chip the panel asks with nothing filled. Watch was already gone (19.0). The "What this is" lines stay. Copy and design-system 9 rewritten.
+- The app starts every walk the same way now: `start(suggest)` makes a live walk from the start corner; `?scenario=` still opens one directly with that intent filled.
+- Frames: the title with Errands picked (accent border, 10% fill) beside the live street, and the panel it leads to with Errands filled; the title alone at 1280 x 800. Nothing in the glasses changed, so the bar is the 19.4 bar (re-measured after 19.6 below).
+- Check: pnpm test 61, pnpm eval 41/41 (989 checks), lint and build green.
 
 ### Phase 19.4 · 2026-10-26 · messages that change the walk (UX rework)
 - A text with quick replies is a thread at the view edge: a warm M monogram, the sender, the time from the 12:40 clock, the line and up to three reply chips while walking; at a stop the full thread as bubbles, the wearer's reply on the right in ink, the other side's on the left in glass; the brain's line under it in the voice color with Yes and Not now. It stays until answered or dismissed (glance moving, full at a stop, out of view in Brisk and back after it; the returns are not new shows on the budget), then folds by rule.
@@ -381,6 +387,7 @@ One entry per phase check: what you compared, what differed from the reference o
 
 ## Log
 
+- 2026-10-26 · Phase 19.5 done. Start the walk, the line, three optional chips that fill the intent panel's answer. Docs: copy (Title), design-system 9.
 - 2026-10-26 · Phase 19.4 done. Threads with quick replies; offers and stops keyed to the reply id and the walk file, never the text; Yes routes with cause `reply`. Docs: copy (Messages), scenarios (notifications, Hungry), design-system 5 and 6, brain-spec 4.
 - 2026-10-26 · Phase 19.3 done. The intent panel at the corner every lap, the lunch picker by walk time with Going here and Go here instead, the stops list with Start; the brain releases the light with `goal.go`. Docs: copy (the corner), design-system 5 and 6, brain-spec 4, walking-rules 13, overlay-spec gaze and moves, scenarios.
 - 2026-10-26 · Phase 19.2 done. One walk file, a loop with a router and an actuated south crossing held at the corner, arrival resumes the loop, the brain owns the destination. Docs rewritten: world-spec 1, scenarios, brain-spec 2 and 4, walking-rules 1, overlay-spec 7, architecture, inspector-spec, copy.

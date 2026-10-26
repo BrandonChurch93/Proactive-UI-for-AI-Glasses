@@ -10,7 +10,7 @@ A panel on the left, reviewer chrome, over the live street; top to bottom:
 - Name: **Proactive UI for AI Glasses**
 - Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
 - What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
-- Choose a walk (mono caps), three cards, each with "90 s": Hungry · Find a place and get there. / Errands · Three stops, one route. / Just walking · See what it does when you want nothing.
+- The walk (mono caps): Start the walk (primary) / At the first red light the glasses ask what you're up to. / three chips, Hungry · Errands · Just walk, any one of which fills that answer on the intent panel (choosing it again clears it).
 - Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
 - Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
 - Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)

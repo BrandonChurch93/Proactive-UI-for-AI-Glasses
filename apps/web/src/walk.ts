@@ -90,6 +90,7 @@ interface StepInput {
 
 export interface WalkOptions {
   scripted: boolean;
+  suggest?: ScenarioId | null;
   exact?: boolean;
   reducedMotion?: boolean;
   focusOutline?: boolean;
@@ -205,7 +206,7 @@ export class Walk {
   }
 
   private reset(): void {
-    this.sim = new Sim(this.scenario, { seed: SEED, viewport: { w: innerWidth, h: innerHeight } });
+    this.sim = new Sim(this.scenario, { seed: SEED, viewport: { w: innerWidth, h: innerHeight }, ...(this.opts.suggest !== undefined ? { suggest: this.opts.suggest } : {}) });
     this.sim.scripted = this.opts.scripted;
     this.brain = new Brain();
     this.bridge.setSim(this.sim);

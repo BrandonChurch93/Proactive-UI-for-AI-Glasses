@@ -2,14 +2,15 @@ import { gsap } from 'gsap';
 import type { Band, ScenarioId } from '@lumen/shared';
 import css from './title.module.css';
 
+
 export const SCENARIO_NAMES: Record<ScenarioId, string> = { hungry: 'Hungry', errands: 'Errands', walking: 'Just walking' };
 
 export type Choice = ScenarioId;
 
-const CHOICES: { id: Choice; name: string; line: string }[] = [
-  { id: 'hungry', name: 'Hungry', line: 'Find a place and get there.' },
-  { id: 'errands', name: 'Errands', line: 'Three stops, one route.' },
-  { id: 'walking', name: 'Just walking', line: 'See what it does when you want nothing.' },
+const CHIPS: { id: Choice; name: string }[] = [
+  { id: 'hungry', name: 'Hungry' },
+  { id: 'errands', name: 'Errands' },
+  { id: 'walking', name: 'Just walk' },
 ];
 
 const WHAT: [string, string][] = [
@@ -96,13 +97,15 @@ export class TitleScreen {
   private panel: HTMLElement;
   private reveals: HTMLElement[];
   private tl: gsap.core.Timeline | null = null;
-  private buttons: HTMLButtonElement[] = [];
+  private startButton: HTMLButtonElement;
+  private chips: HTMLButtonElement[] = [];
+  private picked: Choice | null = null;
   private aboutLink: HTMLButtonElement;
   private busy = false;
 
   constructor(
     parent: HTMLElement,
-    private onChoose: (id: Choice) => void,
+    private onStart: (suggest: Choice | null) => void,
   ) {
     this.el = el('section', css.screen);
     this.el.setAttribute('aria-label', 'Proactive UI for AI Glasses');
@@ -118,22 +121,31 @@ export class TitleScreen {
       r.append(el('i', undefined, k), el('span', undefined, v));
       what.appendChild(r);
     }
-    const chooseHead = el('div', css.label, 'Choose a walk');
-    const choices = el('div', css.choices);
-    for (const c of CHOICES) {
-      const b = el('button', c.id === 'hungry' ? css.primary : undefined) as HTMLButtonElement;
+    const chooseHead = el('div', css.label, 'The walk');
+    const choices = el('div', css.start);
+    this.startButton = el('button', css.startButton, 'Start the walk') as HTMLButtonElement;
+    this.startButton.type = 'button';
+    this.startButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.choose();
+    });
+    const ask = el('p', css.ask, "At the first red light the glasses ask what you're up to.");
+    const chips = el('div', css.chips);
+    chips.setAttribute('role', 'group');
+    chips.setAttribute('aria-label', 'Have an answer ready');
+    for (const c of CHIPS) {
+      const b = el('button', undefined, c.name) as HTMLButtonElement;
       b.type = 'button';
-      const top = el('div', css.choiceTop);
-      top.append(el('b', undefined, c.name), el('em', undefined, '90 s'));
-      b.append(top, el('span', undefined, c.line));
       b.dataset.choice = c.id;
+      b.setAttribute('aria-pressed', 'false');
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.choose(c.id);
+        this.pick(this.picked === c.id ? null : c.id);
       });
-      this.buttons.push(b);
-      choices.appendChild(b);
+      this.chips.push(b);
+      chips.appendChild(b);
     }
+    choices.append(this.startButton, ask, chips);
     const controls = el('div', css.controls);
     (TOUCH ? CONTROLS_TOUCH : CONTROLS).forEach(([k, v], i) => {
       if (i) controls.appendChild(el('span', css.dot, '·'));
@@ -180,7 +192,7 @@ export class TitleScreen {
     tl.to(this.panel, { xPercent: 0, duration: 0.9, ease: EASE_OUT }, 0);
     tl.fromTo(this.reveals, { opacity: 0, y: 10, filter: 'blur(6px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.48, ease: EASE_OUT, stagger: 0.12, clearProps: 'filter' }, 0.35);
     tl.call(() => {
-      if (!TOUCH) this.buttons[0]?.focus({ preventScroll: true });
+      if (!TOUCH) this.startButton.focus({ preventScroll: true });
     });
     this.tl = tl;
     if (atChoice) this.skipToChoice();
@@ -191,10 +203,16 @@ export class TitleScreen {
   }
 
   focus(id: Choice): void {
-    this.buttons.find((b) => b.dataset.choice === id)?.focus({ preventScroll: true });
+    this.pick(id);
+    this.startButton.focus({ preventScroll: true });
   }
 
-  private choose(id: Choice): void {
+  private pick(id: Choice | null): void {
+    this.picked = id;
+    for (const b of this.chips) b.setAttribute('aria-pressed', String(b.dataset.choice === id));
+  }
+
+  private choose(): void {
     if (this.busy) return;
     this.busy = true;
     this.tl?.kill();
@@ -202,7 +220,8 @@ export class TitleScreen {
     tl.to(this.reveals, { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.03 }, 0);
     tl.to(this.panel, { xPercent: -100, duration: 0.45, ease: EASE_IN }, 0.15);
     tl.to(this.plate, { opacity: 0, duration: 0.45, ease: 'power1.inOut' }, 0.15);
-    tl.call(() => this.onChoose(id), [], 0.6);
+    const suggest = this.picked;
+    tl.call(() => this.onStart(suggest), [], 0.6);
     this.tl = tl;
   }
 
