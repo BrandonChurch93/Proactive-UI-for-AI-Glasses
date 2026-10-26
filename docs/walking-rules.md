@@ -91,7 +91,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 13 · The budget is visible
 
 - Trigger: always, in the inspector.
-- Response: the attention budget is a meter that drains on each proactive show (a decision with action `show` at whisper level or above that the wearer did not earn by looking or pinching; pips, labels that answer a settled view and ground safety text are not shows, and look-earned shows are free) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
+- Response: the attention budget is a meter that drains on each proactive show (a decision with action `show` at whisper level or above that the wearer did not earn by looking or pinching; pips, labels that answer a settled view and ground safety text are not shows, and look-earned shows are free, as are answers to the wearer's own choices: the intent panel, the lunch picker, the errands list and what a choice or an arrival brings up) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
 - Eval: proactive shows per walk never exceed 7 plus the refills earned during the walk (9 on a 90 s walk with enough quiet); the meter in the log matches the count of shows that were not earned by dwell or pinch.
 
 ## How these combine

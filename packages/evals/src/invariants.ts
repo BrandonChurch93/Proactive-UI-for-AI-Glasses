@@ -93,6 +93,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     check: (r) => {
       let bandAt = -Infinity;
       const lookedAt = new Map<string, number>();
+      const okAt = new Map<string, number>();
       for (let i = 0; i < r.snapshots.length; i++) {
         const s = r.snapshots[i]!;
         const f = r.frames[i]!;
@@ -100,12 +101,14 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const view = s.view;
         if (!view) continue;
         for (const p of view.panes) if (p.gaze || (s.goal.arrived && s.goal.destination === p.id)) lookedAt.set(p.id, f.t);
+        for (const i of f.items) if (i.zoneOk) okAt.set(i.id, f.t);
         if (f.t - bandAt < 0.32 + TICK) continue;
         const zone = reported(focusRect(f.band, view.w, view.h));
         for (const p of view.panes) {
           if (p.zone !== 'world' || p.opacity < 0.2 || LEVEL_RANK[p.level] < LEVEL_RANK.label) continue;
           if (!rectsOverlap(p.rect, zone) || p.gaze || f.t - (lookedAt.get(p.id) ?? -Infinity) < MOVE.minShown + 0.32 + TICK) continue;
           if (!f.items.some((i) => i.id === p.id) || f.items.some((i) => i.id === p.id && i.zoneOk)) continue;
+          if (f.t - (okAt.get(p.id) ?? -Infinity) < 0.32 + TICK) continue;
           return `t=${s.t} ${p.id} ${p.level} in the ${f.band} zone`;
         }
       }
@@ -197,18 +200,22 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-7',
-    name: 'the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s',
+    name: 'the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s',
     check: (r, cfg) => {
       let surfacedThisStop = false;
+      let busyStop = false;
       let qualifiedAt: number | null = null;
       for (let i = 0; i < r.frames.length; i++) {
         const f = r.frames[i]!;
         const s = r.snapshots[i]!;
         if (f.band !== 'stopped') {
           surfacedThisStop = false;
+          busyStop = false;
           qualifiedAt = null;
           continue;
         }
+        if (s.goal.arrived || s.goal.corner) busyStop = true;
+        if (busyStop) continue;
         const surf = r.entries.find((e) => Math.abs(e.t - f.t) < 1e-6 && e.decision.action === 'surface');
         if (surf) {
           if (f.gate.safety || f.gate.snooze) return `t=${f.t} surfaced during a gate`;
@@ -302,7 +309,9 @@ const checks: { rule: string; name: string; check: Check }[] = [
     rule: 'walking-13',
     name: 'budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count',
     check: (r, cfg) => {
-      const shows = r.entries.filter((e) => isShow(e.decision) && e.decision.cause !== 'dwell' && e.decision.cause !== 'pinch' && e.decision.cause !== 'settle').length;
+      const earned = (d: Decision): boolean =>
+        d.component === 'intent' || d.component === 'picker' || d.component === 'errands' || d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice';
+      const shows = r.entries.filter((e) => isShow(e.decision) && !earned(e.decision)).length;
       const last = r.frames[r.frames.length - 1];
       if (!last) return null;
       if (last.budgetUsed !== shows) return `meter ${last.budgetUsed} but ${shows} shows`;
@@ -312,8 +321,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const b = r.frames[i]!;
         if (b.budget > a.budget) refills += b.budget - a.budget;
       }
-      const exempt = (d: Decision): boolean =>
-        d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'gate' || d.cause === 'arrival';
+      const exempt = (d: Decision): boolean => earned(d) || d.cause === 'gate';
       const bound = r.entries.filter((e) => isShow(e.decision) && !exempt(e.decision)).length;
       if (bound > cfg.budget.shows + refills) return `${bound} budgeted shows > ${cfg.budget.shows} + ${refills}`;
       return null;

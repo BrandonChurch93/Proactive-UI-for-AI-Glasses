@@ -18,21 +18,47 @@
       "name": "0:00 to 0:01 \u00b7 nothing before the street has faded up",
       "between": [
         0,
-        0.8
+        0.75
       ],
       "max": {
         "shows": 0
       }
     },
     {
-      "name": "0:01 \u00b7 Hungry at the corner: the walk starts with no destination",
+      "name": "0:01 \u00b7 stopped at the corner: the intent panel within 1 s",
       "between": [
-        1.1,
-        2
+        0.75,
+        1.0
       ],
-      "state": {
-        "goal": "hungry",
-        "destination": null
+      "must": {
+        "action": "show",
+        "id": "intent",
+        "component": "intent",
+        "nameIs": "What are you up to?"
+      }
+    },
+    {
+      "name": "0:01 \u00b7 Hungry chosen: the lunch picker replaces the panel",
+      "between": [
+        1.0,
+        1.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "picker",
+        "component": "picker",
+        "nameIs": "Lunch on this block \u00b7 by walk time"
+      }
+    },
+    {
+      "name": "0:01 \u00b7 the panel folds as the picker shows",
+      "between": [
+        1.0,
+        1.2
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "intent"
       }
     },
     {
@@ -45,38 +71,50 @@
         "action": "show",
         "id": "goldies-counter",
         "level": "label",
-        "band": "walk",
-        "factIs": "3 min",
+        "band": "stopped",
+        "factIs": "3 min, 9 seats",
         "showReason": false
       }
     },
     {
-      "name": "0:05 \u00b7 not looked at, it folds itself",
+      "name": "0:03 \u00b7 Goldie's picked: the route draws, caused by the choice",
       "between": [
-        4,
-        5.5
+        3.0,
+        3.3
       ],
       "must": {
-        "action": "demote",
-        "id": "goldies-counter",
-        "cause": "auto-fold"
+        "action": "show",
+        "id": "route",
+        "zone": "ground",
+        "cause": "choice"
       }
     },
     {
-      "name": "0:00 to 0:34 \u00b7 no card",
+      "name": "0:03 \u00b7 and Goldie's is the destination",
       "between": [
-        0,
-        34
+        3.2,
+        10.9
       ],
-      "mustNot": {
-        "level": "card"
+      "state": {
+        "destination": "goldies-counter"
       }
     },
     {
-      "name": "0:35 \u00b7 a look at Mega Burger lights its label",
+      "name": "0:03 \u00b7 the picker folds and the light releases",
       "between": [
-        35,
-        36.2
+        3.0,
+        3.3
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "picker"
+      }
+    },
+    {
+      "name": "0:09 \u00b7 a look at Mega Burger, 69 m: its label",
+      "between": [
+        8.6,
+        9.2
       ],
       "must": {
         "action": "show",
@@ -86,16 +124,62 @@
       }
     },
     {
-      "name": "0:36 \u00b7 a second of hold later (it is beyond 35 m), a compact card: no reason, no rows",
+      "name": "0:10 \u00b7 a second of hold later (beyond 35 m), its compact card, offering itself instead",
       "between": [
-        36,
-        37.2
+        9.6,
+        10.2
       ],
       "must": {
         "action": "promote",
         "id": "mega-burger",
         "level": "card",
         "showReason": false
+      }
+    },
+    {
+      "name": "0:11 \u00b7 Go here instead: the route redraws to Mega Burger, caused by the choice",
+      "between": [
+        11.0,
+        11.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "route",
+        "cause": "choice"
+      }
+    },
+    {
+      "name": "0:11 \u00b7 Mega Burger is the destination from here on",
+      "between": [
+        11.2,
+        107.8
+      ],
+      "state": {
+        "destination": "mega-burger"
+      }
+    },
+    {
+      "name": "0:03 to 0:38 \u00b7 no place card except the one looked at",
+      "between": [
+        3.3,
+        38
+      ],
+      "mustNot": {
+        "level": "card",
+        "component": "place",
+        "cause": "score"
+      }
+    },
+    {
+      "name": "0:39 \u00b7 a look at Trattoria da Lia across the street lights its label, then its card",
+      "between": [
+        39.0,
+        40.2
+      ],
+      "must": {
+        "action": "promote",
+        "id": "trattoria-da-lia",
+        "level": "card"
       }
     },
     {
@@ -106,38 +190,38 @@
       ],
       "must": {
         "action": "save",
-        "id": "mega-burger"
+        "id": "trattoria-da-lia"
       }
     },
     {
-      "name": "0:35 to 0:47 \u00b7 a far place never expands",
+      "name": "0:41 \u00b7 nothing opens",
       "between": [
-        35,
-        47
+        41,
+        45
       ],
       "mustNot": {
-        "id": "mega-burger",
+        "id": "trattoria-da-lia",
         "level": "expanded"
       }
     },
     {
-      "name": "0:41 to 1:17 \u00b7 Pocket 1 on the glyph",
+      "name": "0:41 to 1:19 \u00b7 Pocket 1 on the glyph",
       "between": [
         41.5,
-        76
+        79.4
       ],
       "state": {
         "glyph": "Pocket 1"
       }
     },
     {
-      "name": "0:48 \u00b7 the look moves on and the card shrinks back to its label",
+      "name": "0:45 \u00b7 the look moves on and the card shrinks back to its label",
       "between": [
-        47.5,
-        49
+        44.8,
+        45.6
       ],
       "must": {
-        "id": "mega-burger",
+        "id": "trattoria-da-lia",
         "action": [
           "demote",
           "dismiss"
@@ -145,7 +229,7 @@
       }
     },
     {
-      "name": "0:51 \u00b7 a look at the station stair lights its label",
+      "name": "0:52 \u00b7 a look at the station stair lights its label",
       "between": [
         51.3,
         52.2
@@ -158,10 +242,10 @@
       }
     },
     {
-      "name": "1:00 to 1:13 \u00b7 Brisk: labels at most, never a card",
+      "name": "1:02 to 1:15 \u00b7 Brisk: labels at most, never a card",
       "between": [
-        60.5,
-        72.5
+        62.5,
+        74.5
       ],
       "state": {
         "band": "brisk",
@@ -169,10 +253,10 @@
       }
     },
     {
-      "name": "1:13 \u00b7 no need to run",
+      "name": "1:15 \u00b7 no need to run",
       "between": [
-        72.5,
-        74
+        74.5,
+        76
       ],
       "must": {
         "action": "show",
@@ -181,10 +265,10 @@
       }
     },
     {
-      "name": "1:16 \u00b7 the text from Maya at the red light",
+      "name": "1:18 \u00b7 the text from Maya at the red light",
       "between": [
-        76.4,
-        77.2
+        77.9,
+        78.5
       ],
       "must": {
         "action": "show",
@@ -194,10 +278,10 @@
       }
     },
     {
-      "name": "1:17 \u00b7 the pocket surfaces with the time available",
+      "name": "1:20 \u00b7 the pocket surfaces with the time available",
       "between": [
-        77,
-        78.5
+        79,
+        80.5
       ],
       "must": {
         "action": "surface",
@@ -206,50 +290,40 @@
       }
     },
     {
-      "name": "1:19 \u00b7 pinch opens its card",
+      "name": "1:22 \u00b7 a look across the avenue at Mega Burger: its card, Going here",
       "between": [
-        78.9,
-        79.5
+        81.5,
+        83
       ],
       "must": {
-        "action": "show",
-        "id": "pocket:mega-burger",
+        "action": "promote",
+        "id": "mega-burger",
         "level": "card"
       }
     },
     {
-      "name": "1:21 \u00b7 held gaze expands it in place",
+      "name": "1:24 \u00b7 held gaze expands it in place",
       "between": [
-        80.5,
-        82
+        83.8,
+        84.8
       ],
       "must": {
         "action": "promote",
-        "id": "pocket:mega-burger",
+        "id": "mega-burger",
         "level": "expanded"
       }
     },
     {
-      "name": "1:23 \u00b7 hold a seat: the destination is set by the choice and the route draws",
+      "name": "1:25 \u00b7 hold a seat",
       "between": [
-        83,
-        83.5
+        85,
+        85.3
       ],
       "must": {
-        "action": "show",
-        "id": "route",
-        "zone": "ground",
+        "action": "promote",
+        "id": "mega-burger",
+        "level": "expanded",
         "cause": "choice"
-      }
-    },
-    {
-      "name": "1:24 \u00b7 the route goes to Mega Burger",
-      "between": [
-        83.5,
-        88
-      ],
-      "state": {
-        "destination": "mega-burger"
       }
     },
     {
@@ -303,7 +377,7 @@
       "name": "1:40 \u00b7 the destination column on the way to the door",
       "between": [
         100,
-        108
+        107.5
       ],
       "stateSome": {
         "has": "destination"
@@ -322,6 +396,17 @@
       }
     },
     {
+      "name": "1:48 \u00b7 no pocket at the door",
+      "between": [
+        107.5,
+        112.5
+      ],
+      "mustNot": {
+        "action": "surface",
+        "id": "pocket"
+      }
+    },
+    {
       "name": "1:52 \u00b7 four seconds at the door, then the loop resumes with no destination and no intent",
       "between": [
         112.5,
@@ -337,13 +422,13 @@
       }
     },
     {
-      "name": "restraint \u00b7 shows within the budget",
+      "name": "restraint \u00b7 shows within the budget, the panel and the picker included",
       "between": [
         0,
         112
       ],
       "max": {
-        "shows": 9
+        "shows": 11
       }
     }
   ]

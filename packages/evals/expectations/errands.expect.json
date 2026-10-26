@@ -2,30 +2,42 @@
   "walk": "errands",
   "cases": [
     {
-      "name": "0:00 to 0:11 \u00b7 the light is held while the wearer decides",
+      "name": "0:00 to 0:08 \u00b7 the light is held while the wearer decides",
       "between": [
         0,
-        11.4
+        7.9
       ],
       "state": {
         "has": "safety:signal"
       }
     },
     {
-      "name": "0:00 to 0:11 \u00b7 nothing proactive before an intent",
+      "name": "0:01 \u00b7 stopped at the corner: the intent panel within 1 s",
       "between": [
-        0,
-        11.4
+        0.75,
+        1.0
       ],
-      "max": {
-        "shows": 0
+      "must": {
+        "action": "show",
+        "id": "intent",
+        "component": "intent"
       }
     },
     {
-      "name": "0:12 \u00b7 Errands: three stops in one card, in the order chosen",
+      "name": "0:00 to 0:08 \u00b7 nothing proactive before an intent",
       "between": [
-        11.5,
-        12.5
+        0,
+        7.9
+      ],
+      "max": {
+        "nonGazeShows": 1
+      }
+    },
+    {
+      "name": "0:08 \u00b7 Errands: the stops list replaces the panel, three stops in the order chosen, with Start",
+      "between": [
+        8.0,
+        8.3
       ],
       "must": {
         "action": "show",
@@ -35,10 +47,20 @@
       }
     },
     {
-      "name": "0:12 \u00b7 the route draws to the first stop, caused by the choice",
+      "name": "0:08 to 0:10 \u00b7 no route before Start",
       "between": [
-        11.5,
-        12.5
+        8.0,
+        9.95
+      ],
+      "state": {
+        "destination": null
+      }
+    },
+    {
+      "name": "0:10 \u00b7 Start: the route draws to the first stop, caused by the choice",
+      "between": [
+        10.0,
+        10.3
       ],
       "must": {
         "action": "show",
@@ -48,9 +70,9 @@
       }
     },
     {
-      "name": "0:12 \u00b7 the first stop is the destination",
+      "name": "0:10 \u00b7 the first stop is the destination",
       "between": [
-        12,
+        10.2,
         50
       ],
       "state": {
@@ -58,10 +80,10 @@
       }
     },
     {
-      "name": "0:16 \u00b7 the card folds to the route while walking",
+      "name": "0:15 \u00b7 the list folds to the route while walking",
       "between": [
-        15,
-        18
+        14,
+        16
       ],
       "must": {
         "action": "dismiss",
@@ -69,10 +91,10 @@
       }
     },
     {
-      "name": "0:38 \u00b7 the pharmacy lights its label on the look",
+      "name": "0:36 \u00b7 the pharmacy lights its label on the look",
       "between": [
-        37,
-        38.2
+        35.6,
+        36.6
       ],
       "must": {
         "action": "show",
@@ -82,10 +104,10 @@
       }
     },
     {
-      "name": "0:38 \u00b7 its card after half a second of hold",
+      "name": "0:37 \u00b7 its card after half a second of hold",
       "between": [
-        37.5,
-        39
+        36.4,
+        37.2
       ],
       "must": {
         "action": "promote",
@@ -94,10 +116,10 @@
       }
     },
     {
-      "name": "0:45 \u00b7 scaffolding: one glance says why",
+      "name": "0:41 \u00b7 scaffolding: one glance says why",
       "between": [
-        44,
-        46
+        40.5,
+        41.5
       ],
       "must": {
         "action": "show",
@@ -107,10 +129,10 @@
       }
     },
     {
-      "name": "0:52 \u00b7 at the pharmacy door its card shows",
+      "name": "0:51 \u00b7 at the pharmacy door its card shows",
       "between": [
-        52.2,
-        52.8
+        50.7,
+        51.4
       ],
       "must": {
         "action": [
@@ -123,10 +145,10 @@
       }
     },
     {
-      "name": "0:55 \u00b7 picked up, the errands card returns with the stop ticked",
+      "name": "0:54 \u00b7 picked up, the errands card returns with the stop ticked",
       "between": [
-        55.2,
-        55.7
+        53.7,
+        54.2
       ],
       "must": {
         "action": [
@@ -138,10 +160,10 @@
       }
     },
     {
-      "name": "0:56 \u00b7 four seconds at the door, then the route redraws to the next stop",
+      "name": "0:55 \u00b7 four seconds at the door, then the route redraws to the next stop",
       "between": [
-        56.2,
-        56.7
+        54.7,
+        55.2
       ],
       "must": {
         "action": "show",
@@ -150,10 +172,10 @@
       }
     },
     {
-      "name": "1:02 \u00b7 hardware closed early, said and redrawn",
+      "name": "0:58 \u00b7 hardware closed early, said and redrawn",
       "between": [
-        61.4,
-        62
+        57.9,
+        58.3
       ],
       "must": {
         "action": [
@@ -165,20 +187,20 @@
       }
     },
     {
-      "name": "1:02 \u00b7 the route skips the closed stop",
+      "name": "0:58 \u00b7 the route skips the closed stop",
       "between": [
-        62,
-        95
+        58.5,
+        92
       ],
       "state": {
         "destination": "post-office"
       }
     },
     {
-      "name": "1:03 to 1:33 \u00b7 social never one by one",
+      "name": "0:59 to 1:32 \u00b7 social never one by one",
       "between": [
-        62,
-        93.5
+        58.5,
+        92.5
       ],
       "mustNot": {
         "action": "show",
@@ -186,20 +208,20 @@
       }
     },
     {
-      "name": "1:09 to 1:33 \u00b7 three on the glyph",
+      "name": "1:05 to 1:32 \u00b7 three on the glyph",
       "between": [
-        69,
-        93.5
+        65.5,
+        92.5
       ],
       "state": {
         "glyph": "3 \u00b7 social"
       }
     },
     {
-      "name": "1:10 to 1:20 \u00b7 the bus is held at pip, not on the goal",
+      "name": "1:08 to 1:17 \u00b7 the bus is held at pip, not on the goal",
       "between": [
-        69,
-        80
+        68,
+        77
       ],
       "mustNot": {
         "id": "m4-stop",
@@ -207,10 +229,10 @@
       }
     },
     {
-      "name": "1:34 \u00b7 the social strip surfaces once at the red light",
+      "name": "1:33 \u00b7 the social strip surfaces once at the red light",
       "between": [
-        93.5,
-        96
+        92.5,
+        94
       ],
       "must": {
         "action": "show",
@@ -220,10 +242,10 @@
       }
     },
     {
-      "name": "1:38 \u00b7 the Post Office card up on dwell",
+      "name": "1:37 \u00b7 the Post Office card up on dwell",
       "between": [
-        97.5,
-        99
+        96.2,
+        97.2
       ],
       "must": {
         "action": "promote",
@@ -232,9 +254,9 @@
       }
     },
     {
-      "name": "1:40 \u00b7 head scans and a passerby change no level",
+      "name": "1:39 \u00b7 head scans and a passerby change no level",
       "between": [
-        99,
+        97.5,
         108
       ],
       "mustNot": {
@@ -270,8 +292,8 @@
     {
       "name": "1:52 \u00b7 the DM is held",
       "between": [
-        112.5,
-        112.8
+        112,
+        112.3
       ],
       "must": {
         "action": "hold",
@@ -320,7 +342,7 @@
       }
     },
     {
-      "name": "2:11 \u00b7 after the last stop: All done, then the loop resumes with no intent",
+      "name": "2:12 \u00b7 then the loop resumes with no intent",
       "between": [
         132.5,
         136
@@ -334,13 +356,13 @@
       }
     },
     {
-      "name": "restraint \u00b7 shows within the budget",
+      "name": "restraint \u00b7 shows within the budget, the panel and the picker included",
       "between": [
         0,
         136
       ],
       "max": {
-        "shows": 10
+        "shows": 11
       }
     }
   ]

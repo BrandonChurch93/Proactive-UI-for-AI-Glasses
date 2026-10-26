@@ -6,7 +6,7 @@ One walk on one block: a loop that never ends on its own. The intent (Hungry, Er
 
 ## The loop
 
-1. Start corner, south-east, n = 0. The walk begins Stopped with the south crossing's light held red for 12 s and WAIT counting down on the pavement ahead. An intent chosen in that time (the recording's `intent` beat, or the title's choice at 0:01 until the intent panel of Phase 19.3) releases it; otherwise it releases at 0:12 and the walk is Just walk.
+1. Start corner, south-east, n = 0. The walk begins Stopped with the south crossing's light held red for 12 s and WAIT counting down on the pavement ahead. At 0:00.8 the intent panel asks what the wearer is up to (the title's choice filled). Just walk, a lunch place from the picker or Start on the stops list releases the light; otherwise it releases at 0:12 and the walk goes on as it is. The same happens at the end of every lap.
 2. East sidewalk north: Walk, Stroll on the theater stretch (n 11 to 25.5, about 0:10 to 0:34), Walk past the scaffold and the M4 shelter, Brisk on the north stretch (n 60 to 84, about 1:00 to 1:13), Walk to the corner.
 3. North corner, about 1:15: the avenue light is red with 14 s to go (the walk file's phase). Crossing 10 s.
 4. West sidewalk south at Walk, about 1:39 to 2:28. The wearer asks the south crossing 12 m out; it turns within seconds (actuated, at least 18 s of green first).
@@ -16,47 +16,49 @@ A destination replaces the loop with the router's shortest path to its door: 4 s
 
 ## Hungry · discovery, the pocket, a choice
 
-Recording: Hungry at 0:01. Destination chosen at the red light: Mega Burger, across the avenue a few steps south.
+Recording: Hungry at 0:01, Goldie's from the picker at 0:03, then Mega Burger instead at 0:11.
 
-1. 0:00 · Held at the corner: WAIT on the pavement. Hungry at 0:01; the light releases and the walk starts with no destination.
-2. 0:02 · One label, the best fit: Goldie's Counter, "3 min". The reason, "Short wait, on your side of the street", is in the log and never on a label (Rule 2). Born outside the focus zone (Rule 4); not looked at, it folds at 0:04.7 (Rule 3).
-3. 0:35 · A look at Mega Burger across the avenue, about 48 m ahead: its label at 0:35.5, its compact card a second of hold later (beyond 35 m), no reason, no rows; it never expands while beyond 30 m. (Rule 10.)
-4. 0:41 · A pinch while walking saves it. Nothing opens; Pocket 1 on the glyph. (Rule 6.)
-5. 0:47 · Look away: the card shrinks back to its label at 0:48.
-6. 0:51 · A look at the station stair: its label and, as the view settles, the corner's other places beside it; its card at 0:52.
-7. 1:00 to 1:13 · Brisk on the north stretch: labels at most, never a card. (Rules 1, 11.)
-8. 1:13 · "No need to run" at the curb. 1:15, red light, 14 s. 1:16.5, a text from Maya, "Running 10 late, order me the usual?", reason "Long red light".
-9. 1:17.6 · The pocket surfaces: "11 s · what you saved". (Rule 7.) 1:19, a pinch opens Mega Burger's card; 1:21 it expands in place; 1:23, hold a seat: Mega Burger becomes the destination (cause `choice`) and the route draws across the avenue and a few steps south.
+1. 0:00 · Held at the corner: WAIT on the pavement. 0:00.8 the intent panel; Hungry at 0:01, and the lunch picker replaces it: five places by walk time, Goldie's first (10 s).
+2. 0:02 · One label, the best fit, while still stopped: Goldie's Counter, "3 min, 9 seats". The reason is in the log and never on a label (Rule 2).
+3. 0:03 · Goldie's from the picker: it is the destination (cause `choice`), the route draws, the picker folds and the light releases.
+4. 0:08.5 · A look at Mega Burger across the avenue, 69 m ahead: its label, then its compact card a second of hold later (beyond 35 m), offering Go here instead. 0:11, Go here instead: the route redraws to Mega Burger (cause `choice`), up the block and across at the corner rather than back through the start; Goldie's chip goes, Mega Burger's comes.
+5. 0:38.5 · A look at Trattoria da Lia across the street: label, card. 0:41 a pinch while walking saves it; nothing opens; Pocket 1. (Rule 6.)
+6. 0:51 · A look at the station stair: its label and its card at 0:52.
+7. 1:02 to 1:15 · Brisk on the north stretch: labels at most, never a card. (Rules 1, 11.) 1:15, "No need to run"; the red light at 1:17, 12 s.
+8. 1:18 · A text from Maya, "Running 10 late, order me the usual?", reason "Long red light". 1:19.6 the pocket surfaces: "9 s · what you saved". (Rule 7.)
+9. 1:22 · A look across the avenue at Mega Burger: its card with Going here; at 1:24 it expands in place; 1:25, hold a seat.
 10. 1:29 to 1:39 · Crossing. Nothing opens; "Order ready" arrives at 1:33 and is held; at the far curb it shows, "Held that while you crossed".
-11. 1:40 · The destination column on the way to the door. 1:48, at the door, facing it: "Seat's held, inside on the left."
+11. 1:40 · The destination column on the way to the door. 1:48, at the door, facing it: "Seat's held, inside on the left." No pocket at the door.
 12. 1:52 · After 4 s the loop resumes south with no destination and no intent. The recording ends at 1:58.
 
 ## Errands · navigation, sequencing, the curb
 
-Recording: the reviewer stands at the light and chooses Errands at 0:11.5. Stops: Pharmacy, Hardware, Post Office, in that order.
+Recording: the reviewer stands at the light, chooses Errands at 0:08 and Start at 0:10. Stops: Pharmacy, Hardware, Post Office, in that order.
 
-1. 0:00 to 0:11.5 · Held at the corner, WAIT counting down, nothing proactive.
-2. 0:11.5 · Errands. The three stops in one card at the edge, "Three stops · one route", reason "In order along the way". The route draws to the pharmacy (cause `choice`). The card folds to the route by 0:16.5. (Rules 1, 4.)
-3. 0:37 · A look at the pharmacy ahead: label, card half a second later, expanded on continued hold at Stroll.
-4. 0:44.5 · The scaffold narrows the sidewalk ahead: the route band shifts to the curb and one glance, "Scaffolding ahead. Keep to the curb."
-5. 0:52.4 · The pharmacy door: stopped, facing it, its card at the door. 0:55.4 the prescription is picked up; the errands card returns, "Two to go". 0:56.4 the route redraws to Hardware (cause `goal`).
-6. 1:01.5 · Corner Hardware closes early: "Hardware closed early. One stop left." The route redraws to the Post Office.
-7. 1:02.5 to 1:08.5 · Three social notifications on the glyph, never one by one. 1:11.5, the bus at the M4 stop: a pip, not on the goal.
-8. 1:34 · Red at the cross street, 15 s. The social strip once, "3 notifications · later". The Post Office card up on dwell at 1:38. Head scans at 1:40 and a passerby: no level changes. (Rules 5, 8.)
-9. 1:50 to 2:00 · Crossing the cross street. A DM from Jules at 1:52.5 is held; at the far curb, "One message came in. Read it?"
-10. 2:07 · The Post Office door; its card holds. 2:10.8 done: "All done", reason "Every stop done". 2:11.8 the loop resumes, back across the cross street, with no intent. The recording ends at 2:16.
+1. 0:00 to 0:08 · Held at the corner, WAIT counting down, the intent panel from 0:00.8, nothing proactive.
+2. 0:08 · Errands. The stops list replaces the panel: "Three stops · one route", reason "In order along the way", and Start. No route yet.
+3. 0:10 · Start: the route draws to the pharmacy (cause `choice`) and the light releases. The list folds to the route by 0:15. (Rules 1, 4.)
+4. 0:35.5 · A look at the pharmacy ahead: label, card half a second later, expanded on continued hold at Stroll.
+5. 0:41 · The scaffold narrows the sidewalk ahead: the route band shifts to the curb and one glance, "Scaffolding ahead. Keep to the curb."
+6. 0:51 · The pharmacy door: stopped, facing it, its card at the door. 0:54 the prescription is picked up; the errands card returns, "Two to go". 0:55 the route redraws to Hardware (cause `goal`).
+7. 0:58 · Corner Hardware closes early: "Hardware closed early. One stop left." The route redraws to the Post Office.
+8. 0:59 to 1:05 · Three social notifications on the glyph, never one by one. 1:08, the bus at the M4 stop: a pip, not on the goal.
+9. 1:32 · Red at the cross street, 18 s. The social strip once, "3 notifications · later". The Post Office card up on dwell at 1:37. Head scans at 1:39 and a passerby: no level changes. (Rules 5, 8.)
+10. 1:50 to 2:00 · Crossing the cross street. A DM from Jules at 1:52 is held; at the far curb, "One message came in. Read it?"
+11. 2:08 · The Post Office door; its card holds. 2:11 done: "All done", reason "Every stop done". 2:12 the loop resumes, back across the cross street, with no intent. The recording ends at 2:16.
 
 ## Just walking · restraint, right of way, snooze
 
-Recording: Just walk at 0:01. No destination.
+Recording: Just walk at 0:01, and again at the corner a lap later. No destination.
 
-1. 0:00 to 0:10 · Nothing.
+1. 0:00.8 · The intent panel; Just walk at 0:01 folds it and releases the light. Then to 0:10, nothing.
 2. 0:10.5 · Stroll. The look rests on the Grace Theater marquee: its label at 0:11.3, the theater row labels together as the view settles, the card at 0:11.8, the expanded view in place at 0:13.8 (Rule 10). 0:17 to 0:24, the delivery truck crawls past between the wearer and the marquee; not a gate, the level holds while the overlay steps it out of the way (Rule 8).
 3. 0:28 · The look moves to Trattoria da Lia: its label grows into the card, "Read from Italian"; the theater shrinks back to its label in the same move. 0:30, Kathy's Cupcakes: label, then card; the look moves on at 0:32.5 before it would expand.
 4. 0:48 · On the straight past the scaffold the wearer looks up and holds it: "Snoozing", then the countdown from 0:50.3; Atlas Books, looked at from 0:51, is held "Snoozed". 0:55 looking up again cancels it by 0:57.5. (Rule 12.)
 5. 1:13 · "No need to run". 1:15 red light; two food places were looked at, so at 1:17.6, "Hungry? · Find lunch · No". No, at 1:20; the walk stays Just walk.
 6. 1:29 to 1:39 · Crossing: nothing opens. A bike comes up the lane from behind as the wearer steps off: `BIKE` on the pavement with its arrow.
-7. 1:40.6 · The far curb: the view settles on the west side and its places label together. The loop continues south. The recording ends at 1:52. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
+7. 1:40.6 · The far curb: the view settles on the west side and its places label together. The loop continues south and across the south crossing.
+8. 2:53 · Back at the start corner: the light held, the intent panel within a second of stopping. Just walk at 2:56.5; the second lap begins. The recording ends at 3:02. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
 ## Timing as built
 

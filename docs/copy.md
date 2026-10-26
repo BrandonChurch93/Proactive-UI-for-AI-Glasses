@@ -70,7 +70,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 - 12 s · what you saved (header; the number follows the signal)
 - Pocket rows: Mega Burger · 6 min wait · $
 - Whisper line: the name and the say line's short form, three words and a number at most: Goldie's Counter · 3 min / Mega Burger · 6 min wait
-- Ask glance (Just walking only): Hungry? · Find lunch · No
+- Ask glance (Just walk only, at a stop after two food places were looked at; not at the start corner, where the intent panel asks): Hungry? · Find lunch · No
 
 ## Messages
 
@@ -122,7 +122,13 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 - Main Street Pharmacy: Counter 2 · ready / Pay ahead · Not now / after: Paid. Show the code at counter 2. / once picked up, the decision is settled: Picked up / In your bag. Two stops to go.
 - Corner Hardware, closed early: Closed early today / Dropped from the route. The Post Office is next.
 - The others keep their rows and actions from `data/places.json`, at most three rows: Lucky Lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Save the reading. Trattoria da Lia · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Brown butter · Save me one. The Big Bean · Order ahead · Ordered. Ready in 5 min. M4 stop · Remind me at 11. 47th St Station · Route me there. Corner Hardware · Hold it at the till.
-- Errands card: Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / after the pickup: Two to go / 1 Hardware · 2 Post Office / after the closure: Hardware closed early. One stop left. / 1 Post Office / after the last stop: All done (reason: Every stop done), then the list folds and the walk resumes the loop
+## The corner: intent panel, lunch picker, stops list
+
+- Intent panel (at the start corner, within 1 s of stopping, every lap): What are you up to? / Hungry · Errands · Just walk · End the walk. The title's choice is the filled button. Reason in the log: Long red light.
+- Lunch picker (replaces the panel on Hungry): Lunch on this block · by walk time / one row per food or cafe place, by walk time: {name} · {picker line} · {walk time} · {wait and seats}, the walk time as 10 s to 50 s under a minute, then 1 min, 2 min / Not now. Reason in the log: Lunch spots on this block. Picker lines: Goldie's Counter · Fastest lunch on this side. Kathy's Cupcakes · Not lunch, a batch at 2. The Big Bean · Coffee after. Trattoria da Lia · Home cooking, sit-down. Mega Burger · Burgers, counter seats. Wait and seats is the place's live line.
+- The destination's card and expanded view: Going here (a chip in the header, in the voice color). Any other lunch place's card while a destination is set: Go here instead (primary).
+- Stops list (replaces the panel on Errands): Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / In order along the way / Start (primary). Walking away without Start starts it.
+- Errands card on the way: after the pickup: Two to go / 1 Hardware · 2 Post Office / after the closure: Hardware closed early. One stop left. / 1 Post Office / after the last stop: All done (reason: Every stop done), then the list folds and the walk resumes the loop.
 
 ## Arrival and end
 

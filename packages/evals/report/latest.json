@@ -3,8 +3,8 @@
  "totals": {
   "suites": 41,
   "passed": 41,
-  "cases": 972,
-  "casesPassed": 972
+  "cases": 986,
+  "casesPassed": 986
  },
  "byGroup": {
   "walks": {
@@ -95,7 +95,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -149,102 +149,112 @@
      "detail": ""
     },
     {
-     "name": "0:00 to 0:11 · the light is held while the wearer decides",
+     "name": "0:00 to 0:08 · the light is held while the wearer decides",
      "pass": true,
-     "detail": "114 frames"
+     "detail": "79 frames"
     },
     {
-     "name": "0:00 to 0:11 · nothing proactive before an intent",
+     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 0"
+     "detail": "t=0.8 show intent card"
     },
     {
-     "name": "0:12 · Errands: three stops in one card, in the order chosen",
+     "name": "0:00 to 0:08 · nothing proactive before an intent",
      "pass": true,
-     "detail": "t=11.6 show errands card"
+     "detail": "shows 1, non-gaze 1, holds 0"
     },
     {
-     "name": "0:12 · the route draws to the first stop, caused by the choice",
+     "name": "0:08 · Errands: the stops list replaces the panel, three stops in the order chosen, with Start",
      "pass": true,
-     "detail": "t=11.6 show route glance"
+     "detail": "t=8.1 show errands card"
     },
     {
-     "name": "0:12 · the first stop is the destination",
+     "name": "0:08 to 0:10 · no route before Start",
      "pass": true,
-     "detail": "380 frames"
+     "detail": "20 frames"
     },
     {
-     "name": "0:16 · the card folds to the route while walking",
+     "name": "0:10 · Start: the route draws to the first stop, caused by the choice",
      "pass": true,
-     "detail": "t=16.5 dismiss errands card"
+     "detail": "t=10 show route glance"
     },
     {
-     "name": "0:38 · the pharmacy lights its label on the look",
+     "name": "0:10 · the first stop is the destination",
      "pass": true,
-     "detail": "t=37.701 show main-street-pharmacy label"
+     "detail": "398 frames"
     },
     {
-     "name": "0:38 · its card after half a second of hold",
+     "name": "0:15 · the list folds to the route while walking",
      "pass": true,
-     "detail": "t=38.201 promote main-street-pharmacy card"
+     "detail": "t=15 dismiss errands card"
     },
     {
-     "name": "0:45 · scaffolding: one glance says why",
+     "name": "0:36 · the pharmacy lights its label on the look",
      "pass": true,
-     "detail": "t=44.501 show scaffolding glance"
+     "detail": "t=36.201 show main-street-pharmacy label"
     },
     {
-     "name": "0:52 · at the pharmacy door its card shows",
+     "name": "0:37 · its card after half a second of hold",
      "pass": true,
-     "detail": "t=52.601 promote main-street-pharmacy card"
+     "detail": "t=36.701 promote main-street-pharmacy card"
     },
     {
-     "name": "0:55 · picked up, the errands card returns with the stop ticked",
+     "name": "0:41 · scaffolding: one glance says why",
      "pass": true,
-     "detail": "t=55.401 show errands card"
+     "detail": "t=41.001 show scaffolding glance"
     },
     {
-     "name": "0:56 · four seconds at the door, then the route redraws to the next stop",
+     "name": "0:51 · at the pharmacy door its card shows",
      "pass": true,
-     "detail": "t=56.401 show route glance"
+     "detail": "t=50.901 show main-street-pharmacy card"
     },
     {
-     "name": "1:02 · hardware closed early, said and redrawn",
+     "name": "0:54 · picked up, the errands card returns with the stop ticked",
      "pass": true,
-     "detail": "t=61.501 promote errands card"
+     "detail": "t=53.901 show errands card"
     },
     {
-     "name": "1:02 · the route skips the closed stop",
+     "name": "0:55 · four seconds at the door, then the route redraws to the next stop",
      "pass": true,
-     "detail": "330 frames"
+     "detail": "t=54.901 show route glance"
     },
     {
-     "name": "1:03 to 1:33 · social never one by one",
+     "name": "0:58 · hardware closed early, said and redrawn",
+     "pass": true,
+     "detail": "t=58.001 promote errands card"
+    },
+    {
+     "name": "0:58 · the route skips the closed stop",
+     "pass": true,
+     "detail": "335 frames"
+    },
+    {
+     "name": "0:59 to 1:32 · social never one by one",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "1:09 to 1:33 · three on the glyph",
+     "name": "1:05 to 1:32 · three on the glyph",
      "pass": true,
-     "detail": "245 frames"
+     "detail": "270 frames"
     },
     {
-     "name": "1:10 to 1:20 · the bus is held at pip, not on the goal",
+     "name": "1:08 to 1:17 · the bus is held at pip, not on the goal",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "1:34 · the social strip surfaces once at the red light",
+     "name": "1:33 · the social strip surfaces once at the red light",
      "pass": true,
-     "detail": "t=94.302 show social glance"
+     "detail": "t=92.802 show social glance"
     },
     {
-     "name": "1:38 · the Post Office card up on dwell",
+     "name": "1:37 · the Post Office card up on dwell",
      "pass": true,
-     "detail": "t=98.102 promote post-office card"
+     "detail": "t=96.602 promote post-office card"
     },
     {
-     "name": "1:40 · head scans and a passerby change no level",
+     "name": "1:39 · head scans and a passerby change no level",
      "pass": true,
      "detail": ""
     },
@@ -261,7 +271,7 @@
     {
      "name": "1:52 · the DM is held",
      "pass": true,
-     "detail": "t=112.502 hold jules-tonight glance"
+     "detail": "t=112.002 hold jules-tonight glance"
     },
     {
      "name": "2:00 · one message came in",
@@ -279,14 +289,14 @@
      "detail": "t=130.803 show errands card"
     },
     {
-     "name": "2:11 · after the last stop: All done, then the loop resumes with no intent",
+     "name": "2:12 · then the loop resumes with no intent",
      "pass": true,
      "detail": "35 frames"
     },
     {
-     "name": "restraint · shows within the budget",
+     "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "shows 9, non-gaze 7, holds 4"
+     "detail": "shows 11, non-gaze 9, holds 5"
     }
    ],
    "description": "Recorded walk · 1361 snapshots at 10 Hz"
@@ -357,7 +367,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -421,9 +431,19 @@
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:01 · Hungry at the corner: the walk starts with no destination",
+     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
      "pass": true,
-     "detail": "9 frames"
+     "detail": "t=0.8 show intent card"
+    },
+    {
+     "name": "0:01 · Hungry chosen: the lunch picker replaces the panel",
+     "pass": true,
+     "detail": "t=1 show picker card"
+    },
+    {
+     "name": "0:01 · the panel folds as the picker shows",
+     "pass": true,
+     "detail": "t=1 dismiss intent card"
     },
     {
      "name": "0:02 · one label, the best fit, reason in the log only",
@@ -431,89 +451,109 @@
      "detail": "t=2.2 show goldies-counter label"
     },
     {
-     "name": "0:05 · not looked at, it folds itself",
+     "name": "0:03 · Goldie's picked: the route draws, caused by the choice",
      "pass": true,
-     "detail": "t=4.7 demote goldies-counter pip"
+     "detail": "t=3 show route glance"
     },
     {
-     "name": "0:00 to 0:34 · no card",
+     "name": "0:03 · and Goldie's is the destination",
+     "pass": true,
+     "detail": "77 frames"
+    },
+    {
+     "name": "0:03 · the picker folds and the light releases",
+     "pass": true,
+     "detail": "t=3 dismiss picker card"
+    },
+    {
+     "name": "0:09 · a look at Mega Burger, 69 m: its label",
+     "pass": true,
+     "detail": "t=8.8 show mega-burger label"
+    },
+    {
+     "name": "0:10 · a second of hold later (beyond 35 m), its compact card, offering itself instead",
+     "pass": true,
+     "detail": "t=9.8 promote mega-burger card"
+    },
+    {
+     "name": "0:11 · Go here instead: the route redraws to Mega Burger, caused by the choice",
+     "pass": true,
+     "detail": "t=11 show route glance"
+    },
+    {
+     "name": "0:11 · Mega Burger is the destination from here on",
+     "pass": true,
+     "detail": "966 frames"
+    },
+    {
+     "name": "0:03 to 0:38 · no place card except the one looked at",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:35 · a look at Mega Burger lights its label",
+     "name": "0:39 · a look at Trattoria da Lia across the street lights its label, then its card",
      "pass": true,
-     "detail": "t=35.501 show mega-burger label"
-    },
-    {
-     "name": "0:36 · a second of hold later (it is beyond 35 m), a compact card: no reason, no rows",
-     "pass": true,
-     "detail": "t=36.501 promote mega-burger card"
+     "detail": "t=39.801 promote trattoria-da-lia card"
     },
     {
      "name": "0:41 · pinch while walking saves",
      "pass": true,
-     "detail": "t=41.001 save mega-burger card"
+     "detail": "t=41.001 save trattoria-da-lia card"
     },
     {
-     "name": "0:35 to 0:47 · a far place never expands",
+     "name": "0:41 · nothing opens",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "0:41 to 1:17 · Pocket 1 on the glyph",
+     "name": "0:41 to 1:19 · Pocket 1 on the glyph",
      "pass": true,
-     "detail": "345 frames"
+     "detail": "379 frames"
     },
     {
-     "name": "0:48 · the look moves on and the card shrinks back to its label",
+     "name": "0:45 · the look moves on and the card shrinks back to its label",
      "pass": true,
-     "detail": "t=48.101 demote mega-burger label"
+     "detail": "t=45.101 demote trattoria-da-lia label"
     },
     {
-     "name": "0:51 · a look at the station stair lights its label",
+     "name": "0:52 · a look at the station stair lights its label",
      "pass": true,
      "detail": "t=51.601 show 47th-st-station label"
     },
     {
-     "name": "1:00 to 1:13 · Brisk: labels at most, never a card",
+     "name": "1:02 to 1:15 · Brisk: labels at most, never a card",
      "pass": true,
      "detail": "120 frames"
     },
     {
-     "name": "1:13 · no need to run",
+     "name": "1:15 · no need to run",
      "pass": true,
-     "detail": "t=73.001 show need-to-run glance"
+     "detail": "t=74.901 show need-to-run glance"
     },
     {
-     "name": "1:16 · the text from Maya at the red light",
+     "name": "1:18 · the text from Maya at the red light",
      "pass": true,
-     "detail": "t=76.502 show maya-usual glance"
+     "detail": "t=78.002 show maya-usual glance"
     },
     {
-     "name": "1:17 · the pocket surfaces with the time available",
+     "name": "1:20 · the pocket surfaces with the time available",
      "pass": true,
-     "detail": "t=77.602 surface pocket card"
+     "detail": "t=79.602 surface pocket card"
     },
     {
-     "name": "1:19 · pinch opens its card",
+     "name": "1:22 · a look across the avenue at Mega Burger: its card, Going here",
      "pass": true,
-     "detail": "t=79.002 show pocket:mega-burger card"
+     "detail": "t=82.302 promote mega-burger card"
     },
     {
-     "name": "1:21 · held gaze expands it in place",
+     "name": "1:24 · held gaze expands it in place",
      "pass": true,
-     "detail": "t=81.002 promote pocket:mega-burger expanded"
+     "detail": "t=84.302 promote mega-burger expanded"
     },
     {
-     "name": "1:23 · hold a seat: the destination is set by the choice and the route draws",
+     "name": "1:25 · hold a seat",
      "pass": true,
-     "detail": "t=83.002 show route glance"
-    },
-    {
-     "name": "1:24 · the route goes to Mega Burger",
-     "pass": true,
-     "detail": "45 frames"
+     "detail": "t=85.002 promote mega-burger expanded"
     },
     {
      "name": "1:29 to 1:39 · crossing, everything holds",
@@ -546,14 +586,19 @@
      "detail": "t=107.902 show arrival glance"
     },
     {
+     "name": "1:48 · no pocket at the door",
+     "pass": true,
+     "detail": ""
+    },
+    {
      "name": "1:52 · four seconds at the door, then the loop resumes with no destination and no intent",
      "pass": true,
      "detail": "55 frames"
     },
     {
-     "name": "restraint · shows within the budget",
+     "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "shows 8, non-gaze 5, holds 2"
+     "detail": "shows 11, non-gaze 7, holds 2"
     }
    ],
    "description": "Recorded walk · 1181 snapshots at 10 Hz"
@@ -624,7 +669,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -683,7 +728,17 @@
      "detail": "t=0 show safety:signal glance"
     },
     {
-     "name": "0:00 to 0:10 · nothing",
+     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
+     "pass": true,
+     "detail": "t=0.8 show intent card"
+    },
+    {
+     "name": "0:01 · Just walk folds it and the light releases",
+     "pass": true,
+     "detail": "t=1 dismiss intent card"
+    },
+    {
+     "name": "0:01 to 0:10 · after Just walk, nothing",
      "pass": true,
      "detail": "shows 0, non-gaze 0, holds 0"
     },
@@ -800,10 +855,25 @@
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 4, non-gaze 2, holds 7"
+     "detail": "shows 5, non-gaze 3, holds 7"
+    },
+    {
+     "name": "2:53 · a lap later, back at the corner: the light held again and the panel within 1 s of stopping",
+     "pass": true,
+     "detail": "t=173.703 show intent card"
+    },
+    {
+     "name": "2:56 · Just walk again: the panel folds and the second lap begins",
+     "pass": true,
+     "detail": "t=176.504 dismiss intent card"
+    },
+    {
+     "name": "2:58 · walking again with no destination",
+     "pass": true,
+     "detail": "35 frames"
     }
    ],
-   "description": "Recorded walk · 1121 snapshots at 10 Hz"
+   "description": "Recorded walk · 1821 snapshots at 10 Hz"
   },
   {
    "id": "gate-bike",
@@ -871,7 +941,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1012,7 +1082,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1147,7 +1217,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1288,7 +1358,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1441,7 +1511,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1582,7 +1652,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1729,7 +1799,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -1864,7 +1934,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2005,7 +2075,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2140,7 +2210,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2275,7 +2345,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2416,7 +2486,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2563,7 +2633,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2698,7 +2768,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2839,7 +2909,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -2968,7 +3038,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3115,7 +3185,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3250,7 +3320,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3379,7 +3449,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3520,7 +3590,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3661,7 +3731,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3790,7 +3860,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -3925,7 +3995,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4060,7 +4130,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4201,7 +4271,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4336,7 +4406,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4471,7 +4541,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4606,7 +4676,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4741,7 +4811,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -4888,7 +4958,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5029,7 +5099,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5170,7 +5240,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5341,7 +5411,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5488,7 +5558,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5635,7 +5705,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5770,7 +5840,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -5917,7 +5987,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""
@@ -6076,7 +6146,7 @@
      "detail": ""
     },
     {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
      "rule": "walking-7",
      "pass": true,
      "detail": ""

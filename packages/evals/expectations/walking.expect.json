@@ -15,9 +15,32 @@
       }
     },
     {
-      "name": "0:00 to 0:10 \u00b7 nothing",
+      "name": "0:01 \u00b7 stopped at the corner: the intent panel within 1 s",
       "between": [
-        0,
+        0.75,
+        1.0
+      ],
+      "must": {
+        "action": "show",
+        "id": "intent",
+        "component": "intent"
+      }
+    },
+    {
+      "name": "0:01 \u00b7 Just walk folds it and the light releases",
+      "between": [
+        1.0,
+        1.2
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "intent"
+      }
+    },
+    {
+      "name": "0:01 to 0:10 \u00b7 after Just walk, nothing",
+      "between": [
+        1.05,
         10.5
       ],
       "max": {
@@ -290,11 +313,48 @@
       "name": "restraint \u00b7 at most four non-gaze items",
       "between": [
         0,
-        112
+        170
       ],
       "max": {
         "nonGazeShows": 4,
         "shows": 9
+      }
+    },
+    {
+      "name": "2:53 \u00b7 a lap later, back at the corner: the light held again and the panel within 1 s of stopping",
+      "between": [
+        173.0,
+        174.2
+      ],
+      "must": {
+        "action": "show",
+        "id": "intent",
+        "component": "intent"
+      }
+    },
+    {
+      "name": "2:56 \u00b7 Just walk again: the panel folds and the second lap begins",
+      "between": [
+        176.5,
+        176.8
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "intent"
+      }
+    },
+    {
+      "name": "2:58 \u00b7 walking again with no destination",
+      "between": [
+        178.5,
+        182
+      ],
+      "state": {
+        "band": "walk",
+        "destination": null,
+        "hasNot": [
+          "intent"
+        ]
       }
     }
   ]

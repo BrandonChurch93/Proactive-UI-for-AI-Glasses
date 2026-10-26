@@ -50,6 +50,7 @@ export interface SimOptions {
   seed?: number;
   viewport?: Viewport;
   layout?: BlockLayout;
+  suggest?: ScenarioId | null;
 }
 
 export interface LiveInput {
@@ -66,10 +67,12 @@ const PICKUP_S = 3;
 
 export interface Plan {
   destination?: string;
+  go?: boolean;
 }
 
 export class Sim {
   readonly scenario: ScenarioId;
+  readonly suggest: ScenarioId | undefined;
   readonly layout: BlockLayout;
   readonly signal: SignalAnchor;
   readonly south: SouthSignal;
@@ -103,6 +106,7 @@ export class Sim {
   constructor(scenario: ScenarioId, opts: SimOptions = {}) {
     const seed = opts.seed ?? 47;
     this.scenario = scenario;
+    this.suggest = opts.suggest === null ? undefined : (opts.suggest ?? scenario);
     this.layout = opts.layout ?? buildLayout(seed);
     this.signal = { at: 0, leg: 'avenue', state: WALK.signal.state, secondsLeft: WALK.signal.secondsLeft };
     this.south = new SouthSignal(-WARMUP, false);
@@ -199,7 +203,6 @@ export class Sim {
     for (const b of beats) if (b.kind === 'stops') for (const sid of b.ids) this.liveData.set(sid, { ...PLACE_BY_ID.get(sid)?.live });
     for (const v of this.scriptedVehicles(beats)) this.traffic.add(v);
     for (const p of this.scriptedPeople(beats)) this.people.add(p);
-    this.release(t);
   }
 
   private release(t: number): void {
@@ -212,6 +215,7 @@ export class Sim {
     if (p.destination !== this.lastArrived) this.lastArrived = null;
     const dest = p.destination && p.destination !== this.lastArrived && doorSpur(p.destination) ? p.destination : 'start';
     this.want = dest;
+    if (p.go && this.wearer.holding) this.release(this.t);
   }
 
   private dwelling(t: number): boolean {
@@ -252,6 +256,11 @@ export class Sim {
     const at = w.where();
     w.setRoute(target === 'start' ? routeLoop(at) : routeTo(at, target));
     this.reroutes.push({ t, to: target });
+  }
+
+  private walkSeconds(id: string): number {
+    const r = this.route.target === id ? this.route.length - this.wearer.s : routeTo(this.wearer.where(), id).length;
+    return Math.round(r / WALK.speeds.walk);
   }
 
   private stopIds(): string[] {
@@ -492,6 +501,7 @@ export class Sim {
         depth: p.depth,
         distance: Math.round(dist(this.wearer.pos, a) * 100) / 100,
         routeS: Math.round(nearestS(this.route, placeDoor(p)) * 10) / 10,
+        walkS: this.walkSeconds(p.id),
         visible: pr.inFront && pr.x > 0 && pr.x < this.viewport.w && pr.y > 0 && pr.y < this.viewport.h,
         card: p.card,
         short: p.short,
@@ -503,6 +513,7 @@ export class Sim {
       if (p.liveLines) e.liveLines = p.liveLines;
       if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
+      if (p.picker) e.picker = p.picker;
       out.push(e);
     }
     return out;
@@ -584,6 +595,7 @@ export class Sim {
     if (stops.length) snap.goal.stops = stops.map((id) => ({ id }));
     if (this.intent) snap.goal.intentAt = round(this.intentAt);
     if (w.holding) snap.goal.corner = true;
+    if (this.suggest && this.lap === 0) snap.goal.suggest = this.suggest;
     if (w.route.target !== 'start') snap.goal.destination = w.route.target;
     if (this.dwelling(this.t)) snap.goal.arrived = true;
     if (view) {

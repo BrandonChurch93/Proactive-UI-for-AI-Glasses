@@ -41,7 +41,7 @@ function actions(c: Content, id: string, h: PaneHandlers): HTMLElement | null {
   if (!c.actions?.length) return null;
   const row = node('div', s.actions);
   for (const a of c.actions) {
-    const b = node('button', a.primary ? s.primary : undefined, a.label) as HTMLButtonElement;
+    const b = node('button', a.primary ? s.primary : a.id === 'end' || a.id === 'not-now' ? s.quiet : undefined, a.label) as HTMLButtonElement;
     b.type = 'button';
     b.dataset.k = `a:${a.id}`;
     b.addEventListener('click', (e) => {
@@ -73,7 +73,13 @@ function glanceKids(c: Content): HTMLElement[] {
 }
 
 function cardKids(c: Content): HTMLElement[] {
-  const out = [keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name')];
+  const out: HTMLElement[] = [keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name')];
+  if (c.chip) {
+    const head = node('div', s.cardHead);
+    head.appendChild(out[0]!);
+    head.appendChild(keyed(node('span', s.chip, c.chip), 'chip'));
+    out[0] = head;
+  }
   if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
   if (c.live) {
     const live = node('div', `${s.live} ${s.t}`);
@@ -97,6 +103,26 @@ function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement 
       if (r.sub) mid.appendChild(keyed(node('em', undefined, r.sub), `r${i}s`));
       li.appendChild(mid);
       li.appendChild(keyed(node('span', `${s.value} ${tone(r.tone)}`, r.value ?? ''), `r${i}v`));
+    } else if (cls === s.pickRows) {
+      const top = node('div', s.pickTop);
+      top.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
+      top.appendChild(keyed(node('span', s.value, r.value ?? ''), `r${i}v`));
+      li.appendChild(top);
+      if (r.sub) li.appendChild(keyed(node('div', s.pickSay, r.sub), `r${i}s`));
+      if (r.live) {
+        const live = node('div', s.live);
+        live.appendChild(node('i', undefined));
+        live.appendChild(keyed(node('span', undefined, r.live), `r${i}l`));
+        li.appendChild(live);
+      }
+      if (h && r.key) {
+        const key = r.key;
+        li.dataset.gaze = key;
+        li.addEventListener('click', (e) => {
+          e.stopPropagation();
+          h.pinch(key);
+        });
+      }
     } else if (cls === s.pocketRows) {
       li.appendChild(keyed(node('span', undefined, r.title), `r${i}t`));
       li.appendChild(keyed(node('span', undefined, r.value ?? ''), `r${i}v`));
@@ -147,7 +173,19 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       push(rowsList(c, s.errandsRows!, null));
       w = why(c, s.cardWhy!);
       push(w);
+      push(actions(c, d.id, h));
       return { cls: s.errands!, kids, why: w };
+    }
+    case 'intent': {
+      push(keyed(node('div', `${s.intentQ} ${s.t}`, c.name), 'name'));
+      push(actions(c, d.id, h));
+      return { cls: s.intent!, kids, why: null };
+    }
+    case 'picker': {
+      push(keyed(node('div', `${s.pocketHead} ${s.t}`, c.name), 'name'));
+      push(rowsList(c, s.pickRows!, h));
+      push(actions(c, d.id, h));
+      return { cls: s.picker!, kids, why: null };
     }
     case 'pocket': {
       push(keyed(node('div', `${s.pocketHead} ${s.t}`, c.name), 'name'));
@@ -164,7 +202,7 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
   }
   if (level === 'expanded') {
     kids.push(...cardKids({ ...c, live: undefined }));
-    kids[0]!.classList.replace(s.cardName!, s.expName!);
+    (kids[0]!.querySelector(`.${s.cardName}`) ?? kids[0]!).classList.replace(s.cardName!, s.expName!);
     push(rowsList(c, s.rows!, null));
     push(actions(c, d.id, h));
     if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));
@@ -176,6 +214,7 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
     kids.push(...cardKids(c));
     w = why(c, s.cardWhy!);
     push(w);
+    push(actions(c, d.id, h));
     return { cls: s.card!, kids, why: w };
   }
   kids.push(...glanceKids(c));

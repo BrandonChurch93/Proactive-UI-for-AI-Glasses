@@ -43,6 +43,7 @@ export interface PlaceCopy {
   expanded: DepthPayload | null;
   liveLines?: Record<string, string>;
   translate?: boolean;
+  picker?: string;
 }
 
 export interface PlaceData extends PlaceCopy {
@@ -171,6 +172,7 @@ function validatePlace(raw: unknown, i: number): PlaceData {
   const sayOk = (t: unknown): boolean => isRecord(t) && isRecord(t.default) && Object.values(t).every((v) => isRecord(v) && typeof v.line === 'string' && typeof v.short === 'string');
   if (!sayOk(raw.say)) fail(where, 'say needs a default line and short form, and every entry a line and a short form');
   if (raw.sayLive !== undefined && !(isRecord(raw.sayLive) && Object.values(raw.sayLive).every(sayOk))) fail(where, 'sayLive entries must be say tables');
+  if (raw.picker !== undefined && typeof raw.picker !== 'string') fail(where, 'picker must be a string');
   if (!isRecord(raw.reasons)) fail(where, 'reasons must be an object');
   for (const r of Object.values(raw.reasons)) {
     if (typeof r !== 'string' || r.length > 48) fail(where, `reason over 48 characters: ${String(r)}`);

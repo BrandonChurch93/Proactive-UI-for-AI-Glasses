@@ -27,7 +27,7 @@
   "holdS": 12,
   "beats": [
     {
-      "t": 75.5,
+      "t": 77,
       "kind": "inbox",
       "type": "text",
       "id": "maya-usual",
@@ -125,7 +125,7 @@
       "intent": "errands"
     },
     {
-      "t": 101,
+      "t": 104,
       "kind": "inbox",
       "type": "dm",
       "id": "jules-tonight",
@@ -173,17 +173,38 @@
           "id": "hungry"
         },
         {
-          "t": 35,
+          "t": 3,
+          "kind": "choose",
+          "id": "goldies-counter"
+        },
+        {
+          "t": 8.5,
           "kind": "gaze",
           "id": "mega-burger"
         },
         {
-          "t": 41,
-          "kind": "pinch",
-          "id": "mega-burger"
+          "t": 11,
+          "kind": "choice",
+          "id": "mega-burger",
+          "action": "go-instead"
         },
         {
-          "t": 47,
+          "t": 12.5,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 38.5,
+          "kind": "gaze",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 41,
+          "kind": "pinch",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 44,
           "kind": "gaze",
           "id": null
         },
@@ -198,23 +219,18 @@
           "id": null
         },
         {
-          "t": 79,
+          "t": 81,
           "kind": "gaze",
-          "id": "pocket:mega-burger"
+          "id": "mega-burger"
         },
         {
-          "t": 79,
-          "kind": "pinch",
-          "id": "pocket:mega-burger"
-        },
-        {
-          "t": 83,
+          "t": 85,
           "kind": "choice",
           "id": "mega-burger",
           "action": "hold-seat"
         },
         {
-          "t": 85,
+          "t": 87,
           "kind": "gaze",
           "id": null
         }
@@ -224,27 +240,33 @@
       "duration": 136,
       "beats": [
         {
-          "t": 11.5,
+          "t": 8,
           "kind": "intent",
           "id": "errands"
         },
         {
-          "t": 37,
+          "t": 10,
+          "kind": "choice",
+          "id": "errands",
+          "action": "start"
+        },
+        {
+          "t": 35.5,
           "kind": "gaze",
           "id": "main-street-pharmacy"
         },
         {
-          "t": 42,
+          "t": 40.5,
           "kind": "gaze",
           "id": null
         },
         {
-          "t": 97,
+          "t": 95.5,
           "kind": "gaze",
           "id": "post-office"
         },
         {
-          "t": 100,
+          "t": 99,
           "kind": "headScan",
           "sequence": [
             "left",
@@ -255,7 +277,7 @@
       ]
     },
     "walking": {
-      "duration": 112,
+      "duration": 182,
       "beats": [
         {
           "t": 1,
@@ -308,6 +330,11 @@
           "kind": "ask",
           "answer": "no",
           "answerAt": 80
+        },
+        {
+          "t": 176.5,
+          "kind": "intent",
+          "id": "walking"
         }
       ]
     }

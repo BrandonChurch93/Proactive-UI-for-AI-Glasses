@@ -22,6 +22,7 @@ const p = await b.newPage({ viewport: { width: w, height: h } });
 const errors: string[] = [];
 p.on('pageerror', (e) => errors.push(e.message));
 p.on('console', (m) => {
+  if (m.type() === 'log' && m.text().startsWith('far ')) console.log(m.text());
   if (m.type() === 'error') errors.push(m.text());
 });
 
@@ -43,7 +44,7 @@ async function open(sc: string): Promise<void> {
 const PROBES: Record<string, { t: number; id: string; dy?: number }[]> = {
   hungry: [
     { t: 6, id: 'kathys-cupcakes', dy: 0.2 },
-    { t: 44, id: 'post-office' },
+    { t: 40, id: 'lucky-lanes' },
   ],
   errands: [
     { t: 66, id: 'post-office' },
@@ -60,9 +61,11 @@ if (probes) {
     await open(scenario);
     const r = (await p.evaluate(`(async () => {
       const id = ${JSON.stringify(pr.id)};
-      const walk = window.__app.walk; walk.paused = true; walk.autoIntent = false;
+      const walk = window.__app.walk; walk.paused = true;
       if (walk.t > 0) walk.seek(0);
-      for (const x of walk.sim.reviewer.intents) { walk.seek(x.t); walk.queue({ choice: { id: 'intent', action: x.id } }); }
+      const rv = walk.sim.reviewer;
+      const evs = [...rv.choices.map((c) => ({ t: c.t, ev: { choice: { id: c.id, action: c.action } } })), ...rv.pinches.map((x) => ({ t: x.t, ev: { pinch: x.id } }))].filter((e) => e.t < ${pr.t}).sort((a, b) => a.t - b.t);
+      for (const e of evs) { walk.seek(e.t); walk.queue(e.ev); }
       walk.seek(${pr.t});
       const sim = walk.sim; const o = walk.overlay;
       const aim = () => { const a = sim.anchorOf(id); const e = sim.wearer.pos; walk.look(Math.atan2(-(a.x - e.x), -(a.z - e.z)) - sim.wearer.bodyYaw, Math.atan2(a.y - ${pr.dy ?? 1.6} - e.y, Math.hypot(a.x - e.x, a.z - e.z))); };
@@ -88,11 +91,11 @@ if (probes) {
 } else {
   await open(scenario);
   await p.evaluate(`(() => {
-    const walk = window.__app.walk; walk.paused = true; walk.autoIntent = ${lapRun};
+    const walk = window.__app.walk; walk.paused = true;
     if (walk.t > 0) walk.seek(0);
     const sim = walk.sim; const o = walk.overlay;
     if (${nolookup}) sim.reviewer.lookUps = [];
-    const lap = { laps: 0, pauses: [], stillFrom: null, crossBirths: [], crossFrames: 0, routes: [], destAt: null, dest: null };
+    const lap = { laps: 0, pauses: [], stillFrom: null, crossBirths: [], crossFrames: 0, routes: [], destAt: null, dest: null, corners: [], cornerFrom: null };
     const vp = { w: innerWidth, h: innerHeight };
     const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {} };
     let lastTick = -1;
@@ -127,6 +130,12 @@ if (probes) {
         lap.stillFrom = null;
       }
       lap.laps = sim.lap;
+      if (sim.holding && w.speed < 0.05) {
+        if (lap.cornerFrom === null) { lap.cornerFrom = sim.t; lap.corners.push([+sim.t.toFixed(2), null]); }
+        const panel = o.items.get('intent');
+        const open = lap.corners[lap.corners.length - 1];
+        if (open[1] === null && panel && panel.cur && panel.cur.opacity >= 0.5) open[1] = +(sim.t - lap.cornerFrom).toFixed(2);
+      } else if (!sim.holding) lap.cornerFrom = null;
       const goalDest = walk.last()?.frame.goal.destination ?? null;
       if (goalDest !== lap.dest) {
         lap.dest = goalDest;
@@ -153,8 +162,9 @@ if (probes) {
         m.per[it.id] = (m.per[it.id] || 0) + 1;
         const r = c.rect;
         const dx = Math.max(r.x - pr.x, 0, pr.x - (r.x + r.w)); const dy = Math.max(r.y - pr.y, 0, pr.y - (r.y + r.h));
-        const ratio = Math.hypot(dx, dy) / r.w;
+        const ratio = it.yieldS && it.yieldS.on ? 0 : Math.hypot(dx, dy) / r.w;
         if (ratio > 1) { m.farFrames++; if (ratio > m.worstFar) { m.worstFar = ratio; m.worstFarAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
+        if (ratio > 1 && ${process.argv.includes('--far')}) console.log('far', walk.t.toFixed(3), it.id, JSON.stringify(r), Math.round(pr.x), Math.round(pr.y), c.opacity.toFixed(2), JSON.stringify(it.placed && { mode: it.placed.mode, moved: it.placed.moved }), it.aside ? JSON.stringify({ a: it.aside.active, by: it.aside.by }) : '');
         let ov = 0; for (const k of road) ov += overlap(r, k.rect);
         if (ov > 1) { m.roadFrames++; const f = ov / (r.w * r.h); if (f > m.worstRoad) { m.worstRoad = f; m.worstRoadAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
       }
@@ -203,7 +213,7 @@ if (probes) {
     m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
-    lap: { laps: number; pauses: [number, number][]; crossBirths: unknown[]; routes: [number, string, number | null][] };
+    lap: { laps: number; pauses: [number, number][]; crossBirths: unknown[]; routes: [number, string, number | null][]; corners: [number, number | null][] };
   };
   const { m, log } = out;
   const only = arg('id');
@@ -300,6 +310,8 @@ if (probes) {
   const L = out.lap;
   const slow = L.routes.filter((r) => r[2] === null || r[2] > 2);
   console.log(`  route drawn within 2 s of a choice or a Yes: ${L.routes.length - slow.length} of ${L.routes.length}${L.routes.length ? `  ${JSON.stringify(L.routes)}` : ''}`);
+  const lateCorner = L.corners.filter((c) => c[1] === null || c[1] > 1);
+  console.log(`  intent panel within 1 s of Stopped at the corner: ${L.corners.length - lateCorner.length} of ${L.corners.length}${L.corners.length ? `  ${JSON.stringify(L.corners)}` : ''}`);
   console.log(`  panes born during a crossing: ${L.crossBirths.length}${L.crossBirths.length ? `  ${JSON.stringify(L.crossBirths.slice(0, 6))}` : ''}`);
   console.log(`  laps completed: ${L.laps}; stops longer than 1 s not at a light, a door or the corner: ${L.pauses.length}${L.pauses.length ? `  ${JSON.stringify(L.pauses.slice(0, 6))}` : ''}`);
 }

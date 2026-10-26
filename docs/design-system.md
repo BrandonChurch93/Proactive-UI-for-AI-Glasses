@@ -205,7 +205,7 @@ Synthesized, no files. Off by default, one button turns it on.
 Zones:
 - World zone (pips, labels, cards, expanded view): projected from 3D anchors every frame. Scale with distance: `scale = clamp(22 / distance, .7, 1)` times the screen scale, never below 1 (no pane text under 12 px): full size at 22 m and nearer, a smaller label beyond.
 - Ground zone (route, turn arc, destination marker, safety text): painted on the pavement in perspective.
-- View zone (held glyph, message toasts, map tile, the ask glance, reviewer chrome): fixed in view, edges only.
+- View zone (held glyph, message toasts, map tile, the ask glance, the intent panel, the lunch picker, the errands list, reviewer chrome): fixed in view, edges only.
 
 Rules:
 1. Anchor at sign height for a storefront, chest height for a person. The pane sits beside its light on the side away from the center of the view, its near edge 24 px from the light and rising from it, the light 85 % of the way down the pane's height, joined by a short straight leader; when that does not fit, centered above the light with its bottom 22 px above it; then centered below. It is never placed over the roadway; with nowhere else to go it sits above its light at the roadway's top edge.
@@ -224,9 +224,12 @@ Screen scale: sizes above are at the reference view of 1280 × 800. Every pane, 
 | --- | --- | --- | --- |
 | Pip | World | Pip | Light vocabulary, category tint |
 | Label | World | Label | Name and the short form of what the assistant would say about it, beside its storefront, scaled by distance; in Brisk the whisper form (name and one number). Nothing else. Up to six at once, when the view settles |
-| Place card | World | Card | Name, the say line, one live line (the two facts behind it), the reason in Stopped and Stroll. No year, no hint (no card exists in Brisk). Beyond 30 m the compact card: name, say line and live line only, at the distance scale; it becomes the full card in place within 30 m |
+| Place card | World | Card | Name, the say line, one live line (the two facts behind it), the reason in Stopped and Stroll. No year, no hint (no card exists in Brisk). Beyond 30 m the compact card: name, say line and live line only, at the distance scale; it becomes the full card in place within 30 m. While a lunch destination is set, any other lunch place's card (compact or full) carries one primary action, Go here instead |
 | Expanded view | World, in place | Expanded | One decision: name, the say line, at most three rows that support it, two actions, then the line after a choice |
-| Errands card | View edge | Card | The stops in order with why; ticks a stop on pickup; reorders on a closure; folds to the route after 4 s while moving |
+| Intent panel | View edge | Card | At the start corner, within 1 s of stopping, every lap: the question in 17 px / 600 and four choices in a 2 x 2 grid, the title's choice filled, End the walk quiet (transparent, `--ink-2`). Answers fold it; Esc folds it as Just walk. Not on the attention budget |
+| Lunch picker | View edge | Card | Replaces the intent panel on Hungry. Header in the pocket's mono voice; one row per lunch place by walk time: name 14 px / 600 with the walk time in mono `--voice` at the right, the picker line 12.5 px `--ink-2`, the live line with its dot; 320 px wide, up to six rows before it scrolls (wheel or drag); the row under the pointer is the gaze target and lifts to 7% ink; a pinch chooses; Not now quiet. Not on the attention budget |
+| Errands card | View edge | Card | The stops in order with why; at the corner it carries Start; ticks a stop on pickup; reorders on a closure; folds to the route after 4 s while moving. Not on the attention budget |
+| Going here chip | In a card header | n/a | Mono 10.5 px caps in `--voice`, 1 px `--voice` border at 50%, radius 3 px; on the destination's card and expanded view only |
 | Leader, seed | World | Label, card | Light vocabulary |
 | Held glyph | View | Any | Rotated square, accent, optional count (held items, pocket count, social count) or the snooze countdown; the only persistent element |
 | Pocket pane | View, beside the glyph | Card | "12 s · what you saved" and the saved items as rows; surfaces at a stop |

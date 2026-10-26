@@ -70,7 +70,10 @@ const LOOP = ['E', 'AN', 'W', 'AS'];
 export interface GraphPos {
   edge: string;
   d: number;
+  dir?: 1 | -1;
 }
+
+const TURN_BACK_M = 12;
 
 function pointOn(e: Edge, d: number): RoutePoint {
   const dd = Math.max(0, Math.min(e.len, d));
@@ -181,6 +184,7 @@ interface Start {
   d: number;
   prefix: Step[];
   cost: number;
+  dir?: 1 | -1;
 }
 
 function hostOf(sp: Edge): Edge {
@@ -189,7 +193,7 @@ function hostOf(sp: Edge): Edge {
 
 function startOf(pos: GraphPos): Start {
   const e = edgeOf(pos.edge)!;
-  if (!e.id.startsWith('spur:')) return { host: e, d: pos.d, prefix: [], cost: 0 };
+  if (!e.id.startsWith('spur:')) return pos.dir ? { host: e, d: pos.d, prefix: [], cost: 0, dir: pos.dir } : { host: e, d: pos.d, prefix: [], cost: 0 };
   const sp = doorSpur(e.id.slice(5))!;
   const back: Step = { edge: e, d0: pos.d, d1: 0 };
   if (sp.attach < 0) {
@@ -199,13 +203,14 @@ function startOf(pos: GraphPos): Start {
   return { host: hostOf(e), d: sp.attach, prefix: [back], cost: pos.d };
 }
 
+// A pedestrian keeps going rather than turn around for a few metres, so heading back costs a little more.
 function originOf(st: Start): Map<Node, { cost: number; steps: Step[] }> {
   const e = st.host;
   const origin = new Map<Node, { cost: number; steps: Step[] }>();
   const toA: Step[] = st.d > 1e-6 ? [{ edge: e, d0: st.d, d1: 0 }] : [];
   const toB: Step[] = e.len - st.d > 1e-6 ? [{ edge: e, d0: st.d, d1: e.len }] : [];
-  origin.set(e.a, { cost: st.cost + st.d, steps: [...st.prefix, ...toA] });
-  origin.set(e.b, { cost: st.cost + e.len - st.d, steps: [...st.prefix, ...toB] });
+  origin.set(e.a, { cost: st.cost + st.d + (st.dir === 1 && toA.length ? TURN_BACK_M : 0), steps: [...st.prefix, ...toA] });
+  origin.set(e.b, { cost: st.cost + e.len - st.d + (st.dir === -1 && toB.length ? TURN_BACK_M : 0), steps: [...st.prefix, ...toB] });
   return origin;
 }
 
@@ -256,7 +261,8 @@ export function routeTo(pos: GraphPos, target: string): Route {
   const host = hostOf(sp.edge);
   const viaA = best.get(host.a)!.cost + sp.attach;
   const viaB = best.get(host.b)!.cost + host.len - sp.attach;
-  const here = st.host.id === host.id ? st.cost + Math.abs(st.d - sp.attach) : Infinity;
+  const back = (st.dir === 1 && sp.attach < st.d) || (st.dir === -1 && sp.attach > st.d) ? TURN_BACK_M : 0;
+  const here = st.host.id === host.id ? st.cost + Math.abs(st.d - sp.attach) + back : Infinity;
   if (here <= Math.min(viaA, viaB)) return build([...st.prefix, { edge: host, d0: st.d, d1: sp.attach }, tail], target);
   if (viaA <= viaB) return build([...best.get(host.a)!.steps, { edge: host, d0: 0, d1: sp.attach }, tail], target);
   return build([...best.get(host.b)!.steps, { edge: host, d0: host.len, d1: sp.attach }, tail], target);
@@ -289,7 +295,9 @@ export function graphPos(r: Route, s: number): GraphPos {
   if (!pc) return START;
   const span = pc.s1 - pc.s0;
   const k = span > 1e-9 ? Math.max(0, Math.min(1, (s - pc.s0) / span)) : 1;
-  return { edge: pc.edge, d: pc.d0 + (pc.d1 - pc.d0) * k };
+  const pos: GraphPos = { edge: pc.edge, d: pc.d0 + (pc.d1 - pc.d0) * k };
+  if (pc.d1 !== pc.d0) pos.dir = pc.d1 > pc.d0 ? 1 : -1;
+  return pos;
 }
 
 export function nodePos(n: Node): Vec3 {

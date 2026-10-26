@@ -35,6 +35,7 @@ export interface Entity extends PlaceCopy {
   year?: number;
   distance: number;
   routeS: number;
+  walkS?: number;
   visible: boolean;
 }
 
@@ -148,7 +149,7 @@ export interface WorldSnapshot {
   social: { inConversation: boolean; companions: number };
   entities: Entity[];
   inbox: Notification[];
-  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; lap?: number; corner?: boolean; intentAt?: number };
+  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; lap?: number; corner?: boolean; intentAt?: number; suggest?: ScenarioId };
   wearerModel: WearerModel;
   view?: { w: number; h: number; panes: PaneReport[] };
 }
@@ -171,6 +172,7 @@ export interface ContentRow {
   value?: string;
   tone?: 'go' | 'warn' | 'stop' | 'voice' | 'done';
   key?: string;
+  live?: string;
 }
 
 export interface Content {
@@ -190,6 +192,7 @@ export interface Content {
   seconds?: number;
   tone?: 'go' | 'warn' | 'stop' | 'voice';
   arrow?: 'left' | 'right' | 'up' | 'down';
+  chip?: string;
 }
 
 export type ComponentKind =
@@ -206,7 +209,9 @@ export type ComponentKind =
   | 'route'
   | 'destination'
   | 'safety'
-  | 'arrival';
+  | 'arrival'
+  | 'intent'
+  | 'picker';
 
 export interface SignalBundle {
   speed: number;
@@ -290,7 +295,7 @@ export interface BrainFrame {
   focus: { w: number; h: number };
   model: WearerModel;
   dwell: { target?: string; dwellMs: number; earned: Level | 'none'; mark?: { p: number; rate: number } };
-  goal: { scenario: ScenarioId; destination?: string; stops: string[] };
+  goal: { scenario: ScenarioId; destination?: string; stops: string[]; go?: boolean };
   stoppedFor: number;
 }
 

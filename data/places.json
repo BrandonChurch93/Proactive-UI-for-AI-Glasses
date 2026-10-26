@@ -156,7 +156,8 @@
           "line": "Burgers till 1 am · 6 min wait",
           "short": "6 min wait"
         }
-      }
+      },
+      "picker": "Burgers, counter seats"
     },
     {
       "id": "lucky-lanes",
@@ -377,7 +378,8 @@
           "line": "The sign says home cooking · open till 11",
           "short": "Home cooking"
         }
-      }
+      },
+      "picker": "Home cooking, sit-down"
     },
     {
       "id": "pocket-park",
@@ -494,7 +496,8 @@
           "line": "Pastrami counter · 3 min wait",
           "short": "3 min wait"
         }
-      }
+      },
+      "picker": "Fastest lunch on this side"
     },
     {
       "id": "kathys-cupcakes",
@@ -571,7 +574,8 @@
           "line": "Brown butter batch at 2 · 80 min from now",
           "short": "Batch at 2"
         }
-      }
+      },
+      "picker": "Not lunch, a batch at 2"
     },
     {
       "id": "big-bean",
@@ -649,7 +653,8 @@
           "line": "Line of 4 · 5 min",
           "short": "Line of 4"
         }
-      }
+      },
+      "picker": "Coffee after"
     },
     {
       "id": "main-street-pharmacy",

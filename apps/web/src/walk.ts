@@ -69,7 +69,6 @@ const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
 const SEED = 47;
 const ATTENTION_M = 70;
-const INTENT_TICK = 10;
 
 const clock = gsap.timeline({ autoRemoveChildren: true });
 gsap.globalTimeline.remove(clock);
@@ -124,7 +123,6 @@ export class Walk {
   private following = false;
   private pick: { step: number; cur: string | null; cand: string | null; candSince: number; outSince: number | null } = { step: -2, cur: null, cand: null, candSince: 0, outSince: null };
   holding = false;
-  autoIntent = true;
   private sound: { ctx: AudioContext | null; enabled: boolean } = { ctx: null, enabled: false };
 
   constructor(
@@ -188,7 +186,10 @@ export class Walk {
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       handlers: {
         pinch: (id) => this.pinch(id),
-        choice: (id, action) => this.queue({ choice: { id, action } }),
+        choice: (id, action) => {
+          this.queue({ choice: { id, action } });
+          if (id === 'intent' && action === 'end') this.end();
+        },
       },
     });
     o.setFocusOutline(this.focusOutline);
@@ -248,7 +249,8 @@ export class Walk {
   }
 
   dismiss(): void {
-    this.queue({ dismiss: this.sim.gaze.target ?? null });
+    const panel = this.last()?.frame.items.find((d) => d.id === 'intent' || d.id === 'picker');
+    this.queue({ dismiss: panel?.id ?? this.sim.gaze.target ?? null });
   }
 
   look(yaw: number, pitch: number): void {
@@ -347,7 +349,7 @@ export class Walk {
       const pr = this.bridge.project(a);
       const px = Math.hypot(pr.x - vw / 2, pr.y - vh / 2);
       if (pr.inFront && px < (keep ? PIP_RELEASE_PX : PIP_ACQUIRE_PX)) {
-        take(id, px / 4000 - 0.05);
+        take(id, px / 4000 - (keep ? 0.25 : 0.05));
         continue;
       }
       if (place?.n) continue;
@@ -425,7 +427,6 @@ export class Walk {
     const k = this.tickIndex;
     const sim = this.sim;
     if (!sim.scripted) {
-      if (k === INTENT_TICK && this.autoIntent && !this.events.has(k)) this.pending = { choice: { id: 'intent', action: this.scenario }, ...this.pending };
       let ev = this.events.get(k);
       if (!ev && Object.keys(this.pending).length > 0) {
         ev = this.pending;

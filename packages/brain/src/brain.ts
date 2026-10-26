@@ -31,8 +31,10 @@ import {
   entityReason,
   expandedContent,
   labelContent,
+  liveLine,
   pipContent,
   reason,
+  sayFor,
   whisperContent,
 } from './content';
 import { bikeBehind, computeGates, gateList } from './gates';
@@ -108,6 +110,10 @@ const HOLD_TEXT: Record<string, string> = {
 
 const MESSAGE_TYPES = new Set(['text', 'dm']);
 
+function walkTime(s: number): string {
+  return s < 55 ? `${Math.max(10, Math.round(s / 10) * 10)} s` : `${Math.round(s / 60)} min`;
+}
+
 const DEFAULT_CAUSE: Partial<Record<Origin, Cause>> = {
   proactive: 'score',
   gaze: 'dwell',
@@ -172,6 +178,8 @@ export class Brain {
   private needToRunUntil = -1;
   private arrival: string | null = null;
   private routeCause: Cause = 'goal';
+  private corner: { lap: number; state: 'intent' | 'picker' | 'stops' | 'done' } | null = null;
+  private errandsStarted = false;
   private routeCauseNext: Cause | null = null;
   private routeShown: string | undefined;
   private overrides: { band: Band | null; gate: boolean; muteSocial: boolean } = {
@@ -229,8 +237,12 @@ export class Brain {
     this.snapRef++;
     this.frameEvents = [];
     this.dismissedNow.clear();
-    if (snap.goal.scenario && this.snapRef === 0) this.goal = snap.goal.scenario;
+    if (snap.goal.scenario && this.snapRef === 0) {
+      this.goal = snap.goal.scenario;
+      this.errandsStarted = this.goal === 'errands';
+    }
     this.trackArrival(snap);
+    this.trackCorner(snap);
 
     const band = this.pace.update(snap.wearer.speed, t, this.overrides.band);
     this.bandNow = band;
@@ -263,6 +275,7 @@ export class Brain {
     if (snap.goal.stops && this.stops.length === 0 && this.goal === 'errands') this.stops = snap.goal.stops.map((s) => s.id);
     this.ingestInbox(snap, t, dt, band);
     this.applyChoice(snap, t);
+    this.applyPick(snap);
     this.applyDismiss(snap, t);
 
     if ((snap.goal.lap ?? 0) !== this.lap) {
@@ -277,6 +290,7 @@ export class Brain {
       this.entityWants(snap, t, band, wants);
       this.peopleWants(snap, wants);
       this.momentWants(snap, t, band, wants);
+      this.cornerWants(snap, wants);
       this.errandsWants(snap, t, dt, band, wants);
       this.messageWants(snap, t, band, wants);
       this.pocketWants(snap, t, band, stoppedFor, wants);
@@ -311,13 +325,43 @@ export class Brain {
         scenario: this.goal,
         ...(this.routeTarget(snap) ? { destination: this.routeTarget(snap)! } : {}),
         stops: this.openStops(snap),
+        go: !this.corner || this.corner.state === 'done',
       },
       stoppedFor,
     };
   }
 
   private routeTarget(snap: WorldSnapshot): string | undefined {
-    return this.goal === 'errands' ? this.openStops(snap)[0] : this.destination;
+    if (this.goal === 'errands') return this.errandsStarted ? this.openStops(snap)[0] : undefined;
+    return this.destination;
+  }
+
+  private trackCorner(snap: WorldSnapshot): void {
+    const lap = snap.goal.lap ?? 0;
+    if (snap.goal.corner) {
+      if (!this.corner || this.corner.lap !== lap) this.corner = { lap, state: 'intent' };
+      return;
+    }
+    if (!this.corner || this.corner.state === 'done') return;
+    if (this.goal === 'errands' && !this.errandsStarted) {
+      this.errandsStarted = true;
+      this.routeCauseNext = 'goal';
+    }
+    this.corner.state = 'done';
+  }
+
+  private setCorner(state: 'intent' | 'picker' | 'stops' | 'done'): void {
+    if (this.corner) this.corner.state = state;
+  }
+
+  private pick(id: string): void {
+    this.setDestination(id, 'choice');
+    this.setCorner('done');
+  }
+
+  private applyPick(snap: WorldSnapshot): void {
+    const target = snap.wearer.pinch?.target;
+    if (target?.startsWith('pick:') && this.corner?.state === 'picker') this.pick(target.slice(5));
   }
 
   private setDestination(id: string | undefined, cause: Cause): void {
@@ -459,7 +503,22 @@ export class Brain {
         this.foodGlances.clear();
         this.setDestination(undefined, 'choice');
         this.routeCauseNext = 'choice';
-      }
+        this.errandsStarted = false;
+        this.setCorner(c.action === 'hungry' ? 'picker' : c.action === 'errands' ? 'stops' : 'done');
+      } else if (c.action === 'end') this.setCorner('done');
+      return;
+    }
+    if (c.id === 'picker') {
+      if (c.action === 'not-now') {
+        this.goal = 'walking';
+        this.setCorner('done');
+      } else if (this.corner?.state === 'picker') this.pick(c.action);
+      return;
+    }
+    if (c.id === 'errands' && c.action === 'start') {
+      this.errandsStarted = true;
+      this.routeCauseNext = 'choice';
+      this.setCorner('done');
       return;
     }
     if (c.id === 'ask') {
@@ -490,6 +549,11 @@ export class Brain {
       }
       return;
     }
+    if (c.action === 'go-instead') {
+      this.setDestination(id, 'choice');
+      this.bump(this.accepted, this.kindOf(id));
+      return;
+    }
     this.chosen.set(id, c.action);
     this.bump(this.accepted, this.kindOf(id));
     if (c.action === 'hold-seat' || c.action === 'hold-table') {
@@ -507,6 +571,11 @@ export class Brain {
         .filter((x) => x.placement.zone !== 'ground' && LEVEL_RANK[x.level] >= LEVEL_RANK.label)
         .sort((a, b) => LEVEL_RANK[b.level] - LEVEL_RANK[a.level])[0]?.id;
     if (!targetId) return;
+    if (targetId === 'intent' || targetId === 'picker') {
+      if (targetId === 'intent' || this.goal === 'hungry') this.goal = 'walking';
+      this.setCorner('done');
+      return;
+    }
     this.dismissedNow.add(targetId);
     const li = this.items.get(targetId);
     if (li && isPane(li.level)) {
@@ -837,10 +906,57 @@ export class Brain {
   }
 
   private entityContent(e: Entity, level: PaneLevel, why: Reason, band: Band): Content {
-    if (level === 'expanded') return expandedContent(e, why, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id));
-    if (level === 'card') return cardContent(e, why, band, this.goal, e.distance > this.cfg.ladder.cardWithinM);
+    if (level === 'expanded') return this.decorate(e, expandedContent(e, why, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id)), level);
+    if (level === 'card') return this.decorate(e, cardContent(e, why, band, this.goal, e.distance > this.cfg.ladder.cardWithinM), level);
     if (level === 'label') return trimForPace(labelContent(e, why, this.goal), band === 'stopped' ? 'stroll' : band, undefined, this.cfg);
     return pipContent(e, why);
+  }
+
+  // The destination says so in its header; any other lunch place offers itself instead.
+  private decorate(e: Entity, c: Content, level: PaneLevel): Content {
+    if (this.routeTarget(this.snap) === e.id) return { ...c, chip: 'Going here' };
+    if (level === 'card' && this.goal === 'hungry' && this.destination && (e.kind === 'food' || e.kind === 'cafe')) {
+      return { ...c, actions: [{ id: 'go-instead', label: 'Go here instead', primary: true }] };
+    }
+    return c;
+  }
+
+  private cornerWants(snap: WorldSnapshot, wants: Want[]): void {
+    const st = this.corner?.state;
+    if (st === 'intent' && (this.bandNow === 'stopped' || this.standing.has('intent'))) {
+      const r = reason('world', 'Long red light', [{ signal: 'corner', value: snap.goal.lap ?? 0, weight: 1 }]);
+      const sug = snap.goal.suggest;
+      const opt = (id: string, label: string): { id: string; label: string; primary?: boolean } => (sug === id ? { id, label, primary: true } : { id, label });
+      wants.push({
+        id: 'intent',
+        component: 'intent',
+        zone: 'view',
+        level: 'card',
+        anchor: 'view:edge-right',
+        content: { name: 'What are you up to?', reason: r, showReason: false, actions: [opt('hungry', 'Hungry'), opt('errands', 'Errands'), opt('walking', 'Just walk'), { id: 'end', label: 'End the walk' }] },
+        reason: r,
+        origin: 'goal',
+        timing: 'now',
+      });
+    }
+    if (st === 'picker') {
+      const r = reason('world', 'Lunch spots on this block', [{ signal: 'places', value: 'food, cafe', weight: 1 }]);
+      const rows = snap.entities
+        .filter((e) => e.kind === 'food' || e.kind === 'cafe')
+        .sort((a, b) => (a.walkS ?? 0) - (b.walkS ?? 0) || a.id.localeCompare(b.id))
+        .map((e) => ({ key: `pick:${e.id}`, title: e.name, sub: e.picker ?? sayFor(e, 'hungry').short, value: walkTime(e.walkS ?? 0), live: liveLine(e) }));
+      wants.push({
+        id: 'picker',
+        component: 'picker',
+        zone: 'view',
+        level: 'card',
+        anchor: 'view:edge-right',
+        content: { name: 'Lunch on this block · by walk time', rows, reason: r, showReason: false, actions: [{ id: 'not-now', label: 'Not now' }] },
+        reason: r,
+        origin: 'goal',
+        timing: 'now',
+      });
+    }
   }
 
   private peopleWants(snap: WorldSnapshot, wants: Want[]): void {
@@ -960,7 +1076,8 @@ export class Brain {
     if (key !== this.errands.key) {
       this.errands = { key, shownAt: t, movingS: 0, stillS: 0, folded: false };
     }
-    if (!this.errands.folded && viewFoldDue(this.errands.movingS, this.errands.stillS, false, this.cfg)) this.errands.folded = true;
+    const atCorner = this.corner?.state === 'stops';
+    if (!atCorner && !this.errands.folded && viewFoldDue(this.errands.movingS, this.errands.stillS, false, this.cfg)) this.errands.folded = true;
     if (this.errands.folded) {
       if (open.length === 0 && this.goal !== 'errands') this.stops = [];
       return;
@@ -971,7 +1088,7 @@ export class Brain {
       zone: 'view',
       level: 'card',
       anchor: 'view:edge-right',
-      content: { name, rows, reason: r, showReason: name !== r.text },
+      content: { name, rows, reason: r, showReason: name !== r.text, ...(atCorner ? { actions: [{ id: 'start', label: 'Start', primary: true }] } : {}) },
       reason: r,
       origin: 'goal',
       announce: key,
@@ -1096,7 +1213,9 @@ export class Brain {
 
   private pocketWants(snap: WorldSnapshot, t: number, band: Band, stoppedFor: number, wants: Want[]): void {
     const avail = this.pocket.timeAvailable(snap, this.cfg);
-    const gated = this.gateNow.safety || this.gateNow.snooze;
+    const busy = this.arrival !== null || (this.corner !== null && this.corner.state !== 'done');
+    const gated = this.gateNow.safety || this.gateNow.snooze || busy;
+    if (busy && band === 'stopped') this.pocket.surfacedThisStop = true;
     if (band === 'stopped' && this.pocket.shouldSurface(stoppedFor, avail, gated, this.cfg)) {
       this.pocket.surfacedThisStop = true;
       this.pocketUp = true;
@@ -1547,7 +1666,8 @@ export class Brain {
       return { reason: reason('pace', 'Saved for the next stop', parts), timing: 'next-pause', keep: false };
     }
     const newShow = (!prev || LEVEL_RANK[prev.level] < LEVEL_RANK.whisper) && LEVEL_RANK[w.level] >= LEVEL_RANK.whisper;
-    const budgeted = w.origin === 'proactive' || w.origin === 'message' || w.origin === 'social' || w.origin === 'app' || w.origin === 'goal';
+    const asked = w.component === 'intent' || w.component === 'picker' || w.component === 'errands';
+    const budgeted = !asked && (w.origin === 'proactive' || w.origin === 'message' || w.origin === 'social' || w.origin === 'app' || w.origin === 'goal');
     if (newShow && budgeted && this.budget <= 0) {
       return {
         reason: reason('budget', 'Held: attention budget spent', [...parts, { signal: 'budget', value: this.budget, weight: 1 }]),
@@ -1593,7 +1713,7 @@ export class Brain {
       if (action) {
         this.log.append(t, d, this.snapRef);
         this.frameEvents.push(d);
-        if (isShow(d) && d.cause !== 'dwell' && d.cause !== 'pinch' && d.cause !== 'settle') this.spendBudget();
+        if (isShow(d) && !this.earned(w, d)) this.spendBudget();
       }
       w.onCommit?.();
       next.set(w.id, d);
@@ -1651,6 +1771,12 @@ export class Brain {
     return null;
   }
 
+
+  // The budget is for what the brain volunteers; answers to the wearer's own choices and arrivals are earned.
+  private earned(w: Want, d: Decision): boolean {
+    if (w.component === 'intent' || w.component === 'picker' || w.component === 'errands') return true;
+    return d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice';
+  }
 
   private spendBudget(): void {
     this.budgetUsed++;
