@@ -2,13 +2,13 @@ import { PLACE_BY_ID } from './data';
 import type { Entity, WorldSnapshot } from './types';
 import { placeAnchor, placeDoor } from './world';
 
-type CompactEntity = Pick<Entity, 'id' | 'distance' | 'routeS' | 'visible' | 'live'>;
+type CompactEntity = Pick<Entity, 'id' | 'distance' | 'routeS' | 'visible' | 'live' | 'walkS'>;
 export type CompactSnapshot = Omit<WorldSnapshot, 'entities'> & { entities: CompactEntity[] };
 
 export function compactSnapshot(s: WorldSnapshot): CompactSnapshot {
   return {
     ...s,
-    entities: s.entities.map((e) => ({ id: e.id, distance: e.distance, routeS: e.routeS, visible: e.visible, live: e.live })),
+    entities: s.entities.map((e) => ({ id: e.id, distance: e.distance, routeS: e.routeS, visible: e.visible, live: e.live, ...(e.walkS !== undefined ? { walkS: e.walkS } : {}) })),
   };
 }
 
@@ -38,6 +38,7 @@ export function hydrateSnapshot(c: CompactSnapshot): WorldSnapshot {
       if (p.liveLines) e.liveLines = p.liveLines;
       if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
+      if (p.picker) e.picker = p.picker;
       return e;
     }),
   };

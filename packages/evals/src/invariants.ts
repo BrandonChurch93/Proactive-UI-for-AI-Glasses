@@ -237,6 +237,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
     name: 'the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards',
     check: (r, cfg) => {
       const cardAt = new Map<string, number>();
+      const was = new Map<string, string>();
       for (let i = 0; i < r.frames.length; i++) {
         const f = r.frames[i]!;
         const s = r.snapshots[i]!;
@@ -245,7 +246,9 @@ const checks: { rule: string; name: string; check: Check }[] = [
         for (const e of r.entries.filter((x) => Math.abs(x.t - f.t) < 1e-6)) {
           const d = e.decision;
           if (d.component !== 'place') continue;
-          const climbed = d.action === 'promote' || d.action === 'show';
+          const before = was.get(d.id);
+          if (d.action !== 'hold') was.set(d.id, d.action === 'dismiss' ? 'none' : d.level);
+          const climbed = (d.action === 'promote' || d.action === 'show') && before !== d.level;
           if (!climbed) continue;
           const pinched = s.wearer.pinch?.target === d.id;
           if (d.level === 'card') {
@@ -309,9 +312,16 @@ const checks: { rule: string; name: string; check: Check }[] = [
     rule: 'walking-13',
     name: 'budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count',
     check: (r, cfg) => {
-      const earned = (d: Decision): boolean =>
-        d.component === 'intent' || d.component === 'picker' || d.component === 'errands' || d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice';
-      const shows = r.entries.filter((e) => isShow(e.decision) && !earned(e.decision)).length;
+      const seen = new Set<string>();
+      const again = new Set<LogEntry>();
+      for (const e of r.entries as LogEntry[]) {
+        if (!isShow(e.decision) || e.decision.component !== 'thread') continue;
+        if (seen.has(e.decision.id)) again.add(e);
+        seen.add(e.decision.id);
+      }
+      const earned = (d: Decision, e?: LogEntry): boolean =>
+        d.component === 'intent' || d.component === 'picker' || d.component === 'errands' || d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice' || (e !== undefined && again.has(e));
+      const shows = (r.entries as LogEntry[]).filter((e) => isShow(e.decision) && !earned(e.decision, e)).length;
       const last = r.frames[r.frames.length - 1];
       if (!last) return null;
       if (last.budgetUsed !== shows) return `meter ${last.budgetUsed} but ${shows} shows`;
@@ -321,8 +331,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         const b = r.frames[i]!;
         if (b.budget > a.budget) refills += b.budget - a.budget;
       }
-      const exempt = (d: Decision): boolean => earned(d) || d.cause === 'gate';
-      const bound = r.entries.filter((e) => isShow(e.decision) && !exempt(e.decision)).length;
+      const bound = (r.entries as LogEntry[]).filter((e) => isShow(e.decision) && !earned(e.decision, e) && e.decision.cause !== 'gate').length;
       if (bound > cfg.budget.shows + refills) return `${bound} budgeted shows > ${cfg.budget.shows} + ${refills}`;
       return null;
     },

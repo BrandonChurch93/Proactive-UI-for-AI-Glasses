@@ -97,7 +97,7 @@ if (probes) {
     if (${nolookup}) sim.reviewer.lookUps = [];
     const lap = { laps: 0, pauses: [], stillFrom: null, crossBirths: [], crossFrames: 0, routes: [], destAt: null, dest: null, corners: [], cornerFrom: null };
     const vp = { w: innerWidth, h: innerHeight };
-    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {} };
+    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {}, levels: {} };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
     const birthsBefore = () => walk.overlayLog.length;
@@ -184,7 +184,10 @@ if (probes) {
         }
         if (it.cur && it.cur.opacity > 0.2 && it.placed && it.placed.mode === 'pane') {
           const sc = it.placed.scale; const prev = m.scaleLast[it.id];
-          if (prev !== undefined && Math.abs(sc - prev) > 0.002) (m.scaleAt[it.id] = m.scaleAt[it.id] || []).push(+walk.t.toFixed(3));
+          if (prev !== undefined && Math.abs(sc - prev) > 0.002) {
+            (m.scaleAt[it.id] = m.scaleAt[it.id] || []).push(+walk.t.toFixed(3));
+            if (${process.argv.includes('--far')}) console.log('far scale', walk.t.toFixed(3), it.id, prev.toFixed(3), sc.toFixed(3), JSON.stringify(it.placed.moved ?? null), it.d.level);
+          }
           m.scaleLast[it.id] = sc;
         } else delete m.scaleLast[it.id];
       }
@@ -195,7 +198,9 @@ if (probes) {
         if (last.frame.gate.snooze && !m.wasSnoozed) m.snoozes++;
         m.wasSnoozed = last.frame.gate.snooze;
         for (const d of last.frame.events) {
-          if (d.action !== 'promote' || d.placement.zone !== 'world') continue;
+          const before = m.levels[d.id];
+          if (d.action !== 'hold') m.levels[d.id] = d.action === 'dismiss' ? 'none' : d.level;
+          if (d.action !== 'promote' || d.placement.zone !== 'world' || before === d.level) continue;
           const it = o.items.get(d.id);
           if (!it || it.want === 'none' || !it.cur || it.cur.opacity < 0.3) m.hiddenPromotes.push([+last.frame.t.toFixed(1), d.id, d.level]);
         }
@@ -233,7 +238,7 @@ if (probes) {
     const levelChange = e.from !== undefined && e.from !== e.level;
     if (levelChange) {
       const list = changes.get(e.id) ?? [];
-      const climb = /dwell|pinch/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
+      const climb = /dwell|pinch|arrival/.test(e.detail ?? '') && (RANK[e.level] ?? 0) > (RANK[e.from!] ?? 0);
       const world = e.kind === 'drop' || (e.kind === 'hide' && /not looked at/.test(e.detail ?? '')) || (e.kind === 'return' && /looked at again|offscreen|view edge/.test(e.detail ?? '')) || (e.kind === 'hide' && e.cause === 'collapse' && e.level === 'none') || (e.kind === 'return' && e.cause === 'return' && /keepout/.test(e.detail ?? ''));
       list.push({ t: e.t, exempt: climb || world || EXEMPT.test(`${e.cause} ${e.detail ?? ''}`) || e.kind === 'death' || e.kind === 'edge' });
       changes.set(e.id, list);

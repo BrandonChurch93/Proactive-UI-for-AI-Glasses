@@ -3,8 +3,8 @@
  "totals": {
   "suites": 41,
   "passed": 41,
-  "cases": 986,
-  "casesPassed": 986
+  "cases": 989,
+  "casesPassed": 989
  },
  "byGroup": {
   "walks": {
@@ -161,7 +161,7 @@
     {
      "name": "0:00 to 0:08 · nothing proactive before an intent",
      "pass": true,
-     "detail": "shows 1, non-gaze 1, holds 0"
+     "detail": "shows 1, non-gaze 0, holds 0"
     },
     {
      "name": "0:08 · Errands: the stops list replaces the panel, three stops in the order chosen, with Start",
@@ -189,6 +189,11 @@
      "detail": "t=15 dismiss errands card"
     },
     {
+     "name": "0:33 · Maya asks for stamps, 25 s after Errands, at the edge while walking",
+     "pass": true,
+     "detail": "t=33.001 show maya-stamps glance"
+    },
+    {
      "name": "0:36 · the pharmacy lights its label on the look",
      "pass": true,
      "detail": "t=36.201 show main-street-pharmacy label"
@@ -207,6 +212,11 @@
      "name": "0:51 · at the pharmacy door its card shows",
      "pass": true,
      "detail": "t=50.901 show main-street-pharmacy card"
+    },
+    {
+     "name": "0:52.5 · On it at the pharmacy door: the Post Office is already a stop, and the thread says so",
+     "pass": true,
+     "detail": "t=52.501 promote maya-stamps card"
     },
     {
      "name": "0:54 · picked up, the errands card returns with the stop ticked",
@@ -296,7 +306,7 @@
     {
      "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "shows 11, non-gaze 9, holds 5"
+     "detail": "shows 12, non-gaze 6, holds 5"
     }
    ],
    "description": "Recorded walk · 1361 snapshots at 10 Hz"
@@ -481,14 +491,19 @@
      "detail": "t=11 show route glance"
     },
     {
-     "name": "0:11 · Mega Burger is the destination from here on",
+     "name": "0:11 · Mega Burger is the destination until the reply",
      "pass": true,
-     "detail": "966 frames"
+     "detail": "692 frames"
     },
     {
      "name": "0:03 to 0:38 · no place card except the one looked at",
      "pass": true,
      "detail": ""
+    },
+    {
+     "name": "0:26 · Maya's text, 25 s after Hungry, at the edge while walking: glance size, the line and the replies",
+     "pass": true,
+     "detail": "t=26.001 show maya-lunch glance"
     },
     {
      "name": "0:39 · a look at Trattoria da Lia across the street lights its label, then its card",
@@ -521,6 +536,11 @@
      "detail": "t=51.601 show 47th-st-station label"
     },
     {
+     "name": "1:02 · Brisk: the thread steps out of view",
+     "pass": true,
+     "detail": "t=61.701 dismiss maya-lunch glance"
+    },
+    {
      "name": "1:02 to 1:15 · Brisk: labels at most, never a card",
      "pass": true,
      "detail": "120 frames"
@@ -531,9 +551,29 @@
      "detail": "t=74.901 show need-to-run glance"
     },
     {
-     "name": "1:18 · the text from Maya at the red light",
+     "name": "1:15 · after Brisk it is back at the edge",
      "pass": true,
-     "detail": "t=78.002 show maya-usual glance"
+     "detail": "t=74.901 show maya-lunch glance"
+    },
+    {
+     "name": "1:18 · stopped at the red light, the full thread",
+     "pass": true,
+     "detail": "t=77.602 promote maya-lunch card"
+    },
+    {
+     "name": "1:18.5 · On my way: the offer within 1 s, in the brain's voice",
+     "pass": true,
+     "detail": "t=78.502 promote maya-lunch card"
+    },
+    {
+     "name": "1:20.5 · Yes: the route redraws to the Big Bean, caused by the reply, for Maya",
+     "pass": true,
+     "detail": "t=80.502 show route glance"
+    },
+    {
+     "name": "1:20.5 · the Big Bean is the destination",
+     "pass": true,
+     "detail": "312 frames"
     },
     {
      "name": "1:20 · the pocket surfaces with the time available",
@@ -541,64 +581,29 @@
      "detail": "t=79.602 surface pocket card"
     },
     {
-     "name": "1:22 · a look across the avenue at Mega Burger: its card, Going here",
+     "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "t=82.302 promote mega-burger card"
+     "detail": "shows 10, non-gaze 3, holds 0"
     },
     {
-     "name": "1:24 · held gaze expands it in place",
+     "name": "1:44 · a look at the Big Bean on the way: its card, Going here (the chip has moved)",
      "pass": true,
-     "detail": "t=84.302 promote mega-burger expanded"
+     "detail": "t=104.102 promote big-bean card"
     },
     {
-     "name": "1:25 · hold a seat",
+     "name": "1:52 · at the Big Bean door, the arrival line says why",
      "pass": true,
-     "detail": "t=85.002 promote mega-burger expanded"
+     "detail": "t=112.202 promote big-bean card"
     },
     {
-     "name": "1:29 to 1:39 · crossing, everything holds",
-     "pass": true,
-     "detail": "1 decisions"
-    },
-    {
-     "name": "1:29 to 1:39 · nothing opens in a crossing",
-     "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 1"
-    },
-    {
-     "name": "1:33 · the app update is held",
-     "pass": true,
-     "detail": "t=93.002 hold order-ready glance"
-    },
-    {
-     "name": "1:39 · far curb, the held update arrives with its reason",
-     "pass": true,
-     "detail": "t=99.702 show order-ready glance"
-    },
-    {
-     "name": "1:40 · the destination column on the way to the door",
-     "pass": true,
-     "detail": "t=100.002"
-    },
-    {
-     "name": "1:48 · arrival",
-     "pass": true,
-     "detail": "t=107.902 show arrival glance"
-    },
-    {
-     "name": "1:48 · no pocket at the door",
+     "name": "1:52 · no pocket at the door",
      "pass": true,
      "detail": ""
     },
     {
-     "name": "1:52 · four seconds at the door, then the loop resumes with no destination and no intent",
+     "name": "1:56 · four seconds at the door, then the loop resumes with no destination and no intent",
      "pass": true,
-     "detail": "55 frames"
-    },
-    {
-     "name": "restraint · shows within the budget, the panel and the picker included",
-     "pass": true,
-     "detail": "shows 11, non-gaze 7, holds 2"
+     "detail": "15 frames"
     }
    ],
    "description": "Recorded walk · 1181 snapshots at 10 Hz"
@@ -810,7 +815,7 @@
     {
      "name": "0:51 to 0:56 · nothing shows",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 7"
+     "detail": "shows 0, non-gaze 0, holds 8"
     },
     {
      "name": "0:58 · looking up again cancels",
@@ -831,6 +836,16 @@
      "name": "1:20 to 1:52 · the answer is no: the walk stays Just walk with no destination",
      "pass": true,
      "detail": "315 frames"
+    },
+    {
+     "name": "1:19 · Can't today at the red light: no offer, no route",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "1:25 · Maya answers Next time in the thread, and nothing else happens",
+     "pass": true,
+     "detail": "330 frames"
     },
     {
      "name": "1:29 to 1:39 · crossing, everything holds",
@@ -855,7 +870,7 @@
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 5, non-gaze 3, holds 7"
+     "detail": "shows 8, non-gaze 3, holds 8"
     },
     {
      "name": "2:53 · a lap later, back at the corner: the light held again and the panel within 1 s of stopping",

@@ -27,27 +27,115 @@
   "holdS": 12,
   "beats": [
     {
-      "t": 77,
+      "t": 25,
       "kind": "inbox",
       "type": "text",
-      "id": "maya-usual",
+      "id": "maya-lunch",
       "from": "Maya",
-      "text": "Running 10 late, order me the usual?",
+      "text": "Lunch? I'm by the Big Bean at 1.",
+      "replies": [
+        {
+          "id": "on-my-way",
+          "label": "On my way",
+          "offer": {
+            "place": "big-bean",
+            "why": "Meeting Maya at 1"
+          }
+        },
+        {
+          "id": "cant",
+          "label": "Can't today",
+          "answer": {
+            "after": 6,
+            "text": "Next time"
+          }
+        },
+        {
+          "id": "where",
+          "label": "Where exactly?",
+          "answer": {
+            "after": 20,
+            "text": "Corner table by the window"
+          },
+          "offer": {
+            "place": "big-bean",
+            "why": "Meeting Maya at 1"
+          }
+        }
+      ],
       "after": "intent",
       "intent": "hungry"
     },
     {
-      "t": 92,
+      "t": 25,
       "kind": "inbox",
-      "type": "app",
-      "id": "order-ready",
-      "text": "Order ready",
-      "more": 1,
+      "type": "text",
+      "id": "maya-lunch",
+      "from": "Maya",
+      "text": "Lunch? I'm by the Big Bean at 1.",
+      "replies": [
+        {
+          "id": "on-my-way",
+          "label": "On my way",
+          "offer": {
+            "place": "big-bean",
+            "why": "Meeting Maya at 1"
+          }
+        },
+        {
+          "id": "cant",
+          "label": "Can't today",
+          "answer": {
+            "after": 6,
+            "text": "Next time"
+          }
+        },
+        {
+          "id": "where",
+          "label": "Where exactly?",
+          "answer": {
+            "after": 20,
+            "text": "Corner table by the window"
+          },
+          "offer": {
+            "place": "big-bean",
+            "why": "Meeting Maya at 1"
+          }
+        }
+      ],
       "after": "intent",
-      "intent": "hungry"
+      "intent": "walking"
     },
     {
-      "t": 56,
+      "t": 25,
+      "kind": "inbox",
+      "type": "text",
+      "id": "maya-stamps",
+      "from": "Maya",
+      "text": "Can you grab stamps while you're out?",
+      "replies": [
+        {
+          "id": "on-it",
+          "label": "On it",
+          "stop": {
+            "place": "post-office",
+            "line": "Post Office sells stamps"
+          }
+        },
+        {
+          "id": "cant",
+          "label": "Can't today",
+          "answer": {
+            "after": 6,
+            "text": "Next time"
+          }
+        }
+      ],
+      "after": "intent",
+      "intent": "errands"
+    },
+    {
+      "t": 50,
       "kind": "bus",
       "id": "m4-stop",
       "arrivesIn": 2,
@@ -219,18 +307,23 @@
           "id": null
         },
         {
-          "t": 81,
+          "t": 78.5,
+          "kind": "reply",
+          "id": "maya-lunch",
+          "reply": "on-my-way"
+        },
+        {
+          "t": 80.5,
+          "kind": "go",
+          "id": "maya-lunch"
+        },
+        {
+          "t": 103,
           "kind": "gaze",
-          "id": "mega-burger"
+          "id": "big-bean"
         },
         {
-          "t": 85,
-          "kind": "choice",
-          "id": "mega-burger",
-          "action": "hold-seat"
-        },
-        {
-          "t": 87,
+          "t": 108,
           "kind": "gaze",
           "id": null
         }
@@ -259,6 +352,12 @@
           "t": 40.5,
           "kind": "gaze",
           "id": null
+        },
+        {
+          "t": 52.5,
+          "kind": "reply",
+          "id": "maya-stamps",
+          "reply": "on-it"
         },
         {
           "t": 95.5,
@@ -330,6 +429,12 @@
           "kind": "ask",
           "answer": "no",
           "answerAt": 80
+        },
+        {
+          "t": 79,
+          "kind": "reply",
+          "id": "maya-lunch",
+          "reply": "cant"
         },
         {
           "t": 176.5,

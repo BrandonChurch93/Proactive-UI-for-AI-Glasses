@@ -37,9 +37,9 @@ function showsReason(c: Content): boolean {
   return c.showReason !== false && Boolean(c.reason.text) && c.reason.text !== c.name && c.reason.text !== c.fact;
 }
 
-function actions(c: Content, id: string, h: PaneHandlers): HTMLElement | null {
+function actions(c: Content, id: string, h: PaneHandlers, cls = s.actions): HTMLElement | null {
   if (!c.actions?.length) return null;
-  const row = node('div', s.actions);
+  const row = node('div', cls);
   for (const a of c.actions) {
     const b = node('button', a.primary ? s.primary : a.id === 'end' || a.id === 'not-now' ? s.quiet : undefined, a.label) as HTMLButtonElement;
     b.type = 'button';
@@ -175,6 +175,21 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       push(w);
       push(actions(c, d.id, h));
       return { cls: s.errands!, kids, why: w };
+    }
+    case 'thread': {
+      const head = node('div', s.threadHead);
+      head.appendChild(keyed(node('span', s.avatar, c.avatar ?? c.name.slice(0, 1)), 'avatar'));
+      head.appendChild(keyed(node('span', `${s.toastFrom} ${s.t}`, c.name), 'name'));
+      if (c.time) head.appendChild(keyed(node('span', s.threadTime, c.time), 'time'));
+      push(head);
+      if (c.thread?.length) {
+        const list = node('div', s.bubbles);
+        c.thread.forEach((l, i) => list.appendChild(keyed(node('div', `${s.bubble} ${l.me ? s.mine : ''}`, l.text), `b${i}`)));
+        push(list);
+      } else if (c.fact) push(keyed(node('div', `${s.toastLine} ${s.t}`, c.fact), 'fact'));
+      if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));
+      push(actions(c, d.id, h, c.note ? s.actions : s.chips));
+      return { cls: s.thread!, kids, why: null };
     }
     case 'intent': {
       push(keyed(node('div', `${s.intentQ} ${s.t}`, c.name), 'name'));

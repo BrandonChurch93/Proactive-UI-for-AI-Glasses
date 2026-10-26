@@ -212,7 +212,7 @@ Rules:
 2. Focus zone: scaled by pace band (walking rule 1). Stopped: the middle 33% of the width and 40% of the height. Stroll 38 × 44. Walk 44 × 50. Brisk 52 × 58. Nothing persistent inside it except the pane on the thing being looked at, which the zone does not apply to. When the zone grows, or the look leaves a pane that sits in it, the pane moves out over 320 ms if it has a place within its own width of its light, and otherwise waits as its light.
 3. Keep-out: roadway, vehicles in traffic (moving or stopped), people, the wearer's path, faces; recomputed every frame from projected bounds (walking rule 8). The view-edge cards and the reviewer chrome (Sound, Pause, `I · INSPECTOR`, the pace readout, the held glyph) are hard rects too, padded 8 px. A pane that cannot clear a mover dims in place and drops to its light when mostly covered.
 4. Calm backdrop: façade over sky over road, never over a bright sign. (The pip may sit above a marquee, never on it: a glow on a glow is invisible.)
-5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it. Scale belongs to the placement: a move never changes it, and a placement re-chosen inside the 1.2 s keeps the current scale.
+5. Hysteresis: once placed, a pane holds for 1.2 s unless a keep-out forces it. Scale belongs to the placement: a move never changes it, and a placement re-chosen within 2.5 s of the pane's last change of scale keeps the current scale, so a pane approached at speed steps up in size at most once every 2.5 s.
 6. Edge: a card that is not being looked at collapses to its label within 8% of the edge, and a label folds within 4%; the pane on the thing being looked at never collapses, it shrinks to 0.74 or folds when it reaches the edge. A pane is never cut by the edge: it folds first (Edge fold), and returns in place when it fits again or the wearer looks back. The head turns a full 180 degrees.
 7. A new pane is born at its placed position with the condense move (walking rule 4); nothing slides in from the edge.
 
@@ -240,7 +240,7 @@ Screen scale: sizes above are at the reference view of 1280 × 800. Every pane, 
 | Route | Ground | Glance | Pavement band fading 25 m ahead; turn arc; stays at 40% during a gate |
 | Destination marker | Ground + world | Glance | Column of light, settles to a pip at the door |
 | Map tile | View | Glance | Only for a turn the wearer cannot see |
-| Message toast | View | Glance, card | Sender, one line, reply or later; enters from the edge; allowed in any band but Brisk |
+| Message thread | View | Glance, card | A 22 px warm monogram (a radial gradient from #ffe7b3 to #e9b766, the letter in #1a1712), the sender, the time in mono `--ink-2` at the right. While walking: the latest line and the quick replies as chips (12 px, radius 4 px, the action border). At a stop: the thread as bubbles, theirs on the left in glass at 8% with a 12% hairline, the wearer's on the right filled in ink at .86 with dark text, radius 6 px. The brain's offer or note under it in `--voice`, with Yes (primary) and Not now. 300 px wide; not in Brisk |
 | Notification strip | View | Glance | "3 notifications · later"; social only surfaces stopped |
 | Ask glance | View edge | Glance | One line, two choices; only in Just walking, at the first stop after two food places have been looked at |
 | Reminder | World | Label, card | Tied to a place when passing one |

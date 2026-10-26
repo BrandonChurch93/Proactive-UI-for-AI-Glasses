@@ -74,9 +74,17 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 ## Messages
 
-- Text (Hungry): Maya · Running 10 late, order me the usual? · Reply · Later
+A text is a thread: a warm monogram (M), the sender, the time from the 12:40 clock, the message, and up to three quick replies. A reply joins the thread on the right; the other side's answer follows on the left. The brain's own line, when it has one, sits under the thread in the voice color with Yes · Not now.
+
+- Hungry and Just walk, 25 s after the intent starts: Maya · Lunch? I'm by the Big Bean at 1. · On my way · Can't today · Where exactly?
+  - On my way: Big Bean · {walk time} · route there? · Yes · Not now. Yes routes to the Big Bean (reason in the log and on the route: Meeting Maya at 1; at the door the arrival line carries it).
+  - Where exactly?: Maya, 20 s later: Corner table by the window. Then the same offer.
+  - Can't today: Maya: Next time. Nothing else.
+- Errands, 25 s after the intent starts: Maya · Can you grab stamps while you're out? · On it · Can't today
+  - On it: Post Office sells stamps · added as a stop (or · already on your route when it is one).
+  - Can't today: Maya: Next time.
 - DM (Errands, held in the crossing): Jules · Still on for tonight? · Reply · Later
-- App: Package delivered · Front desk · 1 more / Order ready · 1 more
+- App: Package delivered · Front desk · 1 more
 
 ## What each place says
 
@@ -116,8 +124,8 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## Expanded views
 
 - Grace Theater: the three shows (5:30 The Winter Guest · 12 seats / 8:00 Night Market · 40 seats / 10:30 Late Set · Plenty) / Hold two for 8:00 · Not now / after: Two held for 8:00 · I'll walk you there at 7:35.
-- Mega Burger: Seat now · 6 min / Order ahead · ready in 8 / Maya's usual · pastrami (Hungry, once Maya's text has arrived) / Hold a seat · Not now / after: Seat held. Follow the route, across and back.
-- Goldie's Counter: Seat now · 3 min / Order ahead · ready in 5 / Maya's usual · pastrami (Hungry, once Maya's text has arrived) / Hold a seat · Not now / after: Seat held. Follow the route, 40 m.
+- Mega Burger: Seat now · 6 min / Order ahead · ready in 8 / Hold a seat · Not now / after: Seat held. Follow the route, across and back.
+- Goldie's Counter: Seat now · 3 min / Order ahead · ready in 5 / Hold a seat · Not now / after: Seat held. Follow the route, 40 m.
 - Post Office: Line of 8 · about 12 min / Counter · till 5 / Pickup window · till 6 / Take a number · Not now / after: You're number 9. I'll say when it's close.
 - Main Street Pharmacy: Counter 2 · ready / Pay ahead · Not now / after: Paid. Show the code at counter 2. / once picked up, the decision is settled: Picked up / In your bag. Two stops to go.
 - Corner Hardware, closed early: Closed early today / Dropped from the route. The Post Office is next.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FOCUS_ZONE, synthesize, type CaseSpec, type WorldSnapshot } from '@lumen/shared';
+import { FOCUS_ZONE, WALK, synthesize, type CaseSpec, type WorldSnapshot } from '@lumen/shared';
 import { Brain, DEFAULT_CONFIG, Pace, countCopy, trimForPace } from '../src';
 import { computeGates } from '../src/gates';
 import { newLadderItem, step } from '../src/ladder';
@@ -197,3 +197,43 @@ describe('the head-moved gate', () => {
     expect(levels(true)).toContain('label');
   });
 });
+
+describe('a reply changes the walk', () => {
+  const lunch = WALK.beats.find((b) => b.kind === 'inbox' && b.id === 'maya-lunch');
+  const replies = lunch && lunch.kind === 'inbox' ? lunch.replies! : [];
+  const run = (reply: string): { t: number; note?: string; route?: string }[] => {
+    const spec: CaseSpec = { id: 'reply', scenario: 'hungry', duration: 30, pace: [[0, 0]], inbox: [{ t: 1, id: 'maya-lunch', type: 'text', from: 'Maya', text: 'Lunch?' }], choice: [[3, 'maya-lunch', reply]] };
+    const spec2 = replies.find((r) => r.id === reply)!;
+    const brain = new Brain({ scenario: 'hungry' });
+    const out: { t: number; note?: string; route?: string }[] = [];
+    for (const s of synthesize(spec)) {
+      const n = s.inbox.find((m) => m.id === 'maya-lunch');
+      if (n) {
+        n.replies = replies;
+        n.thread = [{ me: false, text: 'Lunch?', at: 1 }];
+        if (s.t >= 3) n.thread.push({ me: true, text: spec2.label, at: 3 });
+        if (spec2.answer && s.t >= 3 + spec2.answer.after) n.thread.push({ me: false, text: spec2.answer.text, at: 3 + spec2.answer.after });
+      }
+      const f = brain.tick(s);
+      const d = f.items.find((x) => x.id === 'maya-lunch');
+      const row: { t: number; note?: string; route?: string } = { t: s.t };
+      if (d?.content.note) row.note = d.content.note;
+      if (f.goal.destination) row.route = f.goal.destination;
+      out.push(row);
+    }
+    return out;
+  };
+
+  it('Where exactly? offers the route only once the answer has arrived', () => {
+    const rows = run('where');
+    const first = rows.find((r) => r.note?.endsWith('route there?'));
+    expect(first?.t).toBeGreaterThanOrEqual(23);
+    expect(first!.t).toBeLessThan(24);
+  });
+
+  it("Can't today offers nothing and routes nowhere", () => {
+    const rows = run('cant');
+    expect(rows.some((r) => r.note || r.route)).toBe(false);
+  });
+});
+

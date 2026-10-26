@@ -92,6 +92,10 @@ interface InboxItem {
   stillS: number;
   heldInGate: boolean;
   reason?: Reason;
+  reply?: string;
+  offer?: { place: string; why: string; state: 'waiting' | 'open' | 'yes' | 'no' };
+  note?: string;
+  seen?: boolean;
 }
 
 interface FollowUp {
@@ -109,6 +113,11 @@ const HOLD_TEXT: Record<string, string> = {
 };
 
 const MESSAGE_TYPES = new Set(['text', 'dm']);
+
+function clockAt(t: number): string {
+  const m = 12 * 60 + 40 + Math.floor(t / 60);
+  return `${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, '0')}`;
+}
 
 function walkTime(s: number): string {
   return s < 55 ? `${Math.max(10, Math.round(s / 10) * 10)} s` : `${Math.round(s / 60)} min`;
@@ -181,6 +190,8 @@ export class Brain {
   private corner: { lap: number; state: 'intent' | 'picker' | 'stops' | 'done' } | null = null;
   private errandsStarted = false;
   private routeCauseNext: Cause | null = null;
+  private routeWhy: string | null = null;
+  private arrivalSaid: string | null = null;
   private routeShown: string | undefined;
   private overrides: { band: Band | null; gate: boolean; muteSocial: boolean } = {
     band: null,
@@ -359,15 +370,49 @@ export class Brain {
     this.setCorner('done');
   }
 
+  // The brain reads which reply was chosen and what the walk file attaches to it, never the words of the message.
+  private answerThread(inb: InboxItem, action: string): boolean {
+    const spec = inb.n.replies?.find((x) => x.id === action);
+    const fresh = (): void => {
+      inb.movingS = 0;
+      inb.stillS = 0;
+    };
+    if (spec && !inb.reply) {
+      inb.reply = spec.id;
+      this.bump(this.accepted, inb.n.type);
+      if (spec.offer) inb.offer = { place: spec.offer.place, why: spec.offer.why, state: spec.answer ? 'waiting' : 'open' };
+      if (spec.stop) {
+        const has = this.stops.includes(spec.stop.place);
+        if (!has) this.stops.push(spec.stop.place);
+        inb.note = `${spec.stop.line} · ${has ? 'already on your route' : 'added as a stop'}`;
+      }
+      fresh();
+      return true;
+    }
+    if (action === 'go' && inb.offer?.state === 'open') {
+      inb.offer.state = 'yes';
+      this.setDestination(inb.offer.place, 'reply', inb.offer.why);
+      fresh();
+      return true;
+    }
+    if (action === 'not-now' && inb.offer?.state === 'open') {
+      inb.offer.state = 'no';
+      inb.status = 'done';
+      return true;
+    }
+    return false;
+  }
+
   private applyPick(snap: WorldSnapshot): void {
     const target = snap.wearer.pinch?.target;
     if (target?.startsWith('pick:') && this.corner?.state === 'picker') this.pick(target.slice(5));
   }
 
-  private setDestination(id: string | undefined, cause: Cause): void {
+  private setDestination(id: string | undefined, cause: Cause, why: string | null = null): void {
     if (id === this.destination) return;
     this.destination = id;
     this.routeCauseNext = cause;
+    this.routeWhy = why;
   }
 
   private trackArrival(snap: WorldSnapshot): void {
@@ -375,6 +420,8 @@ export class Brain {
     const left = this.arrival;
     this.arrival = at;
     if (!left || at === left) return;
+    if (this.arrivalSaid === left) this.announced.delete(left);
+    this.arrivalSaid = null;
     if (this.destination === left) this.setDestination(undefined, 'arrival');
     if (this.goal === 'errands' && this.openStops(snap).length > 0) return;
     if (this.goal !== 'errands') this.stops = [];
@@ -458,7 +505,11 @@ export class Brain {
 
   private ingestInbox(snap: WorldSnapshot, t: number, dt: number, band: Band): void {
     for (const n of snap.inbox) {
-      if (this.inbox.has(n.id)) continue;
+      const have = this.inbox.get(n.id);
+      if (have) {
+        have.n = n;
+        continue;
+      }
       if (n.type === 'social') {
         this.social.count += n.count ?? 1;
         this.social.surfaced = false;
@@ -489,6 +540,7 @@ export class Brain {
     const c = snap.wearer.choice;
     if (!c) return;
     const inb = this.inbox.get(c.id);
+    if (inb?.n.replies && this.answerThread(inb, c.action)) return;
     if (inb) {
       inb.status = 'done';
       if (c.action === 'answer' || c.action === 'reply') this.bump(this.accepted, inb.n.type);
@@ -1101,7 +1153,15 @@ export class Brain {
     for (const it of this.inbox.values()) {
       const n = it.n;
       if (it.status === 'done' || n.type === 'social') continue;
-      if (it.status === 'shown') {
+      const thread = n.thread ?? [];
+      if (it.offer?.state === 'waiting' && thread.some((l, i) => !l.me && thread.slice(0, i).some((m) => m.me))) {
+        it.offer.state = 'open';
+        it.movingS = 0;
+        it.stillS = 0;
+      }
+      const open = Boolean(n.replies) && (!it.reply || it.offer?.state === 'waiting' || it.offer?.state === 'open');
+      if (n.replies && it.status === 'shown' && band === 'brisk') continue;
+      if (it.status === 'shown' && !open) {
         if (viewFoldDue(it.movingS, it.stillS, false, this.cfg, this.cfg.stoppedToastS)) {
           it.status = 'done';
           continue;
@@ -1116,9 +1176,33 @@ export class Brain {
       ];
       let r: Reason;
       let content: Content;
-      const level: Level = 'glance';
+      let level: Level = 'glance';
       let component: ComponentKind = 'toast';
-      if (n.type === 'app') {
+      let announce: string | undefined;
+      if (n.replies) {
+        component = 'thread';
+        level = band === 'stopped' ? 'card' : 'glance';
+        r =
+          it.reason ??
+          (this.gateWasPath(n.id) || it.n.at < t - 1
+            ? reason('social', 'Held for you', parts)
+            : band === 'stopped'
+              ? reason('world', 'Long red light', parts)
+              : reason('world', 'Clear sidewalk ahead', parts));
+        const theirs = [...thread].reverse().find((l) => !l.me);
+        content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: clockAt(n.at), reason: r, showReason: false };
+        if (level === 'card') content.thread = thread.map((l) => ({ me: l.me, text: l.text }));
+        if (!it.reply) content.actions = n.replies.map((x) => ({ id: x.id, label: x.label }));
+        else if (it.offer?.state === 'open') {
+          const e = snap.entities.find((x) => x.id === it.offer!.place);
+          content.note = `${(e?.name ?? it.offer.place).replace(/^The /, '')} · ${walkTime(e?.walkS ?? 0)} · route there?`;
+          content.actions = [
+            { id: 'go', label: 'Yes', primary: true },
+            { id: 'not-now', label: 'Not now' },
+          ];
+        } else if (it.note) content.note = it.note;
+        announce = `${it.reply ?? ''}|${it.offer?.state ?? ''}|${thread.length}`;
+      } else if (n.type === 'app') {
         component = 'strip';
         r = it.heldInGate
           ? reason('gate', 'Held that while you crossed', [...parts, { signal: 'gate', value: 'cleared', weight: 1 }])
@@ -1159,8 +1243,10 @@ export class Brain {
         reason: r,
         origin: n.type === 'app' ? (it.heldInGate ? 'followup' : 'app') : 'message',
         timing,
+        ...(announce !== undefined ? { announce } : {}),
         onCommit: () => {
           it.reason ??= r;
+          it.seen = true;
           if (it.status === 'pending') {
             it.status = 'shown';
             it.shownAt = t;
@@ -1409,16 +1495,26 @@ export class Brain {
       return;
     }
     const level: Level = this.stops.includes(e.id) ? 'card' : 'label';
+    const r = reason('goal', this.routeWhy ?? e.reasons.goal ?? 'You made it', [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const own = wants.findIndex((w) => w.id === e.id);
     const mine = own >= 0 && !wants[own]!.remove ? wants[own]! : null;
     if (mine) {
       mine.anchor = `door:${e.id}`;
       mine.zoneOk = true;
-      if (LEVEL_RANK[mine.level] >= LEVEL_RANK[level]) return;
+      if (LEVEL_RANK[mine.level] >= LEVEL_RANK[level]) {
+        mine.content = mine.level === 'label' ? { name: e.name, fact: e.glance, reason: r, showReason: true } : { ...mine.content, reason: r, showReason: true };
+        mine.reason = r;
+        if (this.arrivalSaid !== e.id && this.paneVisible(e.id)) {
+          if (!this.announced.has(e.id)) this.announced.set(e.id, 'on the way');
+          mine.cause = 'arrival';
+          this.arrivalSaid = e.id;
+        }
+        if (this.arrivalSaid === e.id) mine.announce = 'arrived';
+        return;
+      }
       if (isPane(mine.level) && !this.paneVisible(e.id)) return;
     }
     if (own >= 0) wants.splice(own, 1);
-    const r = reason('goal', e.reasons.goal ?? 'You made it', [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const it = this.item(e.id);
     wants.push({
       id: e.id,
@@ -1517,7 +1613,7 @@ export class Brain {
     }
     if (routeTo && !this.arrival) {
       const nar = snap.env.sidewalkNarrowsAhead;
-      const r = reason('goal', 'On your route', [
+      const r = reason('goal', (this.goal !== 'errands' && this.routeWhy) || 'On your route', [
         { signal: 'route.to', value: routeTo, weight: 1 },
         { signal: 'route.offset', value: nar && nar.distance < 30 ? 'curb' : 'center', weight: 1 },
       ]);
@@ -1775,6 +1871,7 @@ export class Brain {
   // The budget is for what the brain volunteers; answers to the wearer's own choices and arrivals are earned.
   private earned(w: Want, d: Decision): boolean {
     if (w.component === 'intent' || w.component === 'picker' || w.component === 'errands') return true;
+    if (w.component === 'thread' && this.inbox.get(w.id)?.seen) return true;
     return d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice';
   }
 

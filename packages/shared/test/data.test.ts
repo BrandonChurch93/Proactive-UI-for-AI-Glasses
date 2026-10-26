@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PLACE_BY_ID, SCENARIO_IDS, WALK, type Beat } from '../src';
+import { PLACE_BY_ID, SCENARIO_IDS, WALK, compactSnapshot, hydrateSnapshot, synthesize, type Beat } from '../src';
 
 const PANES = new Set(['errands', 'picker', 'intent', 'offer']);
 
@@ -16,3 +16,14 @@ describe('data', () => {
     for (const id of SCENARIO_IDS) for (const b of WALK.recordings[id].beats) check(id, b);
   });
 });
+
+describe('recorded snapshots', () => {
+  it('keep what the brain reads from a place: its walk time and its picker line', () => {
+    const snap = synthesize({ id: 'c', scenario: 'hungry', duration: 0.1, pace: [[0, 0]], only: ['goldies-counter'] })[0]!;
+    snap.entities[0]!.walkS = 12;
+    const back = hydrateSnapshot(JSON.parse(JSON.stringify(compactSnapshot(snap))));
+    expect(back.entities[0]!.walkS).toBe(12);
+    expect(back.entities[0]!.picker).toBe(PLACE_BY_ID.get('goldies-counter')!.picker);
+  });
+});
+

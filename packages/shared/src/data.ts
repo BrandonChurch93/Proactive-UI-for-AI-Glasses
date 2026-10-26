@@ -74,6 +74,14 @@ interface BeatBase {
   intent?: ScenarioId;
 }
 
+export interface ReplySpec {
+  id: string;
+  label: string;
+  answer?: { after: number; text: string };
+  offer?: { place: string; why: string };
+  stop?: { place: string; line: string };
+}
+
 export type Beat =
   | (BeatBase & { kind: 'gaze'; id: string | null; dy?: number })
   | (BeatBase & { kind: 'pinch'; id: string })
@@ -85,6 +93,7 @@ export type Beat =
       text?: string;
       count?: number;
       more?: number;
+      replies?: ReplySpec[];
     })
   | (BeatBase & { kind: 'choice'; id: string; action: string })
   | (BeatBase & { kind: 'stops'; ids: string[] })

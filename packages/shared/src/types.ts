@@ -1,4 +1,4 @@
-import type { Band, EntityKind, Leg, LiveValue, PlaceCopy, ScenarioId, Side, SignalState } from './data';
+import type { Band, EntityKind, Leg, LiveValue, PlaceCopy, ReplySpec, ScenarioId, Side, SignalState } from './data';
 import type { Box3, Rect, Vec3 } from './vec';
 
 export type Level = 'pip' | 'label' | 'glance' | 'card' | 'expanded' | 'whisper';
@@ -47,6 +47,14 @@ export interface Notification {
   text?: string;
   count?: number;
   more?: number;
+  replies?: ReplySpec[];
+  thread?: ThreadLine[];
+}
+
+export interface ThreadLine {
+  me: boolean;
+  text: string;
+  at: number;
 }
 
 export interface Stop {
@@ -193,6 +201,9 @@ export interface Content {
   tone?: 'go' | 'warn' | 'stop' | 'voice';
   arrow?: 'left' | 'right' | 'up' | 'down';
   chip?: string;
+  thread?: { me: boolean; text: string }[];
+  avatar?: string;
+  time?: string;
 }
 
 export type ComponentKind =
@@ -211,7 +222,8 @@ export type ComponentKind =
   | 'safety'
   | 'arrival'
   | 'intent'
-  | 'picker';
+  | 'picker'
+  | 'thread';
 
 export interface SignalBundle {
   speed: number;

@@ -125,11 +125,6 @@
           {
             "title": "Order ahead",
             "value": "ready in 8"
-          },
-          {
-            "title": "Maya's usual",
-            "value": "pastrami",
-            "when": "maya-usual"
           }
         ],
         "actions": [
@@ -465,11 +460,6 @@
           {
             "title": "Order ahead",
             "value": "ready in 5"
-          },
-          {
-            "title": "Maya's usual",
-            "value": "pastrami",
-            "when": "maya-usual"
           }
         ],
         "actions": [

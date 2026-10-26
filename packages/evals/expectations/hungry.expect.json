@@ -149,10 +149,10 @@
       }
     },
     {
-      "name": "0:11 \u00b7 Mega Burger is the destination from here on",
+      "name": "0:11 \u00b7 Mega Burger is the destination until the reply",
       "between": [
         11.2,
-        107.8
+        80.4
       ],
       "state": {
         "destination": "mega-burger"
@@ -168,6 +168,20 @@
         "level": "card",
         "component": "place",
         "cause": "score"
+      }
+    },
+    {
+      "name": "0:26 \u00b7 Maya's text, 25 s after Hungry, at the edge while walking: glance size, the line and the replies",
+      "between": [
+        25.9,
+        26.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-lunch",
+        "component": "thread",
+        "level": "glance",
+        "reasonText": "Clear sidewalk ahead"
       }
     },
     {
@@ -242,6 +256,17 @@
       }
     },
     {
+      "name": "1:02 \u00b7 Brisk: the thread steps out of view",
+      "between": [
+        61.5,
+        62.0
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "maya-lunch"
+      }
+    },
+    {
       "name": "1:02 to 1:15 \u00b7 Brisk: labels at most, never a card",
       "between": [
         62.5,
@@ -265,16 +290,62 @@
       }
     },
     {
-      "name": "1:18 \u00b7 the text from Maya at the red light",
+      "name": "1:15 \u00b7 after Brisk it is back at the edge",
       "between": [
-        77.9,
-        78.5
+        74.7,
+        75.2
       ],
       "must": {
         "action": "show",
-        "id": "maya-usual",
-        "component": "toast",
-        "reasonText": "Long red light"
+        "id": "maya-lunch",
+        "component": "thread"
+      }
+    },
+    {
+      "name": "1:18 \u00b7 stopped at the red light, the full thread",
+      "between": [
+        77.4,
+        77.9
+      ],
+      "must": {
+        "action": "promote",
+        "id": "maya-lunch",
+        "level": "card"
+      }
+    },
+    {
+      "name": "1:18.5 \u00b7 On my way: the offer within 1 s, in the brain's voice",
+      "between": [
+        78.5,
+        79.5
+      ],
+      "must": {
+        "action": "promote",
+        "id": "maya-lunch",
+        "noteIs": "Big Bean \u00b7 30 s \u00b7 route there?"
+      }
+    },
+    {
+      "name": "1:20.5 \u00b7 Yes: the route redraws to the Big Bean, caused by the reply, for Maya",
+      "between": [
+        80.5,
+        80.8
+      ],
+      "must": {
+        "action": "show",
+        "id": "route",
+        "cause": "reply",
+        "reasonText": "Meeting Maya at 1"
+      }
+    },
+    {
+      "name": "1:20.5 \u00b7 the Big Bean is the destination",
+      "between": [
+        80.7,
+        111.9
+      ],
+      "state": {
+        "destination": "big-bean"
       }
     },
     {
@@ -290,116 +361,48 @@
       }
     },
     {
-      "name": "1:22 \u00b7 a look across the avenue at Mega Burger: its card, Going here",
+      "name": "restraint \u00b7 shows within the budget, the panel and the picker included",
       "between": [
-        81.5,
-        83
+        0,
+        118
+      ],
+      "max": {
+        "shows": 11
+      }
+    },
+    {
+      "name": "1:44 \u00b7 a look at the Big Bean on the way: its card, Going here (the chip has moved)",
+      "between": [
+        103.3,
+        104.6
       ],
       "must": {
         "action": "promote",
-        "id": "mega-burger",
+        "id": "big-bean",
         "level": "card"
       }
     },
     {
-      "name": "1:24 \u00b7 held gaze expands it in place",
+      "name": "1:52 \u00b7 at the Big Bean door, the arrival line says why",
       "between": [
-        83.8,
-        84.8
+        111.9,
+        112.3
       ],
       "must": {
-        "action": "promote",
-        "id": "mega-burger",
-        "level": "expanded"
+        "action": [
+          "show",
+          "promote"
+        ],
+        "id": "big-bean",
+        "cause": "arrival",
+        "reasonText": "Meeting Maya at 1"
       }
     },
     {
-      "name": "1:25 \u00b7 hold a seat",
+      "name": "1:52 \u00b7 no pocket at the door",
       "between": [
-        85,
-        85.3
-      ],
-      "must": {
-        "action": "promote",
-        "id": "mega-burger",
-        "level": "expanded",
-        "cause": "choice"
-      }
-    },
-    {
-      "name": "1:29 to 1:39 \u00b7 crossing, everything holds",
-      "between": [
-        89.2,
-        98.8
-      ],
-      "must": {
-        "action": "hold",
-        "all": true,
-        "reasonKind": "gate"
-      }
-    },
-    {
-      "name": "1:29 to 1:39 \u00b7 nothing opens in a crossing",
-      "between": [
-        89.2,
-        98.8
-      ],
-      "max": {
-        "shows": 0
-      }
-    },
-    {
-      "name": "1:33 \u00b7 the app update is held",
-      "between": [
-        93,
-        93.3
-      ],
-      "must": {
-        "action": "hold",
-        "id": "order-ready",
-        "timing": "after-gate"
-      }
-    },
-    {
-      "name": "1:39 \u00b7 far curb, the held update arrives with its reason",
-      "between": [
-        99,
-        101
-      ],
-      "must": {
-        "action": "show",
-        "id": "order-ready",
-        "level": "glance",
-        "reasonText": "Held that while you crossed"
-      }
-    },
-    {
-      "name": "1:40 \u00b7 the destination column on the way to the door",
-      "between": [
-        100,
-        107.5
-      ],
-      "stateSome": {
-        "has": "destination"
-      }
-    },
-    {
-      "name": "1:48 \u00b7 arrival",
-      "between": [
-        107.5,
-        108.5
-      ],
-      "must": {
-        "action": "show",
-        "id": "arrival",
-        "nameIs": "Seat's held, inside on the left."
-      }
-    },
-    {
-      "name": "1:48 \u00b7 no pocket at the door",
-      "between": [
-        107.5,
-        112.5
+        111.9,
+        116
       ],
       "mustNot": {
         "action": "surface",
@@ -407,28 +410,17 @@
       }
     },
     {
-      "name": "1:52 \u00b7 four seconds at the door, then the loop resumes with no destination and no intent",
+      "name": "1:56 \u00b7 four seconds at the door, then the loop resumes with no destination and no intent",
       "between": [
-        112.5,
+        116.5,
         118
       ],
       "state": {
         "goal": "walking",
         "destination": null,
         "hasNot": [
-          "route",
-          "arrival"
+          "route"
         ]
-      }
-    },
-    {
-      "name": "restraint \u00b7 shows within the budget, the panel and the picker included",
-      "between": [
-        0,
-        112
-      ],
-      "max": {
-        "shows": 11
       }
     }
   ]

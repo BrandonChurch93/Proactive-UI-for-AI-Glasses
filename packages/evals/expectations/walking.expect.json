@@ -261,6 +261,26 @@
       }
     },
     {
+      "name": "1:19 \u00b7 Can't today at the red light: no offer, no route",
+      "between": [
+        79,
+        112
+      ],
+      "mustNot": {
+        "id": "route"
+      }
+    },
+    {
+      "name": "1:25 \u00b7 Maya answers Next time in the thread, and nothing else happens",
+      "between": [
+        79,
+        112
+      ],
+      "state": {
+        "destination": null
+      }
+    },
+    {
       "name": "1:29 to 1:39 \u00b7 crossing, everything holds",
       "between": [
         89.2,

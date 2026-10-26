@@ -201,7 +201,7 @@ export class Placement {
       road,
       chrome: ctx.chrome ?? [],
       ui,
-      ...(this.scale !== null && t - this.scaleAt < MOVE.hysteresis ? { scaleFrom: this.scale } : {}),
+      ...(this.scale !== null && t - this.scaleAt < MOVE.scaleHold ? { scaleFrom: this.scale } : {}),
     });
     const near2: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
     const prefer = (): { side: Align; vertical: Vertical; push: boolean } | undefined => (this.cfg ? { side: this.cfg.side, vertical: this.cfg.vertical, push: this.cfg.push } : undefined);

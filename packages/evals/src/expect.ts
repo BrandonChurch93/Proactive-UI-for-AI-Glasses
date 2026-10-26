@@ -34,6 +34,7 @@ export interface Match {
   nameIs?: string;
   sayIs?: string;
   factIs?: string | null;
+  noteIs?: string;
   factIncludes?: string;
   showReason?: boolean;
   focusOk?: boolean;
@@ -104,6 +105,7 @@ export function matches(d: Decision, m: Match): boolean {
   if (m.nameIs !== undefined && d.content.name !== m.nameIs) return false;
   if (m.sayIs !== undefined && d.content.say !== m.sayIs) return false;
   if (m.factIs !== undefined && (d.content.fact ?? null) !== m.factIs) return false;
+  if (m.noteIs !== undefined && d.content.note !== m.noteIs) return false;
   if (m.factIncludes !== undefined && !(d.content.fact ?? '').includes(m.factIncludes)) return false;
   if (m.showReason !== undefined && Boolean(d.content.showReason) !== m.showReason) return false;
   if (m.focusOk !== undefined && Boolean(d.placement.focusOk) !== m.focusOk) return false;
@@ -175,7 +177,8 @@ export function evaluate(r: RunResult, exp: Expectation): CaseResult[] {
       res(!hit, hit ? `t=${hit.t} ${hit.d.action} ${hit.d.id} ${hit.d.level}` : '');
     } else if (c.max || c.min) {
       const shows = evs.filter((e) => isShow(e.d) && e.d.cause !== 'settle').length;
-      const nonGaze = evs.filter((e) => isShow(e.d) && e.d.cause !== 'dwell' && e.d.cause !== 'pinch' && e.d.cause !== 'settle' && !e.d.gaze).length;
+      const asked = new Set(['intent', 'picker', 'errands']);
+      const nonGaze = new Set(evs.filter((e) => isShow(e.d) && e.d.cause !== 'dwell' && e.d.cause !== 'pinch' && e.d.cause !== 'settle' && !e.d.gaze && !asked.has(e.d.component)).map((e) => e.d.id)).size;
       const holds = evs.filter((e) => e.d.action === 'hold').length;
       const fails: string[] = [];
       if (c.max?.shows !== undefined && shows > c.max.shows) fails.push(`shows ${shows} > ${c.max.shows}`);

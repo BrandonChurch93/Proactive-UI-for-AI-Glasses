@@ -76,7 +76,7 @@ The recordings script what the reviewer does. They drive `pnpm record` for the e
 
 | Kind | Behavior |
 | --- | --- |
-| Text or DM from a person | Glance toast, sender and one line, at the next safe moment, reply or later |
+| Text or DM from a person | A thread at the view edge at the next safe moment: glance size while walking (sender, the line, the replies), the full thread at a stop; held in a crossing and shown at the far curb; out of view in Brisk and back after it; stays until it is answered or dismissed, then folds by rule. A reply can change the walk, but only through what the walk file attaches to that reply (an offer to a place, a stop added) |
 | Social (likes, follows, comments) | Never shown one by one. Count on the held glyph; one strip when stopped: "3 notifications · later" |
 | App update (package, order) | Batched under whatever is open |
 

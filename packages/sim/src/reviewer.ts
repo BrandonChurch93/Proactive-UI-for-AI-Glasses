@@ -61,7 +61,7 @@ export class ScriptedReviewer {
       if (x.kind === 'intent') return [{ t: x.t, id: 'intent', action: x.id }];
       if (x.kind === 'choose') return [{ t: x.t, id: 'picker', action: x.id }];
       if (x.kind === 'reply') return [{ t: x.t, id: x.id, action: x.reply }];
-      if (x.kind === 'go') return [{ t: x.t, id: 'offer', action: x.id }];
+      if (x.kind === 'go') return [{ t: x.t, id: x.id, action: 'go' }];
       return [];
     });
     this.lookUps = b.flatMap((x) => (x.kind === 'lookUp' ? [{ t: x.t, seconds: x.seconds }] : []));

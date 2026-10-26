@@ -22,6 +22,7 @@ import {
   type Entity,
   type LiveValue,
   type Notification,
+  type ThreadLine,
   type PaneReport,
   type PersonInfo,
   type Beat,
@@ -102,6 +103,7 @@ export class Sim {
   private lastTickT = -Infinity;
   private pendingLive: Events = {};
   private anchors = new Map<string, Vec3>();
+  private threads = new Map<string, ThreadLine[]>();
 
   constructor(scenario: ScenarioId, opts: SimOptions = {}) {
     const seed = opts.seed ?? 47;
@@ -530,9 +532,24 @@ export class Sim {
       if (b.text) n.text = b.text;
       if (b.count !== undefined) n.count = b.count;
       if (b.more !== undefined) n.more = b.more;
+      if (b.replies) {
+        n.replies = b.replies;
+        n.thread = [{ me: false, text: b.text ?? '', at: b.t }, ...(this.threads.get(id) ?? []).filter((l) => l.at <= this.t + 1e-9)];
+      }
       out.push(n);
     }
     return out;
+  }
+
+  // The other side of a conversation is the world's: a reply goes into the thread, and the answer the walk file gives for it follows.
+  private answer(id: string, replyId: string): void {
+    const b = this.timeline.find((x) => x.kind === 'inbox' && x.id === id);
+    if (!b || b.kind !== 'inbox' || !b.replies || this.threads.has(id)) return;
+    const r = b.replies.find((x) => x.id === replyId);
+    if (!r) return;
+    const lines: ThreadLine[] = [{ me: true, text: r.label, at: this.t }];
+    if (r.answer) lines.push({ me: false, text: r.answer.text, at: Math.round((this.t + r.answer.after) * 1000) / 1000 });
+    this.threads.set(id, lines);
   }
 
   dynamicColliders(): Dynamic[] {
@@ -549,6 +566,7 @@ export class Sim {
     const w = this.wearer;
     const pose = this.cameraPose();
     const events = this.scripted ? this.reviewer.eventsBetween(this.lastTickT, this.t) : this.pendingLive;
+    if (events.choice) this.answer(events.choice.id, events.choice.action);
     this.pendingLive = {};
     this.lastTickT = this.t;
     const backdrop: Record<string, number> = {};

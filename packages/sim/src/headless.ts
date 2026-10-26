@@ -91,6 +91,7 @@ export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, max
 const VIEW_SIZE: Record<string, { w: number; h: number }> = {
   errands: { w: 300, h: 150 },
   intent: { w: 300, h: 136 },
+  thread: { w: 300, h: 150 },
   picker: { w: 320, h: 430 },
   toast: { w: 300, h: 84 },
   call: { w: 300, h: 96 },

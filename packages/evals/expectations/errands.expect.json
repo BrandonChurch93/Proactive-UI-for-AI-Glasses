@@ -91,6 +91,19 @@
       }
     },
     {
+      "name": "0:33 \u00b7 Maya asks for stamps, 25 s after Errands, at the edge while walking",
+      "between": [
+        32.9,
+        33.3
+      ],
+      "must": {
+        "action": "show",
+        "id": "maya-stamps",
+        "component": "thread",
+        "level": "glance"
+      }
+    },
+    {
       "name": "0:36 \u00b7 the pharmacy lights its label on the look",
       "between": [
         35.6,
@@ -142,6 +155,18 @@
         "id": "main-street-pharmacy",
         "level": "card",
         "cause": "arrival"
+      }
+    },
+    {
+      "name": "0:52.5 \u00b7 On it at the pharmacy door: the Post Office is already a stop, and the thread says so",
+      "between": [
+        52.5,
+        53.4
+      ],
+      "must": {
+        "action": "promote",
+        "id": "maya-stamps",
+        "noteIs": "Post Office sells stamps \u00b7 already on your route"
       }
     },
     {
@@ -362,7 +387,7 @@
         136
       ],
       "max": {
-        "shows": 11
+        "shows": 12
       }
     }
   ]
