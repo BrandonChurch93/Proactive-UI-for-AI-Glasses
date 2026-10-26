@@ -111,7 +111,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## What a pane shows
 
 - Label: the name and the say line's short form (in Brisk, the name and one number). Nothing else.
-- Card: the name, the say line, one live line, and the reason line in Stopped and Stroll unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
+- Card: the name, the say line, one live line, and the reason line in Stopped and Stroll (a compact card, beyond 30 m, has no reason line) unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
 - Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 
 ## Expanded views

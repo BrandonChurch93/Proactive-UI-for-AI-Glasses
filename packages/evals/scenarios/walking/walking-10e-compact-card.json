@@ -1,0 +1,11 @@
+{
+  "id": "walking-10e-compact-card",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 12,
+  "description": "A place beyond 30 m gets a compact card on a held look (no reason, no rows), and the full card in place as the wearer comes within 30 m.",
+  "startN": 9,
+  "only": ["trattoria-da-lia"],
+  "pace": [[0, 0.8]],
+  "gaze": [[1, "trattoria-da-lia"]]
+}

@@ -64,7 +64,7 @@
       }
     },
     {
-      "name": "0:14 \u00b7 a look at Mega Burger lights its label; 58 m away, no card",
+      "name": "0:14 \u00b7 a look at Mega Burger lights its label",
       "between": [
         14,
         16
@@ -134,14 +134,27 @@
       }
     },
     {
-      "name": "0:14 to 0:34 \u00b7 a far place never becomes a card",
+      "name": "0:14.5 \u00b7 half a second later, a compact card: no reason, no rows, 58 m away",
+      "between": [
+        14.5,
+        15.5
+      ],
+      "must": {
+        "action": "promote",
+        "id": "mega-burger",
+        "level": "card",
+        "showReason": false
+      }
+    },
+    {
+      "name": "0:14 to 0:30 \u00b7 a far place never expands",
       "between": [
         14,
-        35
+        31
       ],
       "mustNot": {
         "id": "mega-burger",
-        "level": "card"
+        "level": "expanded"
       }
     },
     {

@@ -21,6 +21,7 @@ export interface LadderItem {
   hiddenS: number;
   hiddenLogged: boolean;
   byLabels: boolean;
+  far: boolean;
 }
 
 export function newLadderItem(id: string): LadderItem {
@@ -41,6 +42,7 @@ export function newLadderItem(id: string): LadderItem {
     hiddenS: 0,
     hiddenLogged: false,
     byLabels: false,
+    far: false,
   };
 }
 
@@ -83,7 +85,7 @@ export interface LadderOut {
 
 export function earnedByDwell(it: LadderItem, t: number, dwellS: number, band: Band, far: boolean, cfg: Config): PaneLevel {
   if (dwellS < cfg.ladder.pipDwellS - 1e-9) return 'none';
-  if (band === 'brisk' || far || rank(it.level) < rank('label')) return 'label';
+  if (band === 'brisk' || rank(it.level) < rank('label')) return 'label';
   const held = t - Math.max(it.since, it.gazeSince ?? t);
   return held >= cfg.ladder.growS - 1e-9 ? 'card' : 'label';
 }
@@ -97,6 +99,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     let earned = earnedByDwell(it, t, inp.dwellS, band, Boolean(inp.far), cfg);
     if (
       it.level === 'card' &&
+      !inp.far &&
       (band === 'stopped' || band === 'stroll') &&
       it.gazeSince !== null &&
       it.gazeSince <= it.cardAt + 1e-9 &&
@@ -107,12 +110,13 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     let via: LadderOut['via'] = 'dwell';
     if (inp.pinch && (band === 'stopped' || band === 'stroll')) {
       const next = up(maxLevel(it.level, 'label'));
-      if (rank(next) > rank(earned)) {
+      if (rank(next) > rank(earned) && !(inp.far && next === 'expanded')) {
         earned = next;
         via = 'pinch';
       }
     }
-    if ((inp.far || inp.cardWait) && rank(earned) > rank('label') && rank(it.level) < rank('card')) earned = 'label';
+    if (inp.cardWait && rank(earned) > rank('label') && rank(it.level) < rank('card')) earned = 'label';
+    if (inp.far && rank(earned) > rank('card')) earned = 'card';
     let level = maxLevel(it.level, earned);
     const cap = bandCap(band);
     if (rank(level) > rank(cap)) level = cap;

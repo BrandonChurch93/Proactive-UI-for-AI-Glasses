@@ -1,10 +1,10 @@
 {
  "version": 1,
  "totals": {
-  "suites": 40,
-  "passed": 40,
-  "cases": 941,
-  "casesPassed": 941
+  "suites": 41,
+  "passed": 41,
+  "cases": 965,
+  "casesPassed": 965
  },
  "byGroup": {
   "walks": {
@@ -24,8 +24,8 @@
    "passed": 6
   },
   "walking": {
-   "suites": 20,
-   "passed": 20
+   "suites": 21,
+   "passed": 21
   }
  },
  "suites": [
@@ -396,7 +396,7 @@
      "detail": ""
     },
     {
-     "name": "0:14 · a look at Mega Burger lights its label; 58 m away, no card",
+     "name": "0:14 · a look at Mega Burger lights its label",
      "pass": true,
      "detail": "t=14.5 show mega-burger label"
     },
@@ -408,7 +408,7 @@
     {
      "name": "0:22 · pinch while walking saves",
      "pass": true,
-     "detail": "t=22 save mega-burger label"
+     "detail": "t=22 save mega-burger card"
     },
     {
      "name": "0:22 · nothing opens",
@@ -426,7 +426,12 @@
      "detail": "t=34.801 dismiss mega-burger label"
     },
     {
-     "name": "0:14 to 0:34 · a far place never becomes a card",
+     "name": "0:14.5 · half a second later, a compact card: no reason, no rows, 58 m away",
+     "pass": true,
+     "detail": "t=15 promote mega-burger card"
+    },
+    {
+     "name": "0:14 to 0:30 · a far place never expands",
      "pass": true,
      "detail": ""
     },
@@ -4357,7 +4362,7 @@
     {
      "name": "[5.95, 6.05) must {\"action\":\"save\",\"id\":\"mega-burger\",\"reasonKind\":\"pocket\"}",
      "pass": true,
-     "detail": "t=6 save mega-burger label",
+     "detail": "t=6 save mega-burger card",
      "rule": "walking-6"
     },
     {
@@ -5183,9 +5188,9 @@
      "detail": ""
     },
     {
-     "name": "[2.35, 2.45) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
+     "name": "[1.75, 1.85) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
      "pass": true,
-     "detail": "t=2.4 promote grace-theater card",
+     "detail": "t=1.8 promote grace-theater card",
      "rule": "walking-10"
     },
     {
@@ -5515,6 +5520,153 @@
    ],
    "rule": "walking-10",
    "description": "The view settles over three places: all three label together, the one under the center grows to its card; moving the look to a second place swaps the card in one move."
+  },
+  {
+   "id": "walking-10e-compact-card",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world label outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop, never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell or a pinch, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[1.7, 1.9) must {\"action\":\"promote\",\"id\":\"trattoria-da-lia\",\"level\":\"card\",\"showReason\":false}",
+     "pass": true,
+     "detail": "t=1.8 promote trattoria-da-lia card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[9.7, 9.9) must {\"action\":\"promote\",\"id\":\"trattoria-da-lia\",\"level\":\"card\",\"showReason\":true}",
+     "pass": true,
+     "detail": "t=9.8 promote trattoria-da-lia card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[0, 11.7) mustNot {\"id\":\"trattoria-da-lia\",\"level\":\"expanded\"}",
+     "pass": true,
+     "detail": "",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[11.7, 11.9) must {\"action\":\"promote\",\"id\":\"trattoria-da-lia\",\"level\":\"expanded\"}",
+     "pass": true,
+     "detail": "t=11.8 promote trattoria-da-lia expanded",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "A place beyond 30 m gets a compact card on a held look (no reason, no rows), and the full card in place as the wearer comes within 30 m."
   },
   {
    "id": "walking-11-whisper",

@@ -617,6 +617,9 @@ export class Brain {
         this.whisper = { content: whisperContent(e, why, this.goal), reason: why, until: t + this.cfg.whisper.seconds, from: e.id };
       }
 
+      const far = e.distance > this.cfg.ladder.cardWithinM;
+      if (it.level === 'card' && it.far && !far) it.cardAt = t;
+      it.far = far;
       const labelled = this.labels.has(e.id) || (snap.goal.end === e.id && e.distance < this.cfg.arrival.distanceM * 2);
       const visible = this.paneVisible(e.id);
       const dtL = Number.isFinite(it.lastT) ? Math.max(0, t - it.lastT) : 0;
@@ -636,7 +639,7 @@ export class Brain {
           target: isT,
           dwellS: Math.max(0, dwellS - it.hiddenS),
           visible,
-          far: e.distance > this.cfg.ladder.cardWithinM,
+          far,
           cardWait: t - this.cardGrownAt < this.cfg.ladder.swapGapS - 1e-9,
           pinch: pinch === e.id,
           floor: aware.has(e.id) ? 'pip' : 'none',
@@ -685,7 +688,7 @@ export class Brain {
         gaze: isT,
         focusOk: isT,
         zoneOk: level === 'label' && (band === 'stopped' || band === 'stroll'),
-        announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : undefined,
+        announce: level === 'expanded' ? `x:${this.chosen.get(e.id) ?? ''}` : level === 'card' ? (e.distance > this.cfg.ladder.cardWithinM ? 'c:compact' : 'c:full') : undefined,
         cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),
       };
@@ -777,7 +780,7 @@ export class Brain {
 
   private entityContent(e: Entity, level: PaneLevel, why: Reason, band: Band): Content {
     if (level === 'expanded') return expandedContent(e, why, this.goal, new Set(this.inbox.keys()), this.chosen.get(e.id));
-    if (level === 'card') return cardContent(e, why, band, this.goal);
+    if (level === 'card') return cardContent(e, why, band, this.goal, e.distance > this.cfg.ladder.cardWithinM);
     if (level === 'label') return trimForPace(labelContent(e, why, this.goal), band === 'stopped' ? 'stroll' : band, undefined, this.cfg);
     return pipContent(e, why);
   }
@@ -1575,10 +1578,14 @@ export class Brain {
     const a = LEVEL_RANK[prev.level];
     const b = LEVEL_RANK[w.level];
     const pane = (r: number): boolean => r >= LEVEL_RANK.whisper;
-    if (!pane(a) && pane(b)) return 'show';
-    if (pane(a) && !pane(b)) return 'demote';
-    if (b > a) return 'promote';
-    if (b < a) return 'demote';
+    const moved = (action: Decision['action']): Decision['action'] => {
+      if (w.announce !== undefined) this.announced.set(w.id, w.announce);
+      return action;
+    };
+    if (!pane(a) && pane(b)) return moved('show');
+    if (pane(a) && !pane(b)) return moved('demote');
+    if (b > a) return moved('promote');
+    if (b < a) return moved('demote');
     if (w.announce !== undefined && w.announce !== this.announced.get(w.id)) {
       const first = !this.announced.has(w.id);
       this.announced.set(w.id, w.announce);

@@ -58,7 +58,14 @@ export function uiScale(vp: Viewport): number {
 }
 
 export function distanceScale(distance: number): number {
-  return clamp(22 / Math.max(0.1, distance), 0.78, 1);
+  return clamp(22 / Math.max(0.1, distance), 0.7, 1);
+}
+
+// The smallest text in any pane is 12 px at scale 1; a pane never draws it smaller.
+export const TEXT_FLOOR = 1;
+
+export function paneScale(distance: number, ui: number): number {
+  return Math.max(distanceScale(distance) * ui, TEXT_FLOOR);
 }
 
 export function anchorFactors(align: Align, vertical: Vertical): { fx: number; fy: number } {
@@ -147,8 +154,8 @@ export function placeWorld(inp: PlaceInput): Placed {
   if (collapsed === 'pip') return { ...base, rect: { x: anchor.x, y: anchor.y, w: 0, h: 0 }, scale: 1, mode: 'pip', collapsed };
 
   const ui = inp.ui ?? 1;
-  const start = inp.scaleFrom ?? distanceScale(inp.distance) * ui;
-  const scales = inp.scaleFrom !== undefined ? [start] : [start, 0.84 * ui, 0.78 * ui, 0.74 * ui].filter((sc, i, all) => sc <= start + 1e-9 && all.indexOf(sc) === i);
+  const start = inp.scaleFrom ?? paneScale(inp.distance, ui);
+  const scales = inp.scaleFrom !== undefined ? [start] : [start, 0.84 * ui, 0.78 * ui, 0.74 * ui].map((sc) => Math.max(sc, TEXT_FLOOR)).filter((sc, i, all) => sc <= start + 1e-9 && all.indexOf(sc) === i);
   const all: [Align, Vertical][] = [
     [away, 'middle'],
     ['center', 'above'],

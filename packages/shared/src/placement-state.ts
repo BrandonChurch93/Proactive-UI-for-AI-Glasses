@@ -2,7 +2,7 @@ import type { Projected, Viewport } from './camera';
 import type { Band } from './data';
 import { keepOutsFor, type KeepOut } from './keepout';
 import { MOVE } from './motion-tokens';
-import { MARGIN, NOMINAL_SIZE, PIP_GAP, anchorFactors, configRect, distanceScale, placeWorld, type Align, type PlaceInput, type Vertical } from './placement';
+import { MARGIN, NOMINAL_SIZE, PIP_GAP, TEXT_FLOOR, anchorFactors, configRect, paneScale, placeWorld, type Align, type PlaceInput, type Vertical } from './placement';
 import { focusRect } from './rules';
 import { LEVEL_RANK, type Level } from './types';
 import { angleWrap } from './vec';
@@ -242,9 +242,9 @@ export class Placement {
         }
       }
       const failed = placed.mode === 'pip' || placed.mode === 'offscreen';
-      const squeeze = inp.scaleFrom ?? 0.74 * ui;
+      const squeeze = inp.scaleFrom ?? Math.max(0.74 * ui, TEXT_FLOOR);
       const fits = inp.size.w * squeeze <= vp.w - 2 * MARGIN && inp.size.h * squeeze <= vp.h - 2 * MARGIN;
-      const reach = inp.size.w * distanceScale(req.distance) * ui + PIP_GAP.beside + MARGIN;
+      const reach = inp.size.w * paneScale(req.distance, ui) + PIP_GAP.beside + MARGIN;
       const nearEdge = Math.min(a.x, vp.w - a.x) < reach;
       if (failed && req.focusOk && fits && !nearEdge) {
         const same = this.cfg?.side === 'center' && this.cfg.vertical === 'lift' && this.cfg.scale === squeeze;

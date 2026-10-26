@@ -204,7 +204,7 @@ Synthesized, no files. Off by default, one button turns it on.
 ## 5. Placement
 
 Zones:
-- World zone (pips, labels, cards, expanded view): projected from 3D anchors every frame. Scale with distance: `scale = clamp(22 / distance, .78, 1)`: full size at 22 m and nearer, a smaller label beyond.
+- World zone (pips, labels, cards, expanded view): projected from 3D anchors every frame. Scale with distance: `scale = clamp(22 / distance, .7, 1)` times the screen scale, never below 1 (no pane text under 12 px): full size at 22 m and nearer, a smaller label beyond.
 - Ground zone (route, turn arc, destination marker, safety text): painted on the pavement in perspective.
 - View zone (held glyph, message toasts, map tile, the ask glance, reviewer chrome): fixed in view, edges only.
 
@@ -225,7 +225,7 @@ Screen scale: sizes above are at the reference view of 1280 × 800. Every pane, 
 | --- | --- | --- | --- |
 | Pip | World | Pip | Light vocabulary, category tint |
 | Label | World | Label | Name and the short form of what the assistant would say about it, beside its storefront, scaled by distance; in Brisk the whisper form (name and one number). Nothing else. Up to six at once, when the view settles |
-| Place card | World | Card | Name, the say line, one live line (the two facts behind it), the reason in Stopped and Stroll. No year, no hint (no card exists in Brisk) |
+| Place card | World | Card | Name, the say line, one live line (the two facts behind it), the reason in Stopped and Stroll. No year, no hint (no card exists in Brisk). Beyond 30 m the compact card: name, say line and live line only, at the distance scale; it becomes the full card in place within 30 m |
 | Expanded view | World, in place | Expanded | One decision: name, the say line, at most three rows that support it, two actions, then the line after a choice |
 | Errands card | View edge | Card | The stops in order with why; ticks a stop on pickup; reorders on a closure; folds to the route after 4 s while moving |
 | Leader, seed | World | Label, card | Light vocabulary |

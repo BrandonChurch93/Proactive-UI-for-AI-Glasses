@@ -41,14 +41,14 @@ export function labelContent(e: Entity, r: Reason, scenario: ScenarioId): Conten
   return c;
 }
 
-export function cardContent(e: Entity, r: Reason, band: Band, scenario: ScenarioId): Content {
+export function cardContent(e: Entity, r: Reason, band: Band, scenario: ScenarioId, compact = false): Content {
   const say = sayFor(e, scenario).line;
   const c: Content = {
     name: e.name,
     say,
     live: liveLine(e),
     reason: r,
-    showReason: (band === 'stopped' || band === 'stroll') && !say.toLowerCase().includes(r.text.replace(/\.$/, '').toLowerCase()),
+    showReason: !compact && (band === 'stopped' || band === 'stroll') && !say.toLowerCase().includes(r.text.replace(/\.$/, '').toLowerCase()),
   };
   if (e.depth) c.depthRef = e.depth;
   return c;

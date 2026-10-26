@@ -29,14 +29,15 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     pinch: [[22, 'mega-burger']],
   };
 
-  it('labels the best fit, labels a far place on a look without a card, saves on pinch and fades with the labels', () => {
+  it('labels the best fit, gives a far place a compact card on a look, saves on pinch and walks back down', () => {
     const lines = runSpec(spec).filter((e) => e.line.includes('goldies') || e.line.includes('mega-burger'));
     const at = (line: string): number | undefined => lines.find((e) => e.line === line)?.t;
     expect(at('show goldies-counter label')).toBeCloseTo(2.0, 5);
     expect(at('demote goldies-counter pip')).toBeCloseTo(4.5, 5);
     expect(at('show mega-burger label')).toBeCloseTo(14.3, 5);
-    expect(at('promote mega-burger card')).toBeUndefined();
-    expect(at('save mega-burger label')).toBeCloseTo(22.0, 5);
+    expect(at('promote mega-burger card')).toBeCloseTo(14.8, 5);
+    expect(at('save mega-burger card')).toBeCloseTo(22.0, 5);
+    expect(at('demote mega-burger label')).toBeCloseTo(31.1, 5);
     expect(at('demote mega-burger pip')).toBeCloseTo(33.9, 5);
     expect(lines.filter((e) => e.line === 'show mega-burger label')).toHaveLength(1);
   });
