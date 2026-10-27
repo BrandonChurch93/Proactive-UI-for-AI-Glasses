@@ -1,3 +1,4 @@
+import { SCENARIO_LABEL } from '@lumen/shared';
 import s from './inspector.module.css';
 import type { InspectorStore } from './store';
 import { clock } from './timeline';
@@ -41,6 +42,6 @@ export class Exporter {
   update(): void {
     const frames = this.store.frames().filter((f) => f && f.t <= this.store.now() + 1e-6);
     const decisions = frames.reduce((n, f) => n + f.events.length, 0);
-    this.summary.textContent = `${this.store.scenario} · ${clock(this.store.now())} · ${frames.length} snapshots · ${decisions} decisions · ${this.store.overrides().length} overrides`;
+    this.summary.textContent = `${SCENARIO_LABEL[this.store.scenario]} · ${clock(this.store.now())} · ${frames.length} snapshots · ${decisions} decisions · ${this.store.overrides().length} overrides`;
   }
 }

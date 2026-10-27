@@ -3,7 +3,7 @@ import { HeadlessView, Sim, TICK_HZ } from '@lumen/sim';
 import { isScenarioId, nOf } from '@lumen/shared';
 
 const s = process.argv[2] ?? 'walking';
-if (!isScenarioId(s)) throw new Error('usage: tsx scripts/lap.ts hungry|errands|walking [--s=300]');
+if (!isScenarioId(s)) throw new Error('usage: tsx scripts/lap.ts hungry|walking [--s=300]');
 const secs = Number(process.argv.find((a) => a.startsWith('--s='))?.slice(4) ?? 320);
 const sim = new Sim(s);
 const brain = new Brain();

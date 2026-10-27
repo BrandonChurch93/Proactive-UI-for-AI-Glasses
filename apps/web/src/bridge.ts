@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PLACE_BY_ID, groundY, placeDoor, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
+import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, PLACE_BY_ID, SOUTH_CROSSWALK, groundY, placeDoor, zOf, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
 import { keepOuts, pointAt, type Sim } from '@lumen/sim';
 import {
   LIGHT_COLOR,
@@ -11,6 +11,7 @@ import {
   type LeaderHandle,
   type LightHandle,
   type LightKind,
+  type MapView,
   type RouteHandle,
   type SceneBridge,
 } from '@lumen/overlay';
@@ -145,6 +146,49 @@ export class ThreeBridge implements SceneBridge {
   keepOuts(maxDepth = Infinity): KeepOut[] {
     const eye = this.cam.position;
     return keepOuts(this.sim, (v) => this.project(v), this.viewport(), { x: eye.x, y: eye.y, z: eye.z }, maxDepth);
+  }
+
+  private mapAreas: MapView['areas'] | null = null;
+
+  // The block as a plan for the map tile: streets, sidewalks and footprints once, the wearer and the route each frame.
+  mapView(): MapView {
+    const sim = this.sim;
+    const w = sim.wearer;
+    const B = BLOCK;
+    this.mapAreas ??= [
+      { kind: 'walk', x0: -B.buildingLine, z0: zOf(200), x1: B.buildingLine, z1: zOf(-80) },
+      { kind: 'walk', x0: -120, z0: zOf(B.northLineN), x1: 120, z1: zOf(B.southLineN) },
+      { kind: 'road', x0: -B.avenueHalf, z0: zOf(200), x1: B.avenueHalf, z1: zOf(-80) },
+      { kind: 'road', x0: -120, z0: zOf(B.crossTo), x1: 120, z1: zOf(B.crossFrom) },
+      ...sim.layout.colliders
+        .filter((c) => c.kind === 'facade' || c.kind === 'tower')
+        .map((c) => ({ kind: 'building' as const, x0: c.box.min.x, z0: c.box.min.z, x1: c.box.max.x, z1: c.box.max.z })),
+    ];
+    const r = sim.route;
+    const going = r.target !== 'start';
+    const reach = going ? r.length : Math.min(r.length, w.s + 45);
+    const route: MapView['route'] = [];
+    for (let s = w.s; s <= reach + 1e-6; s += 1.5) {
+      const p = pointAt(r, Math.min(s, reach)).pos;
+      route.push({ x: p.x, z: p.z });
+    }
+    const place = going ? PLACE_BY_ID.get(r.target) : undefined;
+    const door = place ? placeDoor(place) : null;
+    const ah = B.avenueHalf;
+    return {
+      x: w.pos.x,
+      z: w.pos.z,
+      yaw: w.bodyYaw,
+      head: sim.head.yaw,
+      areas: this.mapAreas,
+      crossings: [
+        { x0: -ah, z0: zOf(AVENUE_CROSSWALK.n + AVENUE_CROSSWALK.half), x1: ah, z1: zOf(AVENUE_CROSSWALK.n - AVENUE_CROSSWALK.half), bars: 'z' },
+        { x0: -ah, z0: zOf(SOUTH_CROSSWALK.n + SOUTH_CROSSWALK.half), x1: ah, z1: zOf(SOUTH_CROSSWALK.n - SOUTH_CROSSWALK.half), bars: 'z' },
+        { x0: CROSS_CROSSWALK.x - CROSS_CROSSWALK.half, z0: zOf(B.crossTo), x1: CROSS_CROSSWALK.x + CROSS_CROSSWALK.half, z1: zOf(B.crossFrom), bars: 'x' },
+      ],
+      route,
+      dest: door && place ? { x: door.x, z: door.z, kind: place.kind } : null,
+    };
   }
 
   routePath(_to: string, offset: 'center' | 'curb'): Vec3[] {

@@ -409,7 +409,6 @@
       "depth": null,
       "scenarios": [
         "hungry",
-        "errands",
         "walking"
       ],
       "n": [
@@ -614,8 +613,7 @@
       "glance": "Line of 4 · 5 min",
       "depth": "menu",
       "scenarios": [
-        "hungry",
-        "errands"
+        "hungry"
       ],
       "n": [
         46,
@@ -669,10 +667,6 @@
           "line": "Coffee after · line of 4, 5 min",
           "short": "Line of 4"
         },
-        "errands": {
-          "line": "Scaffolding over the door · keep to the curb",
-          "short": "Keep to the curb"
-        },
         "default": {
           "line": "Line of 4 · 5 min",
           "short": "Line of 4"
@@ -698,7 +692,7 @@
       "glance": "Prescription's ready here",
       "depth": "pickup",
       "scenarios": [
-        "errands"
+        "walking"
       ],
       "n": [
         34,
@@ -744,10 +738,6 @@
         }
       },
       "say": {
-        "errands": {
-          "line": "Prescription's ready · counter 2, no line",
-          "short": "Ready, counter 2"
-        },
         "default": {
           "line": "Open till 9",
           "short": "Open till 9"
@@ -779,7 +769,7 @@
       "glance": "Open till 6",
       "depth": "hours",
       "scenarios": [
-        "errands"
+        "walking"
       ],
       "n": [
         68,
@@ -830,10 +820,6 @@
         }
       },
       "say": {
-        "errands": {
-          "line": "Picture hooks in aisle 4 · open till 6",
-          "short": "Aisle 4, till 6"
-        },
         "default": {
           "line": "Keys cut till 5",
           "short": "Keys cut till 5"
@@ -841,10 +827,6 @@
       },
       "sayLive": {
         "closedEarly": {
-          "errands": {
-            "line": "Closed early today · dropped from the route",
-            "short": "Closed early"
-          },
           "default": {
             "line": "Closed early today",
             "short": "Closed early"
@@ -869,7 +851,6 @@
       "glance": "2 min · next in 11",
       "depth": "departures",
       "scenarios": [
-        "errands",
         "walking"
       ],
       "n": [
@@ -916,10 +897,6 @@
         }
       },
       "say": {
-        "errands": {
-          "line": "M4 in 2 min · not on today's route",
-          "short": "M4 in 2"
-        },
         "default": {
           "line": "M4 in 2 min · then 11",
           "short": "M4 in 2"
@@ -943,8 +920,7 @@
       "glance": "Uptown trains · 4 min",
       "depth": "departures",
       "scenarios": [
-        "hungry",
-        "errands"
+        "hungry"
       ],
       "n": [
         86,
@@ -1018,7 +994,7 @@
       "glance": "Line of 8 · 12 min",
       "depth": "hours",
       "scenarios": [
-        "errands"
+        "walking"
       ],
       "n": null,
       "card": {
@@ -1062,10 +1038,6 @@
         }
       },
       "say": {
-        "errands": {
-          "line": "Line of 8, about 12 min · you'll make the counter",
-          "short": "12 min, closes 5"
-        },
         "default": {
           "line": "Counter till 5 · line of 8",
           "short": "Line of 8"

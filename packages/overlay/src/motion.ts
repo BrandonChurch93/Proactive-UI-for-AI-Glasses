@@ -115,6 +115,27 @@ export function batch(tl: TL, p: PaneEls, at: number, fade: { v: number }): numb
   return at + T.quick;
 }
 
+// A notification banner slides down from above the view over t-base, whole, and back up over t-quick.
+export function slideIn(tl: TL, p: PaneEls, at: number, reduced: boolean, fade: { v: number }, slide: { v: number }, from: number): number {
+  tl.set(p.pane, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 }, at);
+  tl.set(p.kids, { opacity: 1, y: 0, filter: 'none' }, at);
+  tl.set(p.seed, { opacity: 0 }, at);
+  if (reduced) {
+    tl.set(slide, { v: 0 }, at);
+    tl.fromTo(fade, { v: 0 }, { v: 1, duration: 0.2, ease: 'none' }, at);
+    return at + 0.2;
+  }
+  tl.fromTo(slide, { v: from }, { v: 0, duration: T.base, ease: EASE.out }, at);
+  tl.fromTo(fade, { v: 0 }, { v: 1, duration: T.base * 0.6, ease: EASE.out }, at);
+  return at + T.base;
+}
+
+export function slideOut(tl: TL, at: number, reduced: boolean, fade: { v: number }, slide: { v: number }, to: number): number {
+  if (!reduced) tl.to(slide, { v: to, duration: T.quick, ease: EASE.in }, at);
+  tl.to(fade, { v: 0, duration: reduced ? 0.2 : T.quick, ease: EASE.in }, at);
+  return at + (reduced ? 0.2 : T.quick);
+}
+
 export function dissolve(tl: TL, p: PaneEls, at: number, reduced: boolean, fade: { v: number }): number {
   if (reduced) {
     tl.to(fade, { v: 0, duration: 0.2, ease: 'none' }, at);

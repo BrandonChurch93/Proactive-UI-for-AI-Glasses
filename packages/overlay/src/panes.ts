@@ -64,11 +64,34 @@ const APP_GLYPHS: Record<NonNullable<Content['app']>, string> = {
   Messages: '<svg viewBox="0 0 14 14"><path d="M3 2h8a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H6.6L3.8 12.6V10.5H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
 };
 
-const INTENT_GLYPHS: Record<string, string> = {
-  hungry: '<svg viewBox="0 0 20 20"><path d="M6 2.5v5.2M4 2.5v4a2 2 0 0 0 4 0v-4M6 9.7v7.8M14.5 17.5V2.5c-2 1.2-3 3.4-3 6.2v2.8h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  errands: '<svg viewBox="0 0 20 20"><path d="M3 5l1.3 1.3L6.8 3.8M3 10.5l1.3 1.3 2.5-2.5M3 16l1.3 1.3 2.5-2.5M9.5 5h7.5M9.5 10.5h7.5M9.5 16h7.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  walking: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M12.8 7.2l-1.6 4-4 1.6 1.6-4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+const stroke = 'fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"';
+export const MENU_GLYPHS: Record<string, string> = {
+  food: `<svg viewBox="0 0 20 20"><path d="M6 2.5v5.2M4 2.5v4a2 2 0 0 0 4 0v-4M6 9.7v7.8M14.5 17.5V2.5c-2 1.2-3 3.4-3 6.2v2.8h3" ${stroke}/></svg>`,
+  things: `<svg viewBox="0 0 20 20"><path d="M3 6.5h14v2.2a1.8 1.8 0 0 0 0 3.6v2.2H3v-2.2a1.8 1.8 0 0 0 0-3.6zM12.5 6.5v8" ${stroke}/></svg>`,
+  shops: `<svg viewBox="0 0 20 20"><path d="M4 7h12l-1 10.5H5zM7.5 7V5.5a2.5 2.5 0 0 1 5 0V7" ${stroke}/></svg>`,
+  transit: `<svg viewBox="0 0 20 20"><path d="M5 3.5h10a1.5 1.5 0 0 1 1.5 1.5v9H3.5V5A1.5 1.5 0 0 1 5 3.5zM3.5 9.5h13M6.5 14v2.5M13.5 14v2.5" ${stroke}/><circle cx="6.5" cy="11.8" r=".6" fill="currentColor"/><circle cx="13.5" cy="11.8" r=".6" fill="currentColor"/></svg>`,
+  compass: `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" ${stroke}/><path d="M12.8 7.2l-1.6 4-4 1.6 1.6-4z" ${stroke}/></svg>`,
 };
+
+// A text arrives as a phone's notification: the app's tile and name, how long ago, then who and what.
+function bannerHead(c: Content): HTMLElement {
+  const head = node('div', s.bannerHead);
+  const tile = keyed(node('span', s.appTile), 'app');
+  tile.innerHTML = APP_GLYPHS[c.app ?? 'Messages'];
+  tile.setAttribute('aria-hidden', 'true');
+  head.append(tile, keyed(node('span', s.appName, c.app ?? 'Messages'), 'appname'), keyed(node('span', s.bannerTime, c.time ?? ''), 'time'));
+  return head;
+}
+
+function bannerFrom(c: Content): HTMLElement {
+  const row = node('div', s.bannerFrom);
+  row.append(keyed(node('span', s.avatar, c.avatar ?? c.name.slice(0, 1)), 'avatar'), keyed(node('span', `${s.bannerName} ${s.t}`, c.name), 'name'));
+  return row;
+}
+
+export function isBanner(component: string, c: Content): boolean {
+  return component === 'thread' || (component === 'toast' && Boolean(c.app));
+}
 
 function keyed<T extends HTMLElement>(e: T, k: string): T {
   e.dataset.k = k;
@@ -205,6 +228,19 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
   };
   switch (d.component) {
     case 'toast':
+      if (c.app) {
+        push(bannerHead(c));
+        push(bannerFrom(c));
+        if (c.fact) push(keyed(node('div', `${s.bannerLine} ${s.t}`, c.fact), 'fact'));
+        push(actions(c, d.id, h, s.chips));
+        return { cls: s.banner!, kids, why: null };
+      }
+      push(keyed(node('div', `${s.toastFrom} ${s.t}`, c.name), 'name'));
+      if (c.fact) push(keyed(node('div', `${s.toastLine} ${s.t}`, c.fact), 'fact'));
+      w = why(c, s.cardWhy!);
+      push(w);
+      push(actions(c, d.id, h));
+      return { cls: s.toast!, kids, why: w };
     case 'followup': {
       push(keyed(node('div', `${s.toastFrom} ${s.t}`, c.name), 'name'));
       if (c.fact) push(keyed(node('div', `${s.toastLine} ${s.t}`, c.fact), 'fact'));
@@ -220,50 +256,38 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       push(w);
       return { cls: s.strip!, kids, why: w };
     }
-    case 'errands': {
-      push(keyed(node('div', `${s.errandsTitle} ${s.t}`, c.name), 'name'));
-      push(rowsList(c, s.errandsRows!, null));
-      w = why(c, s.cardWhy!);
-      push(w);
-      push(actions(c, d.id, h));
-      return { cls: s.errands!, kids, why: w };
-    }
     case 'thread': {
-      const head = node('div', s.threadHead);
-      if (c.app) {
-        const glyph = keyed(node('span', s.appGlyph), 'app');
-        glyph.innerHTML = APP_GLYPHS[c.app];
-        glyph.setAttribute('aria-hidden', 'true');
-        head.appendChild(glyph);
-      }
-      head.appendChild(keyed(node('span', s.avatar, c.avatar ?? c.name.slice(0, 1)), 'avatar'));
-      head.appendChild(keyed(node('span', `${s.toastFrom} ${s.t}`, c.name), 'name'));
-      const stamp = [c.app?.toUpperCase(), c.time].filter(Boolean).join(' · ');
-      if (stamp) head.appendChild(keyed(node('span', s.threadTime, stamp), 'time'));
-      push(head);
+      push(bannerHead(c));
+      push(bannerFrom(c));
       if (c.thread?.length) {
         const list = node('div', s.bubbles);
         c.thread.forEach((l, i) => list.appendChild(keyed(node('div', `${s.bubble} ${l.me ? s.mine : ''}`, l.text), `b${i}`)));
         push(list);
-      } else if (c.fact) push(keyed(node('div', `${s.toastLine} ${s.t}`, c.fact), 'fact'));
+      } else if (c.fact) push(keyed(node('div', `${s.bannerLine} ${s.t}`, c.fact), 'fact'));
       if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));
       push(actions(c, d.id, h, c.note ? s.actions : s.chips));
-      return { cls: s.thread!, kids, why: null };
+      return { cls: s.banner!, kids, why: null };
     }
-    case 'intent': {
-      if (c.fact) push(keyed(node('div', `${s.intentEyebrow} ${s.t}`, c.fact), 'fact'));
-      push(keyed(node('div', `${s.intentQ} ${s.t}`, c.name), 'name'));
+    case 'menu': {
+      if (c.fact) push(keyed(node('div', `${s.menuEyebrow} ${s.t}`, c.fact), 'fact'));
+      push(keyed(node('div', `${s.menuQ} ${s.t}`, c.name), 'name'));
+      const quiet = c.actions?.find((a) => a.id === 'close' || a.id === 'back');
+      if (c.rows?.length) {
+        if (quiet) push(actions({ ...c, actions: [quiet] }, d.id, h, s.menuBack));
+        push(rowsList(c, s.pickRows!, h));
+        return { cls: s.menu!, kids, why: null };
+      }
       for (const a of c.actions ?? []) {
-        if (a.id === 'end') continue;
-        const b = node('button', `${s.intentRow} ${a.primary ? s.intentPick : ''}`) as HTMLButtonElement;
+        if (a === quiet) continue;
+        const b = node('button', `${s.menuRow} ${a.primary ? s.menuPick : ''}`) as HTMLButtonElement;
         b.type = 'button';
         b.dataset.k = `a:${a.id}`;
-        const g = node('span', s.intentGlyph);
-        g.innerHTML = INTENT_GLYPHS[a.id] ?? '';
+        const g = node('span', s.menuGlyph);
+        g.innerHTML = MENU_GLYPHS[a.id] ?? '';
         g.setAttribute('aria-hidden', 'true');
-        const text = node('span', s.intentText);
-        text.append(node('span', s.intentLabel, a.label));
-        if (a.hint) text.append(node('span', s.intentHint, a.hint));
+        const text = node('span', s.menuText);
+        text.append(node('span', s.menuLabel, a.label));
+        if (a.hint) text.append(node('span', s.menuHint, a.hint));
         b.append(g, text);
         b.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -271,15 +295,15 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
         });
         push(b);
       }
-      const end = c.actions?.find((a) => a.id === 'end');
-      if (end) push(actions({ ...c, actions: [end] }, d.id, h, s.intentEnd));
-      return { cls: s.intent!, kids, why: null };
+      if (quiet) push(actions({ ...c, actions: [quiet] }, d.id, h, s.menuEnd));
+      return { cls: s.menu!, kids, why: null };
     }
-    case 'picker': {
-      push(keyed(node('div', `${s.pocketHead} ${s.t}`, c.name), 'name'));
-      push(rowsList(c, s.pickRows!, h));
-      push(actions(c, d.id, h));
-      return { cls: s.picker!, kids, why: null };
+    case 'map': {
+      const cv = document.createElement('canvas');
+      cv.className = s.mapCanvas!;
+      cv.setAttribute('aria-label', 'Map of the block, heading up');
+      push(cv);
+      return { cls: s.map!, kids, why: null };
     }
     case 'pocket': {
       push(keyed(node('div', `${s.pocketHead} ${s.t}`, c.name), 'name'));

@@ -31,7 +31,7 @@ if (isMain) {
   const which = argv.includes('--scenario') ? argv[argv.indexOf('--scenario') + 1] : 'all';
   const list = which === 'all' ? SCENARIO_IDS : isScenarioId(which) ? [which] : [];
   if (list.length === 0) {
-    console.error('usage: pnpm record --scenario hungry|errands|walking|all');
+    console.error('usage: pnpm record --scenario hungry|walking|all');
     process.exit(1);
   }
   for (const s of list) {

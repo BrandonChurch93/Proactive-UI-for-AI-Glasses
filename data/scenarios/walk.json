@@ -107,34 +107,6 @@
       "intent": "walking"
     },
     {
-      "t": 25,
-      "kind": "inbox",
-      "type": "text",
-      "id": "maya-stamps",
-      "from": "Maya",
-      "text": "Can you grab stamps while you're out?",
-      "replies": [
-        {
-          "id": "on-it",
-          "label": "On it",
-          "stop": {
-            "place": "post-office",
-            "line": "Post Office sells stamps"
-          }
-        },
-        {
-          "id": "cant",
-          "label": "Can't today",
-          "answer": {
-            "after": 6,
-            "text": "Next time"
-          }
-        }
-      ],
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
       "t": 50,
       "kind": "bus",
       "id": "m4-stop",
@@ -144,84 +116,14 @@
       "intent": "hungry"
     },
     {
-      "t": 0,
-      "kind": "stops",
-      "ids": [
-        "main-street-pharmacy",
-        "corner-hardware",
-        "post-office"
-      ],
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 33,
-      "kind": "sidewalkNarrows",
-      "fromN": 46,
-      "toN": 52,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 58,
-      "kind": "bus",
-      "id": "m4-stop",
-      "arrivesIn": 2,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 50,
-      "kind": "live",
-      "id": "corner-hardware",
-      "set": {
-        "closedEarly": true
-      },
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 51,
-      "kind": "inbox",
-      "type": "social",
-      "count": 1,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 54,
-      "kind": "inbox",
-      "type": "social",
-      "count": 1,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 57,
-      "kind": "inbox",
-      "type": "social",
-      "count": 1,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 87.5,
-      "kind": "person",
-      "id": "passerby",
-      "path": "corner-crossing",
-      "speed": 1.25,
-      "after": "intent",
-      "intent": "errands"
-    },
-    {
-      "t": 104,
+      "t": 88.5,
       "kind": "inbox",
       "type": "dm",
       "id": "jules-tonight",
       "from": "Jules",
       "text": "Still on for tonight?",
       "after": "intent",
-      "intent": "errands"
+      "intent": "walking"
     },
     {
       "t": 13,
@@ -260,6 +162,12 @@
           "t": 1,
           "kind": "intent",
           "id": "hungry"
+        },
+        {
+          "t": 1.2,
+          "kind": "choice",
+          "id": "menu",
+          "action": "food"
         },
         {
           "t": 3,
@@ -327,52 +235,6 @@
           "t": 108,
           "kind": "gaze",
           "id": null
-        }
-      ]
-    },
-    "errands": {
-      "duration": 136,
-      "beats": [
-        {
-          "t": 8,
-          "kind": "intent",
-          "id": "errands"
-        },
-        {
-          "t": 10,
-          "kind": "choice",
-          "id": "errands",
-          "action": "start"
-        },
-        {
-          "t": 35.5,
-          "kind": "gaze",
-          "id": "main-street-pharmacy"
-        },
-        {
-          "t": 40.5,
-          "kind": "gaze",
-          "id": null
-        },
-        {
-          "t": 52.5,
-          "kind": "reply",
-          "id": "maya-stamps",
-          "reply": "on-it"
-        },
-        {
-          "t": 95.5,
-          "kind": "gaze",
-          "id": "post-office"
-        },
-        {
-          "t": 99,
-          "kind": "headScan",
-          "sequence": [
-            "left",
-            "right",
-            "center"
-          ]
         }
       ]
     },

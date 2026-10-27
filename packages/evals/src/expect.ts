@@ -177,7 +177,7 @@ export function evaluate(r: RunResult, exp: Expectation): CaseResult[] {
       res(!hit, hit ? `t=${hit.t} ${hit.d.action} ${hit.d.id} ${hit.d.level}` : '');
     } else if (c.max || c.min) {
       const shows = evs.filter((e) => isShow(e.d) && e.d.cause !== 'settle').length;
-      const asked = new Set(['intent', 'picker', 'errands']);
+      const asked = new Set(['menu', 'map']);
       const nonGaze = new Set(evs.filter((e) => isShow(e.d) && e.d.cause !== 'dwell' && e.d.cause !== 'pinch' && e.d.cause !== 'settle' && !e.d.gaze && !asked.has(e.d.component)).map((e) => e.d.id)).size;
       const holds = evs.filter((e) => e.d.action === 'hold').length;
       const fails: string[] = [];

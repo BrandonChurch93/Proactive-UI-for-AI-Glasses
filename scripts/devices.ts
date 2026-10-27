@@ -20,7 +20,7 @@ const DEVICES: { name: string; w: number; h: number; dpr: number; touch: boolean
 const base = arg('base', 'http://localhost:5173/')!;
 const out = arg('out', 'shots/devices')!;
 const only = arg('only');
-const beats = (arg('beats', 'walking:14,hungry:62,errands:3.5') ?? '').split(',').filter(Boolean);
+const beats = (arg('beats', 'walking:14,hungry:62,hungry:3.5') ?? '').split(',').filter(Boolean);
 mkdirSync(out, { recursive: true });
 const server = await ensureServer(base);
 const browser = await launch();

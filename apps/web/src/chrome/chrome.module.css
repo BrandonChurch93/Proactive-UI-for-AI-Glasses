@@ -43,8 +43,12 @@
 
 .hint {
   position: absolute;
-  right: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right));
-  bottom: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-bottom));
+  top: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-top));
+  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(124px * max(1, var(--ui, 1))));
+}
+
+.hint.withPause {
+  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(224px * max(1, var(--ui, 1))));
 }
 
 .btn {
@@ -110,7 +114,7 @@
 .pace {
   position: absolute;
   right: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right));
-  bottom: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-bottom)) + calc(36px * max(1, var(--ui, 1))));
+  top: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-top)) + calc(42px * max(1, var(--ui, 1))));
   font-size: calc(10.5px * max(1, var(--ui, 1)));
   letter-spacing: 0.1em;
   color: var(--chrome-fg-2);

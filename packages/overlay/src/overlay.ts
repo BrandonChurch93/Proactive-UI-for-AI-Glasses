@@ -4,6 +4,7 @@ import {
   MARGIN,
   NOMINAL_SIZE,
   anchorFactors,
+  angleWrap,
   clamp,
   focusRect,
   rectsOverlap,
@@ -24,8 +25,8 @@ import {
 } from '@lumen/shared';
 import { BackdropFill } from './backdrop';
 import { leaderPoint, type ColumnHandle, type GroundTextHandle, type KeepOut, type LeaderHandle, type LightHandle, type RouteHandle, type SceneBridge } from './bridge';
-import { batch, condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
-import { buildPane, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
+import { batch, condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, slideIn, slideOut, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
+import { MENU_GLYPHS, buildPane, isBanner, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
 import { Aside, PaneYield, Placement, Track, Yield, leftRecently, type AsideState, type FrameCtx, type WorldPlace } from './place';
 import { Sound } from './sound';
 import { EASE, MOVE, T } from './tokens';
@@ -33,7 +34,9 @@ import { EASE, MOVE, T } from './tokens';
 type PaneLevel = 'label' | 'glance' | 'card' | 'expanded' | 'none';
 
 const HELD_LINE = 'Held that while you crossed';
-const QUIET_LINE = { crossing: 'Quiet while you cross', roadway: 'Quiet near traffic', vehicle: 'Quiet near traffic' } as const;
+// FIND names the button until the wearer has opened the menu once, in this visit.
+let found = false;
+const QUIET_LINE = { crossing: 'Overlay paused while you cross the street', roadway: 'Overlay paused · traffic close by', vehicle: 'Overlay paused · traffic close by' } as const;
 
 interface Lights {
   pip: LightHandle;
@@ -56,6 +59,8 @@ interface Built {
   level: PaneLevel;
   rect: Rect | null;
   fade: { v: number };
+  slide: { v: number };
+  home: Rect | null;
   opacity: number;
   off: { x: number; y: number } | null;
   watch: ResizeObserver | null;
@@ -109,6 +114,9 @@ interface Item {
 }
 
 const FOLD_LEAD_S = 0.4;
+const MAP_M_PER_PX = 0.55;
+const MAP_VOICE = '#ffd98a';
+const MAP_TONES: Record<string, string> = { food: '#e0946a', cafe: '#d4ac7a', theater: '#ef7a74', venue: '#c49ae6', shop: '#e3cc84', service: '#9fd3c2', transit: '#7fa9e6', park: '#9fdc9f' };
 // A newborn pane's first frames move with its placement settling, not with the view; that is not motion to look ahead along.
 const FOLD_SETTLE_S = 0.1;
 
@@ -270,6 +278,9 @@ export class Overlay {
   private readonly glyphLabel: HTMLElement;
   private readonly focusEl: HTMLElement;
   private readonly quietEl: HTMLElement;
+  private readonly menuBtn: HTMLButtonElement;
+  private menuHover: { on: boolean; since: number | null; fired: boolean } = { on: false, since: null, fired: false };
+  private menuBox: { key: string; rect: Rect } | null = null;
   private quietTl: gsap.core.Timeline | null = null;
   quietOn = false;
   private items = new Map<string, Item>();
@@ -324,7 +335,7 @@ export class Overlay {
     this.timeEl = document.createElement('div');
     this.timeEl.className = s.time!;
     if (opts.time === false) this.timeEl.style.display = 'none';
-    this.hud.append(this.worldLayer, this.viewLayer, this.timeEl);
+    this.hud.append(this.worldLayer, this.viewLayer);
     this.fixed = document.createElement('div');
     this.fixed.className = s.fixed!;
     this.glyphEl = document.createElement('div');
@@ -340,7 +351,21 @@ export class Overlay {
     this.live.setAttribute('aria-live', 'polite');
     this.quietEl = document.createElement('div');
     this.quietEl.className = s.quietLine!;
-    this.fixed.append(this.glyphEl, this.quietEl, this.focusEl, this.live);
+    this.menuBtn = document.createElement('button');
+    this.menuBtn.type = 'button';
+    this.menuBtn.className = s.menuBtn!;
+    this.menuBtn.setAttribute('aria-label', 'Find a place');
+    this.menuBtn.innerHTML = `<span class="${s.menuFind}">FIND</span><i>${MENU_GLYPHS.compass}</i>`;
+    if (found) this.menuBtn.classList.add(s.menuFound!);
+    if (opts.time === false) this.menuBtn.style.display = 'none';
+    this.menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handlers.choice('menu', 'open');
+    });
+    // The viewfinder cannot reach chrome fixed to the glass, so the pointer stands in for the look, as over every view-zone pane.
+    this.menuBtn.addEventListener('pointerenter', () => (this.menuHover = { on: true, since: null, fired: false }));
+    this.menuBtn.addEventListener('pointerleave', () => (this.menuHover = { on: false, since: null, fired: false }));
+    this.fixed.append(this.timeEl, this.glyphEl, this.quietEl, this.menuBtn, this.focusEl, this.live);
     this.root.append(this.hud, this.fixed);
     parent.appendChild(this.root);
     this.route = new RouteView(bridge);
@@ -593,6 +618,104 @@ export class Overlay {
     return this.glyphBox.rect;
   }
 
+  private mapYaw: number | null = null;
+  private mapT = 0;
+
+  // The plan heading-up: it turns with the body, eased over t-base, never with the head; the head is the cone.
+  private drawMap(cv: HTMLCanvasElement, t: number): void {
+    const m = this.bridge.mapView?.();
+    if (!m) return;
+    const size = 180;
+    const dpr = Math.min(3, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) * this.ui);
+    const px = Math.round(size * dpr);
+    if (cv.width !== px) {
+      cv.width = px;
+      cv.height = px;
+    }
+    const dt = Math.max(0, t - this.mapT);
+    this.mapT = t;
+    this.mapYaw = this.mapYaw === null || dt > 1 ? m.yaw : this.mapYaw + angleWrap(m.yaw - this.mapYaw) * (1 - Math.exp(-dt / (T.base / 3)));
+    const yaw = this.mapYaw;
+    const g = cv.getContext('2d');
+    if (!g) return;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, px, px);
+    const k = dpr / MAP_M_PER_PX;
+    const cx = (size / 2) * dpr;
+    const cy = size * (2 / 3) * dpr;
+    const c = Math.cos(yaw);
+    const sn = Math.sin(yaw);
+    g.setTransform(c * k, sn * k, -sn * k, c * k, cx - (c * m.x - sn * m.z) * k, cy - (sn * m.x + c * m.z) * k);
+    const fill = (kind: string): string => (kind === 'building' ? 'rgba(251,250,246,0.08)' : kind === 'road' ? 'rgba(251,250,246,0.2)' : 'rgba(251,250,246,0.12)');
+    for (const a of m.areas) {
+      g.fillStyle = fill(a.kind);
+      g.fillRect(Math.min(a.x0, a.x1), Math.min(a.z0, a.z1), Math.abs(a.x1 - a.x0), Math.abs(a.z1 - a.z0));
+    }
+    g.fillStyle = 'rgba(255,255,255,0.85)';
+    for (const x of m.crossings) {
+      const x0 = Math.min(x.x0, x.x1);
+      const z0 = Math.min(x.z0, x.z1);
+      const w = Math.abs(x.x1 - x.x0);
+      const h = Math.abs(x.z1 - x.z0);
+      if (x.bars === 'z') for (let i = x0 + 0.4; i < x0 + w - 0.3; i += 1.2) g.fillRect(i, z0, 0.6, h);
+      else for (let i = z0 + 0.4; i < z0 + h - 0.3; i += 1.2) g.fillRect(x0, i, w, 0.6);
+    }
+    if (m.route.length > 1) {
+      g.strokeStyle = MAP_VOICE;
+      g.lineWidth = (2 * dpr) / k;
+      g.lineJoin = 'round';
+      g.lineCap = 'round';
+      g.beginPath();
+      m.route.forEach((p, i) => (i ? g.lineTo(p.x, p.z) : g.moveTo(p.x, p.z)));
+      g.stroke();
+    }
+    if (m.dest) {
+      g.fillStyle = MAP_TONES[m.dest.kind] ?? MAP_VOICE;
+      g.beginPath();
+      g.arc(m.dest.x, m.dest.z, (3 * dpr) / k, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    const look = angleWrap(m.head - m.yaw);
+    const reach = 46 * dpr;
+    g.fillStyle = 'rgba(251,250,246,0.12)';
+    g.beginPath();
+    g.moveTo(cx, cy);
+    g.arc(cx, cy, reach, -Math.PI / 2 - look - Math.PI / 6, -Math.PI / 2 - look + Math.PI / 6);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#fbfaf6';
+    g.beginPath();
+    g.arc(cx, cy, 3 * dpr, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  private menuDwell(t: number): void {
+    const open = this.frame?.items.some((d) => d.id === 'menu') ?? false;
+    if (open && !found) {
+      found = true;
+      this.menuBtn.classList.add(s.menuFound!);
+    }
+    const h = this.menuHover;
+    if (!h.on || h.fired || open) return;
+    h.since ??= t;
+    if (t - h.since >= 0.5 - 1e-9) {
+      h.fired = true;
+      this.handlers.choice('menu', 'open');
+    }
+  }
+
+  private menuRect(): Rect | null {
+    if (this.menuBtn.style.display === 'none') return null;
+    const key = `${this.ui}|${found}`;
+    if (this.menuBox?.key !== key) {
+      const r = this.menuBtn.getBoundingClientRect();
+      const host = this.root.getBoundingClientRect();
+      this.menuBox = { key, rect: { x: r.left - host.left, y: r.top - host.top, w: r.width, h: r.height } };
+    }
+    return this.menuBox.rect;
+  }
+
   private timeRect(): Rect | null {
     if (!this.timeEl.textContent || this.timeEl.style.display === 'none') return null;
     const key = `${this.timeEl.textContent}|${this.ui}`;
@@ -622,6 +745,7 @@ export class Overlay {
     wrap.style.cssText = 'position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,opacity';
     const box = document.createElement('div');
     box.className = s.pane!;
+    if (isBanner(it.d.component, it.d.content)) box.classList.add(s.bannerPane!);
     box.dataset.pane = it.d.id;
     box.dataset.zone = it.d.placement.zone;
     const seed = document.createElement('div');
@@ -647,6 +771,8 @@ export class Overlay {
       level,
       rect: null,
       fade: { v: 1 },
+      slide: { v: 0 },
+      home: null,
       opacity: 0,
       off: null,
       watch: null,
@@ -833,7 +959,8 @@ export class Overlay {
         prev.still = true;
         dtl.to(prev.fade, { v: 0, duration: T.quick, ease: EASE.in });
         end = T.quick;
-      } else end = dissolve(dtl, this.els(prev), it.lag, this.reduced, prev.fade);
+      } else if (isBanner(it.d.component, it.d.content)) end = slideOut(dtl, 0, this.reduced, prev.fade, prev.slide, -((prev.rect?.y ?? 0) + (prev.rect?.h ?? prev.height) + 20));
+      else end = dissolve(dtl, this.els(prev), it.lag, this.reduced, prev.fade);
       dtl.call(() => {
         if (keep) prev.wrap.style.opacity = '0';
         else {
@@ -874,7 +1001,8 @@ export class Overlay {
       const held = it.d.reason.text === HELD_LINE && it.d.content.showReason !== false;
       const whyAt = held ? Math.max(0, this.gateEndAt + MOVE.returnS - t) : undefined;
       const batched = it.d.component === 'strip' && !this.reduced && whyAt === undefined;
-      const end = batched ? batch(tl, this.els(b), at, b.fade) : condense(tl, this.els(b), at, {
+      const banner = isBanner(it.d.component, it.d.content);
+      const end = banner ? slideIn(tl, this.els(b), at, this.reduced, b.fade, b.slide, -(b.height * this.ui + 80 * this.ui)) : batched ? batch(tl, this.els(b), at, b.fade) : condense(tl, this.els(b), at, {
         card: big,
         reduced: this.reduced,
         open: want === 'expanded' || it.d.component === 'pocket',
@@ -956,6 +1084,9 @@ export class Overlay {
     if (glyph) chrome.push({ x: glyph.x - 8, y: glyph.y - 8, w: glyph.w + 16, h: glyph.h + 16 });
     const time = this.timeRect();
     if (time) chrome.push({ x: time.x - 8, y: time.y - 8, w: time.w + 16, h: time.h + 16 });
+    const menu = this.menuRect();
+    if (menu) chrome.push({ x: menu.x - 8, y: menu.y - 8, w: menu.w + 16, h: menu.h + 16 });
+    this.menuDwell(t);
     const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, chrome, ui, scanning: yieldSide !== null };
     const gk = this.gateK.v;
     const pipMul = this.snooze ? 0.3 : 1;
@@ -1097,7 +1228,9 @@ export class Overlay {
           const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
           scale = ui;
-          rect = b.rect && b !== it.cur ? b.rect : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0, ui);
+          const home = b.home && b !== it.cur ? b.home : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0, ui);
+          b.home = home;
+          rect = { ...home, y: home.y + b.slide.v };
           if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.h.at(t) * ui };
           if (b === it.cur) {
             const y = it.yieldS.update(t, yieldSide, rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right');
@@ -1173,6 +1306,9 @@ export class Overlay {
 
     const ground = new Map<string, Decision>();
     for (const d of this.frame?.items ?? []) if (d.placement.zone === 'ground') ground.set(d.id, d);
+    const mapItem = this.items.get('map');
+    const mapCanvas = mapItem?.cur?.view.el.querySelector('canvas');
+    if (mapCanvas && !mapItem?.dying) this.drawMap(mapCanvas, t);
     this.route.update(t, ground.get('route'), gk);
     this.column.update(t, ground.get('destination'));
     for (const [id, d] of ground) {

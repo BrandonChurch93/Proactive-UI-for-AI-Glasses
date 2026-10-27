@@ -320,7 +320,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
         seen.add(e.decision.id);
       }
       const earned = (d: Decision, e?: LogEntry): boolean =>
-        d.component === 'intent' || d.component === 'picker' || d.component === 'errands' || d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice' || (e !== undefined && again.has(e));
+        d.component === 'menu' || d.component === 'map' || d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice' || (e !== undefined && again.has(e));
       const shows = (r.entries as LogEntry[]).filter((e) => isShow(e.decision) && !earned(e.decision, e)).length;
       const last = r.frames[r.frames.length - 1];
       if (!last) return null;

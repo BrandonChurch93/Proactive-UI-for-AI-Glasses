@@ -12,8 +12,6 @@ export interface Candidate {
 
 export interface CandidateContext {
   goal: ScenarioId;
-  openStops: readonly string[];
-  allStops: readonly string[];
   destination?: string;
   target?: string;
   band: Band;
@@ -32,19 +30,17 @@ export function candidates(entities: readonly Entity[], ctx: CandidateContext, c
   for (const e of entities) {
     if (e.distance > cfg.range) continue;
     const contentKey = contentKeyOf(e);
-    const listed = ctx.goal === 'errands' && ctx.allStops.includes(e.id);
     const scored = score(
       e,
       {
         goal: ctx.goal,
-        stops: ctx.goal === 'errands' ? ctx.openStops : [],
         ...(ctx.destination ? { destination: ctx.destination } : {}),
         gaze: ctx.target === e.id,
         band: ctx.band,
         cardOpen: ctx.cardOpenElsewhere(e.id),
         dismissed: ctx.dismissed[e.kind] ?? 0,
         accepted: ctx.accepted[e.kind] ?? 0,
-        presented: ctx.presented.get(e.id) === contentKey || listed,
+        presented: ctx.presented.get(e.id) === contentKey,
       },
       cfg,
     );

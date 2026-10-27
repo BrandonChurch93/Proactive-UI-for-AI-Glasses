@@ -1,7 +1,7 @@
 {
   "id": "note-dm-in-crossing",
   "rule": "notifications",
-  "scenario": "errands",
+  "scenario": "walking",
   "duration": 20,
   "description": "A DM in the crossing is held, counted, and offered at the far curb.",
   "startN": 86,

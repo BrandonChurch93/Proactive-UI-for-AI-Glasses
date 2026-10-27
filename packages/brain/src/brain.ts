@@ -1,7 +1,6 @@
 import {
   angleWrap,
   clockAt,
-  WALK,
   SETTLE,
   FOCUS_ZONE,
   LEVEL_RANK,
@@ -100,6 +99,8 @@ interface InboxItem {
   note?: string;
   seen?: boolean;
   closed?: { at: number; level: Level };
+  walkS?: number;
+  folded?: boolean;
 }
 
 interface FollowUp {
@@ -136,7 +137,25 @@ const DEFAULT_CAUSE: Partial<Record<Origin, Cause>> = {
   pocket: 'pocket',
 };
 
+type MenuCategory = 'food' | 'things' | 'shops' | 'transit';
+type MenuState = 'closed' | 'root' | MenuCategory;
+const MENU_KINDS: Record<MenuCategory, (e: Entity) => boolean> = {
+  food: (e) => e.kind === 'food' || e.kind === 'cafe',
+  things: (e) => e.kind === 'theater' || e.kind === 'venue' || e.kind === 'park' || e.category === 'bookshop',
+  shops: (e) => (e.kind === 'shop' || e.kind === 'service') && e.category !== 'bookshop',
+  transit: (e) => e.kind === 'transit',
+};
+const MENU_TITLES: Record<MenuCategory, string> = { food: 'Food and drink', things: 'Things to do', shops: 'Shops and services', transit: 'Getting around' };
+const MENU_WORDS: Record<string, string> = { 'live theater': 'theater', bowling: 'lanes', bookshop: 'a reading', park: 'a park', pharmacy: 'pharmacy', hardware: 'hardware', 'post office': 'post office' };
+function isMenuCategory(v: string): v is MenuCategory {
+  return v === 'food' || v === 'things' || v === 'shops' || v === 'transit';
+}
+
 const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+function ago(s: number): string {
+  return s < 60 ? 'now' : `${Math.floor(s / 60)} min`;
+}
+
 function countWord(n: number): string {
   return COUNT_WORDS[n] ?? String(n);
 }
@@ -179,9 +198,7 @@ export class Brain {
   private lastRelYaw: number | null = null;
   private goal: ScenarioId;
   private destination: string | undefined;
-  private stops: string[] = [];
   private chosen = new Map<string, string>();
-  private errands = { key: '', shownAt: -1, movingS: 0, stillS: 0, folded: true };
   private social = { count: 0, surfaced: false, stripUntil: -1 };
   private foodGlances = new Set<string>();
   private ask: 'none' | 'open' | 'done' = 'none';
@@ -191,8 +208,9 @@ export class Brain {
   private needToRunUntil = -1;
   private arrival: string | null = null;
   private routeCause: Cause = 'goal';
-  private corner: { lap: number; state: 'intent' | 'picker' | 'stops' | 'done' } | null = null;
-  private errandsStarted = false;
+  private corner: { lap: number; state: 'wait' | 'done' } | null = null;
+  private menu: MenuState = 'closed';
+  private mapUntil = -Infinity;
   private routeCauseNext: Cause | null = null;
   private routeWhy: string | null = null;
   private arrivalSaid: string | null = null;
@@ -253,10 +271,7 @@ export class Brain {
     this.snapRef++;
     this.frameEvents = [];
     this.dismissedNow.clear();
-    if (snap.goal.scenario && this.snapRef === 0) {
-      this.goal = snap.goal.scenario;
-      this.errandsStarted = this.goal === 'errands';
-    }
+    if (snap.goal.scenario && this.snapRef === 0) this.goal = snap.goal.scenario;
     this.trackArrival(snap);
     this.trackCorner(snap);
 
@@ -288,7 +303,6 @@ export class Brain {
     if (gateStarted) this.onGateStart(t);
     if (gateEnded) this.onGateEnd(t);
 
-    if (snap.goal.stops && this.stops.length === 0 && this.goal === 'errands') this.stops = snap.goal.stops.map((s) => s.id);
     this.ingestInbox(snap, t, dt, band);
     this.applyChoice(snap, t);
     this.applyPick(snap);
@@ -306,8 +320,8 @@ export class Brain {
       this.entityWants(snap, t, band, wants);
       this.peopleWants(snap, wants);
       this.momentWants(snap, t, band, wants);
-      this.cornerWants(snap, wants);
-      this.errandsWants(snap, t, dt, band, wants);
+      this.menuWants(snap, t, band, gate, wants);
+      this.mapWants(snap, t, band, gate, wants);
       this.messageWants(snap, t, band, wants);
       this.pocketWants(snap, t, band, stoppedFor, wants);
       this.askWants(snap, t, band, wants);
@@ -340,38 +354,36 @@ export class Brain {
       goal: {
         scenario: this.goal,
         ...(this.routeTarget(snap) ? { destination: this.routeTarget(snap)! } : {}),
-        stops: this.openStops(snap),
         go: !this.corner || this.corner.state === 'done',
       },
       stoppedFor,
     };
   }
 
-  private routeTarget(snap: WorldSnapshot): string | undefined {
-    if (this.goal === 'errands') return this.errandsStarted ? this.openStops(snap)[0] : undefined;
+  private routeTarget(_snap: WorldSnapshot): string | undefined {
     return this.destination;
   }
 
   private trackCorner(snap: WorldSnapshot): void {
     const lap = snap.goal.lap ?? 0;
     if (snap.goal.corner) {
-      if (!this.corner || this.corner.lap !== lap) this.corner = { lap, state: 'intent' };
+      if (!this.corner || this.corner.lap !== lap) this.corner = { lap, state: 'wait' };
       return;
     }
-    if (!this.corner || this.corner.state === 'done') return;
-    if (this.goal === 'errands' && !this.errandsStarted) {
-      this.errandsStarted = true;
-      this.routeCauseNext = 'goal';
-    }
-    this.corner.state = 'done';
+    if (this.corner) this.corner.state = 'done';
   }
 
-  private setCorner(state: 'intent' | 'picker' | 'stops' | 'done'): void {
+  private setCorner(state: 'wait' | 'done'): void {
     if (this.corner) this.corner.state = state;
   }
 
+  // A place chosen from the menu becomes the destination; a lunch place makes the walk a lunch walk.
   private pick(id: string): void {
+    const e = this.snap.entities.find((x) => x.id === id);
+    if (!e) return;
+    if (e.kind === 'food' || e.kind === 'cafe') this.goal = 'hungry';
     this.setDestination(id, 'choice');
+    this.menu = 'closed';
     this.setCorner('done');
   }
 
@@ -386,11 +398,6 @@ export class Brain {
       inb.reply = spec.id;
       this.bump(this.accepted, inb.n.type);
       if (spec.offer) inb.offer = { place: spec.offer.place, why: spec.offer.why, state: spec.answer ? 'waiting' : 'open' };
-      if (spec.stop) {
-        const has = this.stops.includes(spec.stop.place);
-        if (!has) this.stops.push(spec.stop.place);
-        inb.note = `${spec.stop.line} · ${has ? 'already on your route' : 'added as a stop'}`;
-      }
       fresh();
       return true;
     }
@@ -410,7 +417,7 @@ export class Brain {
 
   private applyPick(snap: WorldSnapshot): void {
     const target = snap.wearer.pinch?.target;
-    if (target?.startsWith('pick:') && this.corner?.state === 'picker') this.pick(target.slice(5));
+    if (target?.startsWith('pick:') && this.menu !== 'closed' && this.menu !== 'root') this.pick(target.slice(5));
   }
 
   private setDestination(id: string | undefined, cause: Cause, why: string | null = null): void {
@@ -429,8 +436,6 @@ export class Brain {
     this.arrivalSaid = null;
     this.atDoorSince = null;
     if (this.destination === left) this.setDestination(undefined, 'arrival');
-    if (this.goal === 'errands' && this.openStops(snap).length > 0) return;
-    if (this.goal !== 'errands') this.stops = [];
     this.goal = 'walking';
   }
 
@@ -537,9 +542,8 @@ export class Brain {
       if (it.status !== 'shown') continue;
       if (moving) it.movingS += dt;
       else it.stillS += dt;
+      it.walkS = (band === 'walk' || band === 'brisk') && snap.wearer.gaze.target !== it.n.id ? (it.walkS ?? 0) + dt : 0;
     }
-    if (moving) this.errands.movingS += dt;
-    else this.errands.stillS += dt;
   }
 
   private applyChoice(snap: WorldSnapshot, t: number): void {
@@ -553,35 +557,32 @@ export class Brain {
       else this.bump(this.dismissed, inb.n.type);
       return;
     }
+    // A recording starts its walk with an intent; Explore lets the light go, Lunch leaves the corner to the menu.
     if (c.id === 'intent') {
-      if (c.action === 'hungry' || c.action === 'errands' || c.action === 'walking') {
+      if (c.action === 'hungry' || c.action === 'walking') {
         this.goal = c.action;
-        this.stops = [];
         this.ask = 'none';
         this.foodGlances.clear();
         this.setDestination(undefined, 'choice');
         this.routeCauseNext = 'choice';
-        this.errandsStarted = false;
-        this.setCorner(c.action === 'hungry' ? 'picker' : c.action === 'errands' ? 'stops' : 'done');
-      } else if (c.action === 'end') this.setCorner('done');
+        if (c.action === 'walking') this.setCorner('done');
+      }
       return;
     }
-    if (c.id === 'picker') {
-      if (c.action === 'not-now') {
-        this.goal = 'walking';
-        this.setCorner('done');
-      } else if (this.corner?.state === 'picker') this.pick(c.action);
-      return;
-    }
-    if (c.id === 'errands' && c.action === 'start') {
-      this.errandsStarted = true;
-      this.routeCauseNext = 'choice';
-      this.setCorner('done');
+    if (c.id === 'menu') {
+      if (c.action === 'open') this.menu = this.menu === 'closed' ? 'root' : 'closed';
+      else if (c.action === 'close') this.menu = 'closed';
+      else if (c.action === 'back') this.menu = 'root';
+      else if (isMenuCategory(c.action)) this.menu = c.action;
+      else this.pick(c.action);
       return;
     }
     if (c.id === 'ask') {
       this.ask = 'done';
-      if (c.action === 'yes' || c.action === 'find-lunch') this.goal = 'hungry';
+      if (c.action === 'yes' || c.action === 'find-lunch') {
+        this.goal = 'hungry';
+        this.menu = 'food';
+      }
       return;
     }
     if (c.id === 'followup') {
@@ -629,9 +630,8 @@ export class Brain {
         .filter((x) => x.placement.zone !== 'ground' && LEVEL_RANK[x.level] >= LEVEL_RANK.label)
         .sort((a, b) => LEVEL_RANK[b.level] - LEVEL_RANK[a.level])[0]?.id;
     if (!targetId) return;
-    if (targetId === 'intent' || targetId === 'picker') {
-      if (targetId === 'intent' || this.goal === 'hungry') this.goal = 'walking';
-      this.setCorner('done');
+    if (targetId === 'menu') {
+      this.menu = 'closed';
       return;
     }
     this.dismissedNow.add(targetId);
@@ -686,19 +686,11 @@ export class Brain {
     return n;
   }
 
-  private openStops(snap: WorldSnapshot): string[] {
-    return this.stops.filter((id) => {
-      const e = snap.entities.find((x) => x.id === id);
-      return !e || (e.live.pickedUp !== true && e.live.closedEarly !== true);
-    });
-  }
-
   private entityWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const target = snap.wearer.gaze.target;
     const dwellS = snap.wearer.gaze.dwellMs / 1000;
     const pinch = snap.wearer.pinch?.target;
     const cardOpen = this.cardOpen();
-    const stops = this.openStops(snap);
     const frozen = this.gateNow.safety;
     const noticed = target && dwellS >= this.cfg.ladder.pipDwellS - 1e-9 ? target : undefined;
     this.updateLabels(snap, t, band, noticed);
@@ -706,8 +698,6 @@ export class Brain {
       snap.entities,
       {
         goal: this.goal,
-        openStops: stops,
-        allStops: this.stops,
         ...(this.destination ? { destination: this.destination } : {}),
         ...(noticed ? { target: noticed } : {}),
         band,
@@ -1003,56 +993,79 @@ export class Brain {
     return c;
   }
 
-  private cornerWants(snap: WorldSnapshot, wants: Want[]): void {
-    const st = this.corner?.state;
-    if (st === 'intent' && (this.bandNow === 'stopped' || this.standing.has('intent'))) {
-      const r = reason('world', 'Long red light', [{ signal: 'corner', value: snap.goal.lap ?? 0, weight: 1 }]);
-      const sug = snap.goal.suggest;
-      const opt = (id: string, label: string, hint: string): { id: string; label: string; primary?: boolean; hint: string } => (sug === id ? { id, label, hint, primary: true } : { id, label, hint });
-      const food = snap.entities.filter((e) => e.kind === 'food' || e.kind === 'cafe').length;
-      const stops = WALK.beats.find((b) => b.kind === 'stops' && b.intent === 'errands');
-      const nStops = stops && stops.kind === 'stops' ? stops.ids.length : 0;
+  // The wearer's own way to find a place and go there: the categories, then a category's places by walk time.
+  private menuWants(snap: WorldSnapshot, t: number, band: Band, gate: GateState, wants: Want[]): void {
+    if (band === 'brisk' || gate.safety) this.menu = 'closed';
+    if (this.menu === 'closed') return;
+    const r = reason('world', 'Find a place', [{ signal: 'menu', value: this.menu, weight: 1 }]);
+    const ents = snap.entities;
+    if (this.menu === 'root') {
+      const food = ents.filter((e) => MENU_KINDS.food(e));
+      const m4 = ents.find((e) => e.id === 'm4-stop')?.live;
+      const train = ents.find((e) => e.id === '47th-st-station')?.live;
+      const names = (cat: MenuCategory): string => {
+        const out = ents.filter((e) => MENU_KINDS[cat](e)).map((e) => MENU_WORDS[e.category] ?? e.category).join(', ');
+        return out.charAt(0).toUpperCase() + out.slice(1);
+      };
+      const nearest = Math.round(Math.min(...food.map((e) => e.distance)) / 5) * 5;
       wants.push({
-        id: 'intent',
-        component: 'intent',
+        id: 'menu',
+        component: 'menu',
         zone: 'view',
         level: 'card',
-        anchor: 'view:edge-right',
+        anchor: 'view:menu',
         content: {
-          name: "What's on the agenda today?",
-          fact: `${clockAt(snap.t, true)} · ${r.text}`,
+          name: 'Where to?',
+          fact: `${clockAt(t, true)} · Find a place`,
           reason: r,
           showReason: false,
           actions: [
-            opt('hungry', 'Looking for food', `${countWord(food)} places on this block`),
-            opt('errands', 'Running errands', `${countWord(nStops)} stops, one route`),
-            opt('walking', 'Just exploring', 'Quiet unless you look'),
-            { id: 'end', label: 'End the walk' },
+            { id: 'food', label: 'Food and drink', hint: `${countWord(food.length)} places · nearest ${nearest} m` },
+            { id: 'things', label: 'Things to do', hint: names('things') },
+            { id: 'shops', label: 'Shops and services', hint: names('shops') },
+            { id: 'transit', label: 'Getting around', hint: `M4 in ${m4?.next ?? '-'} min · uptown in ${train?.uptown ?? '-'}` },
+            { id: 'close', label: 'Close' },
           ],
         },
         reason: r,
         origin: 'goal',
         timing: 'now',
+        announce: 'root',
       });
+      return;
     }
-    if (st === 'picker') {
-      const r = reason('world', 'Lunch spots on this block', [{ signal: 'places', value: 'food, cafe', weight: 1 }]);
-      const rows = snap.entities
-        .filter((e) => e.kind === 'food' || e.kind === 'cafe')
-        .sort((a, b) => (a.walkS ?? 0) - (b.walkS ?? 0) || a.id.localeCompare(b.id))
-        .map((e) => ({ key: `pick:${e.id}`, title: e.name, sub: e.picker ?? sayFor(e, 'hungry').short, value: walkTime(e.walkS ?? 0), live: liveLine(e), kind: e.kind, ...(e.img ? { img: e.img } : {}) }));
-      wants.push({
-        id: 'picker',
-        component: 'picker',
-        zone: 'view',
-        level: 'card',
-        anchor: 'view:edge-right',
-        content: { name: 'Lunch on this block · by walk time', rows, reason: r, showReason: false, actions: [{ id: 'not-now', label: 'Not now' }] },
-        reason: r,
-        origin: 'goal',
-        timing: 'now',
-      });
-    }
+    const cat = this.menu;
+    const rows = ents
+      .filter((e) => MENU_KINDS[cat](e))
+      .sort((a, b) => (a.walkS ?? 0) - (b.walkS ?? 0) || a.id.localeCompare(b.id))
+      .map((e) => ({ key: `pick:${e.id}`, title: e.name, sub: e.picker ?? sayFor(e, this.goal).short, value: walkTime(e.walkS ?? 0), live: liveLine(e), kind: e.kind, ...(e.img ? { img: e.img } : {}) }));
+    wants.push({
+      id: 'menu',
+      component: 'menu',
+      zone: 'view',
+      level: 'card',
+      anchor: 'view:menu',
+      content: { name: 'Where to?', fact: `${MENU_TITLES[cat]} · by walk time`, rows, reason: r, showReason: false, actions: [{ id: 'back', label: 'Back' }] },
+      reason: r,
+      origin: 'goal',
+      timing: 'now',
+      announce: cat,
+    });
+  }
+
+  // The plan of the block, for a destination or for a turn the wearer cannot see yet; the route stays on the ground the whole time.
+  private mapWants(snap: WorldSnapshot, t: number, band: Band, gate: GateState, wants: Want[]): void {
+    if (snap.goal.arrived) this.mapUntil = Math.max(this.mapUntil, t + 10);
+    const cw = snap.env.crosswalk;
+    // The held light at the start corner is not a turn: the loop goes on up the block from there.
+    const turn = Boolean(cw && cw.distance < 20 && snap.wearer.state !== 'crossing' && !snap.goal.corner);
+    const why = this.destination ? 'Route to your pick' : t < this.mapUntil ? 'You made it' : turn ? 'A turn ahead' : null;
+    if (!why || band === 'brisk' || gate.safety || this.menu !== 'closed') return;
+    const r = reason('world', why, [
+      { signal: 'map', value: this.destination ?? (turn ? 'turn' : 'arrived'), weight: 1 },
+      ...(cw ? [{ signal: 'crosswalk.distance', value: Math.round(cw.distance), weight: 1 }] : []),
+    ]);
+    wants.push({ id: 'map', component: 'map', zone: 'view', level: 'card', anchor: 'view:map', content: { name: 'Map', reason: r, showReason: false }, reason: r, origin: 'goal', timing: 'now' });
   }
 
   private peopleWants(snap: WorldSnapshot, wants: Want[]): void {
@@ -1137,61 +1150,6 @@ export class Brain {
     }
   }
 
-  private errandsWants(snap: WorldSnapshot, t: number, _dt: number, band: Band, wants: Want[]): void {
-    if (this.stops.length === 0) return;
-    const ents = new Map(snap.entities.map((e) => [e.id, e]));
-    const ordered = [...this.stops];
-    const short = (id: string): string =>
-      (ents.get(id)?.name ?? id).replace('Main Street ', '').replace('Corner ', '');
-    const done = ordered.filter((id) => ents.get(id)?.live.pickedUp === true);
-    const closed = ordered.filter((id) => ents.get(id)?.live.closedEarly === true);
-    const open = ordered.filter((id) => !done.includes(id) && !closed.includes(id));
-    let name = 'Three stops · one route';
-    let r = reason('goal', 'In order along the way', [
-      { signal: 'stops', value: ordered.length, weight: 1 },
-      { signal: 'order', value: ordered.map(short).join(' > '), weight: 1 },
-    ]);
-    if (open.length === 0 && done.length > 0) {
-      name = 'All done';
-      r = reason('goal', 'Every stop done', [{ signal: 'stops.done', value: done.length, weight: 1 }]);
-    } else if (closed.length > 0) {
-      name = 'Hardware closed early. One stop left.';
-      r = reason('world', 'Hardware closed early. One stop left.', [
-        { signal: 'live.closedEarly', value: short(closed[0]!), weight: 1 },
-        { signal: 'stops.open', value: open.length, weight: 1 },
-      ]);
-    } else if (done.length > 0) {
-      name = open.length === 2 ? 'Two to go' : open.length === 1 ? 'One to go' : 'All done';
-    }
-    const rows = [
-      ...done.map((id) => ({ title: short(id), tone: 'done' as const, value: 'Picked up' })),
-      ...closed.map((id) => ({ title: short(id), tone: 'stop' as const, value: 'Closed' })),
-      ...open.map((id, i) => ({ key: String(i + 1), title: short(id) })),
-    ];
-    const key = `${done.join()}|${closed.join()}`;
-    if (key !== this.errands.key) {
-      this.errands = { key, shownAt: t, movingS: 0, stillS: 0, folded: false };
-    }
-    const atCorner = this.corner?.state === 'stops';
-    if (!atCorner && !this.errands.folded && viewFoldDue(this.errands.movingS, this.errands.stillS, false, this.cfg)) this.errands.folded = true;
-    if (this.errands.folded) {
-      if (open.length === 0 && this.goal !== 'errands') this.stops = [];
-      return;
-    }
-    wants.push({
-      id: 'errands',
-      component: 'errands',
-      zone: 'view',
-      level: 'card',
-      anchor: 'view:edge-right',
-      content: { name, rows, reason: r, showReason: name !== r.text, ...(atCorner ? { actions: [{ id: 'start', label: 'Start', primary: true }] } : {}) },
-      reason: r,
-      origin: 'goal',
-      announce: key,
-      timing: band === 'stopped' ? 'now' : 'next-pause',
-    });
-  }
-
   private messageWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const cardOpen = this.cardOpen();
     for (const it of this.inbox.values()) {
@@ -1209,6 +1167,13 @@ export class Brain {
       }
       const open = Boolean(n.replies) && (!it.reply || it.offer?.state === 'waiting' || it.offer?.state === 'open');
       if (n.replies && it.status === 'shown' && band === 'brisk') continue;
+      // A banner nobody looks at folds after 4 s of walking, as a toast does, and is back once the wearer has stood still half a second, never as a crossing begins.
+      if (open && it.status === 'shown' && (it.walkS ?? 0) >= this.cfg.viewFoldS - 1e-9) it.folded = true;
+      if (it.folded && band === 'stopped' && this.stoppedSince !== null && t - this.stoppedSince >= 0.5 - 1e-9 && !this.gateNow.safety && snap.env.crosswalk?.signal !== 'walk') {
+        it.folded = false;
+        it.walkS = 0;
+      }
+      if (it.folded) continue;
       if (it.status === 'shown' && !open && !it.closed) {
         if (viewFoldDue(it.movingS, it.stillS, false, this.cfg, this.cfg.stoppedToastS)) {
           it.status = 'done';
@@ -1243,9 +1208,9 @@ export class Brain {
               ? reason('world', 'Long red light', parts)
               : reason('world', 'Clear sidewalk ahead', parts));
         const theirs = [...thread].reverse().find((l) => !l.me);
-        content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: clockAt(n.at), app: 'Messages', reason: r, showReason: false };
+        content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: ago(t - n.at), app: 'Messages', reason: r, showReason: false };
         if (level === 'card' || it.reply) content.thread = thread.map((l) => ({ me: l.me, text: l.text }));
-        if (!it.reply) content.actions = n.replies.map((x) => ({ id: x.id, label: x.label }));
+        if (!it.reply && (band === 'stopped' || band === 'stroll' || snap.wearer.gaze.target === n.id)) content.actions = n.replies.map((x) => ({ id: x.id, label: x.label }));
         else if (it.offer?.state === 'open') {
           const e = snap.entities.find((x) => x.id === it.offer!.place);
           content.note = `${(e?.name ?? it.offer.place).replace(/^The /, '')} · ${walkTime(e?.walkS ?? 0)} · route there?`;
@@ -1280,6 +1245,9 @@ export class Brain {
         content = {
           name: n.from ?? 'Message',
           fact: n.text ?? '',
+          avatar: (n.from ?? 'M').slice(0, 1),
+          time: ago(t - n.at),
+          app: 'Messages',
           reason: r,
           showReason: false,
           actions: [
@@ -1294,7 +1262,7 @@ export class Brain {
         component,
         zone: 'view',
         level,
-        anchor: 'view:edge-right',
+        anchor: n.type === 'app' ? 'view:edge-right' : 'view:banner',
         content,
         reason: r,
         origin: n.type === 'app' ? (it.heldInGate ? 'followup' : 'app') : 'message',
@@ -1462,8 +1430,7 @@ export class Brain {
         onCommit: () => {
           if (level !== prev) {
             if (rank(level) < rank(prev)) it.stepAt = t;
-            if (level === 'card') it.cardAt = t;
-            it.level = level;
+              it.level = level;
             it.since = t;
           }
         },
@@ -1550,7 +1517,7 @@ export class Brain {
       });
       return;
     }
-    const level: Level = this.stops.includes(e.id) ? 'card' : 'label';
+    const level: Level = 'label';
     const r = reason('goal', this.routeWhy ?? e.reasons.goal ?? 'You made it', [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const own = wants.findIndex((w) => w.id === e.id);
     const mine = own >= 0 && !wants[own]!.remove ? wants[own]! : null;
@@ -1585,18 +1552,16 @@ export class Brain {
       zone: 'world',
       level,
       anchor: `door:${e.id}`,
-      content: level === 'card' ? cardContent(e, r, 'stopped', this.goal) : { name: e.name, fact: e.glance, reason: r, showReason: true },
+      content: { name: e.name, fact: e.glance, reason: r, showReason: true },
       reason: r,
       origin: 'arrival',
       zoneOk: true,
-      ...(level === 'card' ? { announce: 'c:full' } : {}),
       onCommit: () => {
         if (LEVEL_RANK[it.level] < LEVEL_RANK[level]) {
           it.level = level;
           it.since = t;
           it.shownAt = t;
           it.dwelt = true;
-          if (level === 'card') it.cardAt = t;
         }
         it.lastGazeAt = t;
       },
@@ -1676,7 +1641,7 @@ export class Brain {
     }
     if (routeTo && !this.arrival) {
       const nar = snap.env.sidewalkNarrowsAhead;
-      const why = this.goal === 'errands' ? null : (this.routeWhy ?? (this.goal === 'hungry' && this.routeCause === 'choice' ? 'Your pick for lunch' : null));
+      const why = this.routeWhy ?? (this.goal === 'hungry' && this.routeCause === 'choice' ? 'Your pick for lunch' : null);
       const r = reason('goal', why ?? 'On your route', [
         { signal: 'route.to', value: routeTo, weight: 1 },
         { signal: 'route.offset', value: nar && nar.distance < 30 ? 'curb' : 'center', weight: 1 },
@@ -1690,6 +1655,7 @@ export class Brain {
         anchor: 'route',
         content: {
           name: target?.name ?? routeTo,
+          ...(target ? { fact: walkTime(target.walkS ?? 0) } : {}),
           route: { to: routeTo, offset: nar && nar.distance < 30 && nar.distance > -6 ? 'curb' : 'center' },
           reason: r,
         },
@@ -1826,7 +1792,7 @@ export class Brain {
       return { reason: reason('pace', 'Saved for the next stop', parts), timing: 'next-pause', keep: false };
     }
     const newShow = (!prev || LEVEL_RANK[prev.level] < LEVEL_RANK.whisper) && LEVEL_RANK[w.level] >= LEVEL_RANK.whisper;
-    const asked = w.component === 'intent' || w.component === 'picker' || w.component === 'errands';
+    const asked = w.component === 'menu' || w.component === 'map';
     const budgeted = !asked && (w.origin === 'proactive' || w.origin === 'message' || w.origin === 'social' || w.origin === 'app' || w.origin === 'goal');
     if (newShow && budgeted && this.budget <= 0) {
       return {
@@ -1934,7 +1900,7 @@ export class Brain {
 
   // The budget is for what the brain volunteers; answers to the wearer's own choices and arrivals are earned.
   private earned(w: Want, d: Decision): boolean {
-    if (w.component === 'intent' || w.component === 'picker' || w.component === 'errands') return true;
+    if (w.component === 'menu' || w.component === 'map') return true;
     if (w.component === 'thread' && this.inbox.get(w.id)?.seen) return true;
     return d.cause === 'dwell' || d.cause === 'pinch' || d.cause === 'settle' || d.cause === 'arrival' || d.cause === 'choice';
   }

@@ -202,6 +202,12 @@ export function placeView(slot: string, size: { w: number; h: number }, vp: View
       return { x: vp.w - 24 * ui - w, y: 56 * ui + stackIndex * (h + gap), w, h };
     case 'view:glyph':
       return { x: MARGIN * ui, y: vp.h - 44 * ui - h, w, h };
+    case 'view:menu':
+      return { x: vp.w - 24 * ui - w, y: vp.h - (24 + 44 + 16) * Math.max(1, ui) - h, w, h };
+    case 'view:map':
+      return { x: vp.w - 24 * ui - w, y: vp.h - (24 + 44 + 24) * Math.max(1, ui) - h, w, h };
+    case 'view:banner':
+      return { x: (vp.w - w) / 2, y: Math.max((14 + 14 + 20) * ui, 52 * Math.max(1, ui)), w, h };
     case 'view:bottom':
       return { x: (vp.w - w) / 2, y: vp.h - vp.h * 0.09 - h, w, h };
     default:

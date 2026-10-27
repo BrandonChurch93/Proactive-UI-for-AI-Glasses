@@ -14,7 +14,6 @@ export interface Scored {
 
 export interface ScoreInput {
   goal: ScenarioId;
-  stops: readonly string[];
   destination?: string;
   gaze: boolean;
   band: Band;
@@ -33,9 +32,6 @@ export function isClosed(e: Entity): boolean {
 export function goalRelevance(e: Entity, inp: ScoreInput, cfg: Config): number {
   if (inp.destination === e.id) return cfg.score.goalRelevance;
   if (inp.destination && inp.goal === 'hungry') return 0;
-  if (inp.goal === 'errands') {
-    return inp.stops.includes(e.id) ? cfg.score.goalRelevance : 0;
-  }
   if (inp.goal === 'hungry') {
     if (e.kind === 'food') return cfg.score.goalRelevance;
     return cfg.score.partialRelevance.hungry?.[e.kind] ?? 0;
@@ -43,7 +39,7 @@ export function goalRelevance(e: Entity, inp: ScoreInput, cfg: Config): number {
   return 0;
 }
 
-export function value(e: Entity, goal: ScenarioId, stops: readonly string[]): number {
+export function value(e: Entity): number {
   if (isClosed(e)) return 0;
   const wait = num(e.live.wait);
   switch (e.kind) {
@@ -62,7 +58,6 @@ export function value(e: Entity, goal: ScenarioId, stops: readonly string[]): nu
     }
     case 'service':
     case 'shop':
-      if (goal === 'errands' && stops.includes(e.id)) return e.live.pickedUp === true ? 0 : 1.5;
       return 1;
     default:
       return 1;
@@ -74,7 +69,7 @@ export function score(e: Entity, inp: ScoreInput, cfg: Config): Scored {
   let relevance = g > 0 ? g : cfg.score.otherRelevance;
   if (e.kind === 'transit' && e.live.busAtStop === true) relevance = Math.max(relevance, cfg.score.gazeRelevance);
   if (inp.gaze) relevance = Math.max(relevance, cfg.score.gazeRelevance);
-  const val = value(e, inp.goal, inp.stops);
+  const val = value(e);
   const proximity = clamp(1 - e.distance / cfg.range, 0, 1);
   const novelty =
     (inp.presented ? 0 : 1) * cfg.score.dismissFactor ** inp.dismissed * cfg.score.acceptFactor ** inp.accepted;

@@ -20,7 +20,7 @@ export interface AppOptions {
 
 type Mode = 'attract' | 'walk';
 
-const NOT_DECIDED = new Set<ComponentKind>(['intent', 'picker', 'thread', 'toast', 'strip']);
+const NOT_DECIDED = new Set<ComponentKind>(['menu', 'map', 'thread', 'toast', 'strip']);
 
 // What the street sounds need from the walk: the band for the cadence, the crossing and its signal, and which side the road is on.
 function streetFrame(w: Walk, band: Band, snap: WorldSnapshot): StreetFrame {
@@ -411,7 +411,7 @@ export class App {
       const t = e.target as HTMLElement;
       const row = t.closest<HTMLElement>('[data-gaze]');
       const pane = t.closest<HTMLElement>('[data-pane]');
-      this.walk.hoverId = row?.dataset.gaze ?? (pane && pane.dataset.zone === 'view' ? pane.dataset.pane! : null);
+      this.walk.hoverId = row?.dataset.gaze ?? (pane && pane.dataset.zone === 'view' && pane.dataset.pane !== 'map' ? pane.dataset.pane! : null);
     });
     this.layer.addEventListener('pointerout', () => (this.walk.hoverId = null));
     addEventListener('keydown', (e) => {

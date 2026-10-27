@@ -359,9 +359,9 @@
 @media (min-width: 900px) and (min-height: 561px) {
   .startPanel {
     width: clamp(min(calc(600px * var(--u)), 49vw), 46vw, calc(880px * var(--u)));
-    padding: calc(48px * var(--u)) calc(64px * var(--u));
+    padding: min(calc(48px * var(--u)), 4vh) calc(64px * var(--u));
     padding-left: max(calc(64px * var(--u)), env(safe-area-inset-left));
-    gap: min(calc(48px * var(--u)), 5.8vh);
+    gap: min(calc(48px * var(--u)), 3.6vh);
   }
   .startPanel .lede {
     line-height: 1.55;
@@ -408,9 +408,9 @@
 
 @media (min-width: 900px) and (max-width: 1304px) and (min-height: 561px) {
   .startPanel {
-    padding: calc(32px * var(--u)) calc(48px * var(--u));
+    padding: min(calc(32px * var(--u)), 3vh) calc(48px * var(--u));
     padding-left: max(calc(48px * var(--u)), env(safe-area-inset-left));
-    gap: calc(32px * var(--u));
+    gap: min(calc(32px * var(--u)), 2.4vh);
   }
   .startPanel .what {
     gap: calc(10px * var(--u));

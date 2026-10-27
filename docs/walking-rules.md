@@ -26,7 +26,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 
 - Trigger: a candidate is about to be shown while the band is not Stopped.
 - Response: a label is the place's name and its say line's short form, never the sentence; the card carries the sentence. Label content is capped at three words plus one number while walking (the place name does not count; a unit counts with its number); in Walk and Brisk the reason line is never on the glass, only in the log; a card is refused unless the band allows it; copy that does not fit is shortened by rule (drop the reason line first, then the second fact), never truncated with an ellipsis.
-- Eval: no label exceeds the cap in Walk or Brisk or carries a say line; no world-zone card appears in Walk without its hold; in Brisk a place is a label at most. View-zone items (the errands card, message and call toasts, the pocket, the ask glance) are governed by the notification rules and the view zone's edge placement, not rule 10: allowed in any band but Brisk, at the edge, folding after 4 s while moving unless looked at.
+- Eval: no label exceeds the cap in Walk or Brisk or carries a say line; no world-zone card appears in Walk without its hold; in Brisk a place is a label at most. View-zone items (message banners at the top center, which is the view's top edge and outside the focus zone; the menu and the map tile above the menu button at the bottom right; the pocket; the ask glance) are governed by the notification rules and the view zone's edge placement, not rule 10: allowed in any band but Brisk, at the edges, a banner folding after 4 s of walking unless looked at and back once the wearer has stood still half a second.
 
 ## Rule 3 · Auto-fold while walking
 
@@ -91,7 +91,7 @@ Speed comes from the wearer signal. Scripted speeds per band: Stroll 0.6 m/s, Wa
 ## Rule 13 · The budget is visible
 
 - Trigger: always, in the inspector.
-- Response: the attention budget is a meter that drains on each proactive show (a decision with action `show` at whisper level or above that the wearer did not earn by looking or pinching; pips, labels that answer a settled view and ground safety text are not shows, and look-earned shows are free, as are answers to the wearer's own choices: the intent panel, the lunch picker, the errands list and what a choice or an arrival brings up) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
+- Response: the attention budget is a meter that drains on each proactive show (a decision with action `show` at whisper level or above that the wearer did not earn by looking or pinching; pips, labels that answer a settled view and ground safety text are not shows, and look-earned shows are free, as are answers to the wearer's own choices: the menu, the map tile and what a choice or an arrival brings up) and refills one unit per 40 s of quiet. The inspector shows it live and in the log.
 - Eval: proactive shows per walk never exceed 7 plus the refills earned during the walk (9 on a 90 s walk with enough quiet); the meter in the log matches the count of shows that were not earned by dwell or pinch.
 
 ## How these combine

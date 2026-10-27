@@ -1,7 +1,7 @@
 {
   "id": "note-social-accumulation",
   "rule": "notifications",
-  "scenario": "errands",
+  "scenario": "walking",
   "duration": 20,
   "description": "Social is never shown one by one: a count on the glyph while walking, one strip at the next stop.",
   "startN": 40,

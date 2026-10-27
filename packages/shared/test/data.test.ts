@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { PLACES, PLACE_BY_ID, SCENARIO_IDS, Settle, WALK, compactSnapshot, hydrateSnapshot, synthesize, type Beat } from '../src';
 
-const PANES = new Set(['errands', 'picker', 'intent', 'offer']);
+const PANES = new Set(['menu', 'offer']);
 
 describe('data', () => {
   it('every scripted beat refers to a place, an inbox item or a pocket entry that exists', () => {

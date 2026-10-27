@@ -41,7 +41,7 @@ log.append(snapshot, decisions)
 inspector.observe(log)
 ```
 
-The overlay reports back which panes are visible and where, through the bridge, so the sim can sample the backdrop behind them and the brain can reason about the focus zone. That round trip is one frame late and that is fine. The plan is the other round trip: the brain decides where the wearer is going (an intent, a chosen place, the next errand) and the sim's router walks there, one tick later, without the brain knowing any geometry.
+The overlay reports back which panes are visible and where, through the bridge, so the sim can sample the backdrop behind them and the brain can reason about the focus zone. That round trip is one frame late and that is fine. The plan is the other round trip: the brain decides where the wearer is going (a place chosen from the menu, a Yes to an offer) and the sim's router walks there, one tick later, without the brain knowing any geometry.
 
 ## Determinism
 
@@ -49,7 +49,7 @@ The sim is seeded. The clock is the sim's, never wall time. Scripted beats are d
 
 ## Modes
 
-- `?scenario=hungry|errands|walking` skips the title screen to a walk.
+- `?scenario=walking|hungry` (Explore, Lunch) skips the title screen to a walk.
 - `pnpm record --scenario hungry` runs the sim and brain in Node with no renderer, fixed dt, driving the scripted reviewer from the scenario file, and writes the walk file for evals. There is no browser record mode.
 - `?still=1&scenario=hungry&t=42` renders one frame at a walk time for screenshots, sets `window.__done = true` when the frame is drawn, and exposes `window.__stepTo(t)` so one browser session can render many frames. In still mode the scripted reviewer drives input.
 - `?quality=fast|high` forces the quality tier.

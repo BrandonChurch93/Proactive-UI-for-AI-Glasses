@@ -1,7 +1,7 @@
 import placesJson from '../../../data/places.json';
 import walkJson from '../../../data/scenarios/walk.json';
 
-export type ScenarioId = 'hungry' | 'errands' | 'walking';
+export type ScenarioId = 'hungry' | 'walking';
 export type Band = 'stopped' | 'stroll' | 'walk' | 'brisk';
 export type Side = 'W' | 'E' | 'X';
 export type EntityKind = 'food' | 'cafe' | 'theater' | 'venue' | 'shop' | 'service' | 'transit' | 'park' | 'sign';
@@ -81,7 +81,6 @@ export interface ReplySpec {
   label: string;
   answer?: { after: number; text: string };
   offer?: { place: string; why: string };
-  stop?: { place: string; line: string };
 }
 
 export type Beat =
@@ -98,7 +97,6 @@ export type Beat =
       replies?: ReplySpec[];
     })
   | (BeatBase & { kind: 'choice'; id: string; action: string })
-  | (BeatBase & { kind: 'stops'; ids: string[] })
   | (BeatBase & { kind: 'live'; id: string; set: Record<string, LiveValue> })
   | (BeatBase & { kind: 'sidewalkNarrows'; fromN: number; toN: number })
   | (BeatBase & { kind: 'bus'; id: string; arrivesIn: number; dwellS?: number })
@@ -137,7 +135,6 @@ const BEAT_KINDS: readonly BeatKind[] = [
   'pinch',
   'inbox',
   'choice',
-  'stops',
   'live',
   'sidewalkNarrows',
   'bus',
@@ -212,7 +209,7 @@ function validateWalk(raw: unknown): WalkData {
   if (typeof raw.holdS !== 'number') fail(where, 'holdS must be a number');
   validateBeats(raw.beats, where);
   if (!isRecord(raw.recordings)) fail(where, 'recordings must be an object');
-  for (const id of ['hungry', 'errands', 'walking']) {
+  for (const id of ['hungry', 'walking']) {
     const r = raw.recordings[id];
     if (!isRecord(r) || typeof r.duration !== 'number') fail(where, `recording ${id} needs a duration`);
     validateBeats(r.beats, `${where}/${id}`);
@@ -235,16 +232,17 @@ export const PLACE_BY_ID: ReadonlyMap<string, PlaceData> = new Map(PLACES.map((p
 
 export const WALK: Readonly<WalkData> = validateWalk(walkJson);
 
-export const SCENARIO_IDS: readonly ScenarioId[] = ['hungry', 'errands', 'walking'];
+export const SCENARIO_IDS: readonly ScenarioId[] = ['walking', 'hungry'];
+
+export const SCENARIO_LABEL: Record<ScenarioId, string> = { walking: 'Explore', hungry: 'Lunch' };
 
 export const WALK_SECONDS: Record<ScenarioId, number> = {
   hungry: WALK.recordings.hungry.duration,
-  errands: WALK.recordings.errands.duration,
   walking: WALK.recordings.walking.duration,
 };
 
 export function isScenarioId(v: unknown): v is ScenarioId {
-  return v === 'hungry' || v === 'errands' || v === 'walking';
+  return v === 'hungry' || v === 'walking';
 }
 
 export function place(id: string): PlaceData {

@@ -3,7 +3,7 @@ import { HeadlessView, Sim, TICK_HZ } from '@lumen/sim';
 import { isScenarioId, isShow } from '@lumen/shared';
 
 const s = process.argv[2] ?? 'hungry';
-if (!isScenarioId(s)) throw new Error('usage: tsx scripts/decisions.ts hungry|errands|walking [--pips]');
+if (!isScenarioId(s)) throw new Error('usage: tsx scripts/decisions.ts hungry|walking [--pips]');
 const pips = process.argv.includes('--pips');
 const sim = new Sim(s);
 const brain = new Brain({ scenario: s });

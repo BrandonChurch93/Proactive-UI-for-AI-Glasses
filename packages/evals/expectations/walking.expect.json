@@ -15,26 +15,13 @@
       }
     },
     {
-      "name": "0:01 \u00b7 stopped at the corner: the intent panel within 1 s",
+      "name": "0:00 to 0:02 \u00b7 nothing asks at the corner, and Explore lets the light go at 0:01",
       "between": [
-        0.75,
-        1.0
+        0,
+        2
       ],
-      "must": {
-        "action": "show",
-        "id": "intent",
-        "component": "intent"
-      }
-    },
-    {
-      "name": "0:01 \u00b7 Just exploring folds it and the light releases",
-      "between": [
-        1.0,
-        1.2
-      ],
-      "must": {
-        "action": "dismiss",
-        "id": "intent"
+      "mustNot": {
+        "component": "menu"
       }
     },
     {
@@ -330,37 +317,24 @@
       }
     },
     {
-      "name": "restraint \u00b7 at most four non-gaze items",
+      "name": "restraint \u00b7 at most four non-gaze items (the banner counts again when it returns after folding)",
       "between": [
         0,
         170
       ],
       "max": {
         "nonGazeShows": 4,
-        "shows": 9
+        "shows": 10
       }
     },
     {
-      "name": "2:53 \u00b7 a lap later, back at the corner: the light held again and the panel within 1 s of stopping",
+      "name": "2:53 to 2:56 \u00b7 a lap later, back at the corner: the light held again and nothing asks",
       "between": [
         173.0,
-        174.2
+        176.5
       ],
-      "must": {
-        "action": "show",
-        "id": "intent",
-        "component": "intent"
-      }
-    },
-    {
-      "name": "2:56 \u00b7 Just exploring again: the panel folds and the second lap begins",
-      "between": [
-        176.5,
-        176.8
-      ],
-      "must": {
-        "action": "dismiss",
-        "id": "intent"
+      "mustNot": {
+        "component": "menu"
       }
     },
     {
@@ -373,8 +347,45 @@
         "band": "walk",
         "destination": null,
         "hasNot": [
-          "intent"
+          "menu"
         ]
+      }
+    },
+    {
+      "name": "1:29.5 \u00b7 Jules's DM arrives in the crossing and is held",
+      "between": [
+        89.4,
+        89.7
+      ],
+      "must": {
+        "action": "hold",
+        "id": "jules-tonight"
+      }
+    },
+    {
+      "name": "1:29.5 to 1:39 \u00b7 nothing of it shows while crossing",
+      "between": [
+        89.4,
+        99.0
+      ],
+      "mustNot": {
+        "id": "jules-tonight",
+        "action": [
+          "show",
+          "promote"
+        ]
+      }
+    },
+    {
+      "name": "1:39.7 \u00b7 at the far curb: Held that while you crossed",
+      "between": [
+        99.5,
+        100.0
+      ],
+      "must": {
+        "action": "show",
+        "id": "followup",
+        "reasonText": "Held that while you crossed"
       }
     }
   ]

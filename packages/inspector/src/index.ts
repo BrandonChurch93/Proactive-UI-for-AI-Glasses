@@ -1,4 +1,5 @@
 import { gsap } from 'gsap';
+import { SCENARIO_LABEL } from '@lumen/shared';
 import { Decisions } from './decisions';
 import { Evals } from './evals';
 import { Exporter } from './exporter';
@@ -88,7 +89,7 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
 
   const refresh = (): void => {
     if (!isOpen) return;
-    meta.textContent = `${store.scenario.toUpperCase()} · ${clock(store.now())} / ${clock(store.duration)}`;
+    meta.textContent = `${SCENARIO_LABEL[store.scenario].toUpperCase()} · ${clock(store.now())} / ${clock(store.duration)}`;
     play.textContent = store.paused() ? 'Resume' : 'Pause';
     timeline.draw();
     const p = panels[tab];

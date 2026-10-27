@@ -29,24 +29,24 @@ Everyday, memorable names. Each place has a glance line and an expanded depth. D
 
 | Place | Side · n | Kind | Glance line | Expanded view | Scenarios |
 | --- | --- | --- | --- | --- | --- |
-| Grace Theater | W · 18 to 30 | Live theater · 1927 | Last show tonight at 8 | Tonight's shows, seats left, hold two | Just walking |
-| Mega Burger | W · 70 to 78 | Burgers | 6 min wait · $ | Menu, hold a seat | Hungry |
-| Lucky Lanes | W · 44 to 56 | Bowling | Lanes open · $12 an hour till 5 | Lane availability, book | Just walking |
-| Atlas Books | W · 60 to 68 | Bookshop | Open till 9 | Events tonight, hours | Just walking |
-| Trattoria da Lia | W · 34 to 42 | Italian (sign in Italian) | Home cooking · open until 11 PM | Menu, read from Italian | Hungry, Just walking |
+| Grace Theater | W · 18 to 30 | Live theater · 1927 | Last show tonight at 8 | Tonight's shows, seats left, hold two | Explore |
+| Mega Burger | W · 70 to 78 | Burgers | 6 min wait · $ | Menu, hold a seat | Lunch |
+| Lucky Lanes | W · 44 to 56 | Bowling | Lanes open · $12 an hour till 5 | Lane availability, book | Explore |
+| Atlas Books | W · 60 to 68 | Bookshop | Open till 9 | Events tonight, hours | Explore |
+| Trattoria da Lia | W · 34 to 42 | Italian (sign in Italian) | Home cooking · open until 11 PM | Menu, read from Italian | Lunch, Explore |
 | Pocket Park | W · 80 to 90, the south-west corner | Park | Benches in the shade | Nothing more | All |
-| Goldie's Counter | E · 10 to 18 | Deli | 3 min wait · 9 seats | Menu, hold a seat | Hungry |
-| Kathy's Cupcakes | E · 24 to 30 | Bakery | Fresh batch at 2 | Today's flavors | Hungry, Just walking |
-| The Big Bean | E · 46 to 52 | Coffee | Line of 4 · 5 min | Menu, order ahead | Hungry, Errands |
-| Main Street Pharmacy | E · 34 to 42 | Pharmacy | Prescription's ready here | Pickup details, hours | Errands |
-| Corner Hardware | E · 68 to 78 | Hardware | Open till 6 (closes early in Errands) | Hours, aisles for your item | Errands |
-| M4 stop | E · 58 | Bus | 2 min · next in 11 | Next four buses | Errands, Just walking |
-| 47th St Station | E · 86, stair at the corner | Subway | Uptown trains · 4 min | Next four departures | Hungry, Errands |
-| Post Office | X · north side, 10 m east of the corner | Service | Line of 8 · 12 min | Hours, counter wait | Errands |
+| Goldie's Counter | E · 10 to 18 | Deli | 3 min wait · 9 seats | Menu, hold a seat | Lunch |
+| Kathy's Cupcakes | E · 24 to 30 | Bakery | Fresh batch at 2 | Today's flavors | Lunch, Explore |
+| The Big Bean | E · 46 to 52 | Coffee | Line of 4 · 5 min | Menu, order ahead | Lunch |
+| Main Street Pharmacy | E · 34 to 42 | Pharmacy | Prescription's ready here | Pickup details, hours | Explore (the menu) |
+| Corner Hardware | E · 68 to 78 | Hardware | Open till 6 | Hours, aisles for your item | Explore (the menu) |
+| M4 stop | E · 58 | Bus | 2 min · next in 11 | Next four buses | Explore |
+| 47th St Station | E · 86, stair at the corner | Subway | Uptown trains · 4 min | Next four departures | Lunch |
+| Post Office | X · north side, 10 m east of the corner | Service | Line of 8 · 12 min | Hours, counter wait | Explore (the menu) |
 
 As built: the 47th St Station entrance sits along the east building line just before the corner (n 78 to 83) rather than at the corner itself, so the corner stays clear for waiting and crossing; the newsstand stands at n 65 and the M4 shelter at the curb at n 58, with every route stepping behind the shelter as pedestrians do.
 
-Street furniture with no card: bike dock, taxi stand, the garage entrance, the scaffolding over The Big Bean's frontage that narrows the east sidewalk (Errands beat), crosswalks with countdowns, a delivery truck that crawls the near lane on cue (Just walking beat), a newsstand at the corner.
+Street furniture with no card: bike dock, taxi stand, the garage entrance, the scaffolding over The Big Bean's frontage that narrows the east sidewalk (a focused case), crosswalks with countdowns, a delivery truck that crawls the near lane on cue (Just walking beat), a newsstand at the corner.
 
 Signage rule: a person's name or a plain descriptor, two or three words. Each roster place gets a designed storefront with its own sign format (marquee, blade, painted brick, awning text, window vinyl, neon). Background shops use five or six formats, never one. Background shop names are invented in the same voice and never repeat a roster name.
 
@@ -54,7 +54,7 @@ Signage rule: a person's name or a plain descriptor, two or three words. Each ro
 
 - Traffic: cars, taxis, vans, a bus that stops at the M4 stop, the delivery truck. Each vehicle's box in the sim matches the model as drawn, because keep-outs and the backdrop sampler use the sim's box: models scale to the sim's length and never wider than its width, so the stubby truck model is drawn 7.6 m long, 4.15 m tall and 2.5 m wide, inside its lane. Lane logic with following distance; signals obeyed; never through each other; never stopped inside the intersection. Parked cars along the avenue.
 - People: rigged characters with walk cycles (CC0 low-poly packs, e.g. Quaternius or Kenney, loaded as glTF). Idle groups talking (the social signal), someone at the newsstand, someone waiting at the light. Nobody within 3 m of the camera except scripted beats.
-- Scripted people for beats: a rider in the bike lane for the bike moment; a passerby at the corner for Errands.
+- Scripted people for beats: a rider in the bike lane for the bike moment.
 - Ambient audio: a city bed of distant traffic and air, vehicles passing from the roadway's side, footsteps at the band's cadence, the crossing's beeper at a curb on WAIT and through a crossing; no horns (design-system 4, Sound).
 
 ## 5. Lighting

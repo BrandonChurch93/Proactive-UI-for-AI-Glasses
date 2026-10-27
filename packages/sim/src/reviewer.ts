@@ -70,7 +70,7 @@ export class ScriptedReviewer {
       if (x.kind === 'choice') return [{ t: x.t, id: x.id, action: x.action }];
       if (x.kind === 'ask') return [{ t: x.answerAt, id: 'ask', action: x.answer === 'no' ? 'no' : 'find-lunch' }];
       if (x.kind === 'intent') return [{ t: x.t, id: 'intent', action: x.id }];
-      if (x.kind === 'choose') return [{ t: x.t, id: 'picker', action: x.id }];
+      if (x.kind === 'choose') return [{ t: x.t, id: 'menu', action: x.id }];
       if (x.kind === 'reply') return [{ t: x.t, id: x.id, action: x.reply }];
       if (x.kind === 'go') return [{ t: x.t, id: x.id, action: 'go' }];
       return [];

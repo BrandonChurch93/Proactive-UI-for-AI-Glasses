@@ -33,6 +33,17 @@ export interface GroundTextHandle {
   dispose(): void;
 }
 
+export interface MapView {
+  x: number;
+  z: number;
+  yaw: number;
+  head: number;
+  areas: { kind: 'road' | 'walk' | 'building'; x0: number; z0: number; x1: number; z1: number }[];
+  crossings: { x0: number; z0: number; x1: number; z1: number; bars: 'x' | 'z' }[];
+  route: { x: number; z: number }[];
+  dest: { x: number; z: number; kind: string } | null;
+}
+
 export interface SceneBridge {
   viewport(): Viewport;
   project(v: Vec3): Projected;
@@ -49,4 +60,5 @@ export interface SceneBridge {
   createGroundText(): GroundTextHandle;
   curbDistance(): number;
   chrome?(): Rect[];
+  mapView?(): MapView | null;
 }

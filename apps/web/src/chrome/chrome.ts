@@ -83,6 +83,7 @@ export class Chrome {
   setInspectorHint(visible: boolean): void {
     this.hint.style.display = visible ? '' : 'none';
     this.pauseBtn.style.display = visible && this.touch ? '' : 'none';
+    this.hint.classList.toggle(css.withPause!, this.touch);
     this.cache = null;
   }
 

@@ -1,15 +1,15 @@
 {
  "version": 1,
  "totals": {
-  "suites": 41,
-  "passed": 41,
-  "cases": 992,
-  "casesPassed": 992
+  "suites": 39,
+  "passed": 39,
+  "cases": 917,
+  "casesPassed": 917
  },
  "byGroup": {
   "walks": {
-   "suites": 3,
-   "passed": 3
+   "suites": 2,
+   "passed": 2
   },
   "gates": {
    "suites": 4,
@@ -20,8 +20,8 @@
    "passed": 5
   },
   "moments": {
-   "suites": 6,
-   "passed": 6
+   "suites": 5,
+   "passed": 5
   },
   "walking": {
    "suites": 23,
@@ -29,288 +29,6 @@
   }
  },
  "suites": [
-  {
-   "id": "errands",
-   "group": "walks",
-   "pass": true,
-   "results": [
-    {
-     "name": "determinism: two runs produce identical logs",
-     "rule": "determinism",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
-     "rule": "reasons",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
-     "rule": "copy",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "no em dash in any line the brain produces",
-     "rule": "copy",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
-     "rule": "gates",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
-     "rule": "walking-1",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
-     "rule": "walking-2",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "auto-fold: no proactive world label outlives its band limit",
-     "rule": "walking-3",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
-     "rule": "walking-4",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
-     "rule": "walking-6",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
-     "rule": "walking-7",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
-     "rule": "walking-10",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
-     "rule": "walking-11",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
-     "rule": "walking-12",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
-     "rule": "walking-13",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
-     "rule": "hysteresis",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
-     "rule": "timing",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
-     "rule": "social",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
-     "rule": "placement",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "0:00 to 0:08 · the light is held while the wearer decides",
-     "pass": true,
-     "detail": "79 frames"
-    },
-    {
-     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
-     "pass": true,
-     "detail": "t=0.8 show intent card"
-    },
-    {
-     "name": "0:00 to 0:08 · nothing proactive before an intent",
-     "pass": true,
-     "detail": "shows 1, non-gaze 0, holds 0"
-    },
-    {
-     "name": "0:08 · Errands: the stops list replaces the panel, three stops in the order chosen, with Start",
-     "pass": true,
-     "detail": "t=8.1 show errands card"
-    },
-    {
-     "name": "0:08 to 0:10 · no route before Start",
-     "pass": true,
-     "detail": "20 frames"
-    },
-    {
-     "name": "0:10 · Start: the route draws to the first stop, caused by the choice",
-     "pass": true,
-     "detail": "t=10 show route glance"
-    },
-    {
-     "name": "0:10 · the first stop is the destination",
-     "pass": true,
-     "detail": "398 frames"
-    },
-    {
-     "name": "0:15 · the list folds to the route while walking",
-     "pass": true,
-     "detail": "t=15 dismiss errands card"
-    },
-    {
-     "name": "0:33 · Maya asks for stamps, 25 s after Errands, at the edge while walking",
-     "pass": true,
-     "detail": "t=33.001 show maya-stamps glance"
-    },
-    {
-     "name": "0:35 · the settled view has labelled the pharmacy before the look reaches it",
-     "pass": true,
-     "detail": "t=35.201 show main-street-pharmacy label"
-    },
-    {
-     "name": "0:37 · its card after half a second of hold",
-     "pass": true,
-     "detail": "t=36.501 promote main-street-pharmacy card"
-    },
-    {
-     "name": "0:41 · scaffolding: one glance says why",
-     "pass": true,
-     "detail": "t=41.001 show scaffolding glance"
-    },
-    {
-     "name": "0:51 · at the pharmacy door its card shows",
-     "pass": true,
-     "detail": "t=51.601 promote main-street-pharmacy card"
-    },
-    {
-     "name": "0:52.5 · On it at the pharmacy door: the Post Office is already a stop, and the thread says so",
-     "pass": true,
-     "detail": "t=52.501 promote maya-stamps card"
-    },
-    {
-     "name": "0:54 · picked up, the errands card returns with the stop ticked",
-     "pass": true,
-     "detail": "t=53.901 show errands card"
-    },
-    {
-     "name": "0:55 · four seconds at the door, then the route redraws to the next stop",
-     "pass": true,
-     "detail": "t=54.901 show route glance"
-    },
-    {
-     "name": "0:58 · hardware closed early, said and redrawn",
-     "pass": true,
-     "detail": "t=58.001 promote errands card"
-    },
-    {
-     "name": "0:58 · the route skips the closed stop",
-     "pass": true,
-     "detail": "335 frames"
-    },
-    {
-     "name": "0:59 to 1:32 · social never one by one",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "1:05 to 1:32 · three on the glyph",
-     "pass": true,
-     "detail": "270 frames"
-    },
-    {
-     "name": "1:08 to 1:17 · the bus is held at pip, not on the goal",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "1:33 · the social strip surfaces once at the red light",
-     "pass": true,
-     "detail": "t=92.802 show social glance"
-    },
-    {
-     "name": "1:37 · the Post Office card up on dwell",
-     "pass": true,
-     "detail": "t=96.402 promote post-office card"
-    },
-    {
-     "name": "1:39 · head scans and a passerby change no level",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "1:50 to 2:00 · crossing, everything holds",
-     "pass": true,
-     "detail": "1 decisions"
-    },
-    {
-     "name": "1:50 to 2:00 · nothing opens in a crossing",
-     "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 1"
-    },
-    {
-     "name": "1:52 · the DM is held",
-     "pass": true,
-     "detail": "t=112.002 hold jules-tonight glance"
-    },
-    {
-     "name": "2:00 · one message came in",
-     "pass": true,
-     "detail": "t=120.102 show followup glance"
-    },
-    {
-     "name": "2:08 · at the Post Office door its card holds",
-     "pass": true,
-     "detail": "t=128.003"
-    },
-    {
-     "name": "2:11 · after the last stop: All done",
-     "pass": true,
-     "detail": "t=130.803 show errands card"
-    },
-    {
-     "name": "2:12 · then the loop resumes with no intent",
-     "pass": true,
-     "detail": "35 frames"
-    },
-    {
-     "name": "restraint · shows within the budget, the panel and the picker included",
-     "pass": true,
-     "detail": "shows 9, non-gaze 5, holds 5"
-    }
-   ],
-   "description": "Recorded walk · 1361 snapshots at 10 Hz"
-  },
   {
    "id": "hungry",
    "group": "walks",
@@ -441,19 +159,14 @@
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:01 · stopped at the corner: the agenda panel within 1 s",
+     "name": "0:00 to 0:01 · nothing asks at the corner",
      "pass": true,
-     "detail": "t=0.8 show intent card"
+     "detail": ""
     },
     {
-     "name": "0:01 · Looking for food: the lunch picker replaces the panel",
+     "name": "0:01 · the menu opens on Food: its places by walk time",
      "pass": true,
-     "detail": "t=1 show picker card"
-    },
-    {
-     "name": "0:01 · the panel folds as the picker shows",
-     "pass": true,
-     "detail": "t=1 dismiss intent card"
+     "detail": "t=1.2 show menu card"
     },
     {
      "name": "0:02 · one label, the best fit, reason in the log only",
@@ -471,9 +184,9 @@
      "detail": "77 frames"
     },
     {
-     "name": "0:03 · the picker folds and the light releases",
+     "name": "0:03 · Goldie's chosen from the menu: it folds and the light releases",
      "pass": true,
-     "detail": "t=3 dismiss picker card"
+     "detail": "t=3 dismiss menu card"
     },
     {
      "name": "0:09 · a look at Mega Burger, 69 m: its label",
@@ -501,7 +214,7 @@
      "detail": ""
     },
     {
-     "name": "0:26 · Maya's text, 25 s after Hungry, at the edge while walking: glance size, the line and the replies",
+     "name": "0:26 · Maya's text, 25 s after Hungry, at the top while walking: glance size, the line and the replies",
      "pass": true,
      "detail": "t=26.001 show maya-lunch glance"
     },
@@ -536,9 +249,9 @@
      "detail": "1 frames"
     },
     {
-     "name": "1:02 · Brisk: the thread steps out of view",
+     "name": "0:40 · walking, not looked at, the banner folds after 4 s of Walk",
      "pass": true,
-     "detail": "t=61.701 dismiss maya-lunch glance"
+     "detail": "t=39.801 dismiss maya-lunch glance"
     },
     {
      "name": "1:02 to 1:15 · Brisk: labels at most, never a card",
@@ -551,14 +264,9 @@
      "detail": "t=74.901 show need-to-run glance"
     },
     {
-     "name": "1:15 · after Brisk it is back at the edge",
+     "name": "1:18 · stopped half a second at the red light, the banner is back with the full thread",
      "pass": true,
-     "detail": "t=74.901 show maya-lunch glance"
-    },
-    {
-     "name": "1:18 · stopped at the red light, the full thread",
-     "pass": true,
-     "detail": "t=77.602 promote maya-lunch card"
+     "detail": "t=78.102 show maya-lunch card"
     },
     {
      "name": "1:18.5 · On my way: the offer within 1 s, in the brain's voice",
@@ -596,9 +304,9 @@
      "detail": "t=79.602 surface pocket card"
     },
     {
-     "name": "restraint · shows within the budget, the panel and the picker included",
+     "name": "restraint · shows within the budget, the menu included",
      "pass": true,
-     "detail": "shows 8, non-gaze 3, holds 2"
+     "detail": "shows 9, non-gaze 3, holds 2"
     },
     {
      "name": "1:44 · a look at the Big Bean on the way: its card, Going here (the chip has moved)",
@@ -748,14 +456,9 @@
      "detail": "t=0 show safety:signal glance"
     },
     {
-     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
+     "name": "0:00 to 0:02 · nothing asks at the corner, and Explore lets the light go at 0:01",
      "pass": true,
-     "detail": "t=0.8 show intent card"
-    },
-    {
-     "name": "0:01 · Just exploring folds it and the light releases",
-     "pass": true,
-     "detail": "t=1 dismiss intent card"
+     "detail": ""
     },
     {
      "name": "0:01 to 0:10 · after Just exploring, nothing",
@@ -830,7 +533,7 @@
     {
      "name": "0:51 to 0:56 · nothing shows",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 9"
+     "detail": "shows 0, non-gaze 0, holds 8"
     },
     {
      "name": "0:58 · looking up again cancels",
@@ -865,12 +568,12 @@
     {
      "name": "1:29 to 1:39 · crossing, everything holds",
      "pass": true,
-     "detail": "no decisions in window"
+     "detail": "1 decisions"
     },
     {
      "name": "1:29 to 1:39 · nothing opens in a crossing",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 0"
+     "detail": "shows 0, non-gaze 0, holds 1"
     },
     {
      "name": "1:30 · BIKE on the pavement",
@@ -883,24 +586,34 @@
      "detail": "t=100.602 show lucky-lanes label"
     },
     {
-     "name": "restraint · at most four non-gaze items",
+     "name": "restraint · at most four non-gaze items (the banner counts again when it returns after folding)",
      "pass": true,
-     "detail": "shows 8, non-gaze 3, holds 9"
+     "detail": "shows 9, non-gaze 4, holds 10"
     },
     {
-     "name": "2:53 · a lap later, back at the corner: the light held again and the panel within 1 s of stopping",
+     "name": "2:53 to 2:56 · a lap later, back at the corner: the light held again and nothing asks",
      "pass": true,
-     "detail": "t=173.703 show intent card"
-    },
-    {
-     "name": "2:56 · Just exploring again: the panel folds and the second lap begins",
-     "pass": true,
-     "detail": "t=176.504 dismiss intent card"
+     "detail": ""
     },
     {
      "name": "2:58 · walking again with no destination",
      "pass": true,
      "detail": "35 frames"
+    },
+    {
+     "name": "1:29.5 · Jules's DM arrives in the crossing and is held",
+     "pass": true,
+     "detail": "t=89.502 hold jules-tonight glance"
+    },
+    {
+     "name": "1:29.5 to 1:39 · nothing of it shows while crossing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "1:39.7 · at the far curb: Held that while you crossed",
+     "pass": true,
+     "detail": "t=99.702 show followup glance"
     }
    ],
    "description": "Recorded walk · 1821 snapshots at 10 Hz"
@@ -2449,153 +2162,6 @@
    ],
    "rule": "moments",
    "description": "Bus at the stop, not on the goal: held at pip; a glance only when looked at."
-  },
-  {
-   "id": "moment-closed-early",
-   "group": "moments",
-   "pass": true,
-   "results": [
-    {
-     "name": "determinism: two runs produce identical logs",
-     "rule": "determinism",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
-     "rule": "reasons",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
-     "rule": "copy",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "no em dash in any line the brain produces",
-     "rule": "copy",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
-     "rule": "gates",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
-     "rule": "walking-1",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
-     "rule": "walking-2",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "auto-fold: no proactive world label outlives its band limit",
-     "rule": "walking-3",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
-     "rule": "walking-4",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
-     "rule": "walking-6",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s",
-     "rule": "walking-7",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
-     "rule": "walking-10",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
-     "rule": "walking-11",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
-     "rule": "walking-12",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
-     "rule": "walking-13",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
-     "rule": "hysteresis",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
-     "rule": "timing",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
-     "rule": "social",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
-     "rule": "placement",
-     "pass": true,
-     "detail": ""
-    },
-    {
-     "name": "[0.7, 1.2) must {\"action\":\"show\",\"id\":\"errands\",\"nameIs\":\"Two to go\"}",
-     "pass": true,
-     "detail": "t=0.8 show errands card",
-     "rule": "moments"
-    },
-    {
-     "name": "[10, 10.2) must {\"action\":[\"show\",\"promote\"],\"id\":\"errands\",\"reasonText\":\"Hardware closed early. One stop left.\"}",
-     "pass": true,
-     "detail": "t=10 show errands card",
-     "rule": "moments"
-    },
-    {
-     "name": "[10, 10.2) must {\"action\":\"show\",\"id\":\"route\",\"zone\":\"ground\"}",
-     "pass": true,
-     "detail": "t=10 show route glance",
-     "rule": "moments"
-    },
-    {
-     "name": "[13.9, 14.2) must {\"action\":\"dismiss\",\"id\":\"errands\"}",
-     "pass": true,
-     "detail": "t=14 dismiss errands card",
-     "rule": "moments"
-    }
-   ],
-   "rule": "moments",
-   "description": "Hardware closes early: the brain says so, drops the stop and redraws the route."
   },
   {
    "id": "moment-pace-to-signal",

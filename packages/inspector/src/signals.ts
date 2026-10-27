@@ -76,7 +76,6 @@ export class Signals {
     section('Social and goal');
     kv('Social', `${snap.social.inConversation ? 'in conversation' : 'alone'}${f.gate.social ? ' · holding' : ''}`);
     kv('Goal', `${f.goal.scenario}${f.goal.destination ? ` · to ${f.goal.destination}` : ''}`);
-    if (f.goal.stops.length) kv('Stops', f.goal.stops.join(' > '));
     section('Backdrop behind each pane');
     const lum = Object.entries(snap.env.backdrop);
     if (lum.length === 0) kv('Panes', 'none visible');

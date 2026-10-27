@@ -46,10 +46,6 @@ const PROBES: Record<string, { t: number; id: string; dy?: number }[]> = {
     { t: 6, id: 'kathys-cupcakes', dy: 0.2 },
     { t: 40, id: 'lucky-lanes' },
   ],
-  errands: [
-    { t: 66, id: 'post-office' },
-    { t: 46, id: 'main-street-pharmacy', dy: 0.2 },
-  ],
   walking: [
     { t: 4, id: 'grace-theater' },
     { t: 50, id: 'atlas-books' },
@@ -328,8 +324,6 @@ if (probes) {
   const L = out.lap;
   const slow = L.routes.filter((r) => r[2] === null || r[2] > 2);
   console.log(`  route drawn within 2 s of a choice or a Yes: ${L.routes.length - slow.length} of ${L.routes.length}${L.routes.length ? `  ${JSON.stringify(L.routes)}` : ''}`);
-  const lateCorner = L.corners.filter((c) => c[1] === null || c[1] > 1);
-  console.log(`  intent panel within 1 s of Stopped at the corner: ${L.corners.length - lateCorner.length} of ${L.corners.length}${L.corners.length ? `  ${JSON.stringify(L.corners)}` : ''}`);
   console.log(`  panes born during a crossing: ${L.crossBirths.length}${L.crossBirths.length ? `  ${JSON.stringify(L.crossBirths.slice(0, 6))}` : ''}`);
   console.log(`  laps completed: ${L.laps}; stops longer than 1 s not at a light, a door or the corner: ${L.pauses.length}${L.pauses.length ? `  ${JSON.stringify(L.pauses.slice(0, 6))}` : ''}`);
   console.log(`  crossing line up on gate frames and on no other: ${m.quietBad ? `${m.quietBad} frames wrong, first ${JSON.stringify(m.quietAt)}` : `yes`} (${m.gateFrames ?? 0} gate frames)`);

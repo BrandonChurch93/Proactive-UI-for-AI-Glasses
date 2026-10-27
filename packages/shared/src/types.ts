@@ -57,10 +57,6 @@ export interface ThreadLine {
   at: number;
 }
 
-export interface Stop {
-  id: string;
-}
-
 export interface Crosswalk {
   id: string;
   leg: Leg;
@@ -157,7 +153,7 @@ export interface WorldSnapshot {
   social: { inConversation: boolean; companions: number };
   entities: Entity[];
   inbox: Notification[];
-  goal: { scenario: ScenarioId; stops?: Stop[]; destination?: string; arrived?: boolean; lap?: number; corner?: boolean; intentAt?: number; suggest?: ScenarioId };
+  goal: { scenario: ScenarioId; destination?: string; arrived?: boolean; lap?: number; corner?: boolean; intentAt?: number; suggest?: ScenarioId };
   wearerModel: WearerModel;
   view?: { w: number; h: number; panes: PaneReport[] };
 }
@@ -217,7 +213,6 @@ export type ComponentKind =
   | 'moment'
   | 'toast'
   | 'strip'
-  | 'errands'
   | 'pocket'
   | 'ask'
   | 'followup'
@@ -226,8 +221,8 @@ export type ComponentKind =
   | 'destination'
   | 'safety'
   | 'arrival'
-  | 'intent'
-  | 'picker'
+  | 'menu'
+  | 'map'
   | 'thread';
 
 export interface SignalBundle {
@@ -312,7 +307,7 @@ export interface BrainFrame {
   focus: { w: number; h: number };
   model: WearerModel;
   dwell: { target?: string; dwellMs: number; earned: Level | 'none'; mark?: { p: number; rate: number; next?: Level } };
-  goal: { scenario: ScenarioId; destination?: string; stops: string[]; go?: boolean };
+  goal: { scenario: ScenarioId; destination?: string; go?: boolean };
   stoppedFor: number;
 }
 

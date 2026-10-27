@@ -1,3 +1,4 @@
+import { SCENARIO_LABEL, isScenarioId } from '@lumen/shared';
 import s from './inspector.module.css';
 import type { InspectorStore } from './store';
 
@@ -37,7 +38,7 @@ export class Evals {
       for (const suite of r.suites.filter((x) => x.group === g)) {
         const row = el('div', s.suite);
         const passed = suite.results.filter((c) => c.pass).length;
-        const name = suite.id === store.scenario && g === 'walks' ? `${suite.id} · this walk` : suite.id;
+        const name = g === 'walks' && isScenarioId(suite.id) ? `${SCENARIO_LABEL[suite.id]}${suite.id === store.scenario ? ' · this walk' : ''}` : suite.id;
         row.append(el('span', undefined, name), el('span', suite.pass ? s.pass : s.fail, `${passed}/${suite.results.length}`));
         const fails = suite.results.filter((c) => !c.pass);
         if (fails.length) {

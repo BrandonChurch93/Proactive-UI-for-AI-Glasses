@@ -33,7 +33,6 @@ export interface CaseSpec {
     wearerSide?: boolean;
   }[];
   live?: { t: number; id: string; set: Record<string, LiveValue> }[];
-  stops?: { t: number; ids: string[] };
   narrows?: { t: number; fromN: number; toN: number };
   arrive?: { t: number; id: string };
   conversation?: [number, number];
@@ -176,7 +175,6 @@ export function synthesize(spec: CaseSpec, hz = 10): WorldSnapshot[] {
         onRoute: true,
       };
     }
-    if (spec.stops && t >= spec.stops.t) snap.goal.stops = spec.stops.ids.map((id) => ({ id }));
     if (spec.narrows && t >= spec.narrows.t) {
       snap.env.sidewalkNarrowsAhead = { fromN: spec.narrows.fromN, toN: spec.narrows.toN, distance: spec.narrows.fromN - n };
     }

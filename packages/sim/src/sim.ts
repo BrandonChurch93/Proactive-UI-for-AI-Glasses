@@ -64,7 +64,6 @@ export interface LiveInput {
 const GAZE_ACQUIRE = (3.5 * Math.PI) / 180;
 const GAZE_RELEASE = (6.0 * Math.PI) / 180;
 
-const PICKUP_S = 3;
 
 export interface Plan {
   destination?: string;
@@ -202,7 +201,6 @@ export class Sim {
     this.intentAt = t;
     const beats = WALK.beats.filter((b) => b.after === 'intent' && b.intent === id).map((b) => ({ ...b, t: Math.round((t + b.t) * 1e6) / 1e6 }));
     this.timeline = [...this.timeline, ...beats].sort((a, b) => a.t - b.t);
-    for (const b of beats) if (b.kind === 'stops') for (const sid of b.ids) this.liveData.set(sid, { ...PLACE_BY_ID.get(sid)?.live });
     for (const v of this.scriptedVehicles(beats)) this.traffic.add(v);
     for (const p of this.scriptedPeople(beats)) this.people.add(p);
   }
@@ -243,10 +241,6 @@ export class Sim {
       this.reroute(this.want, t);
       return;
     }
-    if (w.arrivedAt !== null && t - w.arrivedAt >= PICKUP_S && this.stopIds().includes(w.route.target)) {
-      const live = this.liveData.get(w.route.target);
-      if (live && live.pickedUp !== true) live.pickedUp = true;
-    }
     if (this.want !== w.route.target && w.state !== 'crossing' && !this.dwelling(t)) {
       this.reroute(this.want, t);
       if (this.want !== 'start') this.release(t);
@@ -263,11 +257,6 @@ export class Sim {
   private walkSeconds(id: string): number {
     const r = this.route.target === id ? this.route.length - this.wearer.s : routeTo(this.wearer.where(), id).length;
     return Math.round(r / WALK.speeds.walk);
-  }
-
-  private stopIds(): string[] {
-    const b = this.timeline.filter((x) => x.kind === 'stops' && x.t <= this.t + 1e-9).at(-1);
-    return b && b.kind === 'stops' ? b.ids : [];
   }
 
   anchorOf = (id: string): Vec3 | undefined => {
@@ -311,7 +300,12 @@ export class Sim {
   step(dt: number): void {
     const t0 = this.t;
     const t1 = Math.round((t0 + dt) * 1e6) / 1e6;
-    if (this.scripted) for (const x of this.reviewer.intents) if (x.t > t0 + 1e-9 && x.t <= t1 + 1e-9) this.startIntent(x.id, t1);
+    if (this.scripted) {
+      for (const x of this.reviewer.intents) if (x.t > t0 + 1e-9 && x.t <= t1 + 1e-9) this.startIntent(x.id, t1);
+    } else if (this.intent === null) {
+      // Live, there is no question at the corner: the walk is its scenario from the first step, and the light waits for a place to be chosen.
+      this.startIntent(this.scenario, t1);
+    }
     this.south.step(t1);
     this.navigate(t1);
     this.wearer.step(t1, dt);
@@ -610,8 +604,6 @@ export class Sim {
       const n = nOf(w.pos.z);
       if (n < narrows.toN) snap.env.sidewalkNarrowsAhead = { fromN: narrows.fromN, toN: narrows.toN, distance: round(narrows.fromN - n) };
     }
-    const stops = this.stopIds();
-    if (stops.length) snap.goal.stops = stops.map((id) => ({ id }));
     if (this.intent) snap.goal.intentAt = round(this.intentAt);
     if (w.holding) snap.goal.corner = true;
     if (this.suggest && this.lap === 0) snap.goal.suggest = this.suggest;

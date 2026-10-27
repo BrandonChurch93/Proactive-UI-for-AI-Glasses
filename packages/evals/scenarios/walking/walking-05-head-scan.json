@@ -1,7 +1,7 @@
 {
   "id": "walking-05-head-scan",
   "rule": "walking-5",
-  "scenario": "errands",
+  "scenario": "walking",
   "duration": 10,
   "description": "Head-scan yielding is the overlay's move (opacity .15 within 200 ms, back within 400 ms), asserted in the overlay placement tests. The brain's contract: a scan near the curb changes no level and dismisses nothing.",
   "startN": 84,

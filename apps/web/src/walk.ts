@@ -263,7 +263,7 @@ export class Walk {
   }
 
   dismiss(): void {
-    const panel = this.last()?.frame.items.find((d) => d.id === 'intent' || d.id === 'picker');
+    const panel = this.last()?.frame.items.find((d) => d.id === 'menu');
     this.queue({ dismiss: panel?.id ?? this.sim.gaze.target ?? null });
   }
 
