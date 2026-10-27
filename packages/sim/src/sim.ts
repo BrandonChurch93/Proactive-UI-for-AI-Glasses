@@ -175,7 +175,7 @@ export class Sim {
       }
       if (b.kind === 'bus') {
         const arrive = b.t + b.arrivesIn;
-        out.push({ id: 'm4-bus', body: 'bus', lane: 'nb-out', spawnAt: arrive - 15.5, spawnS: 180 - 40, dwell: { at: arrive, until: arrive + 9, s: 180 + 60.6 }, v0: 8.5 });
+        out.push({ id: 'm4-bus', body: 'bus', lane: 'nb-out', spawnAt: arrive - 15.5, spawnS: 180 - 40, dwell: { at: arrive, until: arrive + (b.dwellS ?? 9), s: 180 + 60.6 }, v0: 8.5 });
       }
       if (b.kind === 'bike') {
         const speed = 5.5;
@@ -516,6 +516,7 @@ export class Sim {
       if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
       if (p.picker) e.picker = p.picker;
+      if (p.img) e.img = p.img;
       out.push(e);
     }
     return out;

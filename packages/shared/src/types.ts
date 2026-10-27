@@ -175,6 +175,8 @@ export interface Reason {
 }
 
 export interface ContentRow {
+  img?: string;
+  kind?: EntityKind;
   title: string;
   sub?: string;
   value?: string;
@@ -204,6 +206,9 @@ export interface Content {
   thread?: { me: boolean; text: string }[];
   avatar?: string;
   time?: string;
+  app?: 'Messages';
+  img?: string;
+  kind?: EntityKind;
 }
 
 export type ComponentKind =

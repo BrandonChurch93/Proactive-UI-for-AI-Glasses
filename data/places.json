@@ -79,7 +79,8 @@
           "line": "Night Market at 8 has 40 seats · earlier shows filling",
           "short": "Night Market at 8"
         }
-      }
+      },
+      "img": "img/hero-theater.webp"
     },
     {
       "id": "mega-burger",
@@ -118,13 +119,22 @@
         "sub": "Counter and booths · open till 1",
         "rows": [
           {
-            "title": "Seat now",
-            "value": "6 min",
-            "tone": "go"
+            "img": "img/dish-mega.webp",
+            "title": "The Mega",
+            "sub": "Double patty · cheddar",
+            "value": "$9.50"
           },
           {
-            "title": "Order ahead",
-            "value": "ready in 8"
+            "img": "img/dish-classic.webp",
+            "title": "Classic",
+            "sub": "Single patty · pickles",
+            "value": "$7"
+          },
+          {
+            "img": "img/dish-fries.webp",
+            "title": "Fries",
+            "sub": "Hand cut · sea salt",
+            "value": "$3.50"
           }
         ],
         "actions": [
@@ -152,7 +162,8 @@
           "short": "6 min wait"
         }
       },
-      "picker": "Burgers, counter seats"
+      "picker": "Burgers, counter seats",
+      "img": "img/hero-mega-burger.webp"
     },
     {
       "id": "lucky-lanes",
@@ -229,7 +240,8 @@
           "line": "5 lanes open till 5 · walk right in",
           "short": "5 lanes open"
         }
-      }
+      },
+      "img": "img/hero-lanes.webp"
     },
     {
       "id": "atlas-books",
@@ -294,7 +306,8 @@
           "line": "Poetry reading at 7 · upstairs, free",
           "short": "Reading at 7"
         }
-      }
+      },
+      "img": "img/hero-atlas.webp"
     },
     {
       "id": "trattoria-da-lia",
@@ -334,19 +347,22 @@
         "sub": "Menu · read from Italian",
         "rows": [
           {
-            "key": "$16",
+            "img": "img/dish-cacio.webp",
             "title": "Cacio e pepe",
-            "sub": "Cheese and black pepper"
+            "sub": "Cheese and black pepper",
+            "value": "$16"
           },
           {
-            "key": "$19",
+            "img": "img/dish-lasagna.webp",
             "title": "Lasagne della nonna",
-            "sub": "Grandma's lasagne"
+            "sub": "Grandma's lasagne",
+            "value": "$19"
           },
           {
-            "key": "$8",
+            "img": "img/dish-tiramisu.webp",
             "title": "Tiramisù",
-            "sub": "Coffee and mascarpone"
+            "sub": "Coffee and mascarpone",
+            "value": "$8"
           }
         ],
         "actions": [
@@ -374,7 +390,8 @@
           "short": "Home cooking"
         }
       },
-      "picker": "Home cooking, sit-down"
+      "picker": "Home cooking, sit-down",
+      "img": "img/hero-trattoria.webp"
     },
     {
       "id": "pocket-park",
@@ -414,7 +431,8 @@
           "line": "Benches in the shade · end of the walk",
           "short": "Shaded benches"
         }
-      }
+      },
+      "img": "img/hero-park.webp"
     },
     {
       "id": "goldies-counter",
@@ -453,13 +471,22 @@
         "sub": "Counter seating · open till 4",
         "rows": [
           {
-            "title": "Seat now",
-            "value": "3 min",
-            "tone": "go"
+            "img": "img/dish-pastrami.webp",
+            "title": "Pastrami on rye",
+            "sub": "Hand sliced · mustard",
+            "value": "$14"
           },
           {
-            "title": "Order ahead",
-            "value": "ready in 5"
+            "img": "img/dish-matzo.webp",
+            "title": "Matzo ball soup",
+            "sub": "Chicken broth · dill",
+            "value": "$8"
+          },
+          {
+            "img": "img/dish-eggcream.webp",
+            "title": "Egg cream",
+            "sub": "Chocolate · seltzer",
+            "value": "$4.50"
           }
         ],
         "actions": [
@@ -487,7 +514,8 @@
           "short": "3 min wait"
         }
       },
-      "picker": "Fastest lunch on this side"
+      "picker": "Fastest lunch on this side",
+      "img": "img/hero-goldies.webp"
     },
     {
       "id": "kathys-cupcakes",
@@ -524,17 +552,19 @@
         "sub": "Today's flavors",
         "rows": [
           {
-            "key": "$4",
+            "img": "img/dish-cupcake1.webp",
             "title": "Brown butter",
-            "sub": "Fresh at 2"
+            "sub": "Fresh at 2",
+            "value": "$4"
           },
           {
-            "key": "$4",
+            "img": "img/dish-cupcake2.webp",
             "title": "Lemon poppy",
-            "sub": "In the case"
+            "sub": "In the case",
+            "value": "$4"
           },
           {
-            "key": "$4",
+            "img": "img/dish-cupcake3.webp",
             "title": "Double chocolate",
             "value": "Sold out",
             "tone": "stop"
@@ -565,7 +595,8 @@
           "short": "Batch at 2"
         }
       },
-      "picker": "Not lunch, a batch at 2"
+      "picker": "Not lunch, a batch at 2",
+      "img": "img/hero-kathys.webp"
     },
     {
       "id": "big-bean",
@@ -603,16 +634,19 @@
         "sub": "Order ahead · skip the line",
         "rows": [
           {
-            "key": "$4.25",
-            "title": "Cortado"
+            "img": "img/dish-cortado.webp",
+            "title": "Cortado",
+            "value": "$4.25"
           },
           {
-            "key": "$5",
-            "title": "Cold brew"
+            "img": "img/dish-coldbrew.webp",
+            "title": "Cold brew",
+            "value": "$5"
           },
           {
-            "key": "$5.75",
-            "title": "Oat latte"
+            "img": "img/dish-latte.webp",
+            "title": "Oat latte",
+            "value": "$5.75"
           }
         ],
         "actions": [
@@ -644,7 +678,8 @@
           "short": "Line of 4"
         }
       },
-      "picker": "Coffee after"
+      "picker": "Coffee after",
+      "img": "img/hero-big-bean.webp"
     },
     {
       "id": "main-street-pharmacy",
@@ -725,7 +760,8 @@
             "short": "Picked up"
           }
         }
-      }
+      },
+      "img": "img/hero-pharmacy.webp"
     },
     {
       "id": "corner-hardware",
@@ -814,7 +850,8 @@
             "short": "Closed early"
           }
         }
-      }
+      },
+      "img": "img/hero-hardware.webp"
     },
     {
       "id": "m4-stop",
@@ -887,7 +924,8 @@
           "line": "M4 in 2 min · then 11",
           "short": "M4 in 2"
         }
-      }
+      },
+      "img": "img/hero-m4.webp"
     },
     {
       "id": "47th-st-station",
@@ -961,7 +999,8 @@
           "line": "Uptown in 4 · stairs at the corner",
           "short": "Uptown in 4"
         }
-      }
+      },
+      "img": "img/hero-station.webp"
     },
     {
       "id": "post-office",
@@ -1031,7 +1070,8 @@
           "line": "Counter till 5 · line of 8",
           "short": "Line of 8"
         }
-      }
+      },
+      "img": "img/hero-post-office.webp"
     }
   ]
 }

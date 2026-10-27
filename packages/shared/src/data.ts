@@ -10,6 +10,7 @@ export type SignalState = 'walk' | 'flash' | 'dont';
 export type LiveValue = number | string | boolean;
 
 export interface DepthRow {
+  img?: string;
   key?: string;
   title: string;
   sub?: string;
@@ -44,6 +45,7 @@ export interface PlaceCopy {
   liveLines?: Record<string, string>;
   translate?: boolean;
   picker?: string;
+  img?: string;
 }
 
 export interface PlaceData extends PlaceCopy {
@@ -99,7 +101,7 @@ export type Beat =
   | (BeatBase & { kind: 'stops'; ids: string[] })
   | (BeatBase & { kind: 'live'; id: string; set: Record<string, LiveValue> })
   | (BeatBase & { kind: 'sidewalkNarrows'; fromN: number; toN: number })
-  | (BeatBase & { kind: 'bus'; id: string; arrivesIn: number })
+  | (BeatBase & { kind: 'bus'; id: string; arrivesIn: number; dwellS?: number })
   | (BeatBase & { kind: 'headScan'; sequence: ('left' | 'right' | 'center')[] })
   | (BeatBase & { kind: 'person'; id: string; path: string; speed: number })
   | (BeatBase & { kind: 'vehicle'; id: string; lane: 'near' | 'far'; speed: number; fromN: number; toN: number })

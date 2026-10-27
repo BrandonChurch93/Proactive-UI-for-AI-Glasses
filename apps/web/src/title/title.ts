@@ -1,15 +1,6 @@
 import { gsap } from 'gsap';
-import type { Band, ScenarioId } from '@lumen/shared';
+import type { Band } from '@lumen/shared';
 import css from './title.module.css';
-
-
-export type Choice = ScenarioId;
-
-const CHIPS: { id: Choice; name: string }[] = [
-  { id: 'hungry', name: 'Hungry' },
-  { id: 'errands', name: 'Errands' },
-  { id: 'walking', name: 'Just walk' },
-];
 
 const WHAT: [string, string][] = [
   ['BRAIN', 'A deterministic rules engine, not a model. Same walk, same decisions, every time.'],
@@ -96,19 +87,17 @@ export class TitleScreen {
   private reveals: HTMLElement[];
   private tl: gsap.core.Timeline | null = null;
   private startButton: HTMLButtonElement;
-  private chips: HTMLButtonElement[] = [];
-  private picked: Choice | null = null;
   private aboutLink: HTMLButtonElement;
   private busy = false;
 
   constructor(
     parent: HTMLElement,
-    private onStart: (suggest: Choice | null) => void,
+    private onStart: () => void,
   ) {
     this.el = el('section', css.screen);
     this.el.setAttribute('aria-label', 'Proactive UI for AI Glasses');
     this.plate = el('div', css.plate);
-    this.panel = el('div', css.panel);
+    this.panel = el('div', `${css.panel} ${css.startPanel}`);
     const sub = el('div', css.sub, 'A UX study in when an assistant should speak, and when it should stay quiet');
     const name = el('h1', css.name, 'Proactive UI for AI Glasses');
     const lede = el('p', css.lede, "You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.");
@@ -127,23 +116,7 @@ export class TitleScreen {
       e.stopPropagation();
       this.choose();
     });
-    const ask = el('p', css.ask, "At the first red light the glasses ask what you're up to.");
-    const chips = el('div', css.chips);
-    chips.setAttribute('role', 'group');
-    chips.setAttribute('aria-label', 'Have an answer ready');
-    for (const c of CHIPS) {
-      const b = el('button', undefined, c.name) as HTMLButtonElement;
-      b.type = 'button';
-      b.dataset.choice = c.id;
-      b.setAttribute('aria-pressed', 'false');
-      b.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.pick(this.picked === c.id ? null : c.id);
-      });
-      this.chips.push(b);
-      chips.appendChild(b);
-    }
-    choices.append(this.startButton, ask, chips);
+    choices.append(this.startButton);
     const controls = el('div', css.controls);
     (TOUCH ? CONTROLS_TOUCH : CONTROLS).forEach(([k, v], i) => {
       if (i) controls.appendChild(el('span', css.dot, '·'));
@@ -162,7 +135,14 @@ export class TitleScreen {
       this.skipToChoice();
       about.open(this.aboutLink);
     });
-    this.panel.append(sub, name, lede, whatHead, what, chooseHead, choices, controls, footer);
+    const section = (...kids: HTMLElement[]): HTMLElement => {
+      const g = el('div', css.section);
+      g.append(...kids);
+      return g;
+    };
+    const bottom = el('div', css.bottom);
+    bottom.append(controls, footer);
+    this.panel.append(section(sub, name, lede), section(whatHead, what), section(chooseHead, choices), bottom);
     this.reveals = [sub, name, lede, whatHead, what, chooseHead, choices, controls, footer];
     this.el.append(this.plate, this.panel, about.el);
     this.el.addEventListener('click', () => this.skipToChoice());
@@ -200,16 +180,6 @@ export class TitleScreen {
     if (this.tl && this.tl.progress() < 1) this.tl.progress(1);
   }
 
-  focus(id: Choice): void {
-    this.pick(id);
-    this.startButton.focus({ preventScroll: true });
-  }
-
-  private pick(id: Choice | null): void {
-    this.picked = id;
-    for (const b of this.chips) b.setAttribute('aria-pressed', String(b.dataset.choice === id));
-  }
-
   private choose(): void {
     if (this.busy) return;
     this.busy = true;
@@ -218,8 +188,7 @@ export class TitleScreen {
     tl.to(this.reveals, { opacity: 0, y: -6, filter: 'blur(4px)', duration: 0.22, ease: EASE_IN, stagger: 0.03 }, 0);
     tl.to(this.panel, { xPercent: -100, duration: 0.45, ease: EASE_IN }, 0.15);
     tl.to(this.plate, { opacity: 0, duration: 0.45, ease: 'power1.inOut' }, 0.15);
-    const suggest = this.picked;
-    tl.call(() => this.onStart(suggest), [], 0.6);
+    tl.call(() => this.onStart(), [], 0.6);
     this.tl = tl;
   }
 

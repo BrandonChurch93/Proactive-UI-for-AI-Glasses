@@ -194,14 +194,14 @@
      "detail": "t=33.001 show maya-stamps glance"
     },
     {
-     "name": "0:36 · the pharmacy lights its label on the look",
+     "name": "0:35 · the settled view has labelled the pharmacy before the look reaches it",
      "pass": true,
-     "detail": "t=36.201 show main-street-pharmacy label"
+     "detail": "t=35.201 show main-street-pharmacy label"
     },
     {
      "name": "0:37 · its card after half a second of hold",
      "pass": true,
-     "detail": "t=36.701 promote main-street-pharmacy card"
+     "detail": "t=36.501 promote main-street-pharmacy card"
     },
     {
      "name": "0:41 · scaffolding: one glance says why",
@@ -211,7 +211,7 @@
     {
      "name": "0:51 · at the pharmacy door its card shows",
      "pass": true,
-     "detail": "t=50.901 show main-street-pharmacy card"
+     "detail": "t=51.201 promote main-street-pharmacy card"
     },
     {
      "name": "0:52.5 · On it at the pharmacy door: the Post Office is already a stop, and the thread says so",
@@ -261,7 +261,7 @@
     {
      "name": "1:37 · the Post Office card up on dwell",
      "pass": true,
-     "detail": "t=96.602 promote post-office card"
+     "detail": "t=96.402 promote post-office card"
     },
     {
      "name": "1:39 · head scans and a passerby change no level",
@@ -306,7 +306,7 @@
     {
      "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "shows 12, non-gaze 6, holds 5"
+     "detail": "shows 9, non-gaze 5, holds 5"
     }
    ],
    "description": "Recorded walk · 1361 snapshots at 10 Hz"
@@ -531,9 +531,9 @@
      "detail": "t=45.101 demote trattoria-da-lia label"
     },
     {
-     "name": "0:52 · a look at the station stair lights its label",
+     "name": "0:52 · the station stair, labelled with the view since 0:45, holds its label for the look",
      "pass": true,
-     "detail": "t=51.601 show 47th-st-station label"
+     "detail": "1 frames"
     },
     {
      "name": "1:02 · Brisk: the thread steps out of view",
@@ -583,12 +583,12 @@
     {
      "name": "restraint · shows within the budget, the panel and the picker included",
      "pass": true,
-     "detail": "shows 10, non-gaze 3, holds 0"
+     "detail": "shows 8, non-gaze 3, holds 2"
     },
     {
      "name": "1:44 · a look at the Big Bean on the way: its card, Going here (the chip has moved)",
      "pass": true,
-     "detail": "t=104.102 promote big-bean card"
+     "detail": "t=103.802 promote big-bean card"
     },
     {
      "name": "1:52 · at the Big Bean door, the arrival line says why",
@@ -815,7 +815,7 @@
     {
      "name": "0:51 to 0:56 · nothing shows",
      "pass": true,
-     "detail": "shows 0, non-gaze 0, holds 8"
+     "detail": "shows 0, non-gaze 0, holds 9"
     },
     {
      "name": "0:58 · looking up again cancels",
@@ -870,7 +870,7 @@
     {
      "name": "restraint · at most four non-gaze items",
      "pass": true,
-     "detail": "shows 8, non-gaze 3, holds 8"
+     "detail": "shows 8, non-gaze 3, holds 9"
     },
     {
      "name": "2:53 · a lap later, back at the corner: the light held again and the panel within 1 s of stopping",

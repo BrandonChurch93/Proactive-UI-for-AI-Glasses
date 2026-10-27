@@ -104,16 +104,16 @@
       }
     },
     {
-      "name": "0:36 \u00b7 the pharmacy lights its label on the look",
+      "name": "0:35 \u00b7 the settled view has labelled the pharmacy before the look reaches it",
       "between": [
-        35.6,
-        36.6
+        34.6,
+        35.6
       ],
       "must": {
         "action": "show",
         "id": "main-street-pharmacy",
         "level": "label",
-        "cause": "dwell"
+        "cause": "settle"
       }
     },
     {

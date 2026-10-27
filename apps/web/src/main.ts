@@ -105,6 +105,7 @@ async function boot(): Promise<void> {
     window.__stepTo = async (t: number) => {
       app.walk.seek(t);
       if (app.title.visible) app.title.skipToChoice();
+      app.syncChrome();
       world.update(0);
       if (cam && cam.length === 5) {
         world.core.camera.position.set(cam[0]!, cam[1]!, -cam[2]!);

@@ -10,7 +10,7 @@ A panel on the left, reviewer chrome, over the live street; top to bottom:
 - Name: **Proactive UI for AI Glasses**
 - Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
 - What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
-- The walk (mono caps): Start the walk (primary) / At the first red light the glasses ask what you're up to. / three chips, Hungry · Errands · Just walk, any one of which fills that answer on the intent panel (choosing it again clears it).
+- The walk (mono caps): Start the walk (primary, its label centered). Nothing else: the walk asks what you're up to at the first red light.
 - Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
 - Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
 - Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)
@@ -32,6 +32,7 @@ Allowed kinds: goal, world, gate, budget, social, edge, pace, pocket.
 
 - Short wait, on your side of the street
 - On your route
+- Your pick for lunch (the route to a place chosen from the lunch picker or with Go here instead)
 - Open till 6
 - Across the street, on your way
 - Held that while you crossed
@@ -74,7 +75,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 ## Messages
 
-A text is a thread: a warm monogram (M), the sender, the time from the 12:40 clock, the message, and up to three quick replies. A reply joins the thread on the right; the other side's answer follows on the left. The brain's own line, when it has one, sits under the thread in the voice color with Yes · Not now.
+A text is a thread: a speech-bubble glyph and a warm monogram (M), the sender, the channel label Messages and the time it was sent, from the walk's clock (Tuesday, from 12:40), the message, and up to three quick replies. A reply joins the thread on the right; the other side's answer follows on the left. The brain's own line, when it has one, sits under the thread in the voice color with Yes · Not now.
 
 - Hungry and Just walk, 25 s after the intent starts: Maya · Lunch? I'm by the Big Bean at 1. · On my way · Can't today · Where exactly?
   - On my way: Big Bean · {walk time} · route there? · Yes · Not now. Yes routes to the Big Bean (reason in the log and on the route: Meeting Maya at 1; at the door the arrival line carries it).
@@ -88,7 +89,7 @@ A text is a thread: a warm monogram (M), the sender, the time from the 12:40 clo
 
 ## What each place says
 
-The clock: every walk starts at 12:40, and a line that names a time is written from it.
+The clock: every walk starts on a Tuesday at 12:40, shown top left on the glass as `Tue 12:40` and ticking with the walk, and a line that names a time is written from it. Maya's "at 1" is twenty minutes after the start, and the thread's timestamp is read from the same clock.
 
 Each place has a say line per scenario, the one sentence the assistant would say about it, and its short form. The brain uses the scenario's line, else the default. The say line is the first line of the card and the expanded view; a label shows the short form in every band, which the reading budget still caps at three words and a number (a second fact after a comma is dropped by rule). Live data can replace the table (Corner Hardware closed early, the prescription picked up).
 
@@ -124,16 +125,16 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 ## Expanded views
 
 - Grace Theater: the three shows (5:30 The Winter Guest · 12 seats / 8:00 Night Market · 40 seats / 10:30 Late Set · Plenty) / Hold two for 8:00 · Not now / after: Two held for 8:00 · I'll walk you there at 7:35.
-- Mega Burger: Seat now · 6 min / Order ahead · ready in 8 / Hold a seat · Not now / after: Seat held. Follow the route, across and back.
-- Goldie's Counter: Seat now · 3 min / Order ahead · ready in 5 / Hold a seat · Not now / after: Seat held. Follow the route, 40 m.
+- Mega Burger: The Mega · Double patty · cheddar · $9.50 / Classic · Single patty · pickles · $7 / Fries · Hand cut · sea salt · $3.50 / Hold a seat · Not now / after: Seat held. Follow the route, across and back.
+- Goldie's Counter: Pastrami on rye · Hand sliced · mustard · $14 / Matzo ball soup · Chicken broth · dill · $8 / Egg cream · Chocolate · seltzer · $4.50 / Hold a seat · Not now / after: Seat held. Follow the route, 40 m.
 - Post Office: Line of 8 · about 12 min / Counter · till 5 / Pickup window · till 6 / Take a number · Not now / after: You're number 9. I'll say when it's close.
 - Main Street Pharmacy: Counter 2 · ready / Pay ahead · Not now / after: Paid. Show the code at counter 2. / once picked up, the decision is settled: Picked up / In your bag. Two stops to go.
 - Corner Hardware, closed early: Closed early today / Dropped from the route. The Post Office is next.
 - The others keep their rows and actions from `data/places.json`, at most three rows: Lucky Lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Save the reading. Trattoria da Lia · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Brown butter · Save me one. The Big Bean · Order ahead · Ordered. Ready in 5 min. M4 stop · Remind me at 11. 47th St Station · Route me there. Corner Hardware · Hold it at the till.
 ## The corner: intent panel, lunch picker, stops list
 
-- Intent panel (at the start corner, within 1 s of stopping, every lap): What are you up to? / Hungry · Errands · Just walk · End the walk. The title's choice is the filled button. Reason in the log: Long red light.
-- Lunch picker (replaces the panel on Hungry): Lunch on this block · by walk time / one row per food or cafe place, by walk time: {name} · {picker line} · {walk time} · {wait and seats}, the walk time as 10 s to 50 s under a minute, then 1 min, 2 min / Not now. Reason in the log: Lunch spots on this block. Picker lines: Goldie's Counter · Fastest lunch on this side. Kathy's Cupcakes · Not lunch, a batch at 2. The Big Bean · Coffee after. Trattoria da Lia · Home cooking, sit-down. Mega Burger · Burgers, counter seats. Wait and seats is the place's live line.
+- Intent panel (at the start corner, within 1 s of stopping, every lap): What are you up to? / Hungry · Errands · Just walk · End the walk. No answer is filled from the start panel; a recording opened by its link fills its own intent on the first lap only. Reason in the log: Long red light.
+- Lunch picker (replaces the panel on Hungry): Lunch on this block · by walk time / one row per food or cafe place, by walk time: {name} · {picker line} · {walk time} · {wait and seats}, the walk time as under a minute below 60 s, otherwise whole minutes rounded up (1 min, 2 min); the rows still sort by the true seconds; the route offer's {walk time} reads the same way / Not now. Reason in the log: Lunch spots on this block. Picker lines: Goldie's Counter · Fastest lunch on this side. Kathy's Cupcakes · Not lunch, a batch at 2. The Big Bean · Coffee after. Trattoria da Lia · Home cooking, sit-down. Mega Burger · Burgers, counter seats. Wait and seats is the place's live line.
 - The destination's card and expanded view: Going here (a chip in the header, in the voice color). Any other lunch place's card while a destination is set: Go here instead (primary).
 - Stops list (replaces the panel on Errands): Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / In order along the way / Start (primary). Walking away without Start starts it.
 - Errands card on the way: after the pickup: Two to go / 1 Hardware · 2 Post Office / after the closure: Hardware closed early. One stop left. / 1 Post Office / after the last stop: All done (reason: Every stop done), then the list folds and the walk resumes the loop.

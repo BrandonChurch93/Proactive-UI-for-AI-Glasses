@@ -495,10 +495,24 @@
   background: radial-gradient(circle at 35% 30%, #ffe7b3, #e9b766);
 }
 
+.appGlyph {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--ink-2);
+}
+
+.appGlyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .threadTime {
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: 11px;
+  letter-spacing: 0.04em;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
@@ -702,6 +716,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+.time {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  top: max(14px, env(safe-area-inset-top));
+  scale: var(--ui, 1);
+  transform-origin: left top;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .glyph i {
   width: 8px;
   height: 8px;
@@ -780,3 +809,145 @@
   color: rgba(240, 180, 41, 0.95);
 }
 
+
+.thumb {
+  flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 4px;
+  outline: 1px solid rgba(255, 250, 236, 0.14);
+  outline-offset: -1px;
+  background: rgba(255, 250, 236, 0.04);
+}
+
+.thumb img,
+.hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbCard {
+  width: 44px;
+  height: 44px;
+}
+
+.thumbRow {
+  width: 34px;
+  height: 34px;
+}
+
+.thumbPocket {
+  width: 28px;
+  height: 28px;
+}
+
+.toneDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tone, var(--voice));
+  box-shadow: 0 0 6px var(--tone, var(--voice));
+}
+
+[data-kind='food'] {
+  --tone: #e0946a;
+}
+
+[data-kind='cafe'] {
+  --tone: #d4ac7a;
+}
+
+[data-kind='theater'] {
+  --tone: #ef7a74;
+}
+
+[data-kind='venue'] {
+  --tone: #c49ae6;
+}
+
+[data-kind='shop'] {
+  --tone: #e3cc84;
+}
+
+[data-kind='service'] {
+  --tone: #9fd3c2;
+}
+
+[data-kind='transit'] {
+  --tone: #7fa9e6;
+}
+
+[data-kind='park'] {
+  --tone: #9fdc9f;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cardTop > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 112px;
+  margin: -15px -17px 12px;
+  overflow: hidden;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 18, 26, 0) 30%, rgba(14, 18, 26, 0.92));
+  pointer-events: none;
+}
+
+.rows.thumbRows {
+  grid-template-columns: 34px 1fr auto;
+}
+
+.rows.thumbRows li {
+  align-items: center;
+  padding: 7px 0;
+}
+
+.pickRows li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  column-gap: 10px;
+}
+
+.pickRows li > .thumb {
+  grid-row: 1 / span 3;
+  align-self: start;
+  margin-top: 1px;
+}
+
+.pickRows li > :not(.thumb) {
+  grid-column: 2;
+}
+
+.pocketRows li {
+  align-items: center;
+}
+
+.pocketRows li > span:nth-child(2) {
+  flex: none;
+  white-space: nowrap;
+}
+
+.pocketRows li > span:last-child {
+  flex: 1;
+  text-align: right;
+}

@@ -243,16 +243,12 @@
       }
     },
     {
-      "name": "0:52 \u00b7 a look at the station stair lights its label",
-      "between": [
-        51.3,
-        52.2
-      ],
-      "must": {
-        "action": "show",
-        "id": "47th-st-station",
-        "level": "label",
-        "cause": "dwell"
+      "name": "0:52 \u00b7 the station stair, labelled with the view since 0:45, holds its label for the look",
+      "at": 51.6,
+      "state": {
+        "level": {
+          "47th-st-station": "label"
+        }
       }
     },
     {
@@ -322,7 +318,7 @@
       "must": {
         "action": "promote",
         "id": "maya-lunch",
-        "noteIs": "Big Bean \u00b7 30 s \u00b7 route there?"
+        "noteIs": "Big Bean \u00b7 under a minute \u00b7 route there?"
       }
     },
     {

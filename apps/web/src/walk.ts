@@ -94,6 +94,7 @@ export interface WalkOptions {
   exact?: boolean;
   reducedMotion?: boolean;
   focusOutline?: boolean;
+  attract?: boolean;
   chrome?: () => Rect[];
 }
 
@@ -183,6 +184,7 @@ export class Walk {
     const o = new Overlay(this.bridge, this.layer, {
       clock,
       resumed,
+      time: !this.opts.attract,
       log: (e) => this.overlayLog.push(e),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       handlers: {

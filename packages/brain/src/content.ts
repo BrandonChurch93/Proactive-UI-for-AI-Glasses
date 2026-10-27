@@ -49,20 +49,24 @@ export function cardContent(e: Entity, r: Reason, band: Band, scenario: Scenario
     live: liveLine(e),
     reason: r,
     showReason: !compact && (band === 'stopped' || band === 'stroll') && !say.toLowerCase().includes(r.text.replace(/\.$/, '').toLowerCase()),
+    kind: e.kind,
   };
   if (e.depth) c.depthRef = e.depth;
+  if (e.img && !compact) c.img = e.img;
   return c;
 }
 
 export function expandedContent(e: Entity, r: Reason, scenario: ScenarioId, arrived: ReadonlySet<string>, chosen?: string): Content {
   const x = e.expanded;
   const settled = Object.entries(x?.liveAfter ?? {}).find(([flag]) => e.live[flag] === true);
-  if (settled) return { name: e.name, say: sayFor(e, scenario).line, rows: [], reason: r, showReason: false, note: settled[1] };
+  const img = e.img ? { img: e.img } : {};
+  if (settled) return { name: e.name, say: sayFor(e, scenario).line, rows: [], reason: r, showReason: false, note: settled[1], kind: e.kind, ...img };
   const rows: ContentRow[] = (x?.rows ?? [])
     .filter((row) => !row.when || arrived.has(row.when))
     .slice(0, 3)
     .map((row) => {
       const out: ContentRow = { title: row.title };
+      if (row.img) out.img = row.img;
       if (row.key) out.key = row.key;
       if (row.sub) out.sub = row.sub;
       if (row.value) out.value = row.value;
@@ -70,7 +74,7 @@ export function expandedContent(e: Entity, r: Reason, scenario: ScenarioId, arri
       if (row.now) out.tone = row.tone ?? 'voice';
       return out;
     });
-  const c: Content = { name: e.name, say: sayFor(e, scenario).line, rows, reason: r, showReason: false };
+  const c: Content = { name: e.name, say: sayFor(e, scenario).line, rows, reason: r, showReason: false, kind: e.kind, ...img };
   if (e.depth) c.depthRef = e.depth;
   if (chosen && x?.after?.[chosen]) c.note = x.after[chosen];
   else if (x?.actions?.length) c.actions = x.actions.map((a) => ({ ...a }));

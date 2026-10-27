@@ -1,5 +1,7 @@
 import {
   angleWrap,
+  clockAt,
+  SETTLE,
   FOCUS_ZONE,
   LEVEL_RANK,
   isShow,
@@ -114,13 +116,8 @@ const HOLD_TEXT: Record<string, string> = {
 
 const MESSAGE_TYPES = new Set(['text', 'dm']);
 
-function clockAt(t: number): string {
-  const m = 12 * 60 + 40 + Math.floor(t / 60);
-  return `${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, '0')}`;
-}
-
 function walkTime(s: number): string {
-  return s < 55 ? `${Math.max(10, Math.round(s / 10) * 10)} s` : `${Math.round(s / 60)} min`;
+  return s < 60 ? 'under a minute' : `${Math.ceil(s / 60)} min`;
 }
 
 const DEFAULT_CAUSE: Partial<Record<Origin, Cause>> = {
@@ -158,7 +155,7 @@ export class Brain {
   private quietS = 0;
   private budget: number;
   private labels = new Map<string, number>();
-  private labelsCenterAt = -Infinity;
+  private seen = new Map<string, { visible: boolean; since: number }>();
   private wasSettled = true;
   private cardGrownAt = -Infinity;
   private yaw0: number | null = null;
@@ -192,6 +189,7 @@ export class Brain {
   private routeCauseNext: Cause | null = null;
   private routeWhy: string | null = null;
   private arrivalSaid: string | null = null;
+  private atDoorSince: number | null = null;
   private routeShown: string | undefined;
   private overrides: { band: Band | null; gate: boolean; muteSocial: boolean } = {
     band: null,
@@ -422,6 +420,7 @@ export class Brain {
     if (!left || at === left) return;
     if (this.arrivalSaid === left) this.announced.delete(left);
     this.arrivalSaid = null;
+    this.atDoorSince = null;
     if (this.destination === left) this.setDestination(undefined, 'arrival');
     if (this.goal === 'errands' && this.openStops(snap).length > 0) return;
     if (this.goal !== 'errands') this.stops = [];
@@ -902,29 +901,38 @@ export class Brain {
     const rose = settled && !this.wasSettled;
     this.wasSettled = settled;
     const lc = this.cfg.labels;
-    if (!settled) {
-      for (const e of snap.entities) if (this.labels.has(e.id) && !e.visible && e.id !== target) this.labels.delete(e.id);
+    for (const e of snap.entities) {
+      const s = this.seen.get(e.id);
+      if (!s || s.visible !== e.visible) this.seen.set(e.id, { visible: e.visible, since: t });
     }
-    if (rose) {
+    const held = (id: string, visible: boolean, s: number): boolean => {
+      const x = this.seen.get(id);
+      return Boolean(x && x.visible === visible && t - x.since >= s - 1e-9);
+    };
+    for (const e of snap.entities) {
+      if (!this.labels.has(e.id) || e.visible || e.id === target) continue;
+      // A place at the edge of the view can blink out for a moment; it keeps its label through that.
+      if (held(e.id, false, lc.goneS) && t - this.labels.get(e.id)! >= this.cfg.ladder.minShownS - 1e-9) this.labels.delete(e.id);
+    }
+    if (band === 'brisk') {
+      for (const id of [...this.labels.keys()]) if (id !== target) this.labels.delete(id);
+    } else if (settled) {
       const inView = snap.entities.filter((e) => e.visible && e.distance <= lc.rangeM).sort((a, b) => a.distance - b.distance).slice(0, lc.max);
-      const next = new Map<string, number>();
-      for (const e of inView) next.set(e.id, this.labels.get(e.id) ?? t);
-      this.labels = next;
-      this.labelsCenterAt = t;
-    }
-    if (target && snap.entities.some((e) => e.id === target)) {
-      if (!this.labels.has(target)) {
-        if (this.labels.size >= lc.max) {
-          const far = snap.entities.filter((e) => this.labels.has(e.id)).sort((a, b) => b.distance - a.distance)[0];
-          if (far) this.labels.delete(far.id);
-        }
-        if (this.labels.size === 0) this.labelsCenterAt = t;
-        this.labels.set(target, t);
+      if (rose) {
+        const next = new Map<string, number>();
+        for (const e of inView) next.set(e.id, this.labels.get(e.id) ?? t);
+        this.labels = next;
+      } else if (this.headMoved && band !== 'stopped' && Math.abs(snap.wearer.gaze.yawRate) < SETTLE.stillRate) {
+        for (const e of inView) if (e.id !== target && e.id !== snap.wearer.gaze.target && !this.labels.has(e.id) && held(e.id, true, lc.joinS) && this.labels.size < lc.max) this.labels.set(e.id, t);
       }
-      this.labelsCenterAt = t;
     }
-    if (band === 'stopped') this.labelsCenterAt = t;
-    else if (this.labels.size && t - this.labelsCenterAt >= lc.walkingS - 1e-9) this.labels.clear();
+    if (target && snap.entities.some((e) => e.id === target) && !this.labels.has(target)) {
+      if (this.labels.size >= lc.max) {
+        const far = snap.entities.filter((e) => this.labels.has(e.id)).sort((a, b) => b.distance - a.distance)[0];
+        if (far) this.labels.delete(far.id);
+      }
+      this.labels.set(target, t);
+    }
   }
 
   private commitLadder(
@@ -996,7 +1004,7 @@ export class Brain {
       const rows = snap.entities
         .filter((e) => e.kind === 'food' || e.kind === 'cafe')
         .sort((a, b) => (a.walkS ?? 0) - (b.walkS ?? 0) || a.id.localeCompare(b.id))
-        .map((e) => ({ key: `pick:${e.id}`, title: e.name, sub: e.picker ?? sayFor(e, 'hungry').short, value: walkTime(e.walkS ?? 0), live: liveLine(e) }));
+        .map((e) => ({ key: `pick:${e.id}`, title: e.name, sub: e.picker ?? sayFor(e, 'hungry').short, value: walkTime(e.walkS ?? 0), live: liveLine(e), kind: e.kind, ...(e.img ? { img: e.img } : {}) }));
       wants.push({
         id: 'picker',
         component: 'picker',
@@ -1190,7 +1198,7 @@ export class Brain {
               ? reason('world', 'Long red light', parts)
               : reason('world', 'Clear sidewalk ahead', parts));
         const theirs = [...thread].reverse().find((l) => !l.me);
-        content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: clockAt(n.at), reason: r, showReason: false };
+        content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: clockAt(n.at), app: 'Messages', reason: r, showReason: false };
         if (level === 'card') content.thread = thread.map((l) => ({ me: l.me, text: l.text }));
         if (!it.reply) content.actions = n.replies.map((x) => ({ id: x.id, label: x.label }));
         else if (it.offer?.state === 'open') {
@@ -1340,7 +1348,7 @@ export class Brain {
           seconds: secs,
           rows: this.pocket.items.map((id) => {
             const e = ents.get(id);
-            return { key: `pocket:${id}`, title: e?.name ?? id, value: e?.glance ?? '' };
+            return { key: `pocket:${id}`, title: e?.name ?? id, value: e?.glance ?? '', ...(e ? { kind: e.kind } : {}), ...(e?.img ? { img: e.img } : {}) };
           }),
           reason: r,
           showReason: false,
@@ -1512,7 +1520,12 @@ export class Brain {
         if (this.arrivalSaid === e.id) mine.announce = 'arrived';
         return;
       }
-      if (isPane(mine.level) && !this.paneVisible(e.id)) return;
+      if (isPane(mine.level)) {
+        mine.anchor = `door:${e.id}`;
+        mine.zoneOk = true;
+        this.atDoorSince ??= t;
+        if (t - this.atDoorSince < this.cfg.arrival.anchorS - 1e-9 || !this.paneVisible(e.id)) return;
+      }
     }
     if (own >= 0) wants.splice(own, 1);
     const it = this.item(e.id);
@@ -1613,7 +1626,8 @@ export class Brain {
     }
     if (routeTo && !this.arrival) {
       const nar = snap.env.sidewalkNarrowsAhead;
-      const r = reason('goal', (this.goal !== 'errands' && this.routeWhy) || 'On your route', [
+      const why = this.goal === 'errands' ? null : (this.routeWhy ?? (this.goal === 'hungry' && this.routeCause === 'choice' ? 'Your pick for lunch' : null));
+      const r = reason('goal', why ?? 'On your route', [
         { signal: 'route.to', value: routeTo, weight: 1 },
         { signal: 'route.offset', value: nar && nar.distance < 30 ? 'curb' : 'center', weight: 1 },
       ]);

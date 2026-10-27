@@ -60,6 +60,10 @@ function why(c: Content, cls: string): HTMLElement | null {
   return e;
 }
 
+const APP_GLYPHS: Record<NonNullable<Content['app']>, string> = {
+  Messages: '<svg viewBox="0 0 14 14"><path d="M3 2h8a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H6.6L3.8 12.6V10.5H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+};
+
 function keyed<T extends HTMLElement>(e: T, k: string): T {
   e.dataset.k = k;
   return e;
@@ -72,13 +76,51 @@ function glanceKids(c: Content): HTMLElement[] {
   return out;
 }
 
-function cardKids(c: Content): HTMLElement[] {
+function thumb(img: string | undefined, kind: string | undefined, size: string, k: string): HTMLElement {
+  const box = keyed(node('span', `${s.thumb} ${size}`), k);
+  if (kind) box.dataset.kind = kind;
+  const dot = (): void => {
+    box.replaceChildren(node('i', s.toneDot));
+  };
+  if (!img) {
+    dot();
+    return box;
+  }
+  const el = document.createElement('img');
+  el.alt = '';
+  el.decoding = 'async';
+  el.draggable = false;
+  el.addEventListener('error', dot, { once: true });
+  el.src = img;
+  box.appendChild(el);
+  return box;
+}
+
+function hero(c: Content): HTMLElement {
+  const box = keyed(node('div', s.hero), 'hero');
+  if (c.kind) box.dataset.kind = c.kind;
+  const el = document.createElement('img');
+  el.alt = '';
+  el.decoding = 'async';
+  el.draggable = false;
+  el.addEventListener('error', () => box.replaceChildren(node('i', s.toneDot)), { once: true });
+  el.src = c.img!;
+  box.appendChild(el);
+  return box;
+}
+
+function cardKids(c: Content, thumbed = Boolean(c.img)): HTMLElement[] {
   const out: HTMLElement[] = [keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name')];
   if (c.chip) {
     const head = node('div', s.cardHead);
     head.appendChild(out[0]!);
     head.appendChild(keyed(node('span', s.chip, c.chip), 'chip'));
     out[0] = head;
+  }
+  if (thumbed) {
+    const top = node('div', s.cardTop);
+    top.append(thumb(c.img, c.kind, s.thumbCard!, 'thumb'), out[0]!);
+    out[0] = top;
   }
   if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
   if (c.live) {
@@ -92,18 +134,21 @@ function cardKids(c: Content): HTMLElement[] {
 
 function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement | null {
   if (!c.rows?.length) return null;
-  const keyless = cls === s.rows && c.rows.every((r) => !r.key);
-  const ul = node('ul', keyless ? `${cls} ${s.noKey}` : cls);
+  const thumbs = cls === s.rows && c.rows.some((r) => r.img);
+  const keyless = cls === s.rows && !thumbs && c.rows.every((r) => !r.key);
+  const ul = node('ul', keyless ? `${cls} ${s.noKey}` : thumbs ? `${cls} ${s.thumbRows}` : cls);
   c.rows.forEach((r, i) => {
     const li = node('li', tone(r.tone));
     if (cls === s.rows) {
-      if (!keyless) li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
+      if (thumbs) li.appendChild(r.img ? thumb(r.img, c.kind, s.thumbRow!, `r${i}i`) : node('span', undefined));
+      else if (!keyless) li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
       const mid = node('span', undefined);
       mid.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
       if (r.sub) mid.appendChild(keyed(node('em', undefined, r.sub), `r${i}s`));
       li.appendChild(mid);
       li.appendChild(keyed(node('span', `${s.value} ${tone(r.tone)}`, r.value ?? ''), `r${i}v`));
     } else if (cls === s.pickRows) {
+      li.appendChild(thumb(r.img, r.kind, s.thumbRow!, `r${i}i`));
       const top = node('div', s.pickTop);
       top.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
       top.appendChild(keyed(node('span', s.value, r.value ?? ''), `r${i}v`));
@@ -124,6 +169,7 @@ function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement 
         });
       }
     } else if (cls === s.pocketRows) {
+      li.appendChild(thumb(r.img, r.kind, s.thumbPocket!, `r${i}i`));
       li.appendChild(keyed(node('span', undefined, r.title), `r${i}t`));
       li.appendChild(keyed(node('span', undefined, r.value ?? ''), `r${i}v`));
       if (h && r.key) {
@@ -178,9 +224,16 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
     }
     case 'thread': {
       const head = node('div', s.threadHead);
+      if (c.app) {
+        const glyph = keyed(node('span', s.appGlyph), 'app');
+        glyph.innerHTML = APP_GLYPHS[c.app];
+        glyph.setAttribute('aria-hidden', 'true');
+        head.appendChild(glyph);
+      }
       head.appendChild(keyed(node('span', s.avatar, c.avatar ?? c.name.slice(0, 1)), 'avatar'));
       head.appendChild(keyed(node('span', `${s.toastFrom} ${s.t}`, c.name), 'name'));
-      if (c.time) head.appendChild(keyed(node('span', s.threadTime, c.time), 'time'));
+      const stamp = [c.app?.toUpperCase(), c.time].filter(Boolean).join(' · ');
+      if (stamp) head.appendChild(keyed(node('span', s.threadTime, stamp), 'time'));
       push(head);
       if (c.thread?.length) {
         const list = node('div', s.bubbles);
@@ -216,8 +269,10 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       break;
   }
   if (level === 'expanded') {
-    kids.push(...cardKids({ ...c, live: undefined }));
-    (kids[0]!.querySelector(`.${s.cardName}`) ?? kids[0]!).classList.replace(s.cardName!, s.expName!);
+    if (c.img) kids.push(hero(c));
+    const named = kids.length;
+    kids.push(...cardKids({ ...c, live: undefined }, false));
+    (kids[named]!.querySelector(`.${s.cardName}`) ?? kids[named]!).classList.replace(s.cardName!, s.expName!);
     push(rowsList(c, s.rows!, null));
     push(actions(c, d.id, h));
     if (c.note) push(keyed(node('div', `${s.note} ${s.t}`, c.note), 'note'));

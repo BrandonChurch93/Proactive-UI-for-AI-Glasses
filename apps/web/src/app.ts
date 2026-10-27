@@ -1,8 +1,8 @@
-import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, type Band, type ScenarioId } from '@lumen/shared';
+import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, type Band, type ComponentKind, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
-import { EndCard, TOUCH, TitleScreen, type Choice, type EndStats } from './title/title';
+import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
 
 const LONG_PRESS_MS = 550;
 import { Walk } from './walk';
@@ -20,6 +20,8 @@ export interface AppOptions {
 
 type Mode = 'attract' | 'walk';
 
+const NOT_DECIDED = new Set<ComponentKind>(['intent', 'picker', 'thread', 'toast', 'strip']);
+
 export class App {
   walk: Walk;
   mode: Mode;
@@ -32,6 +34,7 @@ export class App {
   private endShown = false;
   private pace = false;
   private gazeMark = true;
+  private carded = false;
   private snapTarget: string | null = null;
   private upright = false;
   private pausedForRotate = false;
@@ -47,7 +50,7 @@ export class App {
     private opts: AppOptions & { pace?: boolean },
     start: ScenarioId | null,
   ) {
-    this.title = new TitleScreen(ui, (id) => this.start(id));
+    this.title = new TitleScreen(ui, () => this.choose('walking', false, null));
     this.end = new EndCard(ui, {
       again: () => this.again(),
       keepWalking: () => this.choose('walking', true, null),
@@ -100,6 +103,7 @@ export class App {
   private makeWalk(id: ScenarioId, scripted: boolean, suggest?: ScenarioId | null): Walk {
     const w = new Walk(this.world, id, this.layer, {
       scripted,
+      attract: this.mode === 'attract',
       ...(suggest !== undefined ? { suggest } : {}),
       ...(this.opts.exact ? { exact: true } : {}),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
@@ -186,7 +190,15 @@ export class App {
     if (this.snapTarget && this.snapTarget !== w.sim.gaze.target) this.snapTarget = null;
     const reduced = this.opts.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
     const p = mark ? (this.snapTarget === target ? 1 : Math.min(1, mark.p + mark.rate * Math.max(0, w.t - f!.t))) : null;
-    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p });
+    if (target && (f?.dwell.earned === 'card' || f?.dwell.earned === 'expanded')) this.carded = true;
+    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p, label: !this.carded });
+  }
+
+  syncChrome(): void {
+    this.carded ||= this.walk.frames.some((f) => f?.dwell.target && (f.dwell.earned === 'card' || f.dwell.earned === 'expanded'));
+    this.updatePace();
+    this.updateMark();
+    this.chrome.settleMark();
   }
 
   private updatePace(): void {
@@ -197,10 +209,6 @@ export class App {
   setPaused(p: boolean): void {
     this.walk.paused = p;
     this.chrome.setPaused(p && this.mode === 'walk' && !this.inspector?.isOpen);
-  }
-
-  private start(suggest: ScenarioId | null): void {
-    this.choose(suggest ?? 'walking', false, suggest);
   }
 
   private choose(id: ScenarioId, fromEnd = false, suggest: ScenarioId | null = id): void {
@@ -222,7 +230,7 @@ export class App {
     } else go();
   }
 
-  private again(focus?: Choice): void {
+  private again(): void {
     this.hideEnd();
     this.walk.dispose();
     this.inspector?.dispose();
@@ -232,7 +240,6 @@ export class App {
     this.chrome.setInspectorHint(false);
     this.syncSound(this.walk);
     this.title.show(true);
-    if (focus) this.title.focus(focus);
   }
 
   private stats(): EndStats {
@@ -245,6 +252,9 @@ export class App {
     const gates: [number, number][] = [];
     const bands: { t: number; band: Band }[] = [];
     const shows: { t: number; id: string; name: string; reason: string; score: number }[] = [];
+    const prefer: { t: number; name: string; reason: string; rank: number }[] = [];
+    const noted = new Set<string>();
+    let lastPick: (typeof prefer)[number] | null = null;
     let cards = 0;
     let saved = 0;
     let replies = 0;
@@ -269,6 +279,15 @@ export class App {
         gateFrom = null;
       }
       for (const d of f.events) {
+        if (d.component === 'route' && d.action === 'show' && reasonIsClean(d.reason.text)) {
+          if (d.cause === 'reply') prefer.push({ t: f.t, name: d.content.name, reason: d.reason.text, rank: 0 });
+          if (d.cause === 'choice') lastPick = { t: f.t, name: d.content.name, reason: d.reason.text, rank: 1 };
+        }
+        if (d.component === 'thread' && d.content.note && !noted.has(d.id)) {
+          noted.add(d.id);
+          prefer.push({ t: f.t, name: d.content.name, reason: d.content.note, rank: 0 });
+        }
+        if (d.cause === 'arrival' && (isShow(d) || d.action === 'promote')) prefer.push({ t: f.t, name: d.content.name, reason: d.reason.text, rank: 2 });
         if (d.placement.zone === 'ground') continue;
         const was = level.get(d.id) ?? 0;
         const now = LEVEL_RANK[d.level];
@@ -283,19 +302,19 @@ export class App {
         }
         if (d.action === 'save') saved++;
         if (isShow(d)) first ??= { t: f.t, id: d.id };
-        if ((isShow(d) || (d.action === 'promote' && now >= LEVEL_RANK.card)) && d.component !== 'intent' && d.component !== 'picker') {
+        if ((isShow(d) || (d.action === 'promote' && now >= LEVEL_RANK.card)) && !NOT_DECIDED.has(d.component)) {
           if (d.reason.text && d.reason.text !== d.content.name && d.reason.kind !== 'gate' && reasonIsClean(d.reason.text)) shows.push({ t: f.t, id: d.id, name: d.content.name, reason: d.reason.text, score: d.score });
         }
       }
     }
     if (gateFrom !== null) gates.push([gateFrom, w.duration]);
+    if (lastPick) prefer.push(lastPick);
+    const picked = new Map<string, { t: number; name: string; reason: string }>();
+    for (const x of prefer.sort((a, b) => a.rank - b.rank || a.t - b.t)) if (picked.size < 3 && !picked.has(x.name)) picked.set(x.name, x);
     const best = new Map<string, (typeof shows)[number]>();
-    for (const x of shows) if (!best.has(x.name) || best.get(x.name)!.score < x.score) best.set(x.name, x);
-    const decided = [...best.values()]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
-      .sort((a, b) => a.t - b.t)
-      .map(({ t, name, reason }) => ({ t, name, reason }));
+    for (const x of shows) if (!picked.has(x.name) && (!best.has(x.name) || best.get(x.name)!.score < x.score)) best.set(x.name, x);
+    for (const x of [...best.values()].sort((a, b) => b.score - a.score)) if (picked.size < 3) picked.set(x.name, x);
+    const decided = [...picked.values()].sort((a, b) => a.t - b.t).map(({ t, name, reason }) => ({ t, name, reason }));
     return { duration: w.duration, places: places.size, cards, held: held.size, saved, reached, replies, ticks, gates, bands, decided, first };
   }
 

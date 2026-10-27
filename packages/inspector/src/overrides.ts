@@ -66,7 +66,7 @@ export class Overrides {
       this.store.setGazeMark(!this.store.gazeMark());
       this.update();
     });
-    control('Gaze mark', 'A ring at the center of the view, standing in for eye tracking. Reviewer chrome.', this.mark);
+    control('Gaze mark', 'A viewfinder at the center of the view, standing in for eye tracking. Reviewer chrome.', this.mark);
     control('End the walk', 'The walk never ends on its own. This closes the inspector on the end panel.', button('End', () => this.store.endWalk()));
     this.log = el('div');
     this.el.append(controls, el('div', s.section, 'Applied'), this.log);

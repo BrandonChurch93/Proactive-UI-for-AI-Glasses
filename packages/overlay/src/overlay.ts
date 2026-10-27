@@ -20,6 +20,7 @@ import {
   type Rect,
   type Vec3,
   type WorldSnapshot,
+  clockAt,
 } from '@lumen/shared';
 import { BackdropFill } from './backdrop';
 import { leaderPoint, type ColumnHandle, type GroundTextHandle, type KeepOut, type LeaderHandle, type LightHandle, type RouteHandle, type SceneBridge } from './bridge';
@@ -99,10 +100,13 @@ interface Item {
   lastMove: OverlayEvent | null;
   changedAt: number;
   lookedAt: number;
+  homeAt: { x: number; y: number; t: number } | null;
   lag: number;
   swap: boolean;
   frozen: { x: number; y: number } | null;
 }
+
+const FOLD_LEAD_S = 0.4;
 
 export interface OverlayOptions {
   reducedMotion?: boolean;
@@ -110,6 +114,7 @@ export interface OverlayOptions {
   clock?: gsap.core.Timeline;
   log?: (e: OverlayEvent) => void;
   resumed?: boolean;
+  time?: boolean;
 }
 
 export interface OverlayState {
@@ -256,6 +261,8 @@ export class Overlay {
   private readonly viewLayer: HTMLElement;
   private readonly fixed: HTMLElement;
   private readonly glyphEl: HTMLElement;
+  private readonly timeEl: HTMLElement;
+  private timeBox: { key: string; rect: Rect } | null = null;
   private readonly glyphLabel: HTMLElement;
   private readonly focusEl: HTMLElement;
   private items = new Map<string, Item>();
@@ -307,7 +314,10 @@ export class Overlay {
     this.worldLayer.className = s.fixed!;
     this.viewLayer = document.createElement('div');
     this.viewLayer.className = s.fixed!;
-    this.hud.append(this.worldLayer, this.viewLayer);
+    this.timeEl = document.createElement('div');
+    this.timeEl.className = s.time!;
+    if (opts.time === false) this.timeEl.style.display = 'none';
+    this.hud.append(this.worldLayer, this.viewLayer, this.timeEl);
     this.fixed = document.createElement('div');
     this.fixed.className = s.fixed!;
     this.glyphEl = document.createElement('div');
@@ -346,6 +356,8 @@ export class Overlay {
     if (frame.gate.safety !== this.receded) this.setReceded(frame.gate.safety, t);
     this.snooze = frame.gate.snooze;
     this.setGlyph(frame.glyph);
+    const time = clockAt(t, true);
+    if (this.timeEl.textContent !== time) this.timeEl.textContent = time;
     const seen = new Set<string>();
     for (const d of frame.items) {
       if (d.placement.zone === 'ground') continue;
@@ -416,6 +428,7 @@ export class Overlay {
       lastMove: null,
       changedAt: -Infinity,
       lookedAt: -Infinity,
+      homeAt: null,
       lag: 0,
       swap: false,
       frozen: null,
@@ -559,6 +572,17 @@ export class Overlay {
       this.glyphBox = { key, rect: { x: r.left - host.left, y: r.top - host.top, w: r.width, h: r.height } };
     }
     return this.glyphBox.rect;
+  }
+
+  private timeRect(): Rect | null {
+    if (!this.timeEl.textContent || this.timeEl.style.display === 'none') return null;
+    const key = `${this.timeEl.textContent}|${this.ui}`;
+    if (this.timeBox?.key !== key) {
+      const r = this.timeEl.getBoundingClientRect();
+      const host = this.root.getBoundingClientRect();
+      this.timeBox = { key, rect: { x: r.left - host.left, y: r.top - host.top, w: r.width, h: r.height } };
+    }
+    return this.timeBox.rect;
   }
 
   private paneLevelFor(it: Item, placed: WorldPlace | null): PaneLevel {
@@ -887,6 +911,8 @@ export class Overlay {
     for (const r of this.bridge.chrome?.() ?? []) chrome.push({ x: r.x - 8, y: r.y - 8, w: r.w + 16, h: r.h + 16 });
     const glyph = this.glyphRect();
     if (glyph) chrome.push({ x: glyph.x - 8, y: glyph.y - 8, w: glyph.w + 16, h: glyph.h + 16 });
+    const time = this.timeRect();
+    if (time) chrome.push({ x: time.x - 8, y: time.y - 8, w: time.w + 16, h: time.h + 16 });
     const ctx: FrameCtx = { t, band: this.band, vp, keepOuts, chrome, ui, scanning: yieldSide !== null };
     const gk = this.gateK.v;
     const pipMul = this.snooze ? 0.3 : 1;
@@ -947,7 +973,11 @@ export class Overlay {
         const size = it.cur && it.cur.level === lv ? { w: it.cur.width, h: it.cur.height } : (NOMINAL_SIZE[lv as 'label'] ?? NOMINAL_SIZE.label);
         const home = { x: corner.x - size.w * sc * fx, y: corner.y - size.h * sc * fy, w: size.w * sc, h: size.h * sc };
         const inset = MARGIN - MOVE.deadBand - 2;
-        const outside = home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset || chrome.some((r) => rectsOverlap(home, r));
+        // A pane riding toward the chrome keeps moving while it fades, so the test looks ahead along its motion by the fold's length.
+        const dt = it.homeAt ? t - it.homeAt.t : 0;
+        const ahead = dt > 1e-4 && dt < 0.2 ? { ...home, x: home.x + ((home.x - it.homeAt!.x) / dt) * FOLD_LEAD_S, y: home.y + ((home.y - it.homeAt!.y) / dt) * FOLD_LEAD_S } : home;
+        it.homeAt = { x: home.x, y: home.y, t };
+        const outside = home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset || chrome.some((r) => rectsOverlap(home, r) || rectsOverlap(ahead, r));
         if (outside && !it.frozen && pr && it.place) {
           placed = it.place.foldNow(pr, vp);
           it.placed = placed;

@@ -16,7 +16,7 @@ await p.waitForTimeout(800);
 await p.evaluate('(() => { const a = window.__app; a.walk.paused = true; a.walk.seek(a.walk.duration); a.walk.paused = false; })()');
 await p.waitForTimeout(2600);
 await p.screenshot({ path: out });
-const info = await p.evaluate('(() => { const a = window.__app; return { end: a.end.visible, text: a.end.el.querySelector("p")?.textContent, decided: [...a.end.el.querySelectorAll("div > div > div")].map((d) => d.textContent).slice(0, 0), buttons: [...a.end.el.querySelectorAll("button")].map((x) => x.textContent) }; })()');
+const info = await p.evaluate('(() => { const a = window.__app; return { end: a.end.visible, text: a.end.el.querySelector("p")?.textContent, decided: [...a.end.el.querySelectorAll("div > div:has(> i + b)")].map((d) => [...d.children].map((c) => c.textContent).join(" · ")), buttons: [...a.end.el.querySelectorAll("button")].map((x) => x.textContent) }; })()');
 console.log(JSON.stringify(info));
 for (const e of errors) console.error('pageerror', e);
 await b.close();

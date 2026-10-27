@@ -43,3 +43,37 @@ Every vendored asset is listed here with its source link and license. CC0 only, 
 | Police Car by Quaternius | `apps/web/public/assets/cars/police.glb` | https://poly.pizza/m/BwwnUrWGmV | CC0 1.0 |
 
 Models are re-encoded by `pnpm tsx scripts/assets.ts` (unused animation clips removed, meshopt compression); textures are resized from the 2K sets with `sips`. The raw downloads go to `apps/web/public/assets/raw/`, which is not committed. The pipeline refuses any model whose licence is not CC0.
+
+## Card photographs (CC0, via Openverse)
+
+Served from `apps/web/public/img/`: a hero per place (784 x 224) and a thumbnail per dish (176 x 176), WebP, each under 60 KB.
+
+- `img/hero-mega-burger.webp` · "Plates cheeseburgers fries American restaurant" by unknown · CC0 · https://www.rawpixel.com/image/3282931/free-photo-image-beer-beverage-bread (via Openverse, rawpixel)
+- `img/hero-goldies.webp` · "Food items on the counter of The Roastery 2024-04-05" by Andy Li · CC0 · https://commons.wikimedia.org/w/index.php?curid=147123926 (via Openverse, wikimedia)
+- `img/hero-trattoria.webp` · "Fresh bowl pasta ragu Italian" by unknown · CC0 · https://www.rawpixel.com/image/3297751/free-photo-image-bowl-cc0-creative-commons (via Openverse, rawpixel)
+- `img/hero-kathys.webp` · "Cupcakes Dessert" by Leeroy · CC0 · https://stocksnap.io/photo/cupcakes-dessert-41053A7BDE (via Openverse, stocksnap)
+- `img/hero-big-bean.webp` · "Close-up industrial coffee machine" by unknown · CC0 · https://www.rawpixel.com/image/3283560/free-photo-image-restaurant-espresso-cafe (via Openverse, rawpixel)
+- `img/hero-pharmacy.webp` · "The caps of two medicine bottles on a desk." by Topher · CC0 · https://wordpress.org/photos/photo/9968683157/ (via Openverse, wordpress)
+- `img/hero-hardware.webp` · "Hardware store window at 9 Gold St" by wwward0 · CC0 · https://www.flickr.com/photos/15802578@N00/50769351011 (via Openverse, flickr)
+- `img/hero-post-office.webp` · "Post Office Boxes" by MarkBuckawicki · CC0 · https://commons.wikimedia.org/w/index.php?curid=29651792 (via Openverse, wikimedia)
+- `img/hero-theater.webp` · "Front marquee, The Senator Theatre (1939; John J. Zink, architect), 5904 York Road, Baltimore, MD 21212" by Baltimore Heritage · CC0 · https://www.flickr.com/photos/44034762@N04/46235352485 (via Openverse, flickr)
+- `img/hero-lanes.webp` · "Bowling Alley" by Ian Livesey · CC0 · https://stocksnap.io/photo/bowling-alley-MDJKESUW8P (via Openverse, stocksnap)
+- `img/hero-atlas.webp` · "Free library shelves many books" by unknown · CC0 · https://www.rawpixel.com/image/5904761/photo-image-book-public-domain-wood (via Openverse, rawpixel)
+- `img/hero-m4.webp` · "NYCMTA 6041_M103 New York City Hall" by jonriley1979@att.net · CC0 · https://www.flickr.com/photos/125733295@N07/42585105984 (via Openverse, flickr)
+- `img/hero-station.webp` · "People Woman" by Tim Gouw · CC0 · https://stocksnap.io/photo/people-woman-IGCJC9ZRCN (via Openverse, stocksnap)
+- `img/hero-park.webp` · "Benches at the park. / Hibiya Park, Japan" by Shusei Toda · CC0 · https://wordpress.org/photos/photo/84962a4c7b/ (via Openverse, wordpress)
+- `img/dish-mega.webp` · "Double smashburger" by sarahstierch · CC0 · https://www.flickr.com/photos/7633518@N08/54115809974 (via Openverse, flickr)
+- `img/dish-classic.webp` · "Hamburgers" by niklasrhose · CC0 · https://www.flickr.com/photos/125178378@N02/15017552912 (via Openverse, flickr)
+- `img/dish-fries.webp` · "패스트푸드 감자튀김 Fastfood French fries" by CC0photo · CC0 · https://www.flickr.com/photos/137346712@N07/25434078495 (via Openverse, flickr)
+- `img/dish-pastrami.webp` · "Reuben sandwich" by sarahstierch · CC0 · https://www.flickr.com/photos/7633518@N08/54096609663 (via Openverse, flickr)
+- `img/dish-matzo.webp` · "Matzo ball soup" by sarahstierch · CC0 · https://www.flickr.com/photos/7633518@N08/54247328868 (via Openverse, flickr)
+- `img/dish-eggcream.webp` · "A tall glass of chocolate milkshake on a wooden table in a cozy cafe setting. In the background is a gray upholstered chair and a counter with a display case and coffee-making equipment." by Yam B Chhetri · CC0 · https://wordpress.org/photos/photo/29067bf2d1/ (via Openverse, wordpress)
+- `img/dish-cacio.webp` · "Spaghetti, cacio e pepe & bitter leaf salad - Tutto 2024-04-04" by Andy Li · CC0 · https://commons.wikimedia.org/w/index.php?curid=147092362 (via Openverse, wikimedia)
+- `img/dish-lasagna.webp` · "Lasagna Food" by Daria Nepriakhina · CC0 · https://stocksnap.io/photo/lasagna-food-0FAEA43A95 (via Openverse, stocksnap)
+- `img/dish-tiramisu.webp` · "Tiramisu" by sarahstierch · CC0 · https://www.flickr.com/photos/7633518@N08/54281423907 (via Openverse, flickr)
+- `img/dish-cupcake1.webp` · "Cupcakes fresh cherries" by unknown · CC0 · https://www.rawpixel.com/image/5927744/photo-image-public-domain-fruit-food (via Openverse, rawpixel)
+- `img/dish-cupcake2.webp` · "Muffins Cupcakes" by Jennifer Pallian · CC0 · https://stocksnap.io/photo/muffins-cupcakes-AFTCMOMF4F (via Openverse, stocksnap)
+- `img/dish-cupcake3.webp` · "Delicious chocolate Cupcakes" by unknown · CC0 · https://www.rawpixel.com/image/5928180/photo-image-public-domain-food-chocolate (via Openverse, rawpixel)
+- `img/dish-cortado.webp` · "" by unknown · CC0 · https://www.rawpixel.com/image/5949780/free-public-domain-cc0-photo (via Openverse, rawpixel)
+- `img/dish-coldbrew.webp` · "Two. Original public domain image" by unknown · CC0 · https://www.rawpixel.com/image/3296618/free-photo-image-ice-coffee-accessory-beverage (via Openverse, rawpixel)
+- `img/dish-latte.webp` · "Free coffee latte art image" by unknown · CC0 · https://www.rawpixel.com/image/5908079/image-public-domain-art-coffee (via Openverse, rawpixel)

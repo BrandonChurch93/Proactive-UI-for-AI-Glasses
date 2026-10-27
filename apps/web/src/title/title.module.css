@@ -47,6 +47,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--chrome-accent);
+  text-wrap: balance;
 }
 
 .name {
@@ -118,7 +119,7 @@
   border-radius: var(--radius);
   padding: calc(12px * var(--u)) calc(16px * var(--u));
   cursor: pointer;
-  text-align: left;
+  text-align: center;
 }
 
 .startButton:hover,
@@ -126,41 +127,6 @@
   background: #fffaf0;
   outline: 2px solid rgba(240, 180, 41, 0.6);
   outline-offset: 2px;
-}
-
-.ask {
-  margin: calc(2px * var(--u)) 0 0;
-  font-size: calc(13px * var(--u));
-  line-height: 1.4;
-  color: var(--chrome-fg-2);
-}
-
-.chips {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: calc(8px * var(--u));
-}
-
-.chips button {
-  font: inherit;
-  font-size: calc(13.5px * var(--u));
-  color: var(--chrome-fg);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--chrome-rule);
-  border-radius: var(--radius);
-  padding: calc(8px * var(--u)) calc(10px * var(--u));
-  cursor: pointer;
-}
-
-.chips button:hover,
-.chips button:focus-visible {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: #3a414a;
-}
-
-.chips button[aria-pressed='true'] {
-  border-color: rgba(240, 180, 41, 0.75);
-  background: rgba(240, 180, 41, 0.1);
 }
 
 .controls {
@@ -377,6 +343,50 @@
 }
 
 
+.section,
+.bottom {
+  display: contents;
+}
+
+.startPanel .sub {
+  margin-top: auto;
+}
+
+.startPanel .footer {
+  margin-bottom: auto;
+}
+
+@media (min-width: 900px) and (min-height: 561px) {
+  .startPanel {
+    gap: calc(32px * var(--u));
+  }
+  .startPanel .section,
+  .startPanel .bottom {
+    display: grid;
+    gap: calc(10px * var(--u));
+  }
+  .startPanel .section:first-child {
+    margin-top: auto;
+  }
+  .startPanel .bottom {
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+  .startPanel .sub {
+    margin-top: 0;
+  }
+  .startPanel .footer {
+    margin-bottom: 0;
+  }
+  .startPanel .label,
+  .startPanel .controls {
+    margin-top: 0;
+  }
+  .startPanel .name {
+    font-size: calc(64px * var(--u));
+  }
+}
+
 @media (max-width: 899px) {
   .panel {
     width: 100%;
@@ -403,8 +413,5 @@
   }
   .startButton {
     padding: calc(10px * var(--u)) calc(14px * var(--u));
-  }
-  .chips button {
-    padding: calc(7px * var(--u)) calc(8px * var(--u));
   }
 }

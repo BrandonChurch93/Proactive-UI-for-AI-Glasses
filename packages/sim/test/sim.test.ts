@@ -66,9 +66,10 @@ describe.each(SCENARIO_IDS)('sim · %s', (scenario) => {
     for (const s of starts) expect(s.state, `t=${s.t} ${s.leg}`).toBe('crossing');
   });
 
-  it('completes a lap and holds the light at the corner again', () => {
+  it('completes a lap, holds the light at the corner again and fills no answer there', () => {
     expect(sim.lap).toBeGreaterThanOrEqual(1);
     expect(held).toBeGreaterThan(WALK.holdS - 1);
+    expect(sim.snapshot().goal.suggest).toBeUndefined();
   });
 });
 

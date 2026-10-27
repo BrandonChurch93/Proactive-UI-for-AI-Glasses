@@ -33,7 +33,7 @@ export interface Config {
     cardWithinM: number;
     pipDwellS: number;
   };
-  labels: { max: number; rangeM: number; walkingS: number };
+  labels: { max: number; rangeM: number; joinS: number; goneS: number };
   hysteresisS: number;
   autoFoldS: Record<Band, number | null>;
   viewFoldS: number;
@@ -47,7 +47,7 @@ export interface Config {
   followupS: number;
   needToRun: { briskWithinS: number; curbM: number; seconds: number };
   ask: { foodGlances: number };
-  arrival: { distanceM: number };
+  arrival: { distanceM: number; anchorS: number };
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -83,7 +83,7 @@ export const DEFAULT_CONFIG: Config = {
     cardWithinM: 30,
     pipDwellS: 0.25,
   },
-  labels: { max: 6, rangeM: 70, walkingS: 4 },
+  labels: { max: 6, rangeM: 70, joinS: 0.5, goneS: 1 },
   hysteresisS: 1.2,
   autoFoldS: { stopped: null, stroll: 4, walk: 2.5, brisk: 0 },
   viewFoldS: 4,
@@ -97,7 +97,7 @@ export const DEFAULT_CONFIG: Config = {
   followupS: 6,
   needToRun: { briskWithinS: 12, curbM: 4, seconds: 4 },
   ask: { foodGlances: 2 },
-  arrival: { distanceM: 4 },
+  arrival: { distanceM: 4, anchorS: 0.3 },
 };
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };

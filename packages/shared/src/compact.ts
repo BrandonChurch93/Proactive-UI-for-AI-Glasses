@@ -39,6 +39,7 @@ export function hydrateSnapshot(c: CompactSnapshot): WorldSnapshot {
       if (p.sayLive) e.sayLive = p.sayLive;
       if (p.translate) e.translate = p.translate;
       if (p.picker) e.picker = p.picker;
+      if (p.img) e.img = p.img;
       return e;
     }),
   };

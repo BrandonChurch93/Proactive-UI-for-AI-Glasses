@@ -139,6 +139,7 @@
       "kind": "bus",
       "id": "m4-stop",
       "arrivesIn": 2,
+      "dwellS": 25,
       "after": "intent",
       "intent": "hungry"
     },

@@ -12,3 +12,4 @@ export * from './motion-tokens';
 export * from './keepout';
 export * from './placement-state';
 export * from './settle';
+export * from './clock';
