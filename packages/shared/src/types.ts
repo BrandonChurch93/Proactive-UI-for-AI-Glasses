@@ -311,7 +311,7 @@ export interface BrainFrame {
   glyph: Glyph | null;
   focus: { w: number; h: number };
   model: WearerModel;
-  dwell: { target?: string; dwellMs: number; earned: Level | 'none'; mark?: { p: number; rate: number } };
+  dwell: { target?: string; dwellMs: number; earned: Level | 'none'; mark?: { p: number; rate: number; next?: Level } };
   goal: { scenario: ScenarioId; destination?: string; stops: string[]; go?: boolean };
   stoppedFor: number;
 }

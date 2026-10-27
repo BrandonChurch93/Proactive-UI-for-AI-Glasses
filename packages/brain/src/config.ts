@@ -1,4 +1,4 @@
-import type { Band } from '@lumen/shared';
+import { LOOK_AWAY_S, type Band } from '@lumen/shared';
 
 export interface Config {
   quietStartS: number;
@@ -75,7 +75,7 @@ export const DEFAULT_CONFIG: Config = {
     moveRad: 0.0873,
     swapGapS: 1,
     cardHoldS: 2,
-    lookAwayS: 1.2,
+    lookAwayS: LOOK_AWAY_S,
     maxProactive: 3,
     awarenessPips: 3,
     awarenessRelevance: 0.6,
@@ -97,7 +97,7 @@ export const DEFAULT_CONFIG: Config = {
   followupS: 6,
   needToRun: { briskWithinS: 12, curbM: 4, seconds: 4 },
   ask: { foodGlances: 2 },
-  arrival: { distanceM: 4, anchorS: 0.3 },
+  arrival: { distanceM: 4, anchorS: 0.5 },
 };
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };

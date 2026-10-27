@@ -5,7 +5,7 @@ import { Chrome } from './chrome/chrome';
 import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
 
 const LONG_PRESS_MS = 550;
-import { Walk } from './walk';
+import { TURN_PER_VIEW, Walk } from './walk';
 import type { World } from './world/world';
 
 const reports = import.meta.glob<EvalReport>('../../../packages/evals/report/latest.json', { eager: true, import: 'default' });
@@ -34,13 +34,12 @@ export class App {
   private endShown = false;
   private pace = false;
   private gazeMark = true;
-  private carded = false;
   private snapTarget: string | null = null;
   private upright = false;
   private pausedForRotate = false;
   private lastDismiss = -Infinity;
   private press: ReturnType<typeof setTimeout> | null = null;
-  private drag: { x: number; y: number; yaw: number; pitch: number; moved: boolean; pressed: boolean } | null = null;
+  private drag: { x: number; y: number; moved: boolean; pressed: boolean } | null = null;
 
   constructor(
     private world: World,
@@ -67,6 +66,7 @@ export class App {
         },
       },
       TOUCH,
+      layer,
     );
     if (start) {
       this.mode = 'walk';
@@ -190,15 +190,12 @@ export class App {
     if (this.snapTarget && this.snapTarget !== w.sim.gaze.target) this.snapTarget = null;
     const reduced = this.opts.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
     const p = mark ? (this.snapTarget === target ? 1 : Math.min(1, mark.p + mark.rate * Math.max(0, w.t - f!.t))) : null;
-    if (target && (f?.dwell.earned === 'card' || f?.dwell.earned === 'expanded')) this.carded = true;
-    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p, label: !this.carded });
+    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p });
   }
 
   syncChrome(): void {
-    this.carded ||= this.walk.frames.some((f) => f?.dwell.target && (f.dwell.earned === 'card' || f.dwell.earned === 'expanded'));
     this.updatePace();
     this.updateMark();
-    this.chrome.settleMark();
   }
 
   private updatePace(): void {
@@ -360,7 +357,7 @@ export class App {
     const canvas = this.canvas;
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || this.mode !== 'walk') return;
-      this.drag = { x: e.clientX, y: e.clientY, yaw: this.walk.head.yaw, pitch: this.walk.head.pitch, moved: false, pressed: false };
+      this.drag = { x: e.clientX, y: e.clientY, moved: false, pressed: false };
       this.walk.holding = true;
       canvas.setPointerCapture(e.pointerId);
       if (this.press) clearTimeout(this.press);
@@ -374,11 +371,12 @@ export class App {
     canvas.addEventListener('pointermove', (e) => {
       const d = this.drag;
       if (!d) return;
-      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) >= (e.pointerType === 'touch' ? 8 : 4)) d.moved = true;
-      if (!d.moved) return;
-      const yaw = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, d.yaw + (e.clientX - d.x) * 0.0032));
-      const pitch = Math.max(-0.6, Math.min(0.75, d.pitch + (e.clientY - d.y) * 0.0028));
-      this.walk.look(yaw, pitch);
+      if (!d.moved && Math.hypot(e.clientX - d.x, e.clientY - d.y) < (e.pointerType === 'touch' ? 8 : 4)) return;
+      const k = TURN_PER_VIEW / innerWidth;
+      this.walk.turn((e.clientX - d.x) * k, (e.clientY - d.y) * k);
+      d.moved = true;
+      d.x = e.clientX;
+      d.y = e.clientY;
     });
     canvas.addEventListener('pointerup', () => {
       this.walk.holding = false;

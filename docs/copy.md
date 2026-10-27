@@ -75,10 +75,10 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 ## Messages
 
-A text is a thread: a speech-bubble glyph and a warm monogram (M), the sender, the channel label Messages and the time it was sent, from the walk's clock (Tuesday, from 12:40), the message, and up to three quick replies. A reply joins the thread on the right; the other side's answer follows on the left. The brain's own line, when it has one, sits under the thread in the voice color with Yes · Not now.
+A text is a thread: a speech-bubble glyph and a warm monogram (M), the sender, the channel label Messages and the time it was sent, from the walk's clock (Tuesday, from 12:40), the message, and up to three quick replies. A reply joins the thread on the right and stays there at every size, moving or not: a thread never drops a reply the wearer sent. The other side's answer follows on the left. The brain's own line, when it has one, sits under the thread in the voice color with Yes · Not now.
 
 - Hungry and Just walk, 25 s after the intent starts: Maya · Lunch? I'm by the Big Bean at 1. · On my way · Can't today · Where exactly?
-  - On my way: Big Bean · {walk time} · route there? · Yes · Not now. Yes routes to the Big Bean (reason in the log and on the route: Meeting Maya at 1; at the door the arrival line carries it).
+  - On my way: Big Bean · {walk time} · route there? · Yes · Not now. Yes routes to the Big Bean (reason in the log and on the route: Meeting Maya at 1; at the door the arrival line carries it). After Yes the thread keeps the message and the reply with one line under them, Routing to the Big Bean, for 2.5 s (`minShownS`), then leaves once and does not return.
   - Where exactly?: Maya, 20 s later: Corner table by the window. Then the same offer.
   - Can't today: Maya: Next time. Nothing else.
 - Errands, 25 s after the intent starts: Maya · Can you grab stamps while you're out? · On it · Can't today
@@ -120,6 +120,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 
 - Label: the name and the say line's short form (in Brisk, the name and one number). Nothing else.
 - Card: the name, the say line, one live line, and the reason line in Stopped and Stroll (a compact card, beyond 30 m, has no reason line) unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
+- Hold rule caption, under the rule's start while a looked-at pane can still grow and its count has not begun: HOLD (on a label) · HOLD TO OPEN (on a card). Gone the moment the fill begins; never on a pane at its last level.
 - Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 
 ## Expanded views
@@ -146,6 +147,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 
 ## Reviewer chrome
 
+- FOCUS (inside the viewfinder, at its bottom edge, always)
 - I · INSPECTOR
 - Pace readout (reviewer chrome, off by default): PACE · WALK · 1.4 M/S
 - Inspector headers: Timeline · Decisions · Signals · Overrides · Evals · Export

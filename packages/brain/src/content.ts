@@ -52,7 +52,7 @@ export function cardContent(e: Entity, r: Reason, band: Band, scenario: Scenario
     kind: e.kind,
   };
   if (e.depth) c.depthRef = e.depth;
-  if (e.img && !compact) c.img = e.img;
+  if (e.img) c.img = e.img;
   return c;
 }
 

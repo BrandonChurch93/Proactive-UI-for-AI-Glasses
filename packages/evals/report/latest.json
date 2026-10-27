@@ -3,8 +3,8 @@
  "totals": {
   "suites": 41,
   "passed": 41,
-  "cases": 989,
-  "casesPassed": 989
+  "cases": 992,
+  "casesPassed": 992
  },
  "byGroup": {
   "walks": {
@@ -211,7 +211,7 @@
     {
      "name": "0:51 · at the pharmacy door its card shows",
      "pass": true,
-     "detail": "t=51.201 promote main-street-pharmacy card"
+     "detail": "t=51.601 promote main-street-pharmacy card"
     },
     {
      "name": "0:52.5 · On it at the pharmacy door: the Post Office is already a stop, and the thread says so",
@@ -528,7 +528,7 @@
     {
      "name": "0:45 · the look moves on and the card shrinks back to its label",
      "pass": true,
-     "detail": "t=45.101 demote trattoria-da-lia label"
+     "detail": "t=44.901 demote trattoria-da-lia label"
     },
     {
      "name": "0:52 · the station stair, labelled with the view since 0:45, holds its label for the look",
@@ -571,6 +571,21 @@
      "detail": "t=80.502 show route glance"
     },
     {
+     "name": "1:20.5 · after Yes the thread keeps the reply and says where it is routing",
+     "pass": true,
+     "detail": "t=80.502 promote maya-lunch card"
+    },
+    {
+     "name": "1:23 · the thread leaves once, 2.5 s after Yes",
+     "pass": true,
+     "detail": "t=83.002 dismiss maya-lunch card"
+    },
+    {
+     "name": "1:23 to 1:58 · and does not return",
+     "pass": true,
+     "detail": ""
+    },
+    {
      "name": "1:20.5 · the Big Bean is the destination",
      "pass": true,
      "detail": "312 frames"
@@ -588,7 +603,7 @@
     {
      "name": "1:44 · a look at the Big Bean on the way: its card, Going here (the chip has moved)",
      "pass": true,
-     "detail": "t=103.802 promote big-bean card"
+     "detail": "t=104.002 promote big-bean card"
     },
     {
      "name": "1:52 · at the Big Bean door, the arrival line says why",
@@ -5168,13 +5183,13 @@
      "detail": ""
     },
     {
-     "name": "[6.45, 6.75) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
+     "name": "[6.25, 6.55) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
      "pass": true,
-     "detail": "t=6.5 demote grace-theater label",
+     "detail": "t=6.3 demote grace-theater label",
      "rule": "walking-10"
     },
     {
-     "name": "[6.75, 12) mustNot {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
+     "name": "[6.55, 12) mustNot {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
      "pass": true,
      "detail": "",
      "rule": "walking-10"

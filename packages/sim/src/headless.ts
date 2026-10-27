@@ -50,7 +50,7 @@ export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, max
   };
   const push = (r: { rect: Rect; depth: number; vx?: number } | null, kind: KeepOut['kind'], moving: boolean, id: string): void => {
     if (!r || r.depth >= maxDepth) return;
-    const k: KeepOut = { rect: capKeepOut(r.rect, vp), kind, moving, id, depth: r.depth };
+    const k: KeepOut = { rect: capKeepOut(r.rect, vp), full: r.rect, kind, moving, id, depth: r.depth };
     if (r.vx !== undefined) k.vx = r.vx;
     out.push(k);
   };
@@ -199,7 +199,7 @@ export class HeadlessView {
         continue;
       }
       const home = { x: placed.rect.x + it.place.jumpX.at(sim.t), y: placed.rect.y + it.place.jumpY.at(sim.t), w: placed.rect.w, h: placed.rect.h };
-      const s = it.aside.update(home, ctx, exempt || Boolean(d.placement.zoneOk), pr.depth);
+      const s = it.aside.update(home, ctx, exempt || Boolean(d.placement.zoneOk), pr.depth, pr);
       if (s.dropped) {
         it.pane = hidden(d.id, d.level, gaze, 'keepout');
         continue;

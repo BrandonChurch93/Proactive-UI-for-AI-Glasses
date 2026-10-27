@@ -47,6 +47,7 @@ export const MOVE = {
   asideHoldMs: 120,
   asideDropCover: 0.6,
   asideDropMs: 300,
+  coverM: 12,
   droppedPip: 0.45,
   pushOut: 0.32,
   saveRise: 0.25,

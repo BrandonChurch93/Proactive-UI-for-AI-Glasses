@@ -11,9 +11,8 @@ export class Chrome {
   readonly rotate: HTMLElement;
   private mark: HTMLElement;
   private markKey = '';
-  private focusLabel: HTMLElement;
 
-  constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean) {
+  constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean, under?: HTMLElement) {
     this.el = document.createElement('div');
     this.el.className = css.chrome!;
     this.sound = document.createElement('button');
@@ -58,10 +57,12 @@ export class Chrome {
     this.mark = document.createElement('div');
     this.mark.className = css.mark!;
     this.mark.setAttribute('aria-hidden', 'true');
-    const tick = '<svg viewBox="0 0 10 10"><path d="M0.75 10V6.75A6 6 0 0 1 6.75 0.75H10"/></svg>';
+    const tick = '<svg viewBox="0 0 22 22"><path d="M0.75 22V10.75A10 10 0 0 1 10.75 0.75H22"/></svg>';
     this.mark.innerHTML = ['tl', 'tr', 'br', 'bl'].map((c) => `<i class="${css.corner} ${css[c]}">${tick}</i>`).join('') + `<span class="${css.focus}">FOCUS</span>`;
-    this.focusLabel = this.mark.querySelector(`.${css.focus}`)!;
-    this.el.append(this.mark, this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
+    // The viewfinder sits under the glasses: a pane over it covers its ticks, and the pane's hold rule carries the count.
+    if (under) under.before(this.mark);
+    else this.el.append(this.mark);
+    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
     parent.appendChild(this.el);
     addEventListener('resize', () => (this.cache = null));
   }
@@ -85,25 +86,23 @@ export class Chrome {
     this.cache = null;
   }
 
+  hide(): void {
+    this.el.style.display = 'none';
+    this.mark.style.visibility = 'hidden';
+  }
+
   setRotate(on: boolean): void {
     this.rotate.style.display = on ? 'grid' : 'none';
   }
 
-  setMark(state: { lit: boolean; p: number | null; label: boolean } | null): void {
-    const key = state ? `${state.lit}|${state.p === null ? '-' : state.p.toFixed(3)}|${state.label}` : 'off';
+  setMark(state: { lit: boolean; p: number | null } | null): void {
+    const key = state ? `${state.lit}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
     if (key === this.markKey) return;
     this.markKey = key;
     this.mark.style.display = state ? '' : 'none';
     if (!state) return;
     this.mark.classList.toggle(css.lit!, state.lit);
     this.mark.style.setProperty('--p', String(state.p ?? 0));
-    this.focusLabel.classList.toggle(css.gone!, !state.label);
-  }
-
-  settleMark(): void {
-    this.focusLabel.style.transition = 'none';
-    void this.focusLabel.offsetWidth;
-    this.focusLabel.style.transition = '';
   }
 
   setPace(text: string | null): void {

@@ -335,6 +335,44 @@
       }
     },
     {
+      "name": "1:20.5 \u00b7 after Yes the thread keeps the reply and says where it is routing",
+      "between": [
+        80.4,
+        80.8
+      ],
+      "must": {
+        "action": "promote",
+        "id": "maya-lunch",
+        "level": "card",
+        "noteIs": "Routing to the Big Bean"
+      }
+    },
+    {
+      "name": "1:23 \u00b7 the thread leaves once, 2.5 s after Yes",
+      "between": [
+        82.9,
+        83.2
+      ],
+      "must": {
+        "action": "dismiss",
+        "id": "maya-lunch"
+      }
+    },
+    {
+      "name": "1:23 to 1:58 \u00b7 and does not return",
+      "between": [
+        83.2,
+        118
+      ],
+      "mustNot": {
+        "id": "maya-lunch",
+        "action": [
+          "show",
+          "promote"
+        ]
+      }
+    },
+    {
       "name": "1:20.5 \u00b7 the Big Bean is the destination",
       "between": [
         80.7,

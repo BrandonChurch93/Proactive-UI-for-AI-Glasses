@@ -98,6 +98,7 @@ interface InboxItem {
   offer?: { place: string; why: string; state: 'waiting' | 'open' | 'yes' | 'no' };
   note?: string;
   seen?: boolean;
+  closed?: { at: number; level: Level };
 }
 
 interface FollowUp {
@@ -753,9 +754,10 @@ export class Brain {
       }
 
       if (isT) {
-        if (it.gazeSince === null || !it.wasTarget) it.gazeSince = t;
+        if (it.gazeSince === null || !it.wasTarget) this.resumeGaze(it, t);
         it.lastGazeAt = t;
       } else {
+        if (it.wasTarget && it.gazeSince !== null) it.paused = { held: t - it.gazeSince, at: t };
         it.gazeSince = null;
         if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
         if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2) it.lastGazeAt = t;
@@ -882,17 +884,31 @@ export class Brain {
     }
   }
 
-  private markFor(snap: WorldSnapshot, t: number, band: Band, id: string, it: LadderItem): { mark?: { p: number; rate: number } } {
+  // A look that comes back within the look-away time takes its hold up where it left it.
+  private resumeGaze(it: LadderItem, t: number): void {
+    const p = it.paused;
+    it.paused = null;
+    if (p && t - p.at < this.cfg.ladder.lookAwayS - 1e-9) {
+      it.gazeSince = t - p.held;
+      if (it.level === 'card' && Number.isFinite(it.cardAt)) it.cardAt += t - p.at;
+    } else it.gazeSince = t;
+  }
+
+  private markFor(snap: WorldSnapshot, t: number, band: Band, id: string, it: LadderItem): { mark?: { p: number; rate: number; next?: Level } } {
     const e = snap.entities.find((x) => x.id === id);
     if (!e) return {};
     const L = this.cfg.ladder;
-    const ramp = (from: number, s: number): { p: number; rate: number } => ({ p: Math.min(1, Math.max(0, (t - from) / s)), rate: 1 / s });
+    const shown = this.paneVisible(id);
+    const ramp = (from: number, s: number): { p: number; rate: number } => ({ p: Math.min(1, Math.max(0, (t - from) / s)), rate: shown ? 1 / s : 0 });
     if (it.level === 'expanded') return { mark: { p: 1, rate: 0 } };
     if (it.level === 'card') {
       const opens = (band === 'stopped' || band === 'stroll') && e.distance <= L.cardWithinM && it.gazeSince !== null && it.gazeSince <= it.cardAt + 1e-9;
-      return { mark: opens ? ramp(it.cardAt, L.cardHoldS) : { p: 1, rate: 0 } };
+      return { mark: opens ? { ...ramp(it.cardAt, L.cardHoldS), next: 'expanded' } : { p: 1, rate: 0 } };
     }
-    if (it.level === 'label' && band !== 'brisk' && this.headMoved) return { mark: ramp(Math.max(it.since, it.gazeSince ?? t), e.distance > L.nearM ? L.growFarS : L.growS) };
+    if (it.level === 'label' && band !== 'brisk' && this.headMoved) {
+      const grow = e.distance > L.nearM ? L.growFarS : L.growS;
+      return { mark: { ...ramp(Math.max(it.since + it.hiddenS, (it.gazeSince ?? t) + it.hiddenS, this.cardGrownAt + L.swapGapS - grow), grow), next: 'card' } };
+    }
     return { mark: { p: 0, rate: 0 } };
   }
 
@@ -1167,9 +1183,13 @@ export class Brain {
         it.movingS = 0;
         it.stillS = 0;
       }
+      if (it.closed && t - it.closed.at >= this.cfg.ladder.minShownS - 1e-9) {
+        it.status = 'done';
+        continue;
+      }
       const open = Boolean(n.replies) && (!it.reply || it.offer?.state === 'waiting' || it.offer?.state === 'open');
       if (n.replies && it.status === 'shown' && band === 'brisk') continue;
-      if (it.status === 'shown' && !open) {
+      if (it.status === 'shown' && !open && !it.closed) {
         if (viewFoldDue(it.movingS, it.stillS, false, this.cfg, this.cfg.stoppedToastS)) {
           it.status = 'done';
           continue;
@@ -1190,6 +1210,11 @@ export class Brain {
       if (n.replies) {
         component = 'thread';
         level = band === 'stopped' ? 'card' : 'glance';
+        // After Yes the thread keeps its size, the message, the reply and the routing line for minShownS, then leaves once.
+        if (it.offer?.state === 'yes') {
+          it.closed ??= { at: t, level };
+          level = it.closed.level;
+        }
         r =
           it.reason ??
           (this.gateWasPath(n.id) || it.n.at < t - 1
@@ -1199,7 +1224,7 @@ export class Brain {
               : reason('world', 'Clear sidewalk ahead', parts));
         const theirs = [...thread].reverse().find((l) => !l.me);
         content = { name: n.from ?? 'Message', fact: theirs?.text ?? n.text ?? '', avatar: (n.from ?? 'M').slice(0, 1), time: clockAt(n.at), app: 'Messages', reason: r, showReason: false };
-        if (level === 'card') content.thread = thread.map((l) => ({ me: l.me, text: l.text }));
+        if (level === 'card' || it.reply) content.thread = thread.map((l) => ({ me: l.me, text: l.text }));
         if (!it.reply) content.actions = n.replies.map((x) => ({ id: x.id, label: x.label }));
         else if (it.offer?.state === 'open') {
           const e = snap.entities.find((x) => x.id === it.offer!.place);
@@ -1208,6 +1233,9 @@ export class Brain {
             { id: 'go', label: 'Yes', primary: true },
             { id: 'not-now', label: 'Not now' },
           ];
+        } else if (it.offer?.state === 'yes') {
+          const e = snap.entities.find((x) => x.id === it.offer!.place);
+          content.note = `Routing to ${(e?.name ?? it.offer.place).replace(/^The /, 'the ')}`;
         } else if (it.note) content.note = it.note;
         announce = `${it.reply ?? ''}|${it.offer?.state ?? ''}|${thread.length}`;
       } else if (n.type === 'app') {
@@ -1523,8 +1551,10 @@ export class Brain {
       if (isPane(mine.level)) {
         mine.anchor = `door:${e.id}`;
         mine.zoneOk = true;
-        this.atDoorSince ??= t;
-        if (t - this.atDoorSince < this.cfg.arrival.anchorS - 1e-9 || !this.paneVisible(e.id)) return;
+        // The promotion waits for the pane to stand at the door in sight, not for one visible frame between folds at the edge.
+        if (this.paneVisible(e.id)) this.atDoorSince ??= t;
+        else this.atDoorSince = null;
+        if (this.atDoorSince === null || t - this.atDoorSince < this.cfg.arrival.anchorS - 1e-9) return;
       }
     }
     if (own >= 0) wants.splice(own, 1);

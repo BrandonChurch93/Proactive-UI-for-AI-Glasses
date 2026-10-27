@@ -47,6 +47,8 @@ interface Built {
   box: HTMLElement;
   wrap: HTMLElement;
   seed: HTMLElement;
+  rule: HTMLElement;
+  hold: HTMLElement;
   width: number;
   height: number;
   w: Track;
@@ -107,6 +109,8 @@ interface Item {
 }
 
 const FOLD_LEAD_S = 0.4;
+// A newborn pane's first frames move with its placement settling, not with the view; that is not motion to look ahead along.
+const FOLD_SETTLE_S = 0.1;
 
 export interface OverlayOptions {
   reducedMotion?: boolean;
@@ -607,8 +611,13 @@ export class Overlay {
     box.dataset.zone = it.d.placement.zone;
     const seed = document.createElement('div');
     seed.className = s.seed!;
-    box.appendChild(view.el);
-    wrap.append(box, seed);
+    const rule = document.createElement('div');
+    rule.className = s.holdRule!;
+    rule.appendChild(document.createElement('i'));
+    const hold = document.createElement('span');
+    hold.className = s.holdWord!;
+    box.append(view.el, rule);
+    wrap.append(box, seed, hold);
     (it.kind === 'world' ? this.worldLayer : this.viewLayer).appendChild(wrap);
     const width = view.el.offsetWidth;
     const height = view.el.offsetHeight;
@@ -617,6 +626,8 @@ export class Overlay {
       box,
       wrap,
       seed,
+      rule,
+      hold,
       width,
       height,
       w: new Track(width),
@@ -633,6 +644,25 @@ export class Overlay {
     hidePane(this.els(b));
     gsap.set([box, view.el], { opacity: 1 });
     return b;
+  }
+
+  // The hold rule fills from the leader's side toward the next level and is the viewfinder's count, read off the same mark.
+  private holdRule(it: Item, b: Built, t: number, pr: { x: number; y: number } | null): void {
+    const f = this.frame;
+    const m = f?.dwell.target === it.id ? f.dwell.mark : undefined;
+    const on = Boolean(m?.next) && !it.dying && b.level === it.d.level && (b.level === 'label' || b.level === 'card');
+    const p = on && m && f ? clamp(m.p + m.rate * Math.max(0, t - f.t), 0, 1) : 0;
+    const fromRight = Boolean(pr && b.rect && pr.x > b.rect.x + b.rect.w / 2);
+    const key = `${on ? 1 : 0}|${p > 0 ? 1 : 0}|${fromRight ? 1 : 0}|${b.level}`;
+    if (b.rule.dataset.key !== key) {
+      b.rule.dataset.key = key;
+      b.rule.classList.toggle(s.holdOn!, on && p > 0);
+      b.rule.classList.toggle(s.holdRight!, fromRight);
+      b.hold.classList.toggle(s.holdOn!, on && p === 0);
+      b.hold.classList.toggle(s.holdRight!, fromRight);
+      b.hold.textContent = b.level === 'card' ? 'HOLD TO OPEN' : 'HOLD';
+    }
+    b.rule.style.setProperty('--hold', p.toFixed(4));
   }
 
   private sizeBox(b: Built, level: PaneLevel): void {
@@ -819,11 +849,15 @@ export class Overlay {
       it.cur = b;
       const big = want === 'card' || want === 'expanded';
       const looked = it.d.cause === 'dwell' || it.d.cause === 'pinch' || it.d.cause === 'settle';
-      if (world) {
+      if (world && returned) {
+        // Travel is a birth's: a pane coming back from a fold or a drop condenses in place, its leader with it.
+        gsap.set(it.L, { lead: 1, leadO: 1, head: 0 });
+        at = it.lag;
+      } else if (world) {
         const dur = big ? MOVE.travelCard : MOVE.travelGlance;
         const tStart = (t - it.born < 0.05 && !looked ? 0.35 : 0) + it.lag;
         const arrive = travel(tl, it.L, tStart, dur, this.reduced);
-        at = looked && !returned ? tStart : arrive;
+        at = looked ? tStart : arrive;
         if (big) tl.call(() => this.sound.breathUp(want === 'expanded'), [], tStart + dur / 2);
       } else if (big || it.d.component === 'pocket') {
         tl.call(() => this.sound.breathUp(true), [], at);
@@ -975,14 +1009,14 @@ export class Overlay {
         const inset = MARGIN - MOVE.deadBand - 2;
         // A pane riding toward the chrome keeps moving while it fades, so the test looks ahead along its motion by the fold's length.
         const dt = it.homeAt ? t - it.homeAt.t : 0;
-        const ahead = dt > 1e-4 && dt < 0.2 ? { ...home, x: home.x + ((home.x - it.homeAt!.x) / dt) * FOLD_LEAD_S, y: home.y + ((home.y - it.homeAt!.y) / dt) * FOLD_LEAD_S } : home;
+        const ahead = dt > 1e-4 && dt < 0.2 && t - it.born > FOLD_SETTLE_S ? { ...home, x: home.x + ((home.x - it.homeAt!.x) / dt) * FOLD_LEAD_S, y: home.y + ((home.y - it.homeAt!.y) / dt) * FOLD_LEAD_S } : home;
         it.homeAt = { x: home.x, y: home.y, t };
         const outside = home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset || chrome.some((r) => rectsOverlap(home, r) || rectsOverlap(ahead, r));
         if (outside && !it.frozen && pr && it.place) {
           placed = it.place.foldNow(pr, vp);
           it.placed = placed;
           corner = null;
-        } else aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk || d.placement.zoneOk) || leftRecently(t, it.lookedAt), depth);
+        } else aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk || d.placement.zoneOk) || leftRecently(t, it.lookedAt), depth, pr ?? undefined);
       }
       const want = this.paneLevelFor(it, placed);
       const decided = it.d.level !== it.decided;
@@ -1073,6 +1107,7 @@ export class Overlay {
         b.box.style.setProperty('--fill-a', fill.alpha.toFixed(3));
         b.box.style.setProperty('--fill-b', (fill.alpha - 0.04).toFixed(3));
         b.box.style.setProperty('--weight', String(fill.weight));
+        if (b === it.cur && it.kind === 'world') this.holdRule(it, b, t, pr);
       }
 
       if (it.lights && anchorPos) {

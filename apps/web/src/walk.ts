@@ -1,11 +1,14 @@
 import { gsap } from 'gsap';
 import { Brain } from '@lumen/brain';
 import {
+  LOOK_AWAY_S,
   PLACES,
   PLACE_BY_ID,
   WALK_SECONDS,
   angleWrap,
+  clamp,
   pitchToward,
+  viewfinderHalf,
   yawToward,
   compactSnapshot,
   type BrainFrame,
@@ -22,23 +25,19 @@ import { Overlay } from '@lumen/overlay';
 import { ThreeBridge } from './bridge';
 import type { World } from './world/world';
 
-const YAW_ACQUIRE = (3 * Math.PI) / 180;
-const YAW_RELEASE = (6 * Math.PI) / 180;
-const HEAD_LIMIT = Math.PI / 2;
-const PURSUIT_RATE = 6;
-const PURSUIT_SETTLED_RAD = 0.03;
-const PURSUIT_DWELL_MS = 300;
-const PIP_ACQUIRE_PX = 70;
-const FRONT_RELEASE_PX = 40;
-const PIP_RELEASE_PX = 120;
-const PURSUIT_AFTER_DRAG_S = 0.25;
 const ACQUIRE_GRACE_S = 0.25;
-const RELEASE_GRACE_S = 0.4;
 const FRONT_MIN_PX = 36;
 const FRONT_MAX_FACING = (75 * Math.PI) / 180;
+// A light this close to the center outranks a storefront that merely contains it: aiming at a light is precise.
+const FRONT_BIAS_PX = 30;
+// A pursuit stops turning the head once the place it holds is this far behind the shoulder.
+const PURSUIT_MAX = (2 * Math.PI) / 3;
+export const TURN_PER_VIEW = (2 * Math.PI) / 3;
+// A place the wearer's own turn carries out of the square is let go at once; the grace is for the body's steps.
+const TURNING_S = 0.1;
 
 function distanceToQuad(x: number, y: number, q: { x: number; y: number }[]): number {
-  let inside = true;
+  let inside = q.length > 2;
   let sign = 0;
   let best = Infinity;
   for (let i = 0; i < q.length; i++) {
@@ -58,12 +57,24 @@ function distanceToQuad(x: number, y: number, q: { x: number; y: number }[]): nu
   return inside ? 0 : best;
 }
 
-function angleToSpan(a: number, y0: number, y1: number): number {
-  const d0 = angleWrap(a - y0);
-  const d1 = angleWrap(a - y1);
-  if (Math.sign(d0) !== Math.sign(d1) && Math.abs(d0) + Math.abs(d1) < Math.PI) return 0;
-  return Math.min(Math.abs(d0), Math.abs(d1));
+function overlapsSquare(q: { x: number; y: number }[], cx: number, cy: number, h: number): boolean {
+  const xs = q.map((p) => p.x);
+  const ys = q.map((p) => p.y);
+  if (Math.max(...xs) < cx - h || Math.min(...xs) > cx + h || Math.max(...ys) < cy - h || Math.min(...ys) > cy + h) return false;
+  for (let i = 0; i < q.length; i++) {
+    const a = q[i]!;
+    const b = q[(i + 1) % q.length]!;
+    const nx = a.y - b.y;
+    const ny = b.x - a.x;
+    if (nx === 0 && ny === 0) continue;
+    const proj = q.map((p) => p.x * nx + p.y * ny);
+    const c = cx * nx + cy * ny;
+    const r = h * (Math.abs(nx) + Math.abs(ny));
+    if (Math.max(...proj) < c - r || Math.min(...proj) > c + r) return false;
+  }
+  return true;
 }
+
 const STEP = 1 / SIM_HZ;
 const STEPS_PER_TICK = SIM_HZ / TICK_HZ;
 const WARM_STEPS = Math.round(2.5 * SIM_HZ);
@@ -120,11 +131,12 @@ export class Walk {
   private view: { w: number; h: number; panes: PaneReport[] } | undefined;
   private listeners = new Set<() => void>();
   private focusOutline: boolean;
-  private pursuit: { id: string; dyaw: number; dpitch: number } | null = null;
-  private lookedAt = -Infinity;
-  private following = false;
-  private pick: { step: number; cur: string | null; cand: string | null; candSince: number; outSince: number | null } = { step: -2, cur: null, cand: null, candSince: 0, outSince: null };
+  private pursuit: { id: string; on: boolean; dyaw: number; dpitch: number } | null = null;
+  private turned = false;
+  private turnedAt = -Infinity;
+  private bodyWas: number | null = null;
   holding = false;
+  private pick: { step: number; cur: string | null; cand: string | null; candSince: number; outSince: number | null } = { step: -2, cur: null, cand: null, candSince: 0, outSince: null };
   private sound: { ctx: AudioContext | null; enabled: boolean } = { ctx: null, enabled: false };
 
   constructor(
@@ -259,8 +271,13 @@ export class Walk {
   look(yaw: number, pitch: number): void {
     if (this.opts.scripted) return;
     if (this.stepIndex < this.inputs.length && (Math.abs(yaw - this.head.yaw) > 1e-4 || Math.abs(pitch - this.head.pitch) > 1e-4)) this.diverge();
-    this.head = { yaw, pitch };
-    this.lookedAt = this.sim.t;
+    this.head = { yaw: angleWrap(yaw), pitch: clamp(pitch, -0.6, 0.75) };
+    this.turned = true;
+    this.turnedAt = this.sim.t;
+  }
+
+  turn(dyaw: number, dpitch: number): void {
+    this.look(this.head.yaw + dyaw, this.head.pitch + dpitch);
   }
 
   override(o: Override): void {
@@ -283,23 +300,30 @@ export class Walk {
     }
     pk.step = this.stepIndex;
     const { best, curIn } = this.rawGaze(pk.cur);
-    if (pk.cur === null || best === pk.cur) {
-      pk.cur = best;
+    // Held still, the place in the square keeps it until it leaves; only a turn lets a nearer one take over.
+    const aiming = t - this.turnedAt <= LOOK_AWAY_S + 1e-9;
+    if (pk.cur === null || (curIn && (!aiming || best === null || best === pk.cur))) {
+      pk.cur ??= best;
       pk.cand = null;
       pk.outSince = null;
       return pk.cur;
     }
-    if (best && best !== pk.cand) {
+    if (curIn) pk.outSince = null;
+    else if (t - this.turnedAt <= TURNING_S + 1e-9) {
+      pk.cur = best;
+      pk.cand = null;
+      pk.outSince = null;
+      return pk.cur;
+    } else pk.outSince ??= t;
+    if (best !== pk.cand) {
       pk.cand = best;
       pk.candSince = t;
-    } else if (!best) pk.cand = null;
-    if (curIn) pk.outSince = null;
-    else pk.outSince ??= t;
+    }
     if (pk.cand && t - pk.candSince >= ACQUIRE_GRACE_S - 1e-9) {
       pk.cur = pk.cand;
       pk.cand = null;
       pk.outSince = null;
-    } else if (pk.outSince !== null && t - pk.outSince >= RELEASE_GRACE_S - 1e-9) {
+    } else if (pk.outSince !== null && t - pk.outSince >= LOOK_AWAY_S - 1e-9) {
       pk.cur = null;
       pk.outSince = null;
     }
@@ -310,27 +334,22 @@ export class Walk {
     const eye = this.sim.wearer.pos;
     const lit = new Set<string>();
     for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') lit.add(d.placement.anchor);
-    const following = this.following && this.pursuit && !this.holding && this.sim.t - this.lookedAt >= PURSUIT_AFTER_DRAG_S ? this.pursuit.id : null;
-    const ids = following ? new Set([following]) : new Set<string>([...PLACES.map((p) => p.id), ...lit]);
-    const pose = this.sim.cameraPose();
-    const vw = innerWidth;
-    const vh = innerHeight;
+    const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit]);
+    const vp = { w: innerWidth, h: innerHeight };
+    const cx = vp.w / 2;
+    const cy = vp.h / 2;
+    const half = viewfinderHalf(vp);
+    const keepHalf = viewfinderHalf(vp, true);
+    const frontBias = FRONT_BIAS_PX * (half / viewfinderHalf({ w: 1280, h: 800 }));
     let best: string | null = null;
     let bestOff = Infinity;
     let curIn = false;
-    const take = (id: string, off: number): void => {
-      if (id === cur) curIn = true;
-      if (off < bestOff) {
-        best = id;
-        bestOff = off;
-      }
-    };
     for (const id of ids) {
       const a = this.sim.anchorOf(id);
       const far = a ? Math.hypot(a.x - eye.x, a.z - eye.z) : Infinity;
       if (!a || far > ATTENTION_M) continue;
-      const keep = id === cur;
       const place = PLACE_BY_ID.get(id);
+      let front: { x: number; y: number }[] | null = null;
       if (place?.n) {
         const quad = [
           { x: a.x, y: 0.3, z: -place.n[0] },
@@ -340,35 +359,21 @@ export class Walk {
         ].map((c) => this.bridge.project(c));
         const mid = { x: a.x - eye.x, z: -(place.n[0] + place.n[1]) / 2 - eye.z };
         const facing = Math.acos(Math.min(1, Math.abs(mid.x) / (Math.hypot(mid.x, mid.z) || 1)));
-        const wide = quad.every((q) => q.inFront) && Math.abs(quad[1]!.x - quad[0]!.x) >= FRONT_MIN_PX && facing < FRONT_MAX_FACING;
-        if (wide) {
-          const inside = distanceToQuad(vw / 2, vh / 2, quad);
-          if (inside <= (keep ? FRONT_RELEASE_PX : 0)) {
-            take(id, -0.2 + Math.hypot(a.x - eye.x, a.z - eye.z) / 10000);
-            continue;
-          }
-        }
+        if (quad.every((q) => q.inFront) && Math.abs(quad[1]!.x - quad[0]!.x) >= FRONT_MIN_PX && facing < FRONT_MAX_FACING) front = quad;
+      } else {
+        const seg = [{ x: a.x, y: 0.9, z: a.z }, { x: a.x, y: a.y + 0.8, z: a.z }].map((c) => this.bridge.project(c));
+        if (seg.every((q) => q.inFront)) front = seg;
       }
       const pr = this.bridge.project(a);
-      const px = Math.hypot(pr.x - vw / 2, pr.y - vh / 2);
-      if (pr.inFront && px < (keep ? PIP_RELEASE_PX : PIP_ACQUIRE_PX)) {
-        take(id, px / 4000 - (keep ? 0.25 : 0.05));
-        continue;
+      const pin = pr.inFront ? [pr] : null;
+      const within = (h: number): boolean => Boolean((front && overlapsSquare(front, cx, cy, h)) || (pin && overlapsSquare(pin, cx, cy, h)));
+      if (id === cur && within(keepHalf)) curIn = true;
+      if (!within(half)) continue;
+      const off = Math.min(front ? distanceToQuad(cx, cy, front) + frontBias : Infinity, pin ? Math.hypot(pr.x - cx, pr.y - cy) : Infinity) + far / 10000;
+      if (off < bestOff) {
+        best = id;
+        bestOff = off;
       }
-      if (place?.n) continue;
-      let y0 = yawToward(pose.pos, a);
-      let y1 = y0;
-      if (place?.n) {
-        y0 = yawToward(pose.pos, { x: a.x, y: a.y, z: -place.n[0] });
-        y1 = yawToward(pose.pos, { x: a.x, y: a.y, z: -place.n[1] });
-      }
-      const dyaw = angleToSpan(pose.yaw, y0, y1);
-      const flat = Math.hypot(a.x - pose.pos.x, a.z - pose.pos.z);
-      const top = Math.atan2(a.y + 0.8 - pose.pos.y, flat);
-      const bottom = Math.atan2(0.9 - pose.pos.y, flat);
-      const dpitch = pose.pitch > top ? pose.pitch - top : pose.pitch < bottom ? bottom - pose.pitch : 0;
-      if (dyaw > (keep ? YAW_RELEASE : YAW_ACQUIRE) || dpitch > (keep ? 0.2 : 0.12)) continue;
-      take(id, dyaw + dpitch + Math.abs(angleWrap(yawToward(pose.pos, a) - pose.yaw)) * 0.02 - (keep ? 0.02 : 0));
     }
     return { best, curIn };
   }
@@ -376,26 +381,25 @@ export class Walk {
   private pursue(gaze: string | null): void {
     const sim = this.sim;
     const a = gaze && !gaze.includes(':') ? sim.anchorOf(gaze) : undefined;
-    this.following = false;
     if (!gaze || !a) {
       this.pursuit = null;
       return;
     }
     const eye = sim.wearer.pos;
-    const worldYaw = sim.wearer.bodyYaw + this.head.yaw;
+    const body = sim.wearer.bodyYaw;
     const toYaw = yawToward(eye, a);
     const toPitch = pitchToward(eye, a);
-    const dragging = this.holding || sim.t - this.lookedAt < PURSUIT_AFTER_DRAG_S;
-    const settled = Math.abs(angleWrap(sim.head.yaw - worldYaw)) < PURSUIT_SETTLED_RAD && sim.gaze.dwellMs >= PURSUIT_DWELL_MS && this.pick.cand === null;
-    if (!this.pursuit || this.pursuit.id !== gaze || dragging || !settled) {
-      this.pursuit = { id: gaze, dyaw: angleWrap(worldYaw - toYaw), dpitch: this.head.pitch - toPitch };
+    if (!this.pursuit || this.pursuit.id !== gaze || this.turned) {
+      // Only a place the wearer turned onto is held; one the walk carries into the square does not pull the head after it.
+      const on = this.turned || this.sim.t - this.turnedAt <= LOOK_AWAY_S + 1e-9;
+      this.turned = false;
+      this.pursuit = { id: gaze, on, dyaw: angleWrap(body + this.head.yaw - toYaw), dpitch: this.head.pitch - toPitch };
       return;
     }
-    this.following = true;
-    const k = Math.min(1, STEP * PURSUIT_RATE);
-    const yaw = Math.max(-HEAD_LIMIT, Math.min(HEAD_LIMIT, angleWrap(toYaw + this.pursuit.dyaw - sim.wearer.bodyYaw)));
-    const pitch = Math.max(-0.6, Math.min(0.75, toPitch + this.pursuit.dpitch));
-    this.head = { yaw: this.head.yaw + angleWrap(yaw - this.head.yaw) * k, pitch: this.head.pitch + (pitch - this.head.pitch) * k };
+    if (!this.pursuit.on) return;
+    const yaw = angleWrap(toYaw + this.pursuit.dyaw - body);
+    if (Math.abs(yaw) > PURSUIT_MAX) return;
+    this.head = { yaw, pitch: clamp(toPitch + this.pursuit.dpitch, -0.6, 0.75) };
   }
 
   step(): void {
@@ -407,7 +411,10 @@ export class Walk {
     if (!sim.scripted) {
       let inp = this.inputs[this.stepIndex];
       if (!inp) {
-        this.pursue(sim.gaze.target);
+        // While the pointer is down the aim is the wearer's alone: the body turning under it does not swing the view.
+        if (this.holding && this.bodyWas !== null) this.head = { ...this.head, yaw: angleWrap(this.head.yaw - angleWrap(sim.wearer.bodyYaw - this.bodyWas)) };
+        this.bodyWas = sim.wearer.bodyYaw;
+        this.pursue(this.pick.cand ?? sim.gaze.target);
         inp = { yaw: sim.wearer.bodyYaw + this.head.yaw, pitch: this.head.pitch, gaze: this.liveGaze() };
         this.inputs[this.stepIndex] = inp;
       }

@@ -22,7 +22,7 @@ const p = await b.newPage({ viewport: { width: w, height: h } });
 const errors: string[] = [];
 p.on('pageerror', (e) => errors.push(e.message));
 p.on('console', (m) => {
-  if (m.type() === 'log' && m.text().startsWith('far ')) console.log(m.text());
+  if (m.type() === 'log' && /^(far|hidden promote) /.test(m.text())) console.log(m.text());
   if (m.type() === 'error') errors.push(m.text());
 });
 
@@ -83,9 +83,12 @@ if (probes) {
         if (glance === null && (shown('label') || shown('glance') || shown('card') || shown('expanded'))) glance = dt - on;
         if (card === null && (shown('card') || shown('expanded'))) card = dt - on;
       }
-      return { glance, card, targets, band, on, pre };
+      const dec = walk.brain.log.entries.filter((e) => e.decision.id === id && e.t >= t0 - 0.05).slice(0, 6).map((e) => [+(e.t - t0).toFixed(2), e.decision.action, e.decision.level, e.decision.cause]);
+      if (${process.argv.includes('--why')}) console.log(JSON.stringify(dec));
+      return { glance, card, targets, band, on, pre, dec };
     })()`)) as { glance: number | null; card: number | null; targets: [number, string | null][]; band: string; on: number | null; pre: string | null };
     const late = r.on === null ? r.targets.length : r.targets.filter(([t]) => t > r.on! + 0.25).length;
+    if (process.argv.includes('--why')) console.log(JSON.stringify((r as unknown as { dec: unknown }).dec));
     console.log(`probe ${scenario} t ${pr.t} ${pr.id} (${r.band}): on target after ${r.on?.toFixed(2) ?? 'never'} s${r.pre ? `, already a ${r.pre}` : ''}; glance ${r.glance?.toFixed(2) ?? 'none'} s, card ${r.card?.toFixed(2) ?? 'none'} s after; gaze changes after the first 250 ms on target ${late}  targets ${JSON.stringify(r.targets)}`);
   }
 } else {
@@ -105,9 +108,14 @@ if (probes) {
     window.__bar.step = (until) => {
     while (walk.t < until - 0.02 && !walk.ended) {
       const ai = sim.reviewer.aim(sim.t, sim.wearer.pos, sim.wearer.bodyYaw, sim.anchorOf, sim.wearer.state === 'crossing');
-      if (${lapRun}) walk.look(0.22, 0.04);
-      else if (${wander}) walk.look(0.6 * Math.sin(sim.t * 0.5), 0.35 + 0.35 * Math.sin(sim.t * 0.37));
-      else walk.look(ai.yaw - sim.wearer.bodyYaw, ai.pitch);
+      const body = sim.wearer.bodyYaw;
+      const want = ${lapRun} ? { yaw: body + 0.22, pitch: 0.04 } : ${wander} ? { yaw: body + 0.6 * Math.sin(sim.t * 0.5), pitch: 0.35 + 0.35 * Math.sin(sim.t * 0.37) } : ai;
+      // The live head has no weight, so the person dragging it is the spring the sim used to be (omega 11).
+      const hs = (window.__bar.head ??= { yaw: body + walk.head.yaw, pitch: walk.head.pitch, vy: 0, vp: 0 });
+      const ty = hs.yaw + Math.atan2(Math.sin(want.yaw - hs.yaw), Math.cos(want.yaw - hs.yaw));
+      hs.vy += (121 * (ty - hs.yaw) - 22 * hs.vy) / 60; hs.yaw += hs.vy / 60;
+      hs.vp += (121 * (want.pitch - hs.pitch) - 22 * hs.vp) / 60; hs.pitch += hs.vp / 60;
+      walk.look(hs.yaw - body, hs.pitch);
       const prevT = sim.t;
       const logFrom = birthsBefore();
       walk.seek(walk.t + 1 / 60);
@@ -202,7 +210,10 @@ if (probes) {
           if (d.action !== 'hold') m.levels[d.id] = d.action === 'dismiss' ? 'none' : d.level;
           if (d.action !== 'promote' || d.placement.zone !== 'world' || before === d.level) continue;
           const it = o.items.get(d.id);
-          if (!it || it.want === 'none' || !it.cur || it.cur.opacity < 0.3) m.hiddenPromotes.push([+last.frame.t.toFixed(1), d.id, d.level]);
+          if (!it || it.want === 'none' || !it.cur || it.cur.opacity < 0.3) {
+            m.hiddenPromotes.push([+last.frame.t.toFixed(1), d.id, d.level]);
+            if (${process.argv.includes('--why')}) console.log('hidden promote', walk.t.toFixed(2), d.id, d.level, d.cause, JSON.stringify(it && { want: it.want, op: it.cur && it.cur.opacity, mode: it.placed && it.placed.mode, why: it.why, dropped: it.aside.dropped }), JSON.stringify(walk.brain.log.entries.filter((e) => e.decision.id === d.id && e.t > walk.t - 4).map((e) => [e.t, e.decision.action, e.decision.level, e.decision.cause])), JSON.stringify(walk.overlayLog.filter((e) => e.id === d.id && e.t > walk.t - 4).map((e) => [e.t, e.kind, e.level, e.cause, e.detail])));
+          }
         }
       }
     }
@@ -295,6 +306,7 @@ if (probes) {
       perSettleAt = labelBirths[i]!;
     }
   }
+  if (process.argv.includes('--why')) console.log('settle window', JSON.stringify(log.filter((e) => (e.kind === 'birth' || e.kind === 'return') && e.level === 'label' && e.t >= perSettleAt - 1e-6 && e.t < perSettleAt + 0.5).map((e) => [e.t, e.id, e.kind, e.cause, e.detail])));
   const grows = log.filter((e) => e.kind === 'resize' && e.level === 'card' && e.from === 'label').map((e) => e.t);
   let swaps = 0;
   let swapsAt = 0;

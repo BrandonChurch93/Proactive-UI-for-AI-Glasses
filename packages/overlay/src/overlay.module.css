@@ -951,3 +951,55 @@
   flex: 1;
   text-align: right;
 }
+
+.holdRule {
+  position: absolute;
+  left: var(--radius, 6px);
+  right: var(--radius, 6px);
+  bottom: 2px;
+  height: 1.5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.holdRule i {
+  position: absolute;
+  inset: 0;
+  background: var(--voice);
+  box-shadow: 0 0 6px rgba(255, 217, 138, 0.55);
+  transform: scaleX(var(--hold, 0));
+  transform-origin: left center;
+}
+
+.holdRule.holdRight i {
+  transform-origin: right center;
+}
+
+.holdWord {
+  position: absolute;
+  left: 6px;
+  top: calc(100% + 4px);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: rgba(251, 250, 246, 0.55);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.holdWord.holdRight {
+  left: auto;
+  right: 6px;
+}
+
+.holdOn {
+  opacity: 1;
+}
+
+.holdWord.holdOn {
+  transition: opacity 120ms ease-out;
+}

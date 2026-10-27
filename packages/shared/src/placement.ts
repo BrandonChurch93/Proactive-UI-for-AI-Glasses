@@ -57,6 +57,13 @@ export function uiScale(vp: Viewport): number {
   return s < 1 ? clamp(s * 1.3, 0.74, 1) : clamp(s, 1, 1.9);
 }
 
+// The viewfinder is the gaze target: what is inside the square is being looked at, and it lets go 40 px outside.
+export const VIEWFINDER = { size: 160, held: 132, keepPx: 40 } as const;
+
+export function viewfinderHalf(vp: Viewport, keep = false): number {
+  return (VIEWFINDER.size / 2 + (keep ? VIEWFINDER.keepPx : 0)) * Math.max(1, uiScale(vp));
+}
+
 export function distanceScale(distance: number): number {
   return clamp(22 / Math.max(0.1, distance), 0.7, 1);
 }

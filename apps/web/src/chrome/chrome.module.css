@@ -141,22 +141,23 @@
 .mark {
   --s: max(1, var(--ui, 1));
   --p: 0;
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
-  width: calc(44px * var(--s));
-  height: calc(44px * var(--s));
+  width: calc(160px * var(--s));
+  height: calc(160px * var(--s));
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
 .corner {
   position: absolute;
-  width: calc(10px * var(--s));
-  height: calc(10px * var(--s));
-  --in: calc(4px * var(--s) * var(--p));
+  width: calc(22px * var(--s));
+  height: calc(22px * var(--s));
+  --in: calc(14px * var(--s) * var(--p));
   color: var(--ink);
-  opacity: 0.3;
+  opacity: 0.45;
+  filter: drop-shadow(0 calc(1px * var(--s)) 0 rgba(0, 0, 0, 0.55));
   transition: color 120ms ease-out, opacity 120ms ease-out;
 }
 
@@ -170,7 +171,7 @@
 .corner path {
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.5px;
+  stroke-width: calc(1.5px * var(--s));
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
@@ -207,15 +208,13 @@
 .focus {
   position: absolute;
   left: 50%;
-  top: calc(100% + 8px * var(--s));
+  bottom: calc((6px + 14px * var(--p)) * var(--s));
   transform: translateX(-50%);
+  font-family: var(--font-mono);
   font-size: calc(9.5px * var(--s));
+  line-height: 1;
   letter-spacing: 0.12em;
   color: var(--chrome-accent);
   opacity: 0.8;
-  transition: opacity 900ms ease-out;
-}
-
-.focus.gone {
-  opacity: 0;
+  text-shadow: 0 calc(1px * var(--s)) 0 rgba(0, 0, 0, 0.55);
 }

@@ -56,7 +56,7 @@ Served from `apps/web/public/img/`: a hero per place (784 x 224) and a thumbnail
 - `img/hero-pharmacy.webp` · "The caps of two medicine bottles on a desk." by Topher · CC0 · https://wordpress.org/photos/photo/9968683157/ (via Openverse, wordpress)
 - `img/hero-hardware.webp` · "Hardware store window at 9 Gold St" by wwward0 · CC0 · https://www.flickr.com/photos/15802578@N00/50769351011 (via Openverse, flickr)
 - `img/hero-post-office.webp` · "Post Office Boxes" by MarkBuckawicki · CC0 · https://commons.wikimedia.org/w/index.php?curid=29651792 (via Openverse, wikimedia)
-- `img/hero-theater.webp` · "Front marquee, The Senator Theatre (1939; John J. Zink, architect), 5904 York Road, Baltimore, MD 21212" by Baltimore Heritage · CC0 · https://www.flickr.com/photos/44034762@N04/46235352485 (via Openverse, flickr)
+- `img/hero-theater.webp` · "Кінопалац, Рівне 02" by Ата (Wikimedia Commons user) · CC0 · https://commons.wikimedia.org/wiki/File:%D0%9A%D1%96%D0%BD%D0%BE%D0%BF%D0%B0%D0%BB%D0%B0%D1%86,_%D0%A0%D1%96%D0%B2%D0%BD%D0%B5_02.jpg (Wikimedia Commons)
 - `img/hero-lanes.webp` · "Bowling Alley" by Ian Livesey · CC0 · https://stocksnap.io/photo/bowling-alley-MDJKESUW8P (via Openverse, stocksnap)
 - `img/hero-atlas.webp` · "Free library shelves many books" by unknown · CC0 · https://www.rawpixel.com/image/5904761/photo-image-book-public-domain-wood (via Openverse, rawpixel)
 - `img/hero-m4.webp` · "NYCMTA 6041_M103 New York City Hall" by jonriley1979@att.net · CC0 · https://www.flickr.com/photos/125733295@N07/42585105984 (via Openverse, flickr)

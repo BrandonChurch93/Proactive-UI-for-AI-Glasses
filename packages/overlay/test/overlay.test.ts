@@ -162,6 +162,23 @@ describe('rule 8 · the world has right of way', () => {
     for (let t = 2.2; t < 2.5; t += STEP) s = aside.update(card, ctx(t, []), false);
     expect(s.dropped).toBe(false);
   });
+
+  it('a label whose light is behind a near bus waits as its light instead of riding the bus, and only a near vehicle does it', () => {
+    const label: Rect = { x: 700, y: 300, w: 150, h: 52 };
+    const light = { x: 680, y: 340 };
+    const bus = (depth: number): KeepOut => ({ rect: { x: 600, y: 250, w: 400, h: 200 }, kind: 'vehicle', moving: true, id: 'm4-bus', depth });
+    const far = new Aside();
+    expect(far.update(label, ctx(0, [bus(15)]), false, 40, light).dropped).toBe(false);
+    const aside = new Aside();
+    let s = aside.update(label, ctx(0, [bus(6)]), false, 40, light);
+    expect(s.dropped).toBe(true);
+    for (let t = STEP; t < 1; t += STEP) s = aside.update(label, ctx(t, [bus(6)]), false, 40, light);
+    expect(s.dropped).toBe(true);
+    for (let t = 1; t < 1.2; t += STEP) s = aside.update(label, ctx(t, []), false, 40, light);
+    expect(s.dropped).toBe(true);
+    for (let t = 1.2; t < 1.4; t += STEP) s = aside.update(label, ctx(t, []), false, 40, light);
+    expect(s.dropped).toBe(false);
+  });
 });
 
 describe('keep-outs', () => {

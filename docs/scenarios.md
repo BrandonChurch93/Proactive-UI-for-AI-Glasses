@@ -25,11 +25,11 @@ Recording: Hungry at 0:01, Goldie's from the picker at 0:03, then Mega Burger in
 5. 0:38.5 · A look at Trattoria da Lia across the street: label, card. 0:41 a pinch while walking saves it; nothing opens; Pocket 1. (Rule 6.)
 6. 0:51 · A look at the station stair: its label and its card at 0:52.
 7. 1:02 to 1:15 · Brisk on the north stretch: labels at most, never a card. (Rules 1, 11.) 1:15, "No need to run"; the red light at 1:17, 12 s.
-8. 1:18 · A text from Maya (the M4 bus is still at its stop behind the wearer and passes at 1:24, after the reply), "Running 10 late, order me the usual?", reason "Long red light". 1:19.6 the pocket surfaces: "9 s · what you saved". (Rule 7.)
-9. 1:22 · A look across the avenue at Mega Burger: its card with Going here; at 1:24 it expands in place; 1:25, hold a seat.
-10. 1:29 to 1:39 · Crossing. Nothing opens; "Order ready" arrives at 1:33 and is held; at the far curb it shows, "Held that while you crossed".
-11. 1:40 · The destination column on the way to the door. 1:48, at the door, facing it: "Seat's held, inside on the left." No pocket at the door.
-12. 1:52 · After 4 s the loop resumes south with no destination and no intent. The recording ends at 1:58.
+8. 0:26 · Maya's text at the view edge while walking, at glance size: "Lunch? I'm by the Big Bean at 1." with On my way · Can't today · Where exactly?, reason "Clear sidewalk ahead". In Brisk (1:02) it steps out of view and comes back at 1:15.
+9. 1:18 · Stopped at the red light, the full thread. 1:18.5, On my way: "Big Bean · under a minute · route there?" 1:20, the pocket surfaces with the time available. (Rule 7.) 1:20.5, Yes: the route redraws to the Big Bean (cause `reply`, "Meeting Maya at 1"); the thread keeps the message and the reply with "Routing to the Big Bean" under them until 1:23, then leaves once and does not return. The M4 bus waits at its stop until then and passes at 1:24; no label rides it (Rule 8).
+10. 1:44 · A look at the Big Bean on the way back: its card, Going here.
+11. 1:52 · At the Big Bean door, facing it: its card with the arrival line, "Meeting Maya at 1". No pocket at the door.
+12. 1:56 · After 4 s the loop resumes with no destination and no intent. The recording ends at 1:58.
 
 ## Errands · navigation, sequencing, the curb
 

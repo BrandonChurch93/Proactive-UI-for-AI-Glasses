@@ -37,7 +37,7 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     expect(at('show mega-burger label')).toBeCloseTo(14.3, 5);
     expect(at('promote mega-burger card')).toBeCloseTo(15.3, 5);
     expect(at('save mega-burger card')).toBeCloseTo(22.0, 5);
-    expect(at('demote mega-burger label')).toBeCloseTo(31.1, 5);
+    expect(at('demote mega-burger label')).toBeCloseTo(30.9, 5);
     expect(at('demote mega-burger pip')).toBeUndefined();
     expect(lines.filter((e) => e.line === 'show mega-burger label')).toHaveLength(1);
   });

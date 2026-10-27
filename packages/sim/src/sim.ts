@@ -1,4 +1,5 @@
 import {
+  LOOK_AWAY_S,
   PLACE_BY_ID,
   PLACES,
   WALK,
@@ -62,7 +63,6 @@ export interface LiveInput {
 
 const GAZE_ACQUIRE = (3.5 * Math.PI) / 180;
 const GAZE_RELEASE = (6.0 * Math.PI) / 180;
-const GAZE_FLICKER_S = 0.6;
 
 const PICKUP_S = 3;
 
@@ -323,7 +323,7 @@ export class Sim {
     } else {
       const ty = this.live.headYaw ?? this.head.yaw;
       const tp = this.live.headPitch ?? this.head.pitch;
-      this.head.step(dt, ty, tp, 11);
+      this.head.snap(dt, ty, tp);
     }
     this.applyLiveBeats(t0, t1);
     this.settle.step(this.head.yawRate, dt);
@@ -354,9 +354,9 @@ export class Sim {
     }
     if (id !== this.gazeTarget) {
       if (this.gazeTarget) this.lostGaze = { id: this.gazeTarget, at: t, since: this.gazeSince };
-      const back = id !== null && this.lostGaze?.id === id && t - this.lostGaze.at <= GAZE_FLICKER_S + 1e-9;
+      const back = id !== null && this.lostGaze?.id === id && t - this.lostGaze.at <= LOOK_AWAY_S + 1e-9;
       this.gazeTarget = id;
-      this.gazeSince = back ? this.lostGaze!.since : t;
+      this.gazeSince = back ? this.lostGaze!.since + (t - this.lostGaze!.at) : t;
     }
   }
 

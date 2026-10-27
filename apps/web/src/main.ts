@@ -72,7 +72,7 @@ async function boot(): Promise<void> {
     isScenarioId(scenario) ? scenario : null,
   );
   window.__app = app;
-  if (params.get('chrome') === '0') app.chrome.el.style.display = 'none';
+  if (params.get('chrome') === '0') app.chrome.hide();
   window.__walk = () => app.walk;
   plate.remove();
   window.__stats = () => {

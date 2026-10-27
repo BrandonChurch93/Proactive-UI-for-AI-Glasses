@@ -24,6 +24,17 @@ export class Head {
     this.yawRate = dt > 0 ? (this.yaw - prev) / dt : 0;
   }
 
+  // Live play: the head is where the wearer put it, with no weight; the rate the settle detector reads is smoothed over 50 ms.
+  snap(dt: number, targetYaw: number, targetPitch: number): void {
+    const prev = this.yaw;
+    this.yaw += angleWrap(targetYaw - this.yaw);
+    this.pitch = targetPitch;
+    this.yawV = 0;
+    this.pitchV = 0;
+    const r = dt > 0 ? (this.yaw - prev) / dt : 0;
+    this.yawRate += (r - this.yawRate) * Math.min(1, dt / 0.05);
+  }
+
   set(yaw: number, pitch: number): void {
     this.yawV = 0;
     this.pitchV = 0;

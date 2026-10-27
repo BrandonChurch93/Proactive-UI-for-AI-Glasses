@@ -6,6 +6,7 @@ export type KeepOutKind = 'vehicle' | 'person' | 'face' | 'roadway';
 
 export interface KeepOut {
   rect: Rect;
+  full?: Rect;
   kind: KeepOutKind;
   moving: boolean;
   id: string;

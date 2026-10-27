@@ -14,6 +14,7 @@ export interface LadderItem {
   stepAt: number;
   cardAt: number;
   gazeSince: number | null;
+  paused: { held: number; at: number } | null;
   aboveSince: number | null;
   whispered: boolean;
   wasTarget: boolean;
@@ -35,6 +36,7 @@ export function newLadderItem(id: string): LadderItem {
     stepAt: -Infinity,
     cardAt: -Infinity,
     gazeSince: null,
+    paused: null,
     aboveSince: null,
     whispered: false,
     wasTarget: false,
@@ -88,7 +90,7 @@ export interface LadderOut {
 export function earnedByDwell(it: LadderItem, inp: LadderInput, cfg: Config): PaneLevel {
   if (inp.dwellS < cfg.ladder.pipDwellS - 1e-9) return 'none';
   if (inp.band === 'brisk' || inp.still || rank(it.level) < rank('label')) return 'label';
-  const held = inp.t - Math.max(it.since, it.gazeSince ?? inp.t);
+  const held = inp.t - Math.max(it.since, it.gazeSince ?? inp.t) - it.hiddenS;
   return held >= (inp.growS ?? cfg.ladder.growS) - 1e-9 ? 'card' : 'label';
 }
 

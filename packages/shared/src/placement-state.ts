@@ -407,6 +407,10 @@ function overlapArea(a: Rect, b: Rect): number {
   return Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
 }
 
+function inRect(p: { x: number; y: number }, r: Rect): boolean {
+  return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+}
+
 export class Aside {
   private overlapSince: number | null = null;
   private coveredSince: number | null = null;
@@ -419,9 +423,25 @@ export class Aside {
   dropped = false;
   by: string | null = null;
 
-  update(home: Rect, ctx: FrameCtx, focusOk: boolean, depth = Infinity): AsideState {
+  update(home: Rect, ctx: FrameCtx, focusOk: boolean, depth = Infinity, anchor?: { x: number; y: number }): AsideState {
     const { t } = ctx;
     const near = keepOutsFor(ctx.keepOuts, depth);
+    // A light hidden behind a near vehicle has nothing to point at: its pane waits as the light rather than riding the vehicle.
+    const over = anchor && near.find((k) => k.kind === 'vehicle' && k.depth < MOVE.coverM && inRect(anchor, k.full ?? k.rect));
+    if (over) {
+      if (!this.dropped) {
+        this.dropped = true;
+        this.active = true;
+        this.by = `vehicle ${over.id}`;
+        this.x.go(t, 0, MOVE.asideIn, 'out');
+        this.y.go(t, 0, MOVE.asideIn, 'out');
+        this.o.go(t, MOVE.asideOpacity, MOVE.asideIn, 'out');
+      }
+      this.overlapSince = null;
+      this.coveredSince = null;
+      this.clearSince = null;
+      return { dx: this.x.at(t), dy: this.y.at(t), opacity: this.o.at(t), dropped: true, active: true, by: this.by, trace: null };
+    }
     const hits = near.filter((k) => k.kind !== 'roadway' && rectsOverlap(home, k.rect));
     const hard = hits.some((k) => k.kind === 'face' || (k.kind === 'vehicle' && k.moving));
     if (hits.length > 0) {
