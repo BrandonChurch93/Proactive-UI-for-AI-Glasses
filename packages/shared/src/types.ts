@@ -193,7 +193,7 @@ export interface Content {
   depthRef?: string;
   live?: string;
   rows?: ContentRow[];
-  actions?: { id: string; label: string; primary?: boolean }[];
+  actions?: { id: string; label: string; primary?: boolean; hint?: string }[];
   note?: string;
   trimmed?: string[];
   showReason?: boolean;

@@ -33,6 +33,7 @@ import { EASE, MOVE, T } from './tokens';
 type PaneLevel = 'label' | 'glance' | 'card' | 'expanded' | 'none';
 
 const HELD_LINE = 'Held that while you crossed';
+const QUIET_LINE = { crossing: 'Quiet while you cross', roadway: 'Quiet near traffic', vehicle: 'Quiet near traffic' } as const;
 
 interface Lights {
   pip: LightHandle;
@@ -48,7 +49,6 @@ interface Built {
   wrap: HTMLElement;
   seed: HTMLElement;
   rule: HTMLElement;
-  hold: HTMLElement;
   width: number;
   height: number;
   w: Track;
@@ -269,6 +269,9 @@ export class Overlay {
   private timeBox: { key: string; rect: Rect } | null = null;
   private readonly glyphLabel: HTMLElement;
   private readonly focusEl: HTMLElement;
+  private readonly quietEl: HTMLElement;
+  private quietTl: gsap.core.Timeline | null = null;
+  quietOn = false;
   private items = new Map<string, Item>();
   private order = 0;
   private frame: BrainFrame | null = null;
@@ -335,7 +338,9 @@ export class Overlay {
     this.live = document.createElement('div');
     this.live.className = 'sr';
     this.live.setAttribute('aria-live', 'polite');
-    this.fixed.append(this.glyphEl, this.focusEl, this.live);
+    this.quietEl = document.createElement('div');
+    this.quietEl.className = s.quietLine!;
+    this.fixed.append(this.glyphEl, this.quietEl, this.focusEl, this.live);
     this.root.append(this.hud, this.fixed);
     parent.appendChild(this.root);
     this.route = new RouteView(bridge);
@@ -360,6 +365,11 @@ export class Overlay {
     if (frame.gate.safety !== this.receded) this.setReceded(frame.gate.safety, t);
     this.snooze = frame.gate.snooze;
     this.setGlyph(frame.glyph);
+    if (frame.gate.safety) {
+      const held = frame.glyph?.kind === 'held' && frame.glyph.count ? ` · ${frame.glyph.count} held` : '';
+      const text = `${QUIET_LINE[frame.gate.safetyCause ?? 'vehicle']}${held}`;
+      if (this.quietEl.textContent !== text) this.quietEl.textContent = text;
+    }
     const time = clockAt(t, true);
     if (this.timeEl.textContent !== time) this.timeEl.textContent = time;
     const seen = new Set<string>();
@@ -474,6 +484,11 @@ export class Overlay {
   private setReceded(on: boolean, t: number): void {
     this.receded = on;
     this.gateTl?.kill();
+    this.quietOn = on;
+    this.quietTl?.kill();
+    this.quietTl = on
+      ? this.tl().fromTo(this.quietEl, { opacity: 0, filter: 'blur(4px)', y: -3 }, { opacity: 1, filter: 'blur(0px)', y: 0, duration: T.base, ease: EASE.out, clearProps: 'filter' }, MOVE.glyphAt)
+      : this.tl().to(this.quietEl, { opacity: 0, duration: T.quick, ease: EASE.in });
     if (on) {
       this.gateTl = recede(this.tl(), this.hud, this.gateK);
       this.sound.breathDown();
@@ -614,10 +629,8 @@ export class Overlay {
     const rule = document.createElement('div');
     rule.className = s.holdRule!;
     rule.appendChild(document.createElement('i'));
-    const hold = document.createElement('span');
-    hold.className = s.holdWord!;
     box.append(view.el, rule);
-    wrap.append(box, seed, hold);
+    wrap.append(box, seed);
     (it.kind === 'world' ? this.worldLayer : this.viewLayer).appendChild(wrap);
     const width = view.el.offsetWidth;
     const height = view.el.offsetHeight;
@@ -627,7 +640,6 @@ export class Overlay {
       wrap,
       seed,
       rule,
-      hold,
       width,
       height,
       w: new Track(width),
@@ -653,14 +665,11 @@ export class Overlay {
     const on = Boolean(m?.next) && !it.dying && b.level === it.d.level && (b.level === 'label' || b.level === 'card');
     const p = on && m && f ? clamp(m.p + m.rate * Math.max(0, t - f.t), 0, 1) : 0;
     const fromRight = Boolean(pr && b.rect && pr.x > b.rect.x + b.rect.w / 2);
-    const key = `${on ? 1 : 0}|${p > 0 ? 1 : 0}|${fromRight ? 1 : 0}|${b.level}`;
+    const key = `${on && p > 0 ? 1 : 0}|${fromRight ? 1 : 0}`;
     if (b.rule.dataset.key !== key) {
       b.rule.dataset.key = key;
       b.rule.classList.toggle(s.holdOn!, on && p > 0);
       b.rule.classList.toggle(s.holdRight!, fromRight);
-      b.hold.classList.toggle(s.holdOn!, on && p === 0);
-      b.hold.classList.toggle(s.holdRight!, fromRight);
-      b.hold.textContent = b.level === 'card' ? 'HOLD TO OPEN' : 'HOLD';
     }
     b.rule.style.setProperty('--hold', p.toFixed(4));
   }

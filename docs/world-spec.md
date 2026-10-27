@@ -55,7 +55,7 @@ Signage rule: a person's name or a plain descriptor, two or three words. Each ro
 - Traffic: cars, taxis, vans, a bus that stops at the M4 stop, the delivery truck. Each vehicle's box in the sim matches the model as drawn, because keep-outs and the backdrop sampler use the sim's box: models scale to the sim's length and never wider than its width, so the stubby truck model is drawn 7.6 m long, 4.15 m tall and 2.5 m wide, inside its lane. Lane logic with following distance; signals obeyed; never through each other; never stopped inside the intersection. Parked cars along the avenue.
 - People: rigged characters with walk cycles (CC0 low-poly packs, e.g. Quaternius or Kenney, loaded as glTF). Idle groups talking (the social signal), someone at the newsstand, someone waiting at the light. Nobody within 3 m of the camera except scripted beats.
 - Scripted people for beats: a rider in the bike lane for the bike moment; a passerby at the corner for Errands.
-- Ambient audio: a city bed with distant traffic, a horn now and then, footsteps matched to the bob.
+- Ambient audio: a city bed of distant traffic and air, vehicles passing from the roadway's side, footsteps at the band's cadence, the crossing's beeper at a curb on WAIT and through a crossing; no horns (design-system 4, Sound).
 
 ## 5. Lighting
 

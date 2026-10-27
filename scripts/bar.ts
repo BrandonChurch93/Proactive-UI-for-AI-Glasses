@@ -124,6 +124,7 @@ if (probes) {
         if (Object.keys(ev).length) walk.queue(ev);
       }
       m.frames++;
+      { const lf = walk.last(); if (lf) { const g = lf.frame.gate.safety; if (g) m.gateFrames = (m.gateFrames || 0) + 1; const up = o.quietOn && Boolean(o.quietEl.textContent); if (up !== g) { m.quietBad = (m.quietBad || 0) + 1; if (!m.quietAt) m.quietAt = [+walk.t.toFixed(2), g, up]; } } }
       const w = sim.wearer;
       const crossing = w.state === 'crossing';
       if (crossing) {
@@ -226,7 +227,7 @@ if (probes) {
     await p.screenshot({ path: `${shotDir}/${scenario}-live-${at}.png` });
   }
   const out = (await p.evaluate(`(() => { const walk = window.__app.walk; return { m: window.__bar.m, log: walk.overlayLog, t: walk.t, lap: window.__bar.lap }; })()`)) as {
-    m: { frames: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
+    m: { frames: number; quietBad?: number; quietAt?: unknown; gateFrames?: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
     lap: { laps: number; pauses: [number, number][]; crossBirths: unknown[]; routes: [number, string, number | null][]; corners: [number, number | null][] };
@@ -331,6 +332,7 @@ if (probes) {
   console.log(`  intent panel within 1 s of Stopped at the corner: ${L.corners.length - lateCorner.length} of ${L.corners.length}${L.corners.length ? `  ${JSON.stringify(L.corners)}` : ''}`);
   console.log(`  panes born during a crossing: ${L.crossBirths.length}${L.crossBirths.length ? `  ${JSON.stringify(L.crossBirths.slice(0, 6))}` : ''}`);
   console.log(`  laps completed: ${L.laps}; stops longer than 1 s not at a light, a door or the corner: ${L.pauses.length}${L.pauses.length ? `  ${JSON.stringify(L.pauses.slice(0, 6))}` : ''}`);
+  console.log(`  crossing line up on gate frames and on no other: ${m.quietBad ? `${m.quietBad} frames wrong, first ${JSON.stringify(m.quietAt)}` : `yes`} (${m.gateFrames ?? 0} gate frames)`);
 }
 console.log(`  console errors: ${errors.length}${errors.length ? `\n${errors.slice(0, 5).join('\n')}` : ''}`);
 await b.close();

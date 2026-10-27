@@ -25,7 +25,7 @@
       }
     },
     {
-      "name": "0:01 \u00b7 stopped at the corner: the intent panel within 1 s",
+      "name": "0:01 \u00b7 stopped at the corner: the agenda panel within 1 s",
       "between": [
         0.75,
         1.0
@@ -34,11 +34,11 @@
         "action": "show",
         "id": "intent",
         "component": "intent",
-        "nameIs": "What are you up to?"
+        "nameIs": "What's on the agenda today?"
       }
     },
     {
-      "name": "0:01 \u00b7 Hungry chosen: the lunch picker replaces the panel",
+      "name": "0:01 \u00b7 Looking for food: the lunch picker replaces the panel",
       "between": [
         1.0,
         1.2
@@ -417,7 +417,7 @@
       }
     },
     {
-      "name": "1:52 \u00b7 at the Big Bean door, the arrival line says why",
+      "name": "1:52 \u00b7 at the Big Bean door the arrival line is decided, with why (on the glass at 1:53)",
       "between": [
         111.9,
         112.3

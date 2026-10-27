@@ -27,7 +27,7 @@
       }
     },
     {
-      "name": "0:01 \u00b7 Just walk folds it and the light releases",
+      "name": "0:01 \u00b7 Just exploring folds it and the light releases",
       "between": [
         1.0,
         1.2
@@ -38,7 +38,7 @@
       }
     },
     {
-      "name": "0:01 to 0:10 \u00b7 after Just walk, nothing",
+      "name": "0:01 to 0:10 \u00b7 after Just exploring, nothing",
       "between": [
         1.05,
         10.5
@@ -250,7 +250,7 @@
       }
     },
     {
-      "name": "1:20 to 1:52 \u00b7 the answer is no: the walk stays Just walk with no destination",
+      "name": "1:20 to 1:52 \u00b7 the answer is no: the walk stays Just exploring with no destination",
       "between": [
         80.5,
         112
@@ -353,7 +353,7 @@
       }
     },
     {
-      "name": "2:56 \u00b7 Just walk again: the panel folds and the second lap begins",
+      "name": "2:56 \u00b7 Just exploring again: the panel folds and the second lap begins",
       "between": [
         176.5,
         176.8

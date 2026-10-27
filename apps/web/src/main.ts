@@ -17,6 +17,7 @@ declare global {
     __world?: World;
     __walk?: () => Walk;
     __app?: App;
+    __soundlab?: () => Promise<(typeof import('./audio/lab'))['soundlab']>;
     __stats?: () => { calls: number; triangles: number; textures: number; geometries: number };
   }
 }
@@ -74,6 +75,7 @@ async function boot(): Promise<void> {
   window.__app = app;
   if (params.get('chrome') === '0') app.chrome.hide();
   window.__walk = () => app.walk;
+  window.__soundlab = () => import('./audio/lab').then((m) => m.soundlab);
   plate.remove();
   window.__stats = () => {
     const r = world.core.renderer;

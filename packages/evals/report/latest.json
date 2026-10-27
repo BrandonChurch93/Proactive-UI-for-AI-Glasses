@@ -441,12 +441,12 @@
      "detail": "shows 0, non-gaze 0, holds 0"
     },
     {
-     "name": "0:01 · stopped at the corner: the intent panel within 1 s",
+     "name": "0:01 · stopped at the corner: the agenda panel within 1 s",
      "pass": true,
      "detail": "t=0.8 show intent card"
     },
     {
-     "name": "0:01 · Hungry chosen: the lunch picker replaces the panel",
+     "name": "0:01 · Looking for food: the lunch picker replaces the panel",
      "pass": true,
      "detail": "t=1 show picker card"
     },
@@ -606,7 +606,7 @@
      "detail": "t=104.002 promote big-bean card"
     },
     {
-     "name": "1:52 · at the Big Bean door, the arrival line says why",
+     "name": "1:52 · at the Big Bean door the arrival line is decided, with why (on the glass at 1:53)",
      "pass": true,
      "detail": "t=112.202 promote big-bean card"
     },
@@ -753,12 +753,12 @@
      "detail": "t=0.8 show intent card"
     },
     {
-     "name": "0:01 · Just walk folds it and the light releases",
+     "name": "0:01 · Just exploring folds it and the light releases",
      "pass": true,
      "detail": "t=1 dismiss intent card"
     },
     {
-     "name": "0:01 to 0:10 · after Just walk, nothing",
+     "name": "0:01 to 0:10 · after Just exploring, nothing",
      "pass": true,
      "detail": "shows 0, non-gaze 0, holds 0"
     },
@@ -848,7 +848,7 @@
      "detail": "t=80.002 dismiss ask glance"
     },
     {
-     "name": "1:20 to 1:52 · the answer is no: the walk stays Just walk with no destination",
+     "name": "1:20 to 1:52 · the answer is no: the walk stays Just exploring with no destination",
      "pass": true,
      "detail": "315 frames"
     },
@@ -893,7 +893,7 @@
      "detail": "t=173.703 show intent card"
     },
     {
-     "name": "2:56 · Just walk again: the panel folds and the second lap begins",
+     "name": "2:56 · Just exploring again: the panel folds and the second lap begins",
      "pass": true,
      "detail": "t=176.504 dismiss intent card"
     },

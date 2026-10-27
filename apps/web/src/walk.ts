@@ -134,10 +134,9 @@ export class Walk {
   private pursuit: { id: string; on: boolean; dyaw: number; dpitch: number } | null = null;
   private turned = false;
   private turnedAt = -Infinity;
-  private bodyWas: number | null = null;
   holding = false;
   private pick: { step: number; cur: string | null; cand: string | null; candSince: number; outSince: number | null } = { step: -2, cur: null, cand: null, candSince: 0, outSince: null };
-  private sound: { ctx: AudioContext | null; enabled: boolean } = { ctx: null, enabled: false };
+  private sound: { ctx: AudioContext | null; ui: AudioNode | null; enabled: boolean } = { ctx: null, ui: null, enabled: false };
 
   constructor(
     readonly world: World,
@@ -208,14 +207,14 @@ export class Walk {
       },
     });
     o.setFocusOutline(this.focusOutline);
-    if (this.sound.ctx) o.sound.attach(this.sound.ctx);
+    if (this.sound.ctx) o.sound.attach(this.sound.ctx, this.sound.ui ?? undefined);
     o.sound.enabled = this.sound.enabled;
     return o;
   }
 
-  setSound(ctx: AudioContext | null, enabled: boolean): void {
-    if (ctx && ctx !== this.sound.ctx && this.overlay) this.overlay.sound.attach(ctx);
-    this.sound = { ctx: ctx ?? this.sound.ctx, enabled };
+  setSound(ctx: AudioContext | null, enabled: boolean, ui: AudioNode | null = null): void {
+    if (ctx && ctx !== this.sound.ctx && this.overlay) this.overlay.sound.attach(ctx, ui ?? undefined);
+    this.sound = { ctx: ctx ?? this.sound.ctx, ui: ui ?? this.sound.ui, enabled };
     if (this.overlay) this.overlay.sound.enabled = enabled;
   }
 
@@ -389,9 +388,10 @@ export class Walk {
     const body = sim.wearer.bodyYaw;
     const toYaw = yawToward(eye, a);
     const toPitch = pitchToward(eye, a);
-    if (!this.pursuit || this.pursuit.id !== gaze || this.turned) {
+    // While the pointer is down the drag owns the head; the hold resumes when it comes up.
+    if (!this.pursuit || this.pursuit.id !== gaze || this.turned || this.holding) {
       // Only a place the wearer turned onto is held; one the walk carries into the square does not pull the head after it.
-      const on = this.turned || this.sim.t - this.turnedAt <= LOOK_AWAY_S + 1e-9;
+      const on = this.turned || this.holding || this.sim.t - this.turnedAt <= LOOK_AWAY_S + 1e-9;
       this.turned = false;
       this.pursuit = { id: gaze, on, dyaw: angleWrap(body + this.head.yaw - toYaw), dpitch: this.head.pitch - toPitch };
       return;
@@ -411,9 +411,6 @@ export class Walk {
     if (!sim.scripted) {
       let inp = this.inputs[this.stepIndex];
       if (!inp) {
-        // While the pointer is down the aim is the wearer's alone: the body turning under it does not swing the view.
-        if (this.holding && this.bodyWas !== null) this.head = { ...this.head, yaw: angleWrap(this.head.yaw - angleWrap(sim.wearer.bodyYaw - this.bodyWas)) };
-        this.bodyWas = sim.wearer.bodyYaw;
         this.pursue(this.pick.cand ?? sim.gaze.target);
         inp = { yaw: sim.wearer.bodyYaw + this.head.yaw, pitch: this.head.pitch, gaze: this.liveGaze() };
         this.inputs[this.stepIndex] = inp;

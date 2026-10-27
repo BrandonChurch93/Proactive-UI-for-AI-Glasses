@@ -358,7 +358,26 @@
 
 @media (min-width: 900px) and (min-height: 561px) {
   .startPanel {
-    gap: calc(32px * var(--u));
+    width: clamp(min(calc(600px * var(--u)), 49vw), 46vw, calc(880px * var(--u)));
+    padding: calc(48px * var(--u)) calc(64px * var(--u));
+    padding-left: max(calc(64px * var(--u)), env(safe-area-inset-left));
+    gap: min(calc(48px * var(--u)), 5.8vh);
+  }
+  .startPanel .lede {
+    line-height: 1.55;
+  }
+  .startPanel .what {
+    gap: calc(18px * var(--u));
+    line-height: 1.5;
+  }
+  .startPanel .what div {
+    grid-template-columns: calc(72px * var(--u)) 1fr;
+  }
+  .startPanel .controls {
+    column-gap: calc(8px * var(--u));
+  }
+  .startPanel .footer {
+    font-size: calc(13px * var(--u));
   }
   .startPanel .section,
   .startPanel .bottom {
@@ -384,6 +403,18 @@
   }
   .startPanel .name {
     font-size: calc(64px * var(--u));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1304px) and (min-height: 561px) {
+  .startPanel {
+    padding: calc(32px * var(--u)) calc(48px * var(--u));
+    padding-left: max(calc(48px * var(--u)), env(safe-area-inset-left));
+    gap: calc(32px * var(--u));
+  }
+  .startPanel .what {
+    gap: calc(10px * var(--u));
+    line-height: 1.45;
   }
 }
 

@@ -1,12 +1,12 @@
 # Scenarios · the walk and its three recordings
 
-One walk on one block: a loop that never ends on its own. The intent (Hungry, Errands, or nothing, Just walk) is a layer on top that adds a list, a route and an arrival; after an arrival the loop resumes with no intent. Every recording demonstrates several walking rules on purpose; the rule numbers refer to `docs/walking-rules.md`.
+One walk on one block: a loop that never ends on its own. The intent (Looking for food, Running errands, or nothing, Just exploring) is a layer on top that adds a list, a route and an arrival; after an arrival the loop resumes with no intent. Every recording demonstrates several walking rules on purpose; the rule numbers refer to `docs/walking-rules.md`.
 
 `data/scenarios/walk.json` holds it all: the pace track, the signal phase, the corner hold, world beats (absolute, or `after: intent` and timed from the moment that intent starts), and three recordings that script the reviewer (gaze, pinch, choice, look up, head scan, the ask answer, and the new `intent`, `choose`, `reply` and `go`). The brain never reads the file; the sim injects what it says into the `WorldSnapshot`. Positions are n, metres north of the south crossing.
 
 ## The loop
 
-1. Start corner, south-east, n = 0. The walk begins Stopped with the south crossing's light held red for 12 s and WAIT counting down on the pavement ahead. At 0:00.8 the intent panel asks what the wearer is up to (nothing filled; a recording opened by its link fills its own intent on the first lap). Just walk, a lunch place from the picker or Start on the stops list releases the light; otherwise it releases at 0:12 and the walk goes on as it is. The same happens at the end of every lap.
+1. Start corner, south-east, n = 0. The walk begins Stopped with the south crossing's light held red for 12 s and WAIT counting down on the pavement ahead. At 0:00.8 the intent panel asks what's on the agenda today (nothing filled; a recording opened by its link fills its own intent on the first lap). Just exploring, a lunch place from the picker or Start on the stops list releases the light; otherwise it releases at 0:12 and the walk goes on as it is. The same happens at the end of every lap.
 2. East sidewalk north: Walk, Stroll on the theater stretch (n 11 to 25.5, about 0:10 to 0:34), Walk past the scaffold and the M4 shelter, Brisk on the north stretch (n 60 to 84, about 1:00 to 1:13), Walk to the corner.
 3. North corner, about 1:15: the avenue light is red with 14 s to go (the walk file's phase). Crossing 10 s.
 4. West sidewalk south at Walk, about 1:39 to 2:28. The wearer asks the south crossing 12 m out; it turns within seconds (actuated, at least 18 s of green first).
@@ -28,8 +28,8 @@ Recording: Hungry at 0:01, Goldie's from the picker at 0:03, then Mega Burger in
 8. 0:26 · Maya's text at the view edge while walking, at glance size: "Lunch? I'm by the Big Bean at 1." with On my way · Can't today · Where exactly?, reason "Clear sidewalk ahead". In Brisk (1:02) it steps out of view and comes back at 1:15.
 9. 1:18 · Stopped at the red light, the full thread. 1:18.5, On my way: "Big Bean · under a minute · route there?" 1:20, the pocket surfaces with the time available. (Rule 7.) 1:20.5, Yes: the route redraws to the Big Bean (cause `reply`, "Meeting Maya at 1"); the thread keeps the message and the reply with "Routing to the Big Bean" under them until 1:23, then leaves once and does not return. The M4 bus waits at its stop until then and passes at 1:24; no label rides it (Rule 8).
 10. 1:44 · A look at the Big Bean on the way back: its card, Going here.
-11. 1:52 · At the Big Bean door, facing it: its card with the arrival line, "Meeting Maya at 1". No pocket at the door.
-12. 1:56 · After 4 s the loop resumes with no destination and no intent. The recording ends at 1:58.
+11. 1:53 · At the Big Bean door, facing it: its card with the arrival line, "Meeting Maya at 1". The brain decides the arrival at 1:52 as the wearer strolls up; the card has been folded at the view edge since 1:48 and lands on the glass at 1:53, once the wearer is Stopped facing the door and it fits 40 px clear. No pocket at the door.
+12. 1:56 · After 4 s at the door the loop resumes with no destination and no intent. The recording ends at 1:58.
 
 ## Errands · navigation, sequencing, the curb
 
@@ -49,16 +49,16 @@ Recording: the reviewer stands at the light, chooses Errands at 0:08 and Start a
 
 ## Just walking · restraint, right of way, snooze
 
-Recording: Just walk at 0:01, and again at the corner a lap later. No destination.
+Recording: Just exploring at 0:01, and again at the corner a lap later. No destination.
 
-1. 0:00.8 · The intent panel; Just walk at 0:01 folds it and releases the light. Then to 0:10, nothing.
+1. 0:00.8 · The intent panel; Just exploring at 0:01 folds it and releases the light. Then to 0:10, nothing.
 2. 0:10.5 · Stroll. The look rests on the Grace Theater marquee: its label at 0:11.3, the theater row labels together as the view settles, the card at 0:11.8, the expanded view in place at 0:13.8 (Rule 10). 0:17 to 0:24, the delivery truck crawls past between the wearer and the marquee; not a gate, the level holds while the overlay steps it out of the way (Rule 8).
 3. 0:28 · The look moves to Trattoria da Lia: its label grows into the card, "Read from Italian"; the theater shrinks back to its label in the same move. 0:30, Kathy's Cupcakes: label, then card; the look moves on at 0:32.5 before it would expand.
 4. 0:48 · On the straight past the scaffold the wearer looks up and holds it: "Snoozing", then the countdown from 0:50.3; Atlas Books, looked at from 0:51, is held "Snoozed". 0:55 looking up again cancels it by 0:57.5. (Rule 12.)
-5. 1:13 · "No need to run". 1:15 red light; two food places were looked at, so at 1:17.6, "Hungry? · Find lunch · No". No, at 1:20; the walk stays Just walk.
+5. 1:13 · "No need to run". 1:15 red light; two food places were looked at, so at 1:17.6, "Hungry? · Find lunch · No". No, at 1:20; the walk stays Just exploring.
 6. 1:29 to 1:39 · Crossing: nothing opens. A bike comes up the lane from behind as the wearer steps off: `BIKE` on the pavement with its arrow.
 7. 1:40.6 · The far curb: the view settles on the west side and its places label together. The loop continues south and across the south crossing.
-8. 2:53 · Back at the start corner: the light held, the intent panel within a second of stopping. Just walk at 2:56.5; the second lap begins. The recording ends at 3:02. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
+8. 2:53 · Back at the start corner: the light held, the intent panel within a second of stopping. Just exploring at 2:56.5; the second lap begins. The recording ends at 3:02. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
 ## Timing as built
 
@@ -94,4 +94,4 @@ The recordings script what the reviewer does. They drive `pnpm record` for the e
 
 ## End screen
 
-Reached from End the walk on the intent panel, from the inspector, or at the end of a recording (Esc on the intent panel folds it as Just walk; see STATUS 19.3). The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: "The walk"; one sentence built from the session's log ("In 2 minutes the glasses saw 14 places, showed you 7, saved 1 for a red light, got you to the Big Bean, and sent 1 reply", every number counted from this session: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, pinches saved, doors reached, and replies sent; a zero clause is dropped); a timeline of the whole session, 0:00 to its length, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", three lines in time order, one per name: first what the wearer's own answers led to (an offer the glasses made from a reply, and the route it drew, both always listed when they happened; then the last lunch pick and arrivals), then the highest-scoring things shown that carried a reason line. Never the intent panel or the picker, and never a notification's delivery reason ("Clear sidewalk ahead" is when it was shown, not a decision); and the buttons See every decision, Walk again (the title), Keep walking (a new walk from the start corner with the intent panel up) and About. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.
+Reached from End the walk on the intent panel, from the inspector, or at the end of a recording (Esc on the intent panel folds it as Just exploring; see STATUS 19.3). The street holds its last frame and dims to 35% over `t-scene` (reviewer chrome; the glasses are hidden), and the start screen's panel slides in from the left. It reads: "The walk"; one sentence built from the session's log ("In 2 minutes the glasses saw 14 places, showed you 7, saved 1 for a red light, got you to the Big Bean, and sent 1 reply", every number counted from this session: roster places that came within 70 m, decisions that brought something to a card or an expanded view, distinct items held during a crossing, pinches saved, doors reached, and replies sent; a zero clause is dropped); a timeline of the whole session, 0:00 to its length, drawn left to right over 900 ms, with a tick for every card in ink and every hold in the voice color at half strength, the crossings shaded and the pace bands as a stepped line beneath; "What it decided", three lines in time order, one per name: first what the wearer's own answers led to (an offer the glasses made from a reply, and the route it drew, both always listed when they happened; then the last lunch pick and arrivals), then the highest-scoring things shown that carried a reason line. Never the intent panel or the picker, and never a notification's delivery reason ("Clear sidewalk ahead" is when it was shown, not a decision); and the buttons See every decision, Walk again (the title), Keep walking (a new walk from the start corner with the intent panel up) and About. See every decision opens the inspector on this walk's Shows, at the first one; closing it returns to the end screen.

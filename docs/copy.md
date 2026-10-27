@@ -10,7 +10,7 @@ A panel on the left, reviewer chrome, over the live street; top to bottom:
 - Name: **Proactive UI for AI Glasses**
 - Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
 - What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
-- The walk (mono caps): Start the walk (primary, its label centered). Nothing else: the walk asks what you're up to at the first red light.
+- The walk (mono caps): Start the walk (primary, its label centered). Nothing else: the walk asks what's on the agenda at the first red light.
 - Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
 - Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
 - Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)
@@ -59,6 +59,7 @@ Banned words in any reason: look, looked, looking, gaze, eyes, stared, glanced, 
 
 ## Held and follow-up
 
+- The crossing line, top center, the only words on the glass during a gate (caps on screen): Quiet while you cross (a crossing) · Quiet near traffic (the roadway and vehicle gates), with · 1 held or · 2 held after it while the glyph counts
 - Held (glyph) · Held 2 · 3 · social · Pocket 1 · Snoozing (the second second of the gesture, before it takes) · 60 s (snooze countdown)
 - Held that while you crossed. Still want it?
 - One message came in. Read it?
@@ -120,7 +121,6 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 
 - Label: the name and the say line's short form (in Brisk, the name and one number). Nothing else.
 - Card: the name, the say line, one live line, and the reason line in Stopped and Stroll (a compact card, beyond 30 m, has no reason line) unless the say line already says it (Mega Burger's "across the street, on your way"). No year, no category line, no hint on the glass.
-- Hold rule caption, under the rule's start while a looked-at pane can still grow and its count has not begun: HOLD (on a label) · HOLD TO OPEN (on a card). Gone the moment the fill begins; never on a pane at its last level.
 - Expanded view: the name, the say line, at most three rows that support one decision, two actions, and after a choice, the line that confirms it. No "EST" label.
 
 ## Expanded views
@@ -134,7 +134,7 @@ Live lines on cards (the two facts behind the sentence) stay as in `data/places.
 - The others keep their rows and actions from `data/places.json`, at most three rows: Lucky Lanes · Book a lane · Lane 6 is yours at 3:30. Atlas Books · Save the reading. Trattoria da Lia · Cacio e pepe · Cheese and black pepper · Hold a table. Kathy's Cupcakes · Brown butter · Save me one. The Big Bean · Order ahead · Ordered. Ready in 5 min. M4 stop · Remind me at 11. 47th St Station · Route me there. Corner Hardware · Hold it at the till.
 ## The corner: intent panel, lunch picker, stops list
 
-- Intent panel (at the start corner, within 1 s of stopping, every lap): What are you up to? / Hungry · Errands · Just walk · End the walk. No answer is filled from the start panel; a recording opened by its link fills its own intent on the first lap only. Reason in the log: Long red light.
+- Intent panel (at the start corner, within 1 s of stopping, every lap): the eyebrow from the walk's clock and the reason, TUE 12:40 · LONG RED LIGHT (mono caps) / What's on the agenda today? / Looking for food · Five places on this block (the count of food and cafe places on the block) / Running errands · Three stops, one route / Just exploring · Quiet unless you look / End the walk (quiet, below the rows). No answer is filled from the start panel; a recording opened by its link fills its own intent on the first lap only. Reason in the log: Long red light.
 - Lunch picker (replaces the panel on Hungry): Lunch on this block · by walk time / one row per food or cafe place, by walk time: {name} · {picker line} · {walk time} · {wait and seats}, the walk time as under a minute below 60 s, otherwise whole minutes rounded up (1 min, 2 min); the rows still sort by the true seconds; the route offer's {walk time} reads the same way / Not now. Reason in the log: Lunch spots on this block. Picker lines: Goldie's Counter · Fastest lunch on this side. Kathy's Cupcakes · Not lunch, a batch at 2. The Big Bean · Coffee after. Trattoria da Lia · Home cooking, sit-down. Mega Burger · Burgers, counter seats. Wait and seats is the place's live line.
 - The destination's card and expanded view: Going here (a chip in the header, in the voice color). Any other lunch place's card while a destination is set: Go here instead (primary).
 - Stops list (replaces the panel on Errands): Three stops · one route / 1 Pharmacy · 2 Hardware · 3 Post Office / In order along the way / Start (primary). Walking away without Start starts it.

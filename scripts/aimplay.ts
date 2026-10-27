@@ -94,13 +94,18 @@ while (true) {
     await page.waitForTimeout(150);
     continue;
   }
-  const dx = wrap(next.yaw - world) / k;
-  const dy = (next.pitch - s.head.pitch) / k;
-  const x0 = w / 2;
-  const y0 = h * 0.86;
-  await page.mouse.move(x0, y0);
+  // A person re-aims as the body turns under the drag: each step closes part of what is left, read from the live view.
+  let x = w / 2;
+  let y = h * 0.86;
+  await page.mouse.move(x, y);
   await page.mouse.down();
-  await page.mouse.move(x0 + dx, y0 + dy, { steps: 18 });
+  for (let i = 18; i >= 1; i--) {
+    const r = await read();
+    const p = r.places.find((q) => q.id === next.id)!;
+    x += wrap(p.yaw - (r.body + r.head.yaw)) / k / i;
+    y += (p.pitch - r.head.pitch) / k / i;
+    await page.mouse.move(x, y);
+  }
   await page.mouse.up();
   const t0 = (await read()).t;
   let on: number | null = null;

@@ -1,6 +1,7 @@
 import {
   angleWrap,
   clockAt,
+  WALK,
   SETTLE,
   FOCUS_ZONE,
   LEVEL_RANK,
@@ -134,6 +135,11 @@ const DEFAULT_CAUSE: Partial<Record<Origin, Cause>> = {
   goal: 'goal',
   pocket: 'pocket',
 };
+
+const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+function countWord(n: number): string {
+  return COUNT_WORDS[n] ?? String(n);
+}
 
 export class Brain {
   readonly cfg: Config;
@@ -1002,14 +1008,28 @@ export class Brain {
     if (st === 'intent' && (this.bandNow === 'stopped' || this.standing.has('intent'))) {
       const r = reason('world', 'Long red light', [{ signal: 'corner', value: snap.goal.lap ?? 0, weight: 1 }]);
       const sug = snap.goal.suggest;
-      const opt = (id: string, label: string): { id: string; label: string; primary?: boolean } => (sug === id ? { id, label, primary: true } : { id, label });
+      const opt = (id: string, label: string, hint: string): { id: string; label: string; primary?: boolean; hint: string } => (sug === id ? { id, label, hint, primary: true } : { id, label, hint });
+      const food = snap.entities.filter((e) => e.kind === 'food' || e.kind === 'cafe').length;
+      const stops = WALK.beats.find((b) => b.kind === 'stops' && b.intent === 'errands');
+      const nStops = stops && stops.kind === 'stops' ? stops.ids.length : 0;
       wants.push({
         id: 'intent',
         component: 'intent',
         zone: 'view',
         level: 'card',
         anchor: 'view:edge-right',
-        content: { name: 'What are you up to?', reason: r, showReason: false, actions: [opt('hungry', 'Hungry'), opt('errands', 'Errands'), opt('walking', 'Just walk'), { id: 'end', label: 'End the walk' }] },
+        content: {
+          name: "What's on the agenda today?",
+          fact: `${clockAt(snap.t, true)} · ${r.text}`,
+          reason: r,
+          showReason: false,
+          actions: [
+            opt('hungry', 'Looking for food', `${countWord(food)} places on this block`),
+            opt('errands', 'Running errands', `${countWord(nStops)} stops, one route`),
+            opt('walking', 'Just exploring', 'Quiet unless you look'),
+            { id: 'end', label: 'End the walk' },
+          ],
+        },
         reason: r,
         origin: 'goal',
         timing: 'now',

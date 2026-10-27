@@ -64,6 +64,12 @@ const APP_GLYPHS: Record<NonNullable<Content['app']>, string> = {
   Messages: '<svg viewBox="0 0 14 14"><path d="M3 2h8a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H6.6L3.8 12.6V10.5H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
 };
 
+const INTENT_GLYPHS: Record<string, string> = {
+  hungry: '<svg viewBox="0 0 20 20"><path d="M6 2.5v5.2M4 2.5v4a2 2 0 0 0 4 0v-4M6 9.7v7.8M14.5 17.5V2.5c-2 1.2-3 3.4-3 6.2v2.8h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  errands: '<svg viewBox="0 0 20 20"><path d="M3 5l1.3 1.3L6.8 3.8M3 10.5l1.3 1.3 2.5-2.5M3 16l1.3 1.3 2.5-2.5M9.5 5h7.5M9.5 10.5h7.5M9.5 16h7.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  walking: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M12.8 7.2l-1.6 4-4 1.6 1.6-4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+};
+
 function keyed<T extends HTMLElement>(e: T, k: string): T {
   e.dataset.k = k;
   return e;
@@ -245,8 +251,28 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       return { cls: s.thread!, kids, why: null };
     }
     case 'intent': {
+      if (c.fact) push(keyed(node('div', `${s.intentEyebrow} ${s.t}`, c.fact), 'fact'));
       push(keyed(node('div', `${s.intentQ} ${s.t}`, c.name), 'name'));
-      push(actions(c, d.id, h));
+      for (const a of c.actions ?? []) {
+        if (a.id === 'end') continue;
+        const b = node('button', `${s.intentRow} ${a.primary ? s.intentPick : ''}`) as HTMLButtonElement;
+        b.type = 'button';
+        b.dataset.k = `a:${a.id}`;
+        const g = node('span', s.intentGlyph);
+        g.innerHTML = INTENT_GLYPHS[a.id] ?? '';
+        g.setAttribute('aria-hidden', 'true');
+        const text = node('span', s.intentText);
+        text.append(node('span', s.intentLabel, a.label));
+        if (a.hint) text.append(node('span', s.intentHint, a.hint));
+        b.append(g, text);
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          h.choice(d.id, a.id);
+        });
+        push(b);
+      }
+      const end = c.actions?.find((a) => a.id === 'end');
+      if (end) push(actions({ ...c, actions: [end] }, d.id, h, s.intentEnd));
       return { cls: s.intent!, kids, why: null };
     }
     case 'picker': {

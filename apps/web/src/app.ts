@@ -1,6 +1,6 @@
-import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, type Band, type ComponentKind, type ScenarioId } from '@lumen/shared';
+import { LEVEL_RANK, PLACE_BY_ID, angleWrap, isShow, reasonIsClean, uiScale, yawToward, type Band, type ComponentKind, type ScenarioId, type WorldSnapshot } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
-import { Ambient } from './audio/ambient';
+import { Ambient, type StreetFrame } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
 import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
 
@@ -21,6 +21,20 @@ export interface AppOptions {
 type Mode = 'attract' | 'walk';
 
 const NOT_DECIDED = new Set<ComponentKind>(['intent', 'picker', 'thread', 'toast', 'strip']);
+
+// What the street sounds need from the walk: the band for the cadence, the crossing and its signal, and which side the road is on.
+function streetFrame(w: Walk, band: Band, snap: WorldSnapshot): StreetFrame {
+  const sim = w.sim;
+  const eye = sim.wearer.pos;
+  const cw = snap.env.crosswalk;
+  const crossing = sim.wearer.state === 'crossing';
+  const waiting = Boolean(cw && cw.signal !== 'walk' && cw.distance < 1.5 && sim.wearer.speed < 0.2);
+  const post = cw ? sim.anchorOf(`signal:${cw.id}`) : undefined;
+  const head = sim.head.yaw;
+  const signalPan = post ? -Math.sin(angleWrap(yawToward(eye, post) - head)) : 0;
+  const roadPan = -Math.sin(angleWrap(yawToward(eye, { x: 0, y: eye.y, z: eye.z }) - sim.wearer.bodyYaw));
+  return { t: w.t, band, crossing, walkSignal: Boolean(cw && cw.signal === 'walk'), beeping: crossing || waiting, roadPan, signalPan, paint: crossing };
+}
 
 export class App {
   walk: Walk;
@@ -344,7 +358,7 @@ export class App {
   private syncSound(w: Walk): void {
     const live = this.soundOn && this.mode !== 'attract';
     if (live !== this.ambient.on) this.ambient.toggle();
-    w.setSound(this.ambient.context, live);
+    w.setSound(this.ambient.context, live, this.ambient.ui);
   }
 
   private dismiss(): void {
@@ -439,7 +453,8 @@ export class App {
     if (this.mode !== 'attract' && w.ended && !this.endShown && !this.inspector?.isOpen) this.showEnd();
     this.updatePace();
     this.updateMark();
-    this.ambient.update(w.t, w.sim.wearer.speed);
+    const last = w.last();
+    if (last) this.ambient.update(streetFrame(w, last.frame.band, last.snap));
     void dt;
   }
 }
