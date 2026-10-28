@@ -89,7 +89,7 @@ let clockLast = 0;
 
 interface Events {
   pinch?: string;
-  choice?: { id: string; action: string };
+  choice?: { id: string; action: string; row?: string };
   dismiss?: string | null;
 }
 
@@ -200,8 +200,8 @@ export class Walk {
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       handlers: {
         pinch: (id) => this.pinch(id),
-        choice: (id, action) => {
-          this.queue({ choice: { id, action } });
+        choice: (id, action, row) => {
+          this.queue({ choice: row === undefined ? { id, action } : { id, action, row } });
           if (id === 'intent' && action === 'end') this.end();
         },
       },
@@ -340,6 +340,11 @@ export class Walk {
     const half = viewfinderHalf(vp);
     const keepHalf = viewfinderHalf(vp, true);
     const frontBias = FRONT_BIAS_PX * (half / viewfinderHalf({ w: 1280, h: 800 }));
+    // The viewfinder resting on the expanded view of the place it holds is still a look at that place: it is reading the rows.
+    const onPane = (id: string): boolean => {
+      const p = this.view?.panes.find((x) => x.id === id && x.level === 'expanded' && x.visible);
+      return Boolean(p && cx >= p.rect.x && cx <= p.rect.x + p.rect.w && cy >= p.rect.y && cy <= p.rect.y + p.rect.h);
+    };
     let best: string | null = null;
     let bestOff = Infinity;
     let curIn = false;
@@ -366,14 +371,17 @@ export class Walk {
       const pr = this.bridge.project(a);
       const pin = pr.inFront ? [pr] : null;
       const within = (h: number): boolean => Boolean((front && overlapsSquare(front, cx, cy, h)) || (pin && overlapsSquare(pin, cx, cy, h)));
-      if (id === cur && within(keepHalf)) curIn = true;
+      // A destination's light stands at its door; a look at the door is a look at the place.
+      const who = id.startsWith('door:') ? id.slice(5) : id;
+      if (who === cur && within(keepHalf)) curIn = true;
       if (!within(half)) continue;
       const off = Math.min(front ? distanceToQuad(cx, cy, front) + frontBias : Infinity, pin ? Math.hypot(pr.x - cx, pr.y - cy) : Infinity) + far / 10000;
       if (off < bestOff) {
-        best = id;
+        best = who;
         bestOff = off;
       }
     }
+    if (cur && onPane(cur)) return { best: cur, curIn: true };
     return { best, curIn };
   }
 

@@ -47,7 +47,7 @@ export const NOMINAL_SIZE: Record<'label' | 'glance' | 'card' | 'expanded', { w:
   label: { w: 150, h: 52 },
   glance: { w: 214, h: 60 },
   card: { w: 292, h: 152 },
-  expanded: { w: 392, h: 318 },
+  expanded: { w: 392, h: 440 },
 };
 
 export const REFERENCE_VIEW = { w: 1280, h: 800 };
@@ -113,6 +113,7 @@ function clampInto(r: Rect, vp: Viewport): Rect {
 }
 
 export const ZONE_GAP = 14;
+const SLIDE_KEEP = 12;
 
 function pushOutOfZone(r: Rect, zone: Rect, anchorX: number, anchorY: number, vp: Viewport): Rect {
   if (!rectsOverlap(r, zone)) return r;
@@ -136,6 +137,12 @@ export function configRect(
   let r = clampInto(raw, vp);
   const dx = Math.abs(r.x - raw.x);
   const dy = Math.abs(r.y - raw.y);
+  // Beside its light, a pane slides down its side to clear the glass's own chrome above it (a banner, the clock), while its light stays beside it.
+  if (vertical === 'middle') {
+    const over = (inp.chrome ?? []).filter((k) => rectsOverlap(r, k) && k.y < r.y + r.h / 2);
+    const y = over.length ? Math.max(...over.map((k) => k.y + k.h + 1)) : r.y;
+    if (y > r.y && y + r.h <= vp.h - MARGIN + 0.5 && y <= inp.anchor.y - SLIDE_KEEP) r = { ...r, y };
+  }
   const pushed = push && !inp.focusOk && (pushOff !== undefined || rectsOverlap(r, zone));
   if (pushed) r = pushOff ? { ...r, x: inp.anchor.x + pushOff.x, y: inp.anchor.y + pushOff.y } : pushOutOfZone(r, zone, inp.anchor.x, inp.anchor.y, vp);
   const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= MOVE.clampMax : dy < 0.5 && dx <= MOVE.clampMax);
@@ -165,6 +172,7 @@ export function placeWorld(inp: PlaceInput): Placed {
   const scales = inp.scaleFrom !== undefined ? [start] : [start, 0.84 * ui, 0.78 * ui, 0.74 * ui].map((sc) => Math.max(sc, TEXT_FLOOR)).filter((sc, i, all) => sc <= start + 1e-9 && all.indexOf(sc) === i);
   const all: [Align, Vertical][] = [
     [away, 'middle'],
+    [away === 'left' ? 'right' : 'left', 'middle'],
     ['center', 'above'],
     ['center', 'below'],
   ];

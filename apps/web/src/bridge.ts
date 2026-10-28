@@ -175,10 +175,12 @@ export class ThreeBridge implements SceneBridge {
     const place = going ? PLACE_BY_ID.get(r.target) : undefined;
     const door = place ? placeDoor(place) : null;
     const ah = B.avenueHalf;
+    const dir = pointAt(r, w.s).dir;
     return {
       x: w.pos.x,
       z: w.pos.z,
       yaw: w.bodyYaw,
+      heading: Math.atan2(-dir.x, -dir.z),
       head: sim.head.yaw,
       areas: this.mapAreas,
       crossings: [
@@ -187,7 +189,7 @@ export class ThreeBridge implements SceneBridge {
         { x0: CROSS_CROSSWALK.x - CROSS_CROSSWALK.half, z0: zOf(B.crossTo), x1: CROSS_CROSSWALK.x + CROSS_CROSSWALK.half, z1: zOf(B.crossFrom), bars: 'x' },
       ],
       route,
-      dest: door && place ? { x: door.x, z: door.z, kind: place.kind } : null,
+      dest: door && place ? { x: door.x, z: door.z, kind: place.kind, name: place.name.replace(/^The /, '') } : null,
     };
   }
 

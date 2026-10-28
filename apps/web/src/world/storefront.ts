@@ -319,9 +319,23 @@ function buildTheater(group: THREE.Group, bucket: GeoBucket, f: Frame, W: number
   mg.textBaseline = 'middle';
   mg.font = '400 150px "Archivo Black", Arial';
   mg.fillText('GRACE THEATER', 1024, 120);
-  mg.font = '700 92px "Instrument Sans", Arial';
   mg.fillStyle = '#7a1818';
-  mg.fillText('TONIGHT · NIGHT MARKET · 8:00', 1024, 282);
+  const bill = ['DUNE: PART TWO 8:00 · OPPENHEIMER 7:15', 'SPIRITED AWAY 6:45 · THE AVENGERS 9:30'];
+  const fit = (lines: string[], max: number): number => {
+    mg.font = `700 ${max}px "Instrument Sans", Arial`;
+    const w = Math.max(...lines.map((l) => mg.measureText(l).width));
+    return Math.floor(Math.min(max, (max * 1880) / w));
+  };
+  // The second line only when both still read from the far curb; otherwise the first line alone, as large as it fits.
+  const two = fit(bill, 84);
+  if (two >= 64) {
+    mg.font = `700 ${two}px "Instrument Sans", Arial`;
+    mg.fillText(bill[0]!, 1024, 236);
+    mg.fillText(bill[1]!, 1024, 326);
+  } else {
+    mg.font = `700 ${fit(bill.slice(0, 1), 92)}px "Instrument Sans", Arial`;
+    mg.fillText(bill[0]!, 1024, 282);
+  }
   const mt = new THREE.CanvasTexture(mc);
   mt.colorSpace = THREE.SRGBColorSpace;
   mt.anisotropy = 8;

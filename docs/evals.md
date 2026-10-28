@@ -39,7 +39,7 @@ An expectation:
 
 ### Cases and expectations, as built
 
-A case file (`scenarios/{gates,notifications,moments,walking}/*.json`) is a compact script the runner expands into 10 Hz snapshots (`synthesize` in `packages/shared/src/synth.ts`): a scenario, a duration, a start position, and timed tracks for speed, gaze, pinch, choice, dismiss, pitch, yaw, crossing, signal phase, inbox, people, vehicles, live data, stops and sidewalk changes. A recorded walk (`scenarios/*.walk.json`) is the full snapshot sequence from `pnpm record`.
+A case file (`scenarios/{gates,notifications,moments,walking}/*.json`) is a compact script the runner expands into 10 Hz snapshots (`synthesize` in `packages/shared/src/synth.ts`): a scenario, a duration, a start position, and timed tracks for speed, gaze, pinch, choice, choose (a place's row chosen in its expanded view: `{ t, id, row }`, the action being the place's primary one), dismiss, pitch, yaw, crossing, signal phase, inbox, people, vehicles, live data, stops and sidewalk changes. A recorded walk (`scenarios/*.walk.json`) is the full snapshot sequence from `pnpm record`.
 
 An expectation case is one of: `must` (some decision in the window matches; with `all: true`, every decision outside the ground layer matches), `mustNot`, `max` and `min` (`shows`, `nonGazeShows`, `holds`), `state` (every brain frame in the window matches: band, safety, snooze, glyph, has, hasNot, level per item, levelsAtMost, pocket) and `stateSome`. Windows are half-open `[from, to)`. Match fields: action, id, idPrefix, level, levelAtLeast, levelAtMost, reasonKind, reasonText, band, timing, zone, component, cause, gaze, secondsAtLeast, nameIs, factIs, factIncludes, showReason, enter, focusOk.
 
@@ -57,6 +57,8 @@ Every run, case or walk, is also checked against the global invariants in `src/i
 - **Hysteresis.** No score-driven level change within 1.2 s of the previous one on the same item, except on a gate; dwell-ladder climbs and look-away descents are exempt. No band change within 600 ms of the previous one.
 - **Reasons.** Every reason cites an allowed kind and never the wearer's body, eyes or habits (the banned-word list in `docs/copy.md` is checked: look, looked, looking, gaze, eyes, stared, glanced, habit, noticed you, walking fast, slow down, you were).
 - **Placement hints.** Every show carries a zone, a preference and its band; the overlay's placement tests (in the overlay package) check the band's focus zone against rendered positions on a fixed camera.
+- **Choices.** `moment-choose-row` holds the cinema's expanded view to four films with the action reading for 8:00, then a choice on the 7:15 row leaves that row alone with its confirmation logged on the choice (cause `choice`), counts it in the pocket (`Pocket 1`), and does not surface the pocket at that stop. Expectation matchers `rowsAre` and `actionsAre` compare a decision's row titles and action labels.
+- **The places.** A data suite (`places`, group `data`) checks every place in `data/places.json`, whether or not a walk shows it: every say line in every scenario under 60 characters, at most two numbers, never repeating the name, no banned word; every live line within 28 characters; every place with a depth one to four rows, one primary action, Not now and an after line for it (for each row where the rows are choices), Pocket Park by name with rows and no action. The data loader refuses more than four rows, or a row with an action label and no after line.
 - **Determinism.** Two runs of the same walk produce identical logs.
 
 ## 3. Running

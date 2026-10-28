@@ -35,6 +35,8 @@ export interface Match {
   sayIs?: string;
   factIs?: string | null;
   noteIs?: string;
+  rowsAre?: string[];
+  actionsAre?: string[];
   factIncludes?: string;
   showReason?: boolean;
   focusOk?: boolean;
@@ -106,6 +108,8 @@ export function matches(d: Decision, m: Match): boolean {
   if (m.sayIs !== undefined && d.content.say !== m.sayIs) return false;
   if (m.factIs !== undefined && (d.content.fact ?? null) !== m.factIs) return false;
   if (m.noteIs !== undefined && d.content.note !== m.noteIs) return false;
+  if (m.rowsAre !== undefined && JSON.stringify((d.content.rows ?? []).map((r) => r.title)) !== JSON.stringify(m.rowsAre)) return false;
+  if (m.actionsAre !== undefined && JSON.stringify((d.content.actions ?? []).map((a) => a.label)) !== JSON.stringify(m.actionsAre)) return false;
   if (m.factIncludes !== undefined && !(d.content.fact ?? '').includes(m.factIncludes)) return false;
   if (m.showReason !== undefined && Boolean(d.content.showReason) !== m.showReason) return false;
   if (m.focusOk !== undefined && Boolean(d.placement.focusOk) !== m.focusOk) return false;

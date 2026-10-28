@@ -5,17 +5,18 @@
       "id": "grace-theater",
       "name": "Grace Theater",
       "kind": "theater",
-      "category": "live theater",
+      "category": "cinema",
       "side": "W",
       "anchor": {
         "height": 6.9
       },
       "live": {
-        "lastShow": "8:00",
         "seatsLeft": 40,
-        "shows": 3
+        "films": 4,
+        "nextShow": "8:00",
+        "seatsAt8": 12
       },
-      "glance": "Last show tonight at 8",
+      "glance": "Four films tonight",
       "depth": "shows",
       "scenarios": [
         "walking"
@@ -24,39 +25,58 @@
         18,
         30
       ],
-      "year": 1927,
+      "year": 1981,
       "card": {
-        "meta": "Live theater · landmarked 1981",
-        "live": "5:30 nearly full · 40 at 8"
+        "meta": "Cinema · four screens · since 1981",
+        "live": "4 films · 8:00 has 12 seats"
       },
-      "short": "Night Market at 8",
+      "short": "Dune at 8",
       "reasons": {
         "world": "Seats left for tonight"
       },
       "expanded": {
-        "sub": "Tonight · three shows · box office till 9",
+        "sub": "Now playing · next showings",
         "rows": [
           {
-            "key": "5:30",
-            "title": "The Winter Guest",
-            "sub": "Drama · 2 h 10",
+            "key": "8:00",
+            "title": "Dune: Part Two",
+            "sub": "2 h 46 · also 5:30, nearly full",
             "value": "12 seats",
-            "tone": "warn"
+            "tone": "warn",
+            "now": true,
+            "act": "Hold two for 8:00",
+            "after": "Two held for Dune at 8:00 · I'll walk you there at 7:35.",
+            "pocket": "Dune: Part Two · 8:00 · two held"
           },
           {
-            "key": "8:00",
-            "title": "Night Market",
-            "sub": "New musical · 1 h 50",
+            "key": "7:15",
+            "title": "Oppenheimer",
+            "sub": "3 h · also 4:00",
             "value": "40 seats",
             "tone": "go",
-            "now": true
+            "act": "Hold two for 7:15",
+            "after": "Two held for Oppenheimer at 7:15 · I'll walk you there at 6:50.",
+            "pocket": "Oppenheimer · 7:15 · two held"
           },
           {
-            "key": "10:30",
-            "title": "Late Set",
-            "sub": "Improv · 60 min",
+            "key": "6:45",
+            "title": "Spirited Away",
+            "sub": "2 h 5 · also 3:30",
             "value": "Plenty",
-            "tone": "go"
+            "tone": "go",
+            "act": "Hold two for 6:45",
+            "after": "Two held for Spirited Away at 6:45 · I'll walk you there at 6:20.",
+            "pocket": "Spirited Away · 6:45 · two held"
+          },
+          {
+            "key": "9:30",
+            "title": "The Avengers",
+            "sub": "2 h 23 · also 6:30",
+            "value": "Plenty",
+            "tone": "go",
+            "act": "Hold two for 9:30",
+            "after": "Two held for The Avengers at 9:30 · I'll walk you there at 9:05.",
+            "pocket": "The Avengers · 9:30 · two held"
           }
         ],
         "actions": [
@@ -69,15 +89,12 @@
             "id": "not-now",
             "label": "Not now"
           }
-        ],
-        "after": {
-          "hold-two": "Two held for 8:00 · I'll walk you there at 7:35."
-        }
+        ]
       },
       "say": {
         "default": {
-          "line": "Night Market at 8 has 40 seats · earlier shows filling",
-          "short": "Night Market at 8"
+          "line": "Dune: Part Two at 8 · 12 seats left",
+          "short": "Dune at 8"
         }
       },
       "img": "img/hero-theater.webp"
@@ -135,6 +152,11 @@
             "title": "Fries",
             "sub": "Hand cut · sea salt",
             "value": "$3.50"
+          },
+          {
+            "title": "Shake",
+            "sub": "Vanilla or chocolate",
+            "value": "$5"
           }
         ],
         "actions": [
@@ -150,6 +172,9 @@
         ],
         "after": {
           "hold-seat": "Seat held. Follow the route, across and back."
+        },
+        "pocket": {
+          "hold-seat": "Mega Burger · seat held"
         }
       },
       "say": {
@@ -218,6 +243,12 @@
             "sub": "From 4",
             "value": "Booked",
             "tone": "warn"
+          },
+          {
+            "key": "Rental",
+            "title": "Shoes",
+            "sub": "Sizes 4 to 15",
+            "value": "$4"
           }
         ],
         "actions": [
@@ -233,6 +264,9 @@
         ],
         "after": {
           "book": "Lane 6 is yours at 3:30."
+        },
+        "pocket": {
+          "book": "Lane 6 · 3:30 · booked"
         }
       },
       "say": {
@@ -253,10 +287,12 @@
         "height": 4.4
       },
       "live": {
-        "closes": "9:00"
+        "closes": "9:00",
+        "readingAt": "7:00",
+        "picks": 4
       },
-      "glance": "Open till 9",
-      "depth": "events",
+      "glance": "Reading at 7 · staff picks",
+      "depth": "picks",
       "scenarios": [
         "walking"
       ],
@@ -266,44 +302,68 @@
       ],
       "card": {
         "meta": "Bookshop · new and used",
-        "live": "Open till 9"
+        "live": "Reading at 7 · 4 picks in"
       },
       "short": "Reading at 7",
       "reasons": {
         "world": "Reading tonight at 7"
       },
       "expanded": {
-        "sub": "Tonight at Atlas · open till 9",
+        "sub": "Staff picks · in stock today",
         "rows": [
+          {
+            "key": "Fiction",
+            "title": "Tomorrow, and Tomorrow, and Tomorrow",
+            "sub": "Gabrielle Zevin · 2 copies",
+            "value": "$18",
+            "act": "Hold a copy",
+            "after": "Tomorrow, and Tomorrow, and Tomorrow held at the counter under your name · till 9.",
+            "pocket": "Tomorrow, and Tomorrow, and Tomorrow · held till 9"
+          },
+          {
+            "key": "Classic",
+            "title": "The Great Gatsby",
+            "sub": "F. Scott Fitzgerald · used",
+            "value": "$6",
+            "act": "Hold a copy",
+            "after": "The Great Gatsby held at the counter under your name · till 9.",
+            "pocket": "The Great Gatsby · held till 9"
+          },
+          {
+            "key": "Science",
+            "title": "Sapiens",
+            "sub": "Yuval Noah Harari · 1 copy",
+            "value": "$24",
+            "tone": "warn",
+            "act": "Hold a copy",
+            "after": "Sapiens held at the counter under your name · till 9.",
+            "pocket": "Sapiens · held till 9"
+          },
           {
             "key": "7:00",
             "title": "Poetry reading",
-            "sub": "Upstairs · free"
-          },
-          {
-            "key": "8:15",
-            "title": "Book club",
-            "sub": "Open to all"
+            "sub": "Upstairs · free",
+            "value": "tonight",
+            "act": "Save the reading",
+            "after": "Saved. I'll remind you at 6:45.",
+            "pocket": "Poetry reading · 7:00 · saved"
           }
         ],
         "actions": [
           {
-            "id": "save-reading",
-            "label": "Save the reading",
+            "id": "hold",
+            "label": "Hold a copy",
             "primary": true
           },
           {
             "id": "not-now",
             "label": "Not now"
           }
-        ],
-        "after": {
-          "save-reading": "Saved. I'll remind you at 6:45."
-        }
+        ]
       },
       "say": {
         "default": {
-          "line": "Poetry reading at 7 · upstairs, free",
+          "line": "Four staff picks in stock · reading at 7, free",
           "short": "Reading at 7"
         }
       },
@@ -321,9 +381,10 @@
       "live": {
         "closes": "11:00",
         "signLanguage": "it",
-        "sign": "Cucina casalinga · aperto fino alle 23"
+        "sign": "Cucina casalinga · aperto fino alle 23",
+        "tableIn": 20
       },
-      "glance": "Home cooking · open until 11 PM",
+      "glance": "Table in 20 min",
       "depth": "menu",
       "scenarios": [
         "hungry",
@@ -335,9 +396,9 @@
       ],
       "card": {
         "meta": "Home cooking · open until 11 PM",
-        "live": "Open until 11 PM"
+        "live": "Table in 20 min · translated"
       },
-      "short": "Home cooking",
+      "short": "Table in 20",
       "reasons": {
         "goal": "On your route",
         "world": "Read from Italian"
@@ -363,6 +424,12 @@
             "title": "Tiramisù",
             "sub": "Coffee and mascarpone",
             "value": "$8"
+          },
+          {
+            "key": "Set lunch",
+            "title": "Pranzo fisso",
+            "sub": "Two courses and coffee · read from Italian",
+            "value": "$24"
           }
         ],
         "actions": [
@@ -377,17 +444,20 @@
           }
         ],
         "after": {
-          "hold-table": "Table held for two."
+          "hold-table": "Table for two at 1:00 · ask for Lia."
+        },
+        "pocket": {
+          "hold-table": "Table for two · 1:00"
         }
       },
       "say": {
         "hungry": {
-          "line": "Sit-down, about 20 min · the sign says home cooking",
-          "short": "Home cooking"
+          "line": "Sit-down, about 20 min · menu read from Italian",
+          "short": "Table in 20"
         },
         "default": {
-          "line": "The sign says home cooking · open till 11",
-          "short": "Home cooking"
+          "line": "Sign reads home cooking · table in 20 min",
+          "short": "Table in 20"
         }
       },
       "picker": "Home cooking, sit-down",
@@ -406,7 +476,7 @@
         "benches": "shade"
       },
       "glance": "Benches in the shade",
-      "depth": null,
+      "depth": "park",
       "scenarios": [
         "hungry",
         "walking"
@@ -417,14 +487,38 @@
       ],
       "card": {
         "meta": "Park · shade and benches",
-        "live": "Benches in the shade"
+        "live": "Shade till 2:30 · bench free"
       },
       "short": "Shaded benches",
       "reasons": {
         "goal": "End of the walk",
         "world": "Benches in the shade"
       },
-      "expanded": null,
+      "expanded": {
+        "sub": "Right now",
+        "rows": [
+          {
+            "key": "Shade",
+            "title": "East benches in shade",
+            "sub": "Sun reaches them at 2:30",
+            "value": "till 2:30"
+          },
+          {
+            "key": "Free",
+            "title": "Bench by the fountain",
+            "sub": "Two of five free",
+            "value": "now",
+            "tone": "go"
+          },
+          {
+            "key": "Quiet",
+            "title": "Six people",
+            "sub": "No events today",
+            "value": "quiet"
+          }
+        ],
+        "actions": []
+      },
       "say": {
         "default": {
           "line": "Benches in the shade · end of the walk",
@@ -486,6 +580,11 @@
             "title": "Egg cream",
             "sub": "Chocolate · seltzer",
             "value": "$4.50"
+          },
+          {
+            "title": "Half sour pickle",
+            "sub": "On the side",
+            "value": "$2"
           }
         ],
         "actions": [
@@ -501,6 +600,9 @@
         ],
         "after": {
           "hold-seat": "Seat held. Follow the route, 40 m."
+        },
+        "pocket": {
+          "hold-seat": "Goldie's Counter · seat held"
         }
       },
       "say": {
@@ -567,6 +669,12 @@
             "title": "Double chocolate",
             "value": "Sold out",
             "tone": "stop"
+          },
+          {
+            "title": "Red velvet",
+            "sub": "Last two",
+            "value": "$4",
+            "tone": "warn"
           }
         ],
         "actions": [
@@ -582,6 +690,9 @@
         ],
         "after": {
           "save-one": "One brown butter, held at the counter."
+        },
+        "pocket": {
+          "save-one": "Brown butter · held at 2"
         }
       },
       "say": {
@@ -634,17 +745,31 @@
           {
             "img": "img/dish-cortado.webp",
             "title": "Cortado",
-            "value": "$4.25"
+            "value": "$4.25",
+            "act": "Order ahead",
+            "after": "Cortado ordered · ready at 12:46, skip the line.",
+            "pocket": "Cortado · ready at 12:46"
           },
           {
             "img": "img/dish-coldbrew.webp",
             "title": "Cold brew",
-            "value": "$5"
+            "value": "$5",
+            "act": "Order ahead",
+            "after": "Cold brew ordered · ready at 12:46, skip the line.",
+            "pocket": "Cold brew · ready at 12:46"
           },
           {
             "img": "img/dish-latte.webp",
             "title": "Oat latte",
-            "value": "$5.75"
+            "value": "$5.75",
+            "act": "Order ahead",
+            "after": "Oat latte ordered · ready at 12:46, skip the line.",
+            "pocket": "Oat latte · ready at 12:46"
+          },
+          {
+            "key": "12:46",
+            "title": "Pickup at the counter",
+            "sub": "Skip the line of 4"
           }
         ],
         "actions": [
@@ -657,15 +782,13 @@
             "id": "not-now",
             "label": "Not now"
           }
-        ],
-        "after": {
-          "order": "Ordered. Ready in 5 min."
-        }
+        ]
       },
       "say": {
         "hungry": {
-          "line": "Coffee after · line of 4, 5 min",
-          "short": "Line of 4"
+          "line": "Maya's meeting you here at 1",
+          "short": "Maya at 1",
+          "when": "maya-lunch"
         },
         "default": {
           "line": "Line of 4 · 5 min",
@@ -687,9 +810,9 @@
       "live": {
         "ready": true,
         "counter": 2,
-        "pickedUp": false
+        "line": 0
       },
-      "glance": "Prescription's ready here",
+      "glance": "Prescription ready",
       "depth": "pickup",
       "scenarios": [
         "walking"
@@ -700,23 +823,40 @@
       ],
       "card": {
         "meta": "Pharmacy · open till 9",
-        "live": "Ready since noon · till 9"
+        "live": "Ready at counter 2 · no line"
       },
-      "short": "Open till 9",
+      "short": "Ready, counter 2",
       "reasons": {
         "goal": "On your route",
         "world": "Open till 9"
-      },
-      "liveLines": {
-        "pickedUp": "Picked up"
       },
       "expanded": {
         "sub": "Pickup · counter 2",
         "rows": [
           {
-            "title": "Counter 2",
-            "value": "ready",
+            "key": "Rx",
+            "title": "Your prescription",
+            "sub": "Ready since noon",
+            "value": "counter 2",
             "tone": "go"
+          },
+          {
+            "key": "Copay",
+            "title": "Copay $10",
+            "sub": "Insurance on file",
+            "value": "card"
+          },
+          {
+            "key": "Line",
+            "title": "No one at counter 2",
+            "sub": "Front register has 3",
+            "value": "now"
+          },
+          {
+            "key": "Also",
+            "title": "Flu shots",
+            "sub": "Walk in till 8",
+            "value": "free"
           }
         ],
         "actions": [
@@ -733,22 +873,14 @@
         "after": {
           "paid": "Paid. Show the code at counter 2."
         },
-        "liveAfter": {
-          "pickedUp": "In your bag. Two stops to go."
+        "pocket": {
+          "paid": "Prescription · paid, counter 2"
         }
       },
       "say": {
         "default": {
-          "line": "Open till 9",
-          "short": "Open till 9"
-        }
-      },
-      "sayLive": {
-        "pickedUp": {
-          "default": {
-            "line": "Picked up",
-            "short": "Picked up"
-          }
+          "line": "Your prescription is ready · counter 2, no line",
+          "short": "Ready, counter 2"
         }
       },
       "img": "img/hero-pharmacy.webp"
@@ -764,10 +896,11 @@
       },
       "live": {
         "closes": "6:00",
-        "closedEarly": false
+        "keysTill": "5:00",
+        "keyWait": 0
       },
-      "glance": "Open till 6",
-      "depth": "hours",
+      "glance": "Keys cut · no wait",
+      "depth": "aisles",
       "scenarios": [
         "walking"
       ],
@@ -777,28 +910,49 @@
       ],
       "card": {
         "meta": "Hardware · keys cut",
-        "live": "Open till 6"
+        "live": "Keys cut till 5 · no wait"
       },
       "short": "Keys cut till 5",
       "reasons": {
         "goal": "On your route",
-        "world": "Open till 6"
-      },
-      "liveLines": {
-        "closedEarly": "Closed early today"
+        "world": "Keys cut, no wait"
       },
       "expanded": {
-        "sub": "Hours · aisles",
+        "sub": "In stock today · aisles",
         "rows": [
+          {
+            "key": "Keys",
+            "title": "Keys cut",
+            "sub": "About 5 min · till 5",
+            "value": "$3",
+            "tone": "go"
+          },
           {
             "key": "Aisle 4",
             "title": "Picture hooks",
-            "sub": "Bottom shelf"
+            "sub": "Bottom shelf",
+            "value": "$4",
+            "act": "Hold it at the till",
+            "after": "Picture hooks held at the till under your name.",
+            "pocket": "Picture hooks · at the till"
           },
           {
-            "key": "Hours",
-            "title": "Open till 6",
-            "sub": "Keys cut till 5"
+            "key": "Aisle 2",
+            "title": "AA batteries",
+            "sub": "Packs of 8",
+            "value": "$9",
+            "act": "Hold it at the till",
+            "after": "AA batteries held at the till under your name.",
+            "pocket": "AA batteries · at the till"
+          },
+          {
+            "key": "Aisle 7",
+            "title": "LED bulbs",
+            "sub": "Warm white · packs of 4",
+            "value": "$12",
+            "act": "Hold it at the till",
+            "after": "LED bulbs held at the till under your name.",
+            "pocket": "LED bulbs · at the till"
           }
         ],
         "actions": [
@@ -811,26 +965,12 @@
             "id": "not-now",
             "label": "Not now"
           }
-        ],
-        "after": {
-          "hold-item": "Held at the till under your name."
-        },
-        "liveAfter": {
-          "closedEarly": "Dropped from the route. The Post Office is next."
-        }
+        ]
       },
       "say": {
         "default": {
-          "line": "Keys cut till 5",
+          "line": "Keys cut while you wait · till 5",
           "short": "Keys cut till 5"
-        }
-      },
-      "sayLive": {
-        "closedEarly": {
-          "default": {
-            "line": "Closed early today",
-            "short": "Closed early"
-          }
         }
       },
       "img": "img/hero-hardware.webp"
@@ -859,7 +999,7 @@
       ],
       "card": {
         "meta": "Bus · uptown",
-        "live": "M4 · 2 min · next in 11"
+        "live": "M4 in 2 · seats open"
       },
       "short": "M4 in 2",
       "reasons": {
@@ -870,15 +1010,29 @@
         "rows": [
           {
             "key": "2 min",
-            "title": "M4 uptown"
+            "title": "M4 uptown",
+            "sub": "Seats open",
+            "value": "on time",
+            "tone": "go"
           },
           {
             "key": "11 min",
-            "title": "M4 uptown"
+            "title": "M4 uptown",
+            "sub": "Standing room",
+            "value": "3 min late",
+            "tone": "warn"
           },
           {
             "key": "19 min",
-            "title": "M4 uptown"
+            "title": "M4 uptown",
+            "sub": "Seats open",
+            "value": "on time"
+          },
+          {
+            "key": "24 min",
+            "title": "M4 Limited",
+            "sub": "Skips 50th to 59th",
+            "value": "on time"
           }
         ],
         "actions": [
@@ -894,6 +1048,9 @@
         ],
         "after": {
           "remind": "I'll tell you when it's 3 min out."
+        },
+        "pocket": {
+          "remind": "M4 uptown · I'll say at 3 min"
         }
       },
       "say": {
@@ -928,7 +1085,7 @@
       ],
       "card": {
         "meta": "Subway · stairs at the corner",
-        "live": "Uptown trains · 4 min"
+        "live": "Uptown in 4 · elevator out"
       },
       "short": "Uptown in 4",
       "reasons": {
@@ -936,19 +1093,33 @@
         "world": "Stairs at the corner"
       },
       "expanded": {
-        "sub": "Next four departures",
+        "sub": "Next departures · access",
         "rows": [
           {
             "key": "4 min",
-            "title": "Uptown"
+            "title": "Uptown local",
+            "sub": "Platform A · crowded",
+            "value": "on time"
           },
           {
             "key": "7 min",
-            "title": "Downtown"
+            "title": "Downtown local",
+            "sub": "Platform B · seats",
+            "value": "on time"
           },
           {
             "key": "10 min",
-            "title": "Uptown"
+            "title": "Uptown express",
+            "sub": "Skips 50th",
+            "value": "2 min late",
+            "tone": "warn"
+          },
+          {
+            "key": "Access",
+            "title": "Elevator out of service",
+            "sub": "Stairs at the corner, 24 steps",
+            "value": "till Fri",
+            "tone": "warn"
           }
         ],
         "actions": [
@@ -963,7 +1134,10 @@
           }
         ],
         "after": {
-          "route": "Stairs on your right at the corner."
+          "route": "Stairs on your right at the corner · 24 steps."
+        },
+        "pocket": {
+          "route": "Stairs at the corner · 24 steps"
         }
       },
       "say": {
@@ -989,9 +1163,10 @@
       },
       "live": {
         "line": 8,
-        "wait": 12
+        "wait": 12,
+        "packageReady": true
       },
-      "glance": "Line of 8 · 12 min",
+      "glance": "Package ready · line of 8",
       "depth": "hours",
       "scenarios": [
         "walking"
@@ -999,7 +1174,7 @@
       "n": null,
       "card": {
         "meta": "Post office · counter service",
-        "live": "Line of 8 · 12 min"
+        "live": "Line of 8 · package ready"
       },
       "short": "Line of 8",
       "reasons": {
@@ -1010,16 +1185,23 @@
         "sub": "Counter · open till 5",
         "rows": [
           {
-            "title": "Line of 8",
-            "value": "about 12 min"
-          },
-          {
-            "title": "Counter",
+            "key": "Line",
+            "title": "8 ahead",
+            "sub": "About 12 min",
             "value": "till 5"
           },
           {
-            "title": "Pickup window",
-            "value": "till 6"
+            "key": "Window",
+            "title": "A package for you",
+            "sub": "Pickup window · no line",
+            "value": "till 6",
+            "tone": "go"
+          },
+          {
+            "key": "Stamps",
+            "title": "Kiosk",
+            "sub": "No line",
+            "value": "24 h"
           }
         ],
         "actions": [
@@ -1034,12 +1216,15 @@
           }
         ],
         "after": {
-          "number": "You're number 9. I'll say when it's close."
+          "number": "You're number 9 · about 12 min. I'll say when it's close."
+        },
+        "pocket": {
+          "number": "Number 9 · about 12 min"
         }
       },
       "say": {
         "default": {
-          "line": "Counter till 5 · line of 8",
+          "line": "A package for you · counter line of 8",
           "short": "Line of 8"
         }
       },

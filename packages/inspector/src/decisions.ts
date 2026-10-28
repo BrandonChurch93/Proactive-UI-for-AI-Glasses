@@ -84,6 +84,7 @@ export class Decisions {
     );
     r.appendChild(head);
     r.appendChild(el('div', s.reason, reasonLine(d)));
+    if (d.cause === 'choice' && d.component === 'place' && d.content.note) r.appendChild(el('div', s.confirm, `Confirmed · ${d.content.note}`));
     const parts = d.reason.parts.map((p) => `${p.signal} · ${p.value} · ${p.weight}`);
     if (d.cause) parts.unshift(`cause · ${d.cause}`);
     if (d.content.trimmed?.length) parts.push(`trimmed · ${d.content.trimmed.join(', ')}`);

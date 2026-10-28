@@ -106,8 +106,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
       !inp.far &&
       (band === 'stopped' || band === 'stroll') &&
       it.gazeSince !== null &&
-      it.gazeSince <= it.cardAt + 1e-9 &&
-      t - it.cardAt >= cfg.ladder.cardHoldS - 1e-9
+      t - Math.max(it.cardAt, it.gazeSince) >= cfg.ladder.cardHoldS - 1e-9
     ) {
       earned = 'expanded';
     }

@@ -37,11 +37,12 @@ export interface MapView {
   x: number;
   z: number;
   yaw: number;
+  heading: number;
   head: number;
   areas: { kind: 'road' | 'walk' | 'building'; x0: number; z0: number; x1: number; z1: number }[];
   crossings: { x0: number; z0: number; x1: number; z1: number; bars: 'x' | 'z' }[];
   route: { x: number; z: number }[];
-  dest: { x: number; z: number; kind: string } | null;
+  dest: { x: number; z: number; kind: string; name: string } | null;
 }
 
 export interface SceneBridge {

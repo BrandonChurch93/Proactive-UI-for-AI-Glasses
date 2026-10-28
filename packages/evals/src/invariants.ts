@@ -200,7 +200,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-7',
-    name: 'the pocket surfaces within 500 ms of a qualifying stop (not at a door or the start corner), never in a gate, never under 6 s',
+    name: 'the pocket surfaces within 500 ms of a qualifying stop (not at a door, the start corner or a stop where a choice was just settled), never in a gate, never under 6 s',
     check: (r, cfg) => {
       let surfacedThisStop = false;
       let busyStop = false;
@@ -215,6 +215,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
           continue;
         }
         if (s.goal.arrived || s.goal.corner) busyStop = true;
+        if (r.entries.some((e) => Math.abs(e.t - f.t) < 1e-6 && e.decision.cause === 'choice' && e.decision.component === 'place')) busyStop = true;
         if (busyStop) continue;
         const surf = r.entries.find((e) => Math.abs(e.t - f.t) < 1e-6 && e.decision.action === 'surface');
         if (surf) {

@@ -621,7 +621,7 @@ export class Overlay {
   private mapYaw: number | null = null;
   private mapT = 0;
 
-  // The plan heading-up: it turns with the body, eased over t-base, never with the head; the head is the cone.
+  // The plan heading-up along the walk: it turns with the route under the wearer, eased over t-base and held while they stand, never with the head; the head is the cone.
   private drawMap(cv: HTMLCanvasElement, t: number): void {
     const m = this.bridge.mapView?.();
     if (!m) return;
@@ -634,7 +634,8 @@ export class Overlay {
     }
     const dt = Math.max(0, t - this.mapT);
     this.mapT = t;
-    this.mapYaw = this.mapYaw === null || dt > 1 ? m.yaw : this.mapYaw + angleWrap(m.yaw - this.mapYaw) * (1 - Math.exp(-dt / (T.base / 3)));
+    if (this.mapYaw === null || dt > 1) this.mapYaw = m.heading;
+    else if (this.band !== 'stopped') this.mapYaw += angleWrap(m.heading - this.mapYaw) * (1 - Math.exp(-dt / (T.base / 3)));
     const yaw = this.mapYaw;
     const g = cv.getContext('2d');
     if (!g) return;
@@ -645,49 +646,74 @@ export class Overlay {
     const cy = size * (2 / 3) * dpr;
     const c = Math.cos(yaw);
     const sn = Math.sin(yaw);
-    g.setTransform(c * k, sn * k, -sn * k, c * k, cx - (c * m.x - sn * m.z) * k, cy - (sn * m.x + c * m.z) * k);
-    const fill = (kind: string): string => (kind === 'building' ? 'rgba(251,250,246,0.08)' : kind === 'road' ? 'rgba(251,250,246,0.2)' : 'rgba(251,250,246,0.12)');
-    for (const a of m.areas) {
-      g.fillStyle = fill(a.kind);
-      g.fillRect(Math.min(a.x0, a.x1), Math.min(a.z0, a.z1), Math.abs(a.x1 - a.x0), Math.abs(a.z1 - a.z0));
+    const ox = cx - (c * m.x - sn * m.z) * k;
+    const oy = cy - (sn * m.x + c * m.z) * k;
+    g.setTransform(c * k, sn * k, -sn * k, c * k, ox, oy);
+    const rect = (a: { x0: number; z0: number; x1: number; z1: number }): [number, number, number, number] => [Math.min(a.x0, a.x1), Math.min(a.z0, a.z1), Math.abs(a.x1 - a.x0), Math.abs(a.z1 - a.z0)];
+    for (const kind of ['walk', 'road'] as const) {
+      g.fillStyle = kind === 'road' ? 'rgba(251,250,246,0.10)' : 'rgba(251,250,246,0.16)';
+      for (const a of m.areas) if (a.kind === kind) g.fillRect(...rect(a));
     }
-    g.fillStyle = 'rgba(255,255,255,0.85)';
+    g.fillStyle = 'rgba(251,250,246,0.26)';
+    g.strokeStyle = 'rgba(251,250,246,0.34)';
+    g.lineWidth = dpr / k;
+    for (const a of m.areas) {
+      if (a.kind !== 'building') continue;
+      g.fillRect(...rect(a));
+      g.strokeRect(...rect(a));
+    }
+    g.fillStyle = 'rgba(255,255,255,0.6)';
     for (const x of m.crossings) {
-      const x0 = Math.min(x.x0, x.x1);
-      const z0 = Math.min(x.z0, x.z1);
-      const w = Math.abs(x.x1 - x.x0);
-      const h = Math.abs(x.z1 - x.z0);
+      const [x0, z0, w, h] = rect(x);
       if (x.bars === 'z') for (let i = x0 + 0.4; i < x0 + w - 0.3; i += 1.2) g.fillRect(i, z0, 0.6, h);
       else for (let i = z0 + 0.4; i < z0 + h - 0.3; i += 1.2) g.fillRect(x0, i, w, 0.6);
     }
     if (m.route.length > 1) {
       g.strokeStyle = MAP_VOICE;
-      g.lineWidth = (2 * dpr) / k;
+      g.lineWidth = (2.5 * dpr) / k;
       g.lineJoin = 'round';
       g.lineCap = 'round';
       g.beginPath();
       m.route.forEach((p, i) => (i ? g.lineTo(p.x, p.z) : g.moveTo(p.x, p.z)));
       g.stroke();
     }
-    if (m.dest) {
-      g.fillStyle = MAP_TONES[m.dest.kind] ?? MAP_VOICE;
-      g.beginPath();
-      g.arc(m.dest.x, m.dest.z, (3 * dpr) / k, 0, Math.PI * 2);
-      g.fill();
-    }
     g.setTransform(1, 0, 0, 1, 0, 0);
-    const look = angleWrap(m.head - m.yaw);
+    const look = angleWrap(m.head - yaw);
     const reach = 46 * dpr;
-    g.fillStyle = 'rgba(251,250,246,0.12)';
+    g.fillStyle = 'rgba(251,250,246,0.14)';
     g.beginPath();
     g.moveTo(cx, cy);
     g.arc(cx, cy, reach, -Math.PI / 2 - look - Math.PI / 6, -Math.PI / 2 - look + Math.PI / 6);
     g.closePath();
     g.fill();
-    g.fillStyle = '#fbfaf6';
+    g.fillStyle = '#ffffff';
     g.beginPath();
     g.arc(cx, cy, 3 * dpr, 0, Math.PI * 2);
     g.fill();
+    if (m.dest) {
+      const pad = 8 * dpr;
+      const dx = clamp(c * k * m.dest.x - sn * k * m.dest.z + ox, pad, px - pad);
+      const dy = clamp(sn * k * m.dest.x + c * k * m.dest.z + oy, pad, px - pad);
+      g.fillStyle = MAP_TONES[m.dest.kind] ?? MAP_VOICE;
+      g.beginPath();
+      g.arc(dx, dy, 3 * dpr, 0, Math.PI * 2);
+      g.fill();
+      g.font = `400 ${10 * dpr}px 'Martian Mono', ui-monospace, monospace`;
+      g.textBaseline = 'middle';
+      const tw = g.measureText(m.dest.name).width;
+      const gap = 7 * dpr;
+      const edge = 6 * dpr;
+      const fitsRight = dx + gap + tw <= px - edge;
+      const fitsLeft = dx - gap - tw >= edge;
+      const tx = clamp(fitsRight || !fitsLeft ? dx + gap : dx - gap - tw, edge, px - edge - tw);
+      const overDot = tx < dx + 4 * dpr && tx + tw > dx - 4 * dpr;
+      const ty = overDot ? (dy + 14 * dpr <= px - pad ? dy + 14 * dpr : dy - 14 * dpr) : dy;
+      g.textAlign = 'left';
+      g.fillStyle = 'rgba(14,18,26,0.55)';
+      g.fillText(m.dest.name, tx + dpr * 0.5, ty + dpr * 0.5);
+      g.fillStyle = '#fbfaf6';
+      g.fillText(m.dest.name, tx, ty);
+    }
   }
 
   private menuDwell(t: number): void {
@@ -785,6 +811,31 @@ export class Overlay {
   }
 
   // The hold rule fills from the leader's side toward the next level and is the viewfinder's count, read off the same mark.
+  // The row under the pointer, else the one tapped, else the one under the viewfinder's center while the place is looked at.
+  private liftRow(it: Item, b: Built, vp: { w: number; h: number }): void {
+    const rows = b.view.el.querySelectorAll<HTMLElement>('li[data-row]');
+    if (!rows.length) return;
+    let pick: HTMLElement | null = null;
+    for (const li of rows) if (li.matches(':hover')) pick = li;
+    pick ??= [...rows].find((li) => li.dataset.tap !== undefined) ?? null;
+    const r = b.rect;
+    const cx = vp.w / 2;
+    const cy = vp.h / 2;
+    if (!pick && r && this.snap?.wearer.gaze.target === it.id && cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h) {
+      for (const li of rows) {
+        const q = li.getBoundingClientRect();
+        if (cy >= q.top && cy <= q.bottom) pick = li;
+      }
+    }
+    for (const li of rows) {
+      if (li === pick) li.dataset.lift = '';
+      else delete li.dataset.lift;
+    }
+    const btn = b.view.el.querySelector<HTMLElement>('button[data-follow]');
+    const label = pick?.dataset.act ?? btn?.dataset.follow;
+    if (btn && label && btn.textContent !== label) btn.textContent = label;
+  }
+
   private holdRule(it: Item, b: Built, t: number, pr: { x: number; y: number } | null): void {
     const f = this.frame;
     const m = f?.dwell.target === it.id ? f.dwell.mark : undefined;
@@ -865,7 +916,54 @@ export class Overlay {
     return { kind: 'birth', cause: 'return', detail: d.placement.focusOk && it.why?.detail === 'not looked at' ? 'looked at again' : (it.why?.cause ?? '') };
   }
 
+  // A choice settles in place: the rows that stay stay, the others and the actions dissolve, and the confirmation resolves where the actions were.
+  private settle(it: Item, b: Built, t: number, why: Item['why'] | undefined): boolean {
+    const c = it.d.content;
+    const old = b.view;
+    const acts = old.el.querySelector<HTMLElement>(`.${s.actions}`);
+    const titles = new Set((c.rows ?? []).map((r) => r.title));
+    const lis = [...old.el.querySelectorAll<HTMLElement>('li')];
+    const kept = lis.filter((li) => titles.has(li.querySelector('b')?.textContent ?? ''));
+    const keep = kept[0];
+    if (!keep || !acts || !c.note || c.actions?.length || this.reduced) return false;
+    it.tl?.kill();
+    const tl = this.tl();
+    const leaving = [...lis.filter((li) => !kept.includes(li)), acts];
+    tl.to(leaving, { opacity: 0, filter: 'blur(4px)', duration: MOVE.dissolveKids, ease: EASE.in, stagger: MOVE.dissolveStagger }, 0);
+    const out = MOVE.dissolveKids + MOVE.dissolveStagger * Math.max(0, leaving.length - 1);
+    const view = buildPane({ ...it.d, level: 'expanded' }, 'expanded', this.handlers);
+    gsap.set(view.el, { opacity: 0 });
+    b.box.appendChild(view.el);
+    b.view = view;
+    const note = view.el.querySelector<HTMLElement>('[data-k="note"]');
+    tl.call(() => {
+      const scale = b.scale ?? 1;
+      const li = view.el.querySelector<HTMLElement>('li');
+      const dy = li ? (keep.getBoundingClientRect().top - li.getBoundingClientRect().top) / scale : 0;
+      old.el.remove();
+      gsap.set(view.el, { opacity: 1 });
+      if (note) gsap.set(note, { opacity: 0 });
+      if (li && Math.abs(dy) > 0.5) gsap.fromTo(li, { y: dy }, { y: 0, duration: T.base, ease: EASE.out });
+      if (note) gsap.fromTo(note, { opacity: 0, y: -3, filter: 'blur(5px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: T.base, ease: EASE.out, clearProps: 'filter' });
+      b.width = view.el.offsetWidth;
+      b.height = view.el.offsetHeight;
+      b.w.go(this.t, b.width, T.base, 'out');
+      b.h.go(this.t, b.height, T.base, 'out');
+      this.watch(b);
+    }, [], out);
+    it.condensingUntil = t + out + T.base;
+    it.changedAt = t;
+    it.tl = tl;
+    if (why) {
+      it.why = why;
+      it.restored = false;
+      this.note(it, 'resize', 'choice', why.detail, undefined, 'expanded');
+    }
+    return true;
+  }
+
   private morph(it: Item, b: Built, want: PaneLevel, t: number, from: PaneLevel, why: Item['why'] | undefined): void {
+    if (from === 'expanded' && want === 'expanded' && b.level === 'expanded' && this.settle(it, b, t, why)) return;
     it.tl?.kill();
     const tl = this.tl();
     gsap.set(b.box, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 });
@@ -1250,6 +1348,7 @@ export class Overlay {
         b.box.style.setProperty('--fill-b', (fill.alpha - 0.04).toFixed(3));
         b.box.style.setProperty('--weight', String(fill.weight));
         if (b === it.cur && it.kind === 'world') this.holdRule(it, b, t, pr);
+        if (b === it.cur && b.level === 'expanded') this.liftRow(it, b, vp);
       }
 
       if (it.lights && anchorPos) {

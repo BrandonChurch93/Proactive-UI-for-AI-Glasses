@@ -12,7 +12,7 @@ One walk on one block, explored: a loop that never ends on its own. The wearer c
 4. West sidewalk south at Walk, about 1:39 to 2:28. The wearer asks the south crossing 12 m out; it turns within seconds (actuated, at least 18 s of green first).
 5. South crossing, 10 s, back to the start corner at about 2:39, and the light is held again: 12 s, every lap.
 
-A destination replaces the loop with the router's shortest path to its door: the route band from the feet, the destination column at the door, the map tile at the bottom right, 4 s stopped at the door facing it, then the loop resumes from there.
+A destination replaces the loop with the router's shortest path to its door: the route band from the feet, the destination column at the door, the map tile at the bottom right, 4 s stopped at the door facing it, longer while the wearer keeps looking at it (up to 30 s, so its expanded view can be read and chosen from), then the loop resumes from there.
 
 ## Lunch · the menu, discovery, the pocket, a choice
 
@@ -20,15 +20,15 @@ Recording: the walk starts at 0:01, the menu opens on Food at 0:01.2, Goldie's f
 
 1. 0:00 · Held at the corner: WAIT on the pavement; nothing asks. 0:01.2 the menu opens on Food: five places by walk time, Goldie's first.
 2. 0:02 · One label, the best fit, while still stopped: Goldie's Counter, "3 min, 9 seats". The reason is in the log and never on a label (Rule 2).
-3. 0:03 · Goldie's from the menu: it is the destination (cause `choice`), the menu folds, the route draws and says "Goldie's Counter · under a minute", the column rises at the door, the map tile slides in, and the light releases.
+3. 0:03 · Goldie's from the menu: it is the destination (cause `choice`), the menu folds, the route draws and says "Goldie's Counter · 15 m", the column rises at the door, the map tile slides in, and the light releases.
 4. 0:08.5 · A look at Mega Burger across the avenue, 69 m ahead: its label, then its compact card a second of hold later (beyond 35 m), offering Go here instead. 0:11, Go here instead: the route redraws to Mega Burger (cause `choice`), up the block and across at the corner rather than back through the start; Goldie's chip goes, Mega Burger's comes.
 5. 0:26 · Maya's banner slides down at the top center while walking: Messages, now, Maya, "Lunch? I'm by the Big Bean at 1.", its chips while the band is Stroll; reason "Clear sidewalk ahead". Nobody looks at it, so after 4 s of Walk it slides back up (0:40); it returns once the wearer has stood still half a second, never as a crossing begins.
 6. 0:38.5 · A look at Trattoria da Lia across the street: label, card. 0:41 a pinch while walking saves it; nothing opens; Pocket 1. (Rule 6.)
 7. 0:51 · The station stair, labelled with the view, holds its label for the look.
 8. 1:02 to 1:15 · Brisk on the north stretch: labels at most, never a card. (Rules 1, 11.) 1:15, "No need to run"; the red light at 1:17, 12 s.
-9. 1:18 · Stopped half a second at the red light, Maya's banner is back, the full thread with its chips. 1:18.5, On my way: "Big Bean · under a minute · route there?" 1:20, the pocket surfaces with the time available. (Rule 7.) 1:20.5, Yes: the route redraws to the Big Bean (cause `reply`, "Meeting Maya at 1"); the banner keeps the message and the reply with "Routing to the Big Bean" under them until 1:23, then leaves once and does not return. The M4 bus waits at its stop until then and passes at 1:24; no label rides it (Rule 8).
+9. 1:18 · Stopped half a second at the red light, Maya's banner is back, the full thread with its chips. 1:18.5, On my way: "Big Bean · 40 m · route there?" 1:20, the pocket surfaces with the time available. (Rule 7.) 1:20.5, Yes: the route redraws to the Big Bean (cause `reply`, "Meeting Maya at 1"); the banner keeps the message and the reply with "Routing to the Big Bean" under them until 1:23, then leaves once and does not return. The M4 bus waits at its stop until then and passes at 1:24; no label rides it (Rule 8).
 10. 1:44 · A look at the Big Bean on the way back: its card, Going here.
-11. 1:53 · At the Big Bean door, facing it: its card with the arrival line, "Meeting Maya at 1". The brain decides the arrival at 1:52 as the wearer strolls up; the card has been folded at the view edge since 1:48 and lands on the glass at 1:53, once the wearer is Stopped facing the door and it fits 40 px clear. No pocket at the door.
+11. 1:53 · At the Big Bean door, facing it: its card reads the friend first, "Maya's meeting you here at 1", then "Line of 4 · 5 min", and no reason line under it. The brain decides the arrival at 1:52 as the wearer strolls up; the card has been folded at the view edge since 1:48 and lands on the glass at 1:53, once the wearer is Stopped facing the door and it fits 40 px clear. No pocket at the door.
 12. 1:56 · After 4 s at the door the loop resumes with no destination. The recording ends at 1:58.
 
 ## Explore · restraint, right of way, snooze

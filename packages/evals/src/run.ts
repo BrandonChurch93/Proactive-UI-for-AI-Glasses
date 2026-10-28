@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { SCENARIO_IDS, compactSnapshot, type RunExport } from '@lumen/shared';
 import { recordWalk } from './record';
 import { buildReport, writeReport } from './report';
-import { listCases, listWalks, ROOT, runCase, runExport, runWalk, type SuiteResult } from './suite';
+import { listCases, listWalks, ROOT, runCase, runData, runExport, runWalk, type SuiteResult } from './suite';
 
 const argv = process.argv.slice(2);
 const only = argv.includes('--walk') ? argv[argv.indexOf('--walk') + 1] : undefined;
@@ -37,7 +37,10 @@ for (const { id, file } of listWalks()) {
   if (only && id !== only) continue;
   suites.push(runWalk(id, file));
 }
-if (!only) for (const { group, spec } of listCases()) suites.push(runCase(spec, group));
+if (!only) {
+  suites.push(runData());
+  for (const { group, spec } of listCases()) suites.push(runCase(spec, group));
+}
 else for (const { group, spec } of listCases()) if (spec.id === only) suites.push(runCase(spec, group));
 
 const report = buildReport(suites);

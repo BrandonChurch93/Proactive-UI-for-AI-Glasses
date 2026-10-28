@@ -4,6 +4,7 @@ import { graphPos, headingAt, pointAt, type GraphPos, type Route } from './route
 export const STOP_DECEL = 0.9;
 export const CROSSING_S = 10;
 export const DOOR_S = 4;
+export const DOOR_READ_S = 30;
 const EASE_TAU = 0.42;
 const TURN_RATE = 3.2;
 

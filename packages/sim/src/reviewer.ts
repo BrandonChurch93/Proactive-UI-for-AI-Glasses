@@ -1,4 +1,4 @@
-import { angleWrap, clamp, pitchToward, yawToward, type Beat, type ScenarioId, type Vec3 } from '@lumen/shared';
+import { PLACE_BY_ID, angleWrap, clamp, pitchToward, yawToward, type Beat, type ScenarioId, type Vec3 } from '@lumen/shared';
 
 export class Head {
   yaw: number;
@@ -43,20 +43,24 @@ export class Head {
   }
 }
 
+export function primaryAction(id: string): string {
+  return PLACE_BY_ID.get(id)?.expanded?.actions.find((a) => a.primary)?.id ?? 'choose';
+}
+
 export const HEAD_LIMIT = Math.PI / 2;
 export const IDLE_PITCH = 0.04;
 export const STEEP = 0.3;
 
 export interface Events {
   pinch?: string;
-  choice?: { id: string; action: string };
+  choice?: { id: string; action: string; row?: string };
   dismiss?: string | null;
 }
 
 export class ScriptedReviewer {
   private gazes: { t: number; id: string | null; dy: number }[];
   private pinches: { t: number; id: string }[];
-  private choices: { t: number; id: string; action: string }[];
+  private choices: { t: number; id: string; action: string; row?: string }[];
   private lookUps: { t: number; seconds: number }[];
   private scans: { t: number; sequence: string[] }[];
 
@@ -70,6 +74,7 @@ export class ScriptedReviewer {
       if (x.kind === 'choice') return [{ t: x.t, id: x.id, action: x.action }];
       if (x.kind === 'ask') return [{ t: x.answerAt, id: 'ask', action: x.answer === 'no' ? 'no' : 'find-lunch' }];
       if (x.kind === 'intent') return [{ t: x.t, id: 'intent', action: x.id }];
+      if (x.kind === 'choose' && x.row !== undefined) return [{ t: x.t, id: x.id, action: primaryAction(x.id), row: x.row }];
       if (x.kind === 'choose') return [{ t: x.t, id: 'menu', action: x.id }];
       if (x.kind === 'reply') return [{ t: x.t, id: x.id, action: x.reply }];
       if (x.kind === 'go') return [{ t: x.t, id: x.id, action: 'go' }];
@@ -97,7 +102,7 @@ export class ScriptedReviewer {
     const p = this.pinches.find((x) => x.t > a + 1e-9 && x.t <= b + 1e-9);
     if (p) ev.pinch = p.id;
     const c = this.choices.find((x) => x.t > a + 1e-9 && x.t <= b + 1e-9);
-    if (c) ev.choice = { id: c.id, action: c.action };
+    if (c) ev.choice = c.row === undefined ? { id: c.id, action: c.action } : { id: c.id, action: c.action, row: c.row };
     return ev;
   }
 

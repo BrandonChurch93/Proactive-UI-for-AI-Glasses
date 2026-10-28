@@ -29,20 +29,20 @@ Everyday, memorable names. Each place has a glance line and an expanded depth. D
 
 | Place | Side · n | Kind | Glance line | Expanded view | Scenarios |
 | --- | --- | --- | --- | --- | --- |
-| Grace Theater | W · 18 to 30 | Live theater · 1927 | Last show tonight at 8 | Tonight's shows, seats left, hold two | Explore |
-| Mega Burger | W · 70 to 78 | Burgers | 6 min wait · $ | Menu, hold a seat | Lunch |
-| Lucky Lanes | W · 44 to 56 | Bowling | Lanes open · $12 an hour till 5 | Lane availability, book | Explore |
-| Atlas Books | W · 60 to 68 | Bookshop | Open till 9 | Events tonight, hours | Explore |
-| Trattoria da Lia | W · 34 to 42 | Italian (sign in Italian) | Home cooking · open until 11 PM | Menu, read from Italian | Lunch, Explore |
-| Pocket Park | W · 80 to 90, the south-west corner | Park | Benches in the shade | Nothing more | All |
-| Goldie's Counter | E · 10 to 18 | Deli | 3 min wait · 9 seats | Menu, hold a seat | Lunch |
-| Kathy's Cupcakes | E · 24 to 30 | Bakery | Fresh batch at 2 | Today's flavors | Lunch, Explore |
-| The Big Bean | E · 46 to 52 | Coffee | Line of 4 · 5 min | Menu, order ahead | Lunch |
-| Main Street Pharmacy | E · 34 to 42 | Pharmacy | Prescription's ready here | Pickup details, hours | Explore (the menu) |
-| Corner Hardware | E · 68 to 78 | Hardware | Open till 6 | Hours, aisles for your item | Explore (the menu) |
-| M4 stop | E · 58 | Bus | 2 min · next in 11 | Next four buses | Explore |
-| 47th St Station | E · 86, stair at the corner | Subway | Uptown trains · 4 min | Next four departures | Lunch |
-| Post Office | X · north side, 10 m east of the corner | Service | Line of 8 · 12 min | Hours, counter wait | Explore (the menu) |
+| Grace Theater | W · 18 to 30 | Cinema · since 1981 (the marquee reads the bill) | Four films tonight | Four films with their next showings and seats, hold two for the one under the look | Explore |
+| Mega Burger | W · 70 to 78 | Burgers | 6 min wait · $ | Menu with a shake, hold a seat | Lunch |
+| Lucky Lanes | W · 44 to 56 | Bowling | Lanes open · $12 an hour till 5 | Lane availability and shoe rental, book | Explore |
+| Atlas Books | W · 60 to 68 | Bookshop | Reading at 7 · staff picks | Three staff picks in stock and the reading, hold a copy or save the reading | Explore |
+| Trattoria da Lia | W · 34 to 42 | Italian (sign in Italian) | Table in 20 min | Menu and the set lunch, read from Italian, hold a table | Lunch, Explore |
+| Pocket Park | W · 80 to 90, the south-west corner | Park | Benches in the shade | Shade, a free bench, how quiet; no action | All |
+| Goldie's Counter | E · 10 to 18 | Deli | 3 min wait · 9 seats | Menu with a side, hold a seat | Lunch |
+| Kathy's Cupcakes | E · 24 to 30 | Bakery | Fresh batch at 2 | Today's flavors, the last two red velvet, save one | Lunch, Explore |
+| The Big Bean | E · 46 to 52 | Coffee | Line of 4 · 5 min | Three drinks to order ahead for the 12:46 pickup | Lunch |
+| Main Street Pharmacy | E · 34 to 42 | Pharmacy | Prescription ready | Your prescription at counter 2, the copay, the line, flu shots; pay ahead (no medicine ever named) | Explore (the menu) |
+| Corner Hardware | E · 68 to 78 | Hardware | Keys cut · no wait | Keys cut while you wait and three things in stock by aisle, hold one at the till | Explore (the menu) |
+| M4 stop | E · 58 | Bus | 2 min · next in 11 | Next four buses, seats and lateness | Explore |
+| 47th St Station | E · 86, stair at the corner | Subway | Uptown trains · 4 min | Next three departures and the elevator out | Lunch |
+| Post Office | X · north side, 10 m east of the corner | Service | Package ready · line of 8 | The line, a package at the pickup window, the stamp kiosk; take a number | Explore (the menu) |
 
 As built: the 47th St Station entrance sits along the east building line just before the corner (n 78 to 83) rather than at the corner itself, so the corner stays clear for waiting and crossing; the newsstand stands at n 65 and the M4 shelter at the curb at n 58, with every route stepping behind the shelter as pedestrians do.
 

@@ -18,6 +18,9 @@ export interface DepthRow {
   tone?: 'go' | 'warn' | 'stop';
   now?: boolean;
   when?: string;
+  act?: string;
+  after?: string;
+  pocket?: string;
 }
 
 export interface DepthPayload {
@@ -25,12 +28,14 @@ export interface DepthPayload {
   rows: DepthRow[];
   actions: { id: string; label: string; primary?: boolean }[];
   after?: Record<string, string>;
+  pocket?: Record<string, string>;
   liveAfter?: Record<string, string>;
 }
 
 export interface SayLine {
   line: string;
   short: string;
+  when?: string;
 }
 
 export type SayTable = { default: SayLine } & Partial<Record<ScenarioId, SayLine>>;
@@ -108,7 +113,7 @@ export type Beat =
   | (BeatBase & { kind: 'ask'; answer: 'yes' | 'no'; answerAt: number })
   | (BeatBase & { kind: 'bike'; side: 'near' | 'far'; fromBehind: boolean; timeToPath: number })
   | (BeatBase & { kind: 'intent'; id: ScenarioId })
-  | (BeatBase & { kind: 'choose'; id: string })
+  | (BeatBase & { kind: 'choose'; id: string; row?: string })
   | (BeatBase & { kind: 'reply'; id: string; reply: string })
   | (BeatBase & { kind: 'go'; id: string });
 
@@ -182,6 +187,15 @@ function validatePlace(raw: unknown, i: number): PlaceData {
   if (raw.sayLive !== undefined && !(isRecord(raw.sayLive) && Object.values(raw.sayLive).every(sayOk))) fail(where, 'sayLive entries must be say tables');
   if (raw.picker !== undefined && typeof raw.picker !== 'string') fail(where, 'picker must be a string');
   if (!isRecord(raw.reasons)) fail(where, 'reasons must be an object');
+  const x = raw.expanded;
+  if (x !== null && x !== undefined) {
+    if (!isRecord(x) || !Array.isArray(x.rows) || !Array.isArray(x.actions)) fail(where, 'expanded needs rows and actions');
+    if (x.rows.length > 4) fail(where, 'expanded carries at most four rows');
+    for (const r of x.rows as unknown[]) {
+      if (!isRecord(r) || typeof r.title !== 'string') fail(where, 'every expanded row needs a title');
+      if ((r.act === undefined) !== (r.after === undefined)) fail(where, `row ${String(r.title)} needs both an action label and an after line, or neither`);
+    }
+  }
   for (const r of Object.values(raw.reasons)) {
     if (typeof r !== 'string' || r.length > 48) fail(where, `reason over 48 characters: ${String(r)}`);
   }

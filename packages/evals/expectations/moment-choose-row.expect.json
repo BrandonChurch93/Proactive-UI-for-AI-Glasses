@@ -1,0 +1,42 @@
+{
+  "walk": "moment-choose-row",
+  "cases": [
+    {
+      "name": "the expanded view offers four films and the action reads for the 8:00 marked now",
+      "rule": "choice",
+      "between": [3.7, 3.9],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "expanded",
+        "rowsAre": ["Dune: Part Two", "Oppenheimer", "Spirited Away", "The Avengers"],
+        "actionsAre": ["Hold two for 8:00", "Not now"]
+      }
+    },
+    {
+      "name": "the 7:15 row chosen: it alone stays and the confirmation is logged with the choice",
+      "rule": "choice",
+      "between": [6, 6.25],
+      "must": {
+        "id": "grace-theater",
+        "level": "expanded",
+        "cause": "choice",
+        "rowsAre": ["Oppenheimer"],
+        "actionsAre": [],
+        "noteIs": "Two held for Oppenheimer at 7:15 · I'll walk you there at 6:50."
+      }
+    },
+    {
+      "name": "the pocket counts it",
+      "rule": "choice",
+      "between": [6.3, 9],
+      "state": { "pocket": 1, "glyph": "Pocket 1" }
+    },
+    {
+      "name": "and does not surface at the stop it was settled at",
+      "rule": "choice",
+      "between": [6, 9],
+      "mustNot": { "id": "pocket" }
+    }
+  ]
+}

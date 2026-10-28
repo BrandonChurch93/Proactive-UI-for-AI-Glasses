@@ -357,6 +357,8 @@ export class Placement {
 
   private fold(a: { x: number; y: number }, vp: Viewport): WorldPlace {
     this.folded = true;
+    this.jumpX.set(0);
+    this.jumpY.set(0);
     this.cfg = null;
     this.shown = null;
     this.shownBox = null;
@@ -519,6 +521,7 @@ export class Aside {
       const r = { ...home, x: home.x + o.dx, y: home.y + o.dy };
       if (r.x < MARGIN - 0.5 || r.y < MARGIN - 0.5 || r.x + r.w > vp.w - MARGIN + 0.5 || r.y + r.h > vp.h - MARGIN + 0.5) return false;
       if (!focusOk && rectsOverlap(r, zone)) return false;
+      if ((ctx.chrome ?? []).some((c) => rectsOverlap(r, c))) return false;
       return !near.some((k) => rectsOverlap(r, k.rect));
     });
     const chased = (o: { dir: string }): boolean => hits.some((k) => Math.abs(k.vx ?? 0) > 20 && (o.dir === 'right' ? k.vx! > 0 : o.dir === 'left' ? k.vx! < 0 : false));

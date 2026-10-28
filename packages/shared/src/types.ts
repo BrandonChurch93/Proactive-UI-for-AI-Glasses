@@ -140,7 +140,7 @@ export interface WorldSnapshot {
     gaze: { target?: string; dwellMs: number; dir: Vec3; pitch: number; yaw: number; yawRate: number; settled?: boolean };
     pinch?: { target: string };
     dismiss?: { target?: string };
-    choice?: { id: string; action: string };
+    choice?: { id: string; action: string; row?: string };
   };
   env: {
     crosswalk?: Crosswalk;
@@ -179,6 +179,7 @@ export interface ContentRow {
   tone?: 'go' | 'warn' | 'stop' | 'voice' | 'done';
   key?: string;
   live?: string;
+  act?: string;
 }
 
 export interface Content {

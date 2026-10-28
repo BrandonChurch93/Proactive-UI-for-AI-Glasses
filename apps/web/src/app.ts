@@ -298,6 +298,10 @@ export class App {
           noted.add(d.id);
           prefer.push({ t: f.t, name: d.content.name, reason: d.content.note, rank: 0 });
         }
+        if (d.component === 'place' && d.cause === 'choice' && d.content.note && !noted.has(d.id)) {
+          noted.add(d.id);
+          prefer.push({ t: f.t, name: d.content.name, reason: d.content.note, rank: 0 });
+        }
         if (d.cause === 'arrival' && (isShow(d) || d.action === 'promote')) prefer.push({ t: f.t, name: d.content.name, reason: d.reason.text, rank: 2 });
         if (d.placement.zone === 'ground') continue;
         const was = level.get(d.id) ?? 0;

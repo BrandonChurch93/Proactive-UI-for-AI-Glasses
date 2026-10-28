@@ -15,6 +15,7 @@ export interface CaseSpec {
   gaze?: [number, string | null][];
   pinch?: [number, string][];
   choice?: [number, string, string][];
+  choose?: { t: number; id: string; row: string }[];
   dismiss?: [number, string | null][];
   pitch?: [number, number][];
   yaw?: [number, number][];
@@ -159,6 +160,8 @@ export function synthesize(spec: CaseSpec, hz = 10): WorldSnapshot[] {
     if (pinch) snap.wearer.pinch = { target: pinch[1] };
     const choice = spec.choice?.find(([at]) => Math.abs(at - t) < dt / 2);
     if (choice) snap.wearer.choice = { id: choice[1], action: choice[2] };
+    const pick = spec.choose?.find((c) => Math.abs(c.t - t) < dt / 2);
+    if (pick) snap.wearer.choice = { id: pick.id, action: PLACES.find((p) => p.id === pick.id)?.expanded?.actions.find((a) => a.primary)?.id ?? 'choose', row: pick.row };
     const dismiss = spec.dismiss?.find(([at]) => Math.abs(at - t) < dt / 2);
     if (dismiss) snap.wearer.dismiss = dismiss[1] ? { target: dismiss[1] } : {};
     if (anchor) {

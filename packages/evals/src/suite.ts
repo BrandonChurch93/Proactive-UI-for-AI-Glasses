@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { hydrateSnapshot, synthesize, type CaseSpec, type CompactSnapshot, type RunExport, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
-import { withConfig, type ConfigOverride } from '@lumen/brain';
+import { PLACES, hydrateSnapshot, reasonIsClean, synthesize, type CaseSpec, type CompactSnapshot, type RunExport, type WorldSnapshot, type ScenarioId } from '@lumen/shared';
+import { countCopy, withConfig, type ConfigOverride } from '@lumen/brain';
 import { evaluate, type CaseResult, type Expectation } from './expect';
 import { invariants } from './invariants';
 import { fingerprint, run, type RunResult } from './runner';
@@ -117,4 +117,49 @@ export function runExport(file: RunExport, name: string): SuiteResult {
     results,
     description: `${file.source} ${file.scenario} run · ${file.snapshots.length} snapshots · ${file.overrides.length} overrides`,
   };
+}
+
+// Every line a place can say, whether or not a recorded walk happens to show it.
+export function runData(): SuiteResult {
+  const results: CaseResult[] = [];
+  const add = (name: string, rule: string, bad: string[]): void => {
+    results.push({ name, rule, pass: bad.length === 0, detail: bad.length ? bad.join('; ') : `${PLACES.length} places` });
+  };
+  const sayBad: string[] = [];
+  for (const p of PLACES) {
+    for (const [key, l] of Object.entries(p.say)) {
+      if (!l) continue;
+      if (l.line.length >= 60) sayBad.push(`${p.id} ${key} over 60: ${l.line}`);
+      if (countCopy(l.line).numbers > 2) sayBad.push(`${p.id} ${key} more than two numbers: ${l.line}`);
+      if (l.line.toLowerCase().includes(p.name.toLowerCase())) sayBad.push(`${p.id} ${key} repeats the name`);
+      if (!reasonIsClean(l.line) || !reasonIsClean(l.short)) sayBad.push(`${p.id} ${key} banned word`);
+    }
+  }
+  add('every say line in places.json is under 60 characters, holds at most two numbers, never repeats the name and never uses a banned word', 'copy', sayBad);
+  add(
+    'every live line in places.json fits the card in 28 characters',
+    'copy',
+    PLACES.filter((p) => p.card.live.length > 28).map((p) => `${p.id}: ${p.card.live}`),
+  );
+  const shapeBad: string[] = [];
+  for (const p of PLACES) {
+    const x = p.expanded;
+    if (!p.depth) continue;
+    if (!x) {
+      shapeBad.push(`${p.id} has a depth and no expanded view`);
+      continue;
+    }
+    if (x.rows.length === 0 || x.rows.length > 4) shapeBad.push(`${p.id} carries ${x.rows.length} rows`);
+    const primary = x.actions.filter((a) => a.primary);
+    if (p.id === 'pocket-park') {
+      if (x.actions.length) shapeBad.push('pocket-park asks for an action');
+      continue;
+    }
+    if (primary.length !== 1) shapeBad.push(`${p.id} has ${primary.length} primary actions`);
+    if (!x.actions.some((a) => a.id === 'not-now')) shapeBad.push(`${p.id} has no Not now`);
+    const choices = x.rows.filter((r) => r.act);
+    if (choices.length ? choices.some((r) => !r.after) : !x.after?.[primary[0]?.id ?? '']) shapeBad.push(`${p.id} has no after line for its action`);
+  }
+  add('every place with a depth has one to four rows, one primary action, Not now and an after line for it; Pocket Park has rows and no action', 'choice', shapeBad);
+  return { id: 'places', group: 'data', pass: results.every((r) => r.pass), results, description: 'Every place in data/places.json against the copy rules and the shape of an expanded view' };
 }

@@ -1048,6 +1048,48 @@
   padding: 7px 0;
 }
 
+.rows li.flush > span:first-child {
+  grid-column: 1 / 3;
+}
+
+.flushKey {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  margin-right: 8px;
+}
+
+.rows {
+  isolation: isolate;
+}
+
+.rows li[data-row] {
+  position: relative;
+  cursor: pointer;
+}
+
+.rows li[data-row]::before {
+  content: '';
+  position: absolute;
+  inset: 0 -6px;
+  z-index: -1;
+  border-radius: 4px;
+  background: rgba(255, 250, 236, 0.07);
+  opacity: 0;
+  transition: opacity 120ms linear;
+  pointer-events: none;
+}
+
+.rows li[data-lift]::before {
+  opacity: 1;
+}
+
+.rows li[data-lift],
+.rows li[data-lift] + li {
+  border-top-color: transparent;
+}
+
 .pickRows li {
   display: grid;
   grid-template-columns: 34px 1fr;

@@ -1,0 +1,11 @@
+{
+  "id": "moment-choose-row",
+  "rule": "choice",
+  "scenario": "walking",
+  "duration": 9,
+  "description": "At the cinema's expanded view a choice on the 7:15 row settles that row alone, logs its confirmation, and counts it in the pocket.",
+  "startN": 10,
+  "pace": [[0, 0]],
+  "gaze": [[1, "grace-theater"]],
+  "choose": [{ "t": 6, "id": "grace-theater", "row": "7:15" }]
+}

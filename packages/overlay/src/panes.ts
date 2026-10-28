@@ -13,7 +13,7 @@ export interface PaneView {
 }
 
 export interface PaneHandlers {
-  choice(id: string, action: string): void;
+  choice(id: string, action: string, row?: string): void;
   pinch(id: string): void;
 }
 
@@ -37,16 +37,26 @@ function showsReason(c: Content): boolean {
   return c.showReason !== false && Boolean(c.reason.text) && c.reason.text !== c.name && c.reason.text !== c.fact;
 }
 
+// The pane's rows that are each a choice: the one lifted by the pointer, a tap or the look decides what the action does.
+function liftedRow(el: Element | null): HTMLElement | null {
+  return el?.querySelector<HTMLElement>('li[data-lift]') ?? null;
+}
+
 function actions(c: Content, id: string, h: PaneHandlers, cls = s.actions): HTMLElement | null {
   if (!c.actions?.length) return null;
   const row = node('div', cls);
+  const follow = Boolean(c.rows?.some((r) => r.act));
   for (const a of c.actions) {
     const b = node('button', a.primary ? s.primary : a.id === 'end' || a.id === 'not-now' ? s.quiet : undefined, a.label) as HTMLButtonElement;
     b.type = 'button';
     b.dataset.k = `a:${a.id}`;
+    if (follow && a.primary) {
+      b.dataset.follow = a.label;
+    }
     b.addEventListener('click', (e) => {
       e.stopPropagation();
-      h.choice(id, a.id);
+      const lift = follow && a.primary ? liftedRow(row.parentElement)?.dataset.row : undefined;
+      h.choice(id, a.id, lift);
     });
     row.appendChild(b);
   }
@@ -169,13 +179,25 @@ function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement 
   c.rows.forEach((r, i) => {
     const li = node('li', tone(r.tone));
     if (cls === s.rows) {
-      if (thumbs) li.appendChild(r.img ? thumb(r.img, c.kind, s.thumbRow!, `r${i}i`) : node('span', undefined));
+      const flush = thumbs && !r.img;
+      if (flush) li.classList.add(s.flush!);
+      else if (thumbs) li.appendChild(thumb(r.img, c.kind, s.thumbRow!, `r${i}i`));
       else if (!keyless) li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
       const mid = node('span', undefined);
+      if (flush && r.key) mid.appendChild(keyed(node('time', s.flushKey, r.key), `r${i}k`));
       mid.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
       if (r.sub) mid.appendChild(keyed(node('em', undefined, r.sub), `r${i}s`));
       li.appendChild(mid);
       li.appendChild(keyed(node('span', `${s.value} ${tone(r.tone)}`, r.value ?? ''), `r${i}v`));
+      if (r.act) {
+        li.dataset.row = r.key ?? r.title;
+        li.dataset.act = r.act;
+        li.addEventListener('click', (e) => {
+          e.stopPropagation();
+          ul.querySelectorAll<HTMLElement>('li[data-tap]').forEach((x) => x !== li && delete x.dataset.tap);
+          li.dataset.tap = '';
+        });
+      }
     } else if (cls === s.pickRows) {
       li.appendChild(thumb(r.img, r.kind, s.thumbRow!, `r${i}i`));
       const top = node('div', s.pickTop);
@@ -376,6 +398,7 @@ export function buildPane(d: Decision, level: Level, h: PaneHandlers): PaneView 
       tmp.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => next.set(e.dataset.k!, e.textContent ?? ''));
       let changed = false;
       el.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => {
+        if (e.dataset.follow !== undefined) return;
         const v = next.get(e.dataset.k!);
         if (v !== undefined && e.textContent !== v) {
           e.textContent = v;

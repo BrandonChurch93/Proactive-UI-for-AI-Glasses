@@ -42,7 +42,7 @@ import { People, type ScriptedPerson } from './people';
 import { Head, STEEP, ScriptedReviewer, type Events } from './reviewer';
 import { START, crossingAnchor, doorSpur, nearestS, routeLoop, routeTo, type Route } from './route';
 import { LANE_BY_ID, Traffic, type ScriptedVehicle, type Vehicle } from './traffic';
-import { DOOR_S, Wearer } from './wearer';
+import { DOOR_READ_S, DOOR_S, Wearer } from './wearer';
 
 export const SIM_HZ = 60;
 export const TICK_HZ = 10;
@@ -218,9 +218,12 @@ export class Sim {
     if (p.go && this.wearer.holding) this.release(this.t);
   }
 
+  // The wearer stands at the door 4 s, and for as long as they keep looking at the place, up to 30 s: they are reading it.
   private dwelling(t: number): boolean {
     const w = this.wearer;
-    return w.arrivedAt !== null && w.route.target !== 'start' && t - w.arrivedAt < DOOR_S;
+    if (w.arrivedAt === null || w.route.target === 'start') return false;
+    const at = t - w.arrivedAt;
+    return at < DOOR_S || (at < DOOR_READ_S && this.gazeTarget === w.route.target);
   }
 
   private navigate(t: number): void {

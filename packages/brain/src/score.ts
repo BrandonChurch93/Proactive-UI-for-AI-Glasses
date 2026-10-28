@@ -25,10 +25,6 @@ export interface ScoreInput {
 
 const num = (v: unknown): number | undefined => (typeof v === 'number' ? v : undefined);
 
-export function isClosed(e: Entity): boolean {
-  return e.live.closedEarly === true;
-}
-
 export function goalRelevance(e: Entity, inp: ScoreInput, cfg: Config): number {
   if (inp.destination === e.id) return cfg.score.goalRelevance;
   if (inp.destination && inp.goal === 'hungry') return 0;
@@ -40,7 +36,6 @@ export function goalRelevance(e: Entity, inp: ScoreInput, cfg: Config): number {
 }
 
 export function value(e: Entity): number {
-  if (isClosed(e)) return 0;
   const wait = num(e.live.wait);
   switch (e.kind) {
     case 'food':

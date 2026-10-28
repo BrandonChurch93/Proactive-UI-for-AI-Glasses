@@ -190,6 +190,12 @@
   font-size: 12.5px;
 }
 
+.confirm {
+  margin: 3px 0 0 104px;
+  font-size: 12.5px;
+  color: var(--voice);
+}
+
 .parts {
   margin: 3px 0 0 104px;
   font-family: var(--font-mono);
