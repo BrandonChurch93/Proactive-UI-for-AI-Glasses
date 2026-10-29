@@ -1,8 +1,6 @@
-import { mkdirSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdirSync } from 'node:fs';
 import { PLACES } from '@lumen/shared';
-import { arg, ensureServer, launch } from './lib/browser';
+import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 
 // pnpm doors: plays Explore live in real time and visits every place in one walk the way a wearer would, with the
 // look alone. For each place it opens the menu, chooses the place, walks to its door, aims at the door and holds the
@@ -25,23 +23,7 @@ const shots = arg('shots');
 const burst = new Set(arg('burst')?.split(',') ?? []);
 if (shots) mkdirSync(shots, { recursive: true });
 
-// The dev server reloads the page whenever a source changes (an editor's format-on-save lands a minute after an edit);
-// a reload mid-walk restarts the walk, so wait until the sources have been quiet for 75 s.
-const newest = (dir: string): number => {
-  let m = 0;
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
-    const f = join(dir, e.name);
-    m = Math.max(m, e.isDirectory() ? newest(f) : statSync(f).mtimeMs);
-  }
-  return m;
-};
-const root = fileURLToPath(new URL('..', import.meta.url));
-for (;;) {
-  const quiet = (Date.now() - Math.max(newest(join(root, 'packages')), newest(join(root, 'apps/web/src')), newest(join(root, 'data')))) / 1000;
-  if (quiet >= 75) break;
-  await new Promise((r) => setTimeout(r, (75 - quiet) * 1000 + 500));
-}
+await waitQuiet();
 const server = await ensureServer(base);
 const browser = await launch();
 const page = await browser.newPage({ viewport: { width: w, height: h } });

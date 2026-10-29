@@ -1,4 +1,4 @@
-import { LEVEL_RANK, PLACE_BY_ID, angleWrap, isShow, reasonIsClean, uiScale, yawToward, type Band, type ComponentKind, type ScenarioId, type WorldSnapshot } from '@lumen/shared';
+import { LEVEL_RANK, PLACE_BY_ID, angleWrap, isShow, reasonIsClean, uiScale, VIEWFINDER, yawToward, type Band, type ComponentKind, type ScenarioId, type WorldSnapshot } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Ambient, type StreetFrame } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
@@ -205,7 +205,10 @@ export class App {
     if (this.snapTarget && this.snapTarget !== w.sim.gaze.target) this.snapTarget = null;
     const reduced = this.opts.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
     const p = mark ? (this.snapTarget === target ? 1 : Math.min(1, mark.p + mark.rate * Math.max(0, w.t - f!.t))) : null;
-    this.chrome.setMark({ lit: Boolean(mark), p: reduced ? null : p });
+    // The corners pull in while a place is held, the look on it as long as a look needs; they brighten on the count.
+    const gz = w.sim.gaze;
+    const held = !reduced && Boolean(gz.target && PLACE_BY_ID.has(gz.target) && gz.dwellMs >= VIEWFINDER.holdMs);
+    this.chrome.setMark({ lit: Boolean(mark), held, p: reduced ? null : p });
   }
 
   syncChrome(): void {

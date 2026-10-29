@@ -1,5 +1,7 @@
 import { chromium, type Browser } from 'playwright';
 import { createServer, type ViteDevServer } from 'vite';
+import { readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const webRoot = fileURLToPath(new URL('../../apps/web', import.meta.url));
@@ -44,3 +46,23 @@ export async function launch(): Promise<Browser> {
 }
 
 export const VIEWPORT = { width: 1280, height: 800 };
+
+// The dev server reloads the page whenever a source changes (an editor's format-on-save lands a minute after an edit);
+// a reload mid-walk restarts the walk, so a live run waits until the sources have been quiet this long.
+export async function waitQuiet(seconds = 75): Promise<void> {
+  const newest = (dir: string): number => {
+    let m = 0;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
+      const f = join(dir, e.name);
+      m = Math.max(m, e.isDirectory() ? newest(f) : statSync(f).mtimeMs);
+    }
+    return m;
+  };
+  const root = fileURLToPath(new URL('../..', import.meta.url));
+  for (;;) {
+    const quiet = (Date.now() - Math.max(newest(join(root, 'packages')), newest(join(root, 'apps/web/src')), newest(join(root, 'data')))) / 1000;
+    if (quiet >= seconds) return;
+    await new Promise((r) => setTimeout(r, (seconds - quiet) * 1000 + 500));
+  }
+}

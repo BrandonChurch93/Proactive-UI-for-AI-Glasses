@@ -18,7 +18,8 @@
     "record": "tsx packages/evals/src/record.ts",
     "shot": "tsx scripts/shot.ts",
     "shots": "tsx scripts/shots.ts",
-    "doors": "tsx scripts/doors.ts"
+    "doors": "tsx scripts/doors.ts",
+    "aim": "tsx scripts/aim.ts"
   },
   "devDependencies": {
     "@fontsource/archivo-black": "5.3.0",

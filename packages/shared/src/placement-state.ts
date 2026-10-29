@@ -89,7 +89,9 @@ export interface WorldPlace {
   side: 'left' | 'right';
   collapsed?: Level;
   why?: 'collapse' | 'step-down' | 'room' | 'edge';
-  moved?: 'replace' | 'rope' | 'clamp' | 'zone';
+  moved?: 'replace' | 'rope' | 'clamp' | 'zone' | 'held';
+  fx?: number;
+  fy?: number;
   align?: Align;
   vertical?: Vertical;
   edge?: { x: number; y: number };
@@ -132,12 +134,13 @@ export class Placement {
   readonly jumpX = new Track(0);
   readonly jumpY = new Track(0);
 
-  reset(): void {
+  // Handing a pane back keeps its scale and when it last changed: scale belongs to the pane, held 2.5 s across any re-placement.
+  reset(keepScale = false): void {
     this.cfg = null;
     this.shown = null;
     this.last = null;
     this.folded = false;
-    this.scale = null;
+    if (!keepScale) this.scale = null;
   }
 
   // The pane on the thing being looked at stays where it fits: it leaves only for a cause that has lasted `leaveMs`; an anchor leaving the view folds it at once.
@@ -336,13 +339,15 @@ export class Placement {
       const span = { x, y, w: Math.max(from.x + from.w, rect.x + rect.w) - x, h: Math.max(from.y + from.h, rect.y + rect.h) - y };
       return req.focusOk || Boolean(req.zoneOk) || !rectsOverlap(span, zoneNow);
     };
+    // A move starts no farther back than keeps the pane's edge within its own width of the light, the gap it already stands at included.
+    const reach = Math.max(0, rect.w * 0.98 - Math.hypot(Math.max(rect.x - a.x, 0, a.x - (rect.x + rect.w)), Math.max(rect.y - a.y, 0, a.y - (rect.y + rect.h)))) / MOVE.kickReach;
     if (jump !== null && this.shown && this.shownBox && !resized && pathClear(this.shownBox)) {
-      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump, rect.w);
+      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump, Math.min(rect.w, reach));
     } else if (this.shown && jump === null) {
       const d = Math.hypot(c.x - this.shown.x, c.y - this.shown.y);
       const rel = this.shownRel ? Math.hypot(c.x - a.x - this.shownRel.x, c.y - a.y - this.shownRel.y) : 0;
       if (rel > MOVE.ropeJump && this.last?.mode === 'pane' && !resized && !res.held) {
-        this.kickFrom(t, this.shown, c, MOVE.pushOut, rect.w);
+        this.kickFrom(t, this.shown, c, MOVE.pushOut, Math.min(rect.w, reach));
         moved ??= 'rope';
       } else {
         const rope = (target: number, cur: number): number => {
@@ -385,6 +390,13 @@ export class Placement {
     return this.remember(placed);
   }
 
+  adopt(p: WorldPlace, anchor: { x: number; y: number }): void {
+    this.reset(true);
+    this.last = p;
+    this.prevAnchor = { x: anchor.x, y: anchor.y };
+    this.leaveSince = null;
+  }
+
   get placedAt(): number {
     return this.cfgAt;
   }
@@ -417,8 +429,8 @@ export class Placement {
     return p;
   }
 
-  ease(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number): void {
-    if (Math.hypot(from.x - to.x, from.y - to.y) > MOVE.deadBand) this.kickFrom(t, from, to, dur);
+  ease(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number, w = Infinity): void {
+    if (Math.hypot(from.x - to.x, from.y - to.y) > MOVE.deadBand) this.kickFrom(t, from, to, dur, w);
   }
 
   // A move during a fast head turn starts no farther back than the pane's width, so it never trails its light.

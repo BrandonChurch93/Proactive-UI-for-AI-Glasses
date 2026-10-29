@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Brain } from '@lumen/brain';
-import { FOCUS_ZONE, KEEPOUT, anchorFactors, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
+import { FOCUS_ZONE, KEEPOUT, anchorFactors, besideSquare, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
 import { ALBEDO, SHADE, Sim, TICK_HZ, keepOuts } from '@lumen/sim';
 import type { KeepOut } from '../src/bridge';
 import { primaryContrast, secondaryContrast, tierFor } from '../src/backdrop';
@@ -273,6 +273,24 @@ describe('rule 1 · the zone grows, content is pushed out over 320 ms, not cut',
     const after = p.update(req, { ...base, t: 2 + MOVE.pushOut + 0.05, band: 'brisk' });
     expect(p.jumpX.at(2 + MOVE.pushOut + 0.05)).toBe(0);
     expect(rectsOverlap(after.rect, zone)).toBe(false);
+  });
+});
+
+describe('rule 1 · the held pane beside the viewfinder', () => {
+  it('sits on its light\'s side 24 px outside the square, clear of its light, and grows from that corner away from it', () => {
+    const vp = { w: 1920, h: 1080 };
+    const light = { x: 760, y: 580 };
+    const clear = { x: light.x - 12, y: light.y - 12, w: 24, h: 24 };
+    const base = { light, viewport: vp, half: 108, gap: 32, avoid: [] };
+    const f = besideSquare({ ...base, size: { w: 290, h: 81 } })!;
+    expect(f.side).toBe('left');
+    expect(f.rect.x + f.rect.w).toBeCloseTo(960 - 108 - 32);
+    expect(rectsOverlap(f.rect, clear)).toBe(false);
+    const g = besideSquare({ ...base, size: { w: 394, h: 205 }, side: f.side, corner: { x: f.rect.x + f.rect.w * f.fx, y: f.rect.y + f.rect.h * f.fy, fx: f.fx, fy: f.fy } })!;
+    expect(g.side).toBe('left');
+    expect(g.rect.x + g.rect.w).toBeCloseTo(f.rect.x + f.rect.w);
+    expect(g.rect.y + g.rect.h).toBeCloseTo(f.rect.y + f.rect.h);
+    expect(rectsOverlap(g.rect, clear)).toBe(false);
   });
 });
 

@@ -3,8 +3,17 @@ import {
   LEVEL_RANK,
   MARGIN,
   NOMINAL_SIZE,
+  PIP_GAP,
   READ,
+  VIEWFINDER,
   anchorFactors,
+  besideSquare,
+  keepOutsFor,
+  viewfinderHalf,
+  type BesideInput,
+  type Beside,
+  type Projected,
+  type SquareSide,
   angleWrap,
   clamp,
   focusRect,
@@ -70,6 +79,27 @@ interface Built {
   scale?: number;
 }
 
+interface Held {
+  side: SquareSide | null;
+  fx: number;
+  fy: number;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  at: number;
+  w: number;
+  h: number;
+  outSince: number | null;
+  badSince: number | null;
+  came: boolean;
+  level: Level;
+}
+
+const EASE_OUT = (k: number): number => 1 - (1 - k) ** 3;
+
+function factors(p: WorldPlace): { fx: number; fy: number } {
+  return p.fx !== undefined && p.fy !== undefined ? { fx: p.fx, fy: p.fy } : anchorFactors(p.align ?? 'center', p.vertical ?? 'above');
+}
+
 interface Item {
   id: string;
   d: Decision;
@@ -113,7 +143,12 @@ interface Item {
   swap: boolean;
   frozen: { x: number; y: number } | null;
   edgeSince: number | null;
-  read: { off: { x: number; y: number }; outSince: number | null } | null;
+  hold: Held | null;
+  holdEnded: boolean;
+  noCome: Level | null;
+  ride: { x: number; y: number } | null;
+  // Where the light was, and which anchor it was, when the pane was last placed: an arrival moves the anchor to the door.
+  placedPr: { x: number; y: number; anchor: string } | null;
 }
 
 const FOLD_LEAD_S = 0.4;
@@ -122,6 +157,7 @@ const MAP_VOICE = '#ffd98a';
 const MAP_TONES: Record<string, string> = { food: '#e0946a', cafe: '#d4ac7a', theater: '#ef7a74', venue: '#c49ae6', shop: '#e3cc84', service: '#9fd3c2', transit: '#7fa9e6', park: '#9fdc9f' };
 // A newborn pane's first frames move with its placement settling, not with the view; that is not motion to look ahead along.
 const FOLD_SETTLE_S = 0.1;
+const FAST_TURN = 1.5;
 
 export interface OverlayOptions {
   reducedMotion?: boolean;
@@ -130,6 +166,8 @@ export interface OverlayOptions {
   log?: (e: OverlayEvent) => void;
   resumed?: boolean;
   time?: boolean;
+  aiming?: () => boolean;
+  gaze?: () => { target: string | null; dwellMs: number };
 }
 
 export interface OverlayState {
@@ -292,6 +330,9 @@ export class Overlay {
   private snap: WorldSnapshot | null = null;
   private band: Band = 'walk';
   private receded = false;
+  private aiming: () => boolean;
+  // The look as it is this frame, not as of the last tick: a pane must be pinned before the tick that marks it looked at re-places it.
+  private gazeNow: () => { target: string | null; dwellMs: number };
   private gateTl: gsap.core.Timeline | null = null;
   private readonly gateK = { v: 1 };
   private gateEndAt = -Infinity;
@@ -324,6 +365,8 @@ export class Overlay {
   ) {
     this.clock = opts.clock ?? null;
     this.log = opts.log ?? null;
+    this.aiming = opts.aiming ?? (() => false);
+    this.gazeNow = opts.gaze ?? (() => ({ target: this.snap?.wearer.gaze.target ?? null, dwellMs: this.snap?.wearer.gaze.dwellMs ?? 0 }));
     this.resuming = Boolean(opts.resumed);
     this.reduced = opts.reducedMotion ?? (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.handlers = { choice: opts.handlers?.choice ?? (() => {}), pinch: opts.handlers?.pinch ?? (() => {}) };
@@ -475,7 +518,11 @@ export class Overlay {
       swap: false,
       frozen: null,
       edgeSince: null,
-      read: null,
+      hold: null,
+      holdEnded: false,
+      noCome: null,
+      ride: null,
+      placedPr: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -828,34 +875,147 @@ export class Overlay {
     return row === undefined ? { id, action } : { id, action, row };
   }
 
-  // While an expanded view is read at Stopped or Stroll it holds its place in the world, so turning the head carries the
-  // viewfinder across its rows; it goes back to following its light once the look has been off the pane (plus 80 px) for 1 s.
-  private reading(it: Item, t: number, vp: { w: number; h: number }, pr: { x: number; y: number; inFront: boolean }): WorldPlace | null {
+  // The held place's pane comes beside the viewfinder over 320 ms and holds there: the corner nearest the square keeps its
+  // offset from the light, so it moves on the glass only as the world does and the leader stretches to the light. It
+  // re-places only for a cause that has lasted 300 ms, grows in place around that corner, and goes back to following its
+  // light once the look has been gone 1 s. Where no place beside the square fits, it holds where it stands.
+  private hold(it: Item, t: number, ctx: FrameCtx, chrome: Rect[], pr: Projected, depth: number, size: { w: number; h: number }): WorldPlace | null {
     const b = it.cur;
     const placed = it.placed;
-    const ok = it.d.level === 'expanded' && (this.band === 'stopped' || this.band === 'stroll') && pr.inFront && b?.level === 'expanded' && placed?.mode === 'pane' && b.rect;
-    if (!ok) {
-      it.read = null;
+    const g = this.gazeNow();
+    const look = g.target === it.id;
+    const vp = ctx.vp;
+    if (!pr.inFront || it.dying || !b?.rect || b.level === 'none' || !placed || placed.mode !== 'pane' || (g.target && !look) || it.placedPr?.anchor !== it.d.placement.anchor) return this.endHold(it);
+    const scale = placed.scale;
+    const W = size.w * scale;
+    const H = size.h * scale;
+    const doorway = this.bridge.doorway?.(it.d.placement.anchor) ?? null;
+    const near = keepOutsFor(ctx.keepOuts, depth).filter((k) => k.kind === 'roadway' || (k.kind === 'vehicle' && !k.moving) || (k.kind === 'face' && (!doorway || k.still)) || (k.kind === 'person' && k.still && !doorway)).map((k) => k.rect);
+    const base: BesideInput = { light: pr, size: { w: W, h: H }, viewport: vp, half: viewfinderHalf(vp), gap: PIP_GAP.beside * Math.max(1, ctx.ui ?? 1), avoid: [...near, ...(ctx.chrome ?? [])], current: b.rect };
+    if (doorway) base.doorway = doorway;
+    const corner = (r: Rect, f: { fx: number; fy: number }): { x: number; y: number } => ({ x: r.x + r.w * f.fx - pr.x, y: r.y + r.h * f.fy - pr.y });
+    // The last placement was made against last frame's light; carried to this frame's, so a fast turn does not skew the offset.
+    const lag = it.placedPr ? { x: pr.x - it.placedPr.x, y: pr.y - it.placedPr.y } : { x: 0, y: 0 };
+    const placedRect = { ...placed.rect, x: placed.rect.x + lag.x, y: placed.rect.y + lag.y };
+    // Where the pane stands before the world's own offsets (a step aside, a yield) are added: its placement plus any move under way.
+    const stood = (): Rect => ({ ...placedRect, x: placedRect.x + (it.place?.jumpX.at(t) ?? 0), y: placedRect.y + (it.place?.jumpY.at(t) ?? 0) });
+    const aim = (f: Beside | null, from: Rect): Held => {
+      const ff = f ?? factors(placed);
+      return { side: f?.side ?? null, fx: ff.fx, fy: ff.fy, from: corner(from, ff), to: corner(f?.rect ?? placedRect, ff), at: t, w: W, h: H, outSince: null, badSince: null, came: true, level: it.d.level };
+    };
+    // The look landing pins the pane where it stands, so nothing re-places it; once the look has held it comes beside the square.
+    if (!it.hold) {
+      // A pane frozen by a head scan stands where the scan began, not where its placement says: pin it once the scan is over.
+      // ...and one still condensing or growing is not yet at its measured size, which its placement still has to catch up with.
+      if (!look || it.frozen || b.level !== it.d.level || t < it.condensingUntil) return null;
+      // In a fast turn the eye is not on it: pin it to its placement rather than to where a catch-up move has it trailing.
+      const at = Math.abs(this.yawRate) < FAST_TURN ? stood() : placedRect;
+      const pin = aim(null, at);
+      it.hold = { ...pin, to: pin.from, came: false };
+      it.place?.jumpX.set(0);
+      it.place?.jumpY.set(0);
+    }
+    if (!it.hold.came && look && g.dwellMs >= VIEWFINDER.holdMs && b.opacity >= 0.9 && t >= it.condensingUntil) {
+      const f = it.noCome === it.d.level ? null : besideSquare(base);
+      if (f) it.hold = aim(f, stood());
+      else it.hold.came = true;
+    }
+    const hd = it.hold;
+    if (look) hd.outSince = null;
+    else hd.outSince ??= t;
+    if (hd.outSince !== null && t - hd.outSince >= READ.leaveS - 1e-9) return this.endHold(it);
+    const offAt = (): { x: number; y: number } => {
+      const k = EASE_OUT(clamp((t - hd.at) / MOVE.pushOut, 0, 1));
+      return { x: hd.from.x + (hd.to.x - hd.from.x) * k, y: hd.from.y + (hd.to.y - hd.from.y) * k };
+    };
+    if (Math.abs(W - hd.w) > 0.5 || Math.abs(H - hd.h) > 0.5) {
+      hd.w = W;
+      hd.h = H;
+      const grew = hd.level !== it.d.level;
+      hd.level = it.d.level;
+      // A pane held where its placement put it goes back to its placement for the new size, and is held there again.
+      if (!hd.side && grew && look) {
+        it.noCome = it.d.level;
+        return this.endHold(it, true);
+      }
+      if (hd.side && grew && look) {
+        const now = offAt();
+        // A larger pane grows from its corner where it can, else takes another side of the square short of crossing its light; with no room at all it goes back beside its light, once, and is held there.
+        const f = besideSquare({ ...base, side: hd.side, corner: { x: pr.x + now.x, y: pr.y + now.y, fx: hd.fx, fy: hd.fy } });
+        const across: Record<SquareSide, SquareSide> = { left: 'right', right: 'left', above: 'below', below: 'above' };
+        const g2 = f ? null : besideSquare({ ...base, exclude: across[hd.side] });
+        // Where the larger pane at its old corner would touch the chrome or leave the view, it takes its place at once; the Grow move is animating it anyway.
+        const start = { x: pr.x + now.x - W * hd.fx, y: pr.y + now.y - H * hd.fy, w: W, h: H };
+        const blocked = start.x < MARGIN || start.y < MARGIN || start.x + W > vp.w - MARGIN || start.y + H > vp.h - MARGIN || chrome.some((k) => rectsOverlap(start, k));
+        if (f) Object.assign(hd, { from: blocked ? corner(f.rect, hd) : now, to: corner(f.rect, hd), at: t });
+        else if (g2) {
+          it.hold = { ...aim(g2, stood()), level: it.d.level };
+          if (blocked) it.hold.from = it.hold.to;
+        } else {
+          it.noCome = it.d.level;
+          return this.endHold(it, true);
+        }
+      }
+    }
+    let off = offAt();
+    let rect = { x: pr.x + off.x - W * hd.fx, y: pr.y + off.y - H * hd.fy, w: W, h: H };
+    // A move that would cross the chrome on its way completes at once: its end was checked against it, its path was not.
+    if (t - hd.at < MOVE.pushOut && chrome.some((k) => rectsOverlap(rect, k))) {
+      hd.from = hd.to;
+      off = offAt();
+      rect = { x: pr.x + off.x - W * hd.fx, y: pr.y + off.y - H * hd.fy, w: W, h: H };
+    }
+    const out = rect.x < MARGIN - 0.5 || rect.y < MARGIN - 0.5 || rect.x + rect.w > vp.w - MARGIN + 0.5 || rect.y + rect.h > vp.h - MARGIN + 0.5;
+    // While the wearer turns away, a held pane leaving the view lets go and rides with the world like the rest: re-placing it beside the square would follow the turn.
+    if (out && this.aiming()) {
+      it.hold = null;
+      it.ride = { x: rect.x - pr.x, y: rect.y - pr.y };
       return null;
     }
-    const r = b.rect!;
-    const m = READ.marginPx * this.ui;
-    const cx = vp.w / 2;
-    const cy = vp.h / 2;
-    const over = cx >= r.x - m && cx <= r.x + r.w + m && cy >= r.y - m && cy <= r.y + r.h + m;
-    const look = this.snap?.wearer.gaze.target === it.id;
-    if (!it.read) {
-      if (!look || b.opacity < 0.9 || t < it.condensingUntil) return null;
-      it.read = { off: { x: placed.rect.x - pr.x, y: placed.rect.y - pr.y }, outSince: null };
+    // Re-placing beside the square is for a place still near it; once its light has gone a pane's width beyond the square the look has moved on, and re-placing would hold it there.
+    const lightOff = Math.hypot(Math.max(0, Math.abs(pr.x - vp.w / 2) - base.half), Math.max(0, Math.abs(pr.y - vp.h / 2) - base.half));
+    const near2 = lightOff <= base.gap + W;
+    // The chrome acts at once: a held pane that would touch it takes its place beside the square now, rather than folding and coming back.
+    if (t - hd.at >= MOVE.pushOut && chrome.some((k) => rectsOverlap(rect, k))) {
+      if (!near2) return this.endHold(it);
+      const f = besideSquare(base);
+      if (!f) return this.endHold(it);
+      it.hold = aim(f, stood());
+      return this.hold(it, t, ctx, chrome, pr, depth, size);
     }
-    if (over && look) it.read.outSince = null;
-    else it.read.outSince ??= t;
-    if (it.read.outSince !== null && t - it.read.outSince >= READ.leaveS - 1e-9) {
-      it.read = null;
-      return null;
+    const bad = t - hd.at >= MOVE.pushOut && (out || [...near, ...chrome].some((k) => rectsOverlap(rect, k)));
+    if (bad) {
+      hd.badSince ??= t;
+      if (t - hd.badSince >= MOVE.leaveMs / 1000 - 1e-9) {
+        if (!near2) return this.endHold(it);
+        const f = besideSquare(base);
+        // With nowhere better beside the square it stays where it is, drawn inside the view, and tries again 300 ms later.
+        if (!f) hd.badSince = t;
+        else {
+          it.hold = aim(f, stood());
+          return this.hold(it, t, ctx, chrome, pr, depth, size);
+        }
+      }
+    } else hd.badSince = null;
+    const p: WorldPlace = { mode: 'pane', rect, leader: { x: pr.x + off.x, y: pr.y + off.y }, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', fx: hd.fx, fy: hd.fy };
+    if (placed.align) p.align = placed.align;
+    if (placed.vertical) p.vertical = placed.vertical;
+    if (hd.came && t - hd.at < MOVE.pushOut) p.moved = 'held';
+    return p;
+  }
+
+  // The pane goes back to its placement from where it stands, so placement's own leave hysteresis covers a first frame that does not fit.
+  // A level change instead starts placement afresh at the new size, since the old rect at the new size may not fit at all.
+  private endHold(it: Item, fresh = false): null {
+    if (it.hold) {
+      it.hold = null;
+      it.place?.jumpX.set(0);
+      it.place?.jumpY.set(0);
+      if (!fresh && it.placed?.mode === 'pane' && it.placedPr) it.place?.adopt(it.placed, it.placedPr);
+      else it.place?.reset(true);
+      it.holdEnded = !fresh;
     }
-    const rect = { ...placed.rect, x: pr.x + it.read.off.x, y: pr.y + it.read.off.y };
-    return { ...placed, rect, leader: { x: placed.leader.x - placed.rect.x + rect.x, y: placed.leader.y - placed.rect.y + rect.y } };
+    return null;
   }
 
   // The row under the pointer, else the one tapped, else the one under the viewfinder's center while the place is looked at, else the row the action reads for.
@@ -1240,6 +1400,7 @@ export class Overlay {
     const zone = focusRect(this.band, vp.w, vp.h);
     gsap.set(this.focusEl, { left: zone.x, top: zone.y, width: zone.w, height: zone.h });
 
+    const aimingNow = this.aiming();
     const slots = new Map<string, number>();
     const ordered = this.placeOrder();
     this.stagger(ordered);
@@ -1273,15 +1434,45 @@ export class Overlay {
           const sizeOf = (l: Level): { w: number; h: number } =>
             kept && kept.level === l ? { w: kept.width, h: kept.height } : (NOMINAL_SIZE[l as 'label' | 'card' | 'expanded'] ?? NOMINAL_SIZE.label);
           if (d.placement.focusOk) it.lookedAt = t;
-          const read = this.reading(it, t, vp, p);
-          if (read) placed = read;
+          // A drag over, the pane the look is on stays where it rode, pinned; the rest go back to their placement in one move.
+          if (it.ride && (!aimingNow || !p.inFront || it.dying)) {
+            const r = it.placed?.mode === 'pane' ? { ...it.placed.rect, x: p.x + it.ride.x, y: p.y + it.ride.y } : null;
+            it.ride = null;
+            if (r && p.inFront && this.gazeNow().target === it.id && !it.hold) {
+              const f = factors(it.placed!);
+              const off = { x: r.x + r.w * f.fx - p.x, y: r.y + r.h * f.fy - p.y };
+              it.hold = { side: null, fx: f.fx, fy: f.fy, from: off, to: off, at: t - MOVE.pushOut, w: r.w, h: r.h, outSince: null, badSince: null, came: false, level: it.d.level };
+            } else {
+              it.place.reset(true);
+              it.holdEnded = true;
+            }
+          }
+          const held = this.hold(it, t, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx, chrome, p, depth, size);
+          // While the wearer drags the view, and a moment after, a pane already on the glass rides with the world where it stands, so the one aimed at is where the turn meets it.
+          if (!held && !it.ride && aimingNow && p.inFront && it.placed?.mode === 'pane' && it.cur?.rect && it.want !== 'none' && !it.dying) it.ride = { x: it.placed.rect.x - p.x, y: it.placed.rect.y - p.y };
+          if (held) placed = held;
+          else if (it.ride) {
+            const { moved: _m, ...last } = it.placed!;
+            placed = { ...last, rect: { ...last.rect, x: p.x + it.ride.x, y: p.y + it.ride.y } };
+          }
           else if (it.frozen && it.yieldS.on && it.placed?.mode === 'pane') placed = it.placed;
           else placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) || leftRecently(t, it.lookedAt), zoneOk: Boolean(d.placement.zoneOk), left: !d.placement.focusOk && leftRecently(t, it.lookedAt), sizeOf, doorway: this.bridge.doorway?.(d.placement.anchor) ?? null }, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx);
+          // Back to following its light, the pane moves there from where the hold left it, in one 320 ms move.
+          if (!held && !it.ride && it.holdEnded) {
+            it.holdEnded = false;
+            const r = it.cur?.rect;
+            // In a fast turn the eye is not on it: it takes its place at once rather than trailing its light.
+            if (r && placed.mode === 'pane' && Math.abs(this.yawRate) < FAST_TURN) {
+              const f = factors(placed);
+              it.place.ease(t, { x: r.x + r.w * f.fx, y: r.y + r.h * f.fy }, { x: placed.rect.x + placed.rect.w * f.fx, y: placed.rect.y + placed.rect.h * f.fy }, MOVE.pushOut, placed.rect.w);
+            }
+          }
           if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && !it.dying) {
             const r = placed.rect;
             taken.push({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 });
           }
           it.placed = placed;
+          it.placedPr = { x: p.x, y: p.y, anchor: d.placement.anchor };
         }
       }
       let aside: AsideState | null = null;
@@ -1289,7 +1480,7 @@ export class Overlay {
       let fx = 0.5;
       let fy = 1;
       if (placed && placed.mode === 'pane' && it.place) {
-        ({ fx, fy } = anchorFactors(placed.align ?? 'center', placed.vertical ?? 'above'));
+        ({ fx, fy } = factors(placed));
         corner = { x: placed.rect.x + placed.rect.w * fx + it.place.jumpX.at(t), y: placed.rect.y + placed.rect.h * fy + it.place.jumpY.at(t) };
       }
       if (placed && placed.mode === 'pane' && corner && LEVEL_RANK[d.level] >= LEVEL_RANK.label && !it.dying) {
@@ -1304,7 +1495,7 @@ export class Overlay {
         const ahead = dt > 1e-4 && dt < 0.2 && t - it.born > FOLD_SETTLE_S ? { ...home, x: home.x + ((home.x - it.homeAt!.x) / dt) * FOLD_LEAD_S, y: home.y + ((home.y - it.homeAt!.y) / dt) * FOLD_LEAD_S } : home;
         it.homeAt = { x: home.x, y: home.y, t };
         // The view's edge must have held 300 ms before it folds a pane that fits (the drawn rect is clamped meanwhile); the chrome folds at once.
-        const atEdge = !it.read && (home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset);
+        const atEdge = !it.hold && (home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset);
         if (atEdge && d.placement.focusOk) it.edgeSince ??= t;
         else it.edgeSince = null;
         const outside = (atEdge && (it.edgeSince === null || t - it.edgeSince >= MOVE.leaveMs / 1000 - 1e-9)) || chrome.some((r) => rectsOverlap(home, r) || (!d.placement.focusOk && rectsOverlap(ahead, r)));
@@ -1493,10 +1684,10 @@ export class Overlay {
     const b = it.cur;
     const born = it.fresh.some((e) => e.kind === 'birth');
     if (it.frozen && placed?.mode === 'pane' && pr) {
-      const { fx, fy } = anchorFactors(placed.align ?? 'center', placed.vertical ?? 'above');
+      const { fx, fy } = factors(placed);
       it.off = { x: placed.rect.x + placed.rect.w * fx - pr.x, y: placed.rect.y + placed.rect.h * fy - pr.y };
     } else if (b && placed?.mode === 'pane' && pr && !born) {
-      const { fx, fy } = anchorFactors(placed.align ?? 'center', placed.vertical ?? 'above');
+      const { fx, fy } = factors(placed);
       const off = { x: placed.rect.x + placed.rect.w * fx - pr.x, y: placed.rect.y + placed.rect.h * fy - pr.y };
       if (it.off && Math.hypot(off.x - it.off.x, off.y - it.off.y) > 40) {
         const cause = placed.moved ?? placed.why ?? 'anchor';
@@ -1552,6 +1743,17 @@ export class Overlay {
     it.trace.style.width = `${len.toFixed(1)}px`;
     it.trace.style.transform = `translate3d(${ax.toFixed(1)}px, ${ay.toFixed(1)}px, 0) rotate(${ang.toFixed(4)}rad)`;
     it.trace.style.opacity = Math.min(1, (1 - o) / (1 - MOVE.asideOpacity)).toFixed(3);
+  }
+
+  // What the live gaze can aim at besides lights and storefronts: every pane on the glass, by its anchor.
+  aimables(): { anchor: string; rect: Rect; opacity: number }[] {
+    const out: { anchor: string; rect: Rect; opacity: number }[] = [];
+    for (const it of this.items.values()) {
+      const b = it.cur;
+      if (it.kind !== 'world' || it.dying || !b?.rect || b.level === 'none' || b.opacity <= 0.05 || it.placed?.mode !== 'pane' || it.aside.dropped) continue;
+      out.push({ anchor: it.d.placement.anchor, rect: b.rect, opacity: b.opacity });
+    }
+    return out;
   }
 
   report(): { w: number; h: number; panes: PaneReport[] } {

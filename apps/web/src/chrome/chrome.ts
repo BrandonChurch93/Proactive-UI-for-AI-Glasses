@@ -96,13 +96,14 @@ export class Chrome {
     this.rotate.style.display = on ? 'grid' : 'none';
   }
 
-  setMark(state: { lit: boolean; p: number | null } | null): void {
-    const key = state ? `${state.lit}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
+  setMark(state: { lit: boolean; held: boolean; p: number | null } | null): void {
+    const key = state ? `${state.lit}|${state.held}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
     if (key === this.markKey) return;
     this.markKey = key;
     this.mark.style.display = state ? '' : 'none';
     if (!state) return;
     this.mark.classList.toggle(css.lit!, state.lit);
+    this.mark.classList.toggle(css.held!, state.held);
     this.mark.style.setProperty('--p', String(state.p ?? 0));
   }
 

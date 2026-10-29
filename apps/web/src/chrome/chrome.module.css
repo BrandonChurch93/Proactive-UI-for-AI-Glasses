@@ -158,11 +158,15 @@
   position: absolute;
   width: calc(22px * var(--s));
   height: calc(22px * var(--s));
-  --in: calc(14px * var(--s) * var(--p));
+  --in: 0px;
   color: var(--ink);
   opacity: 0.45;
   filter: drop-shadow(0 calc(1px * var(--s)) 0 rgba(0, 0, 0, 0.55));
-  transition: color 120ms ease-out, opacity 120ms ease-out;
+  transition: color 120ms ease-out, opacity 120ms ease-out, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.held .corner {
+  --in: calc(14px * var(--s));
 }
 
 .corner svg {
@@ -204,6 +208,10 @@
   transform: translate(var(--in), calc(-1 * var(--in))) rotate(270deg);
 }
 
+.held .focus {
+  bottom: calc(20px * var(--s));
+}
+
 .lit .corner {
   color: var(--voice);
   opacity: calc(0.7 + 0.3 * var(--p));
@@ -212,7 +220,8 @@
 .focus {
   position: absolute;
   left: 50%;
-  bottom: calc((6px + 14px * var(--p)) * var(--s));
+  bottom: calc(6px * var(--s));
+  transition: bottom 220ms cubic-bezier(0.22, 1, 0.36, 1);
   transform: translateX(-50%);
   font-family: var(--font-mono);
   font-size: calc(9.5px * var(--s));
