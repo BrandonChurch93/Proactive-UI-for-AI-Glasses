@@ -62,4 +62,5 @@ export interface SceneBridge {
   curbDistance(): number;
   chrome?(): Rect[];
   mapView?(): MapView | null;
+  doorway?(anchor: string): Rect | null;
 }

@@ -147,6 +147,16 @@ describe('rule 8 · the world has right of way', () => {
     expect(Math.hypot(s.dx, s.dy)).toBeLessThan(1);
   });
 
+  it('someone standing still is scenery: they never dim or drop the pane, face or body', () => {
+    const aside = new Aside();
+    const body: KeepOut = { rect: { x: 300, y: 150, w: 400, h: 400 }, kind: 'person', moving: false, still: true, id: 'p', depth: 5 };
+    const face: KeepOut = { rect: { x: 320, y: 150, w: 80, h: 80 }, kind: 'face', moving: false, still: true, id: 'p:face', depth: 5 };
+    let s = aside.update(card, ctx(0, [body, face]), false);
+    for (let t = STEP; t < 1; t += STEP) s = aside.update(card, ctx(t, [body, face]), false);
+    expect(s.dropped).toBe(false);
+    expect(s.opacity).toBeGreaterThan(0.99);
+  });
+
   it('a moving vehicle dims the pane on the first frame and drops it to a pip only after covering most of it for 300 ms', () => {
     const aside = new Aside();
     const truck: KeepOut = { rect: { x: 0, y: 0, w: 1280, h: 800 }, kind: 'vehicle', moving: true, id: 'truck', depth: 5 };

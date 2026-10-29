@@ -27,6 +27,8 @@ export interface Person {
   phase: number;
   facePoint?: Vec3;
   opacity: number;
+  stillSince: number | null;
+  goneAt: number | null;
 }
 
 const W = (x: number, n: number, wait?: Leg): Waypoint => (wait ? { x, n, wait } : { x, n });
@@ -70,11 +72,28 @@ export interface ScriptedPerson {
 const EAST_DOORS = [-30, -14, 2, 14, 21, 27, 32, 38, 44, 49, 54, 72, 81];
 const WEST_DOORS = [-32, -16, -1, 12, 24, 32, 38, 50, 64, 74];
 
+const GONE_S = 0.8;
+const BEHIND_M = 1.7;
+const DOORWAY_CLEAR_M = 6;
+const PASS_WINDOW_M = 12;
+const CURB_LANE_X = 7.45;
+const FACADE_LANE_X = 12.5;
+export const STILL_SPEED = 0.2;
+export const STILL_S = 2;
+
+function enters(p: Person): boolean {
+  const last = p.path[p.path.length - 1]!;
+  return !p.scripted && p.path.length > 1 && Math.abs(last.x) >= 12.6 && last.n < 84;
+}
+
 export class People {
   people: Person[] = [];
   private rng: Rng;
   private queue: { at: number; make: () => Person }[] = [];
   private seq = 0;
+  private doorSide = 0;
+  private facing = 0;
+  private doorAt: Vec3 | null = null;
 
   constructor(
     private readonly opts: PeopleOptions,
@@ -117,6 +136,8 @@ export class People {
       height: this.rng.range(1.58, 1.88),
       phase: this.rng.range(0, Math.PI * 2),
       opacity: 1,
+      stillSince: path.length > 1 ? null : at,
+      goneAt: null,
     };
   }
 
@@ -183,8 +204,8 @@ export class People {
 
   private seedIdle(): void {
     const idle: [number, number, number, PersonAnim][] = [
-      [-12.5, 36.6, Math.PI / 2, 'talk'],
-      [-11.85, 37.3, -Math.PI / 2, 'talk'],
+      [-12.5, 34.8, Math.PI / 2, 'talk'],
+      [-11.85, 35.5, -Math.PI / 2, 'talk'],
       [11.6, 67.4, -Math.PI / 2, 'idle'],
       [-12.35, 80.0, Math.PI / 2, 'sit'],
       [-12.0, 40.4, Math.PI / 2, 'sit'],
@@ -202,13 +223,45 @@ export class People {
     }
   }
 
-  step(t: number, dt: number, wearer: Vec3, wearerMoving: boolean): void {
+  step(t: number, dt: number, wearer: Vec3, wearerMoving: boolean, doorSide = 0, facing = doorSide): void {
+    this.doorSide = doorSide;
+    this.facing = facing;
+    this.doorAt = wearer;
     this.queue.sort((a, b) => a.at - b.at);
-    while (this.queue.length && this.queue[0]!.at <= t) this.people.push(this.queue.shift()!.make());
+    while (this.queue.length && this.queue[0]!.at <= t) {
+      const next = this.queue.shift()!.make();
+      if (!next.scripted && this.outOfTheirDoor(next.path)) {
+        const path = this.ambientPath(this.rng);
+        const speed = this.rng.range(1.05, 1.45);
+        const at = t + this.rng.range(0.5, 3);
+        this.queue.push({ at, make: () => this.person(`p${this.seq++}`, path, speed, at) });
+        this.queue.sort((a, b) => a.at - b.at);
+        continue;
+      }
+      this.people.push(next);
+    }
     for (const p of this.people) {
       if (!p.alive) continue;
+      this.goFurther(p);
+      // A doorway is a passage: someone walking into a shop steps over the threshold and is gone inside within a second.
+      if (p.goneAt !== null || (p.idx >= p.path.length && enters(p))) {
+        p.goneAt ??= t;
+        const k = (t - p.goneAt) / GONE_S;
+        p.pos = v3(p.pos.x - Math.sin(p.heading) * p.baseSpeed * 0.6 * dt, 0, p.pos.z - Math.cos(p.heading) * p.baseSpeed * 0.6 * dt);
+        p.speed = p.baseSpeed * 0.6;
+        p.opacity = Math.max(0, 1 - k);
+        if (k >= 1) {
+          p.alive = false;
+          const path = this.ambientPath(this.rng);
+          const at = t + this.rng.range(0.5, 3);
+          const speed = this.rng.range(1.05, 1.45);
+          this.queue.push({ at, make: () => this.person(`p${this.seq++}`, path, speed, at) });
+        }
+        continue;
+      }
       if (p.path.length < 2 || p.idx >= p.path.length) {
         p.speed = 0;
+        p.stillSince ??= t;
         if (p.path.length >= 2 && !p.scripted) {
           p.alive = false;
           const path = this.ambientPath(this.rng);
@@ -220,8 +273,10 @@ export class People {
         continue;
       }
       const wp = p.path[p.idx]!;
-      const tx = wp.x;
-      const tz = zOf(wp.n);
+      // Someone being led behind the wearer walks for the lane a few steps ahead, so every step agrees with the detour.
+      const behind = !p.scripted && this.passBehind(p);
+      const tx = behind ? this.behindLane(wearer.x) : wp.x;
+      const tz = behind ? p.pos.z + Math.sign(zOf(wp.n) - p.pos.z) * 3 : zOf(wp.n);
       const dx = tx - p.pos.x;
       const dz = tz - p.pos.z;
       const d = Math.hypot(dx, dz);
@@ -230,6 +285,7 @@ export class People {
         const sig = readSignal(this.opts.signal, prev.wait, t);
         if (sig.state !== 'walk' && Math.hypot(p.pos.x - prev.x, p.pos.z - zOf(prev.n)) < 0.3) {
           p.speed = 0;
+          p.stillSince ??= t;
           p.anim = 'wait';
           if (!p.scripted) this.keepClear(p, wearer, wearerMoving);
           continue;
@@ -238,7 +294,7 @@ export class People {
       let want = p.baseSpeed;
       let vx = (dx / (d || 1)) * want;
       let vz = (dz / (d || 1)) * want;
-      if (!p.scripted) {
+      if (!p.scripted && !behind && !this.goingIn(p)) {
         const ox = p.pos.x - wearer.x;
         const oz = p.pos.z - wearer.z;
         const od = Math.hypot(ox, oz);
@@ -268,7 +324,8 @@ export class People {
       const step = Math.min(speed * dt, Math.max(d, speed * dt));
       const before = p.pos;
       p.pos = v3(p.pos.x + (vx / vl) * step, 0, p.pos.z + (vz / vl) * step);
-      if (!p.scripted) this.keepClear(p, wearer, wearerMoving);
+      if (!p.scripted && !this.goingIn(p)) this.keepClear(p, wearer, wearerMoving);
+      else if (!p.scripted) p.pos = walkable(p.pos);
       if (!p.scripted && step > 1e-4) {
         const gain = Math.hypot(tx - before.x, tz - before.z) - Math.hypot(tx - p.pos.x, tz - p.pos.z);
         if (gain < step * 0.3) {
@@ -286,19 +343,69 @@ export class People {
         }
       }
       p.speed = speed;
+      if (Math.hypot(p.pos.x - before.x, p.pos.z - before.z) < STILL_SPEED * dt) p.stillSince ??= t;
+      else p.stillSince = null;
       p.anim = 'walk';
       const target = Math.atan2(-(vx / vl), -(vz / vl));
       let dh = target - p.heading;
       while (dh > Math.PI) dh -= Math.PI * 2;
       while (dh < -Math.PI) dh += Math.PI * 2;
       p.heading += dh * Math.min(1, dt * 7);
-      if (Math.hypot(tx - p.pos.x, tz - p.pos.z) < 0.35) p.idx++;
+      if (behind ? Math.abs(zOf(wp.n) - p.pos.z) < 0.5 : Math.hypot(tx - p.pos.x, tz - p.pos.z) < 0.35) p.idx++;
     }
     this.people = this.people.filter((p) => p.alive || t - p.spawnAt < 0);
   }
 
+  // The lane behind the wearer, on the curb side, as far back as the pavement allows.
+  private behindLane(x: number): number {
+    const lane = x - this.facing * BEHIND_M;
+    return Math.sign(lane) * Math.min(Math.max(Math.abs(lane), CURB_LANE_X), FACADE_LANE_X);
+  }
+
+  // Only someone passing along the pavement goes behind the wearer; someone heading into a shop goes straight in.
+  private passBehind(p: Person): boolean {
+    const w = this.doorAt;
+    if (this.doorSide === 0 || w === null || Math.sign(p.pos.x) !== this.doorSide || Math.abs(p.pos.x) <= 7 || Math.abs(p.pos.z - w.z) >= PASS_WINDOW_M) return false;
+    const wp = p.path[Math.min(p.idx, p.path.length - 1)]!;
+    return Math.abs(wp.x) < 12.6;
+  }
+
+  // Someone bound for the door the wearer is reading, or one a few metres from it, goes in a few doors further along instead,
+  // so nobody walks between the wearer and what they read.
+  private goFurther(p: Person): void {
+    const w = this.doorAt;
+    if (p.scripted || this.doorSide === 0 || w === null || p.path.length < 2 || p.idx >= p.path.length) return;
+    const last = p.path[p.path.length - 1]!;
+    if (Math.abs(last.x) < 12.6 || Math.sign(last.x) !== this.doorSide) return;
+    const wn = -w.z;
+    const dn = last.n - wn;
+    if (Math.abs(dn) >= DOORWAY_CLEAR_M) return;
+    const away = dn < 0 ? -1 : 1;
+    let n = wn + away * (DOORWAY_CLEAR_M + 3);
+    if (n > 82 || n < -40) n = wn - away * (DOORWAY_CLEAR_M + 3);
+    for (let i = Math.max(p.idx, 1); i < p.path.length; i++) if (Math.abs(p.path[i]!.n - last.n) < 0.01) p.path[i] = { ...p.path[i]!, n };
+  }
+
+  // Someone heading into a doorway near the wearer's door walks straight in: no ring pushes them back from the threshold.
+  private goingIn(p: Person): boolean {
+    const w = this.doorAt;
+    if (this.doorSide === 0 || w === null) return false;
+    const wp = p.path[Math.min(p.idx, p.path.length - 1)]!;
+    return Math.abs(wp.x) >= 12.6 && Math.sign(wp.x) === this.doorSide && Math.abs(zOf(wp.n) - w.z) < DOORWAY_CLEAR_M;
+  }
+
+  // While the wearer stands at a door, nobody comes out of a doorway within DOORWAY_CLEAR_M of them, and nobody is born on
+  // that pavement within PASS_WINDOW_M, so everyone passing arrives with room to step behind them.
+  private outOfTheirDoor(path: Waypoint[]): boolean {
+    const w = this.doorAt;
+    const first = path[0]!;
+    if (this.doorSide === 0 || w === null || Math.sign(first.x) !== this.doorSide || Math.abs(first.x) <= 7) return false;
+    const dz = Math.abs(zOf(first.n) - w.z);
+    return dz < (Math.abs(first.x) >= 12.6 ? Math.max(DOORWAY_CLEAR_M, PASS_WINDOW_M) : PASS_WINDOW_M);
+  }
+
   private keepClear(p: Person, wearer: Vec3, _moving: boolean): void {
-    const min = 3.2;
+    const min = this.passBehind(p) ? Math.max(0.7, Math.abs(wearer.x - this.behindLane(wearer.x)) - 0.2) : 3.2;
     const dist = (q: Vec3): number => Math.hypot(q.x - wearer.x, q.z - wearer.z);
     if (dist(p.pos) >= min) {
       p.pos = walkable(p.pos);

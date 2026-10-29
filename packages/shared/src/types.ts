@@ -180,6 +180,7 @@ export interface ContentRow {
   key?: string;
   live?: string;
   act?: string;
+  lead?: boolean;
 }
 
 export interface Content {

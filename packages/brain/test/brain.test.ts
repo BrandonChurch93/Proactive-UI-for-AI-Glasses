@@ -237,3 +237,15 @@ describe('a reply changes the walk', () => {
   });
 });
 
+describe('a crossing', () => {
+  it('keeps a text that landed at the curb for the far one (regression: it spent its time receded)', () => {
+    const spec: CaseSpec = { id: 'dm-cross', scenario: 'walking', duration: 15, pace: [[0, 0], [3, 1.38]], crossing: [3, 13], inbox: [{ t: 2, id: 'jules', type: 'dm', from: 'Jules', text: 'Still on for tonight?' }] };
+    const brain = new Brain({ scenario: 'walking' });
+    let after = false;
+    for (const s of synthesize(spec)) {
+      const f = brain.tick(s);
+      if (s.t > 13.5 && s.t < 14) after ||= f.items.some((d) => d.id === 'jules');
+    }
+    expect(after).toBe(true);
+  });
+});

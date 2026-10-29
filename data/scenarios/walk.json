@@ -156,7 +156,7 @@
   ],
   "recordings": {
     "hungry": {
-      "duration": 118,
+      "duration": 122,
       "beats": [
         {
           "t": 1,
@@ -233,6 +233,22 @@
         },
         {
           "t": 108,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 113.2,
+          "kind": "gaze",
+          "id": "big-bean"
+        },
+        {
+          "t": 117.5,
+          "kind": "choose",
+          "id": "big-bean",
+          "row": "cortado"
+        },
+        {
+          "t": 119.5,
           "kind": "gaze",
           "id": null
         }

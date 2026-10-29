@@ -1,10 +1,10 @@
 {
  "version": 1,
  "totals": {
-  "suites": 41,
-  "passed": 41,
-  "cases": 943,
-  "casesPassed": 943
+  "suites": 42,
+  "passed": 42,
+  "cases": 969,
+  "casesPassed": 969
  },
  "byGroup": {
   "walks": {
@@ -20,8 +20,8 @@
    "passed": 4
   },
   "notifications": {
-   "suites": 5,
-   "passed": 5
+   "suites": 6,
+   "passed": 6
   },
   "moments": {
    "suites": 6,
@@ -328,12 +328,27 @@
      "detail": ""
     },
     {
-     "name": "1:56 · four seconds at the door, then the loop resumes with no destination and no intent",
+     "name": "1:55.5 · the Big Bean's expanded view by 1:56, four rows, the action reading for the Cortado",
      "pass": true,
-     "detail": "15 frames"
+     "detail": "t=115.502 promote big-bean expanded"
+    },
+    {
+     "name": "1:57.5 · the Cortado chosen: that row alone, its confirmation on a choice",
+     "pass": true,
+     "detail": "t=117.502 promote big-bean expanded"
+    },
+    {
+     "name": "2:01 · the pocket holds what was saved and what was settled",
+     "pass": true,
+     "detail": "5 frames"
+    },
+    {
+     "name": "2:00 · the look let go, the door stop ends and the loop resumes with no destination and no intent",
+     "pass": true,
+     "detail": "10 frames"
     }
    ],
-   "description": "Recorded walk · 1181 snapshots at 10 Hz"
+   "description": "Recorded walk · 1221 snapshots at 10 Hz"
   },
   {
    "id": "walking",
@@ -1916,6 +1931,153 @@
    ],
    "rule": "notifications",
    "description": "A text on a clear sidewalk while walking shows at the next safe moment, timed next-pause, and folds after 4 s."
+  },
+  {
+   "id": "note-two-texts",
+   "group": "notifications",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world label outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door, the start corner or a stop where a choice was just settled), never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the first text is the banner",
+     "pass": true,
+     "detail": "t=2 show maya-usual glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "the second tucks under it as a strip, sender and line",
+     "pass": true,
+     "detail": "t=5 show jules-tonight glance",
+     "rule": "notifications"
+    },
+    {
+     "name": "and is never the banner while the first is up",
+     "pass": true,
+     "detail": "",
+     "rule": "notifications"
+    },
+    {
+     "name": "the banner counts them",
+     "pass": true,
+     "detail": "t=5 promote maya-usual glance",
+     "rule": "notifications"
+    }
+   ],
+   "rule": "notifications",
+   "description": "A second text while one is up tucks under it as a strip, and the banner counts them; it is never drawn over the first."
   },
   {
    "id": "moment-bike",

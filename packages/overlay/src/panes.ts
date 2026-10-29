@@ -99,6 +99,10 @@ function bannerFrom(c: Content): HTMLElement {
   return row;
 }
 
+export function isTucked(component: string, c: Content): boolean {
+  return component === 'strip' && Boolean(c.app);
+}
+
 export function isBanner(component: string, c: Content): boolean {
   return component === 'thread' || (component === 'toast' && Boolean(c.app));
 }
@@ -148,9 +152,34 @@ function hero(c: Content): HTMLElement {
   return box;
 }
 
+let ruler: CanvasRenderingContext2D | null = null;
+function textWidth(text: string, font: string): number {
+  ruler ??= typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d') : null;
+  if (!ruler) return text.length * 11;
+  ruler.font = font;
+  return ruler.measureText(text).width;
+}
+
+// A place's name never wraps: the badge keeps the header only when both fit on one line beside the thumbnail.
+function chipBeside(c: Content, thumbed: boolean): boolean {
+  const room = thumbed ? CARD_W - CARD_PAD - THUMB_CARD - THUMB_GAP : EXPANDED_W - EXPANDED_PAD;
+  const name = textWidth(c.name, `600 ${thumbed ? 20 : 21}px 'Instrument Sans'`);
+  const chip = c.chip ?? '';
+  const badge = textWidth(chip.toUpperCase(), `400 10.5px 'Martian Mono'`) + chip.length * 10.5 * 0.06 + 14;
+  return name + 10 + badge <= room;
+}
+
+const CARD_W = 292;
+const CARD_PAD = 30;
+const THUMB_CARD = 44;
+const THUMB_GAP = 12;
+const EXPANDED_W = 392;
+const EXPANDED_PAD = 34;
+
 function cardKids(c: Content, thumbed = Boolean(c.img)): HTMLElement[] {
   const out: HTMLElement[] = [keyed(node('div', `${s.cardName} ${s.t}`, c.name), 'name')];
-  if (c.chip) {
+  const below = Boolean(c.chip) && !chipBeside(c, thumbed);
+  if (c.chip && !below) {
     const head = node('div', s.cardHead);
     head.appendChild(out[0]!);
     head.appendChild(keyed(node('span', s.chip, c.chip), 'chip'));
@@ -168,6 +197,11 @@ function cardKids(c: Content, thumbed = Boolean(c.img)): HTMLElement[] {
     live.appendChild(keyed(node('span', undefined, c.live), 'live'));
     out.push(live);
   }
+  if (below) {
+    const row = node('div', s.chipBelow);
+    row.appendChild(keyed(node('span', s.chip, c.chip), 'chip'));
+    out.push(row);
+  }
   return out;
 }
 
@@ -179,12 +213,13 @@ function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement 
   c.rows.forEach((r, i) => {
     const li = node('li', tone(r.tone));
     if (cls === s.rows) {
-      const flush = thumbs && !r.img;
+      // In a list of thumbnails a row without one keeps the title column: its key in the 34 px slot, or flush with no key.
+      const flush = thumbs && !r.img && !r.key;
       if (flush) li.classList.add(s.flush!);
-      else if (thumbs) li.appendChild(thumb(r.img, c.kind, s.thumbRow!, `r${i}i`));
+      else if (thumbs && r.img) li.appendChild(thumb(r.img, c.kind, s.thumbRow!, `r${i}i`));
+      else if (thumbs) li.appendChild(keyed(node('time', s.slotKey, r.key ?? ''), `r${i}k`));
       else if (!keyless) li.appendChild(keyed(node('time', undefined, r.key ?? ''), `r${i}k`));
       const mid = node('span', undefined);
-      if (flush && r.key) mid.appendChild(keyed(node('time', s.flushKey, r.key), `r${i}k`));
       mid.appendChild(keyed(node('b', undefined, r.title), `r${i}t`));
       if (r.sub) mid.appendChild(keyed(node('em', undefined, r.sub), `r${i}s`));
       li.appendChild(mid);
@@ -192,6 +227,7 @@ function rowsList(c: Content, cls: string, h: PaneHandlers | null): HTMLElement 
       if (r.act) {
         li.dataset.row = r.key ?? r.title;
         li.dataset.act = r.act;
+        if (r.lead) li.dataset.lead = '';
         li.addEventListener('click', (e) => {
           e.stopPropagation();
           ul.querySelectorAll<HTMLElement>('li[data-tap]').forEach((x) => x !== li && delete x.dataset.tap);
@@ -272,6 +308,13 @@ function build(d: Decision, level: Level, h: PaneHandlers): { cls: string; kids:
       return { cls: s.toast!, kids, why: w };
     }
     case 'strip': {
+      if (c.app) {
+        const row = node('div', s.tuckRow);
+        row.append(keyed(node('span', s.avatar, c.avatar ?? c.name.slice(0, 1)), 'avatar'), keyed(node('span', `${s.bannerName} ${s.t}`, c.name), 'name'));
+        if (c.fact) row.append(node('span', s.dot, '·'), keyed(node('span', `${s.tuckLine} ${s.t}`, c.fact), 'fact'));
+        push(row);
+        return { cls: `${s.banner} ${s.tucked}`, kids, why: null };
+      }
       push(keyed(node('div', `${s.toastFrom} ${s.t}`, c.name), 'name'));
       if (c.fact) push(keyed(node('div', `${s.stripCount} ${s.t}`, c.fact), 'fact'));
       w = why(c, '');

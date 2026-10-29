@@ -419,6 +419,12 @@
   gap: 10px;
 }
 
+.chipBelow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
 .chip {
   flex: none;
   font-family: var(--font-mono);
@@ -1052,12 +1058,9 @@
   grid-column: 1 / 3;
 }
 
-.flushKey {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
-  margin-right: 8px;
+.rows .slotKey {
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .rows {
@@ -1282,6 +1285,30 @@
   letter-spacing: 0.04em;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
+}
+
+.banner.tucked {
+  padding: 0 15px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.tuckRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.tuckRow .bannerName {
+  font-size: 14px;
+}
+
+.tuckLine {
+  font-size: 14px;
+  color: var(--ink);
 }
 
 .bannerFrom {

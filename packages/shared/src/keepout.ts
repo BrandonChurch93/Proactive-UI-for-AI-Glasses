@@ -1,5 +1,6 @@
 import type { Projected, Viewport } from './camera';
-import { BLOCK, zOf } from './world';
+import { PLACE_BY_ID } from './data';
+import { BLOCK, placeDoor, zOf } from './world';
 import type { Box3, Rect, Vec3 } from './vec';
 
 export type KeepOutKind = 'vehicle' | 'person' | 'face' | 'roadway';
@@ -9,6 +10,7 @@ export interface KeepOut {
   full?: Rect;
   kind: KeepOutKind;
   moving: boolean;
+  still?: boolean;
   id: string;
   depth: number;
   vx?: number;
@@ -45,6 +47,22 @@ function clipPoly<T>(poly: T[], inside: (p: T) => number, cut: (a: T, b: T, k: n
 
 type P2 = { x: number; y: number };
 const lerp2 = (a: P2, b: P2, k: number): P2 => ({ x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k });
+
+// The opening a place's door light stands in: where people go in and out, which a pane at the door never covers.
+export const DOORWAY = { halfM: 1.0, topM: 2.2, clearPx: 40, reach: 0.95 } as const;
+
+export function doorwayRect(anchor: string, proj: Projector, vp: Viewport): Rect | null {
+  if (!anchor.startsWith('door:')) return null;
+  const p = PLACE_BY_ID.get(anchor.slice(5));
+  if (!p) return null;
+  const d = placeDoor(p);
+  const alongX = p.side === 'X';
+  const h = DOORWAY.halfM;
+  const box: Box3 = alongX
+    ? { min: { x: d.x - h, y: 0, z: d.z - 0.05 }, max: { x: d.x + h, y: DOORWAY.topM, z: d.z + 0.05 } }
+    : { min: { x: d.x - 0.05, y: 0, z: d.z - h }, max: { x: d.x + 0.05, y: DOORWAY.topM, z: d.z + h } };
+  return boxKeepOut(box, proj, vp)?.rect ?? null;
+}
 
 export function boxKeepOut(b: Box3, proj: Projector, vp: Viewport): { rect: Rect; depth: number } | null {
   const corners: Vec3[] = [];

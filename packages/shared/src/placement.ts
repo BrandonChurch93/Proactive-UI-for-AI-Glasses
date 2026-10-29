@@ -1,5 +1,6 @@
 import type { Band } from './data';
 import type { Projected, Viewport } from './camera';
+import { DOORWAY } from './keepout';
 import { MOVE } from './motion-tokens';
 import { focusRect } from './rules';
 import type { Level } from './types';
@@ -25,6 +26,7 @@ export interface PlaceInput {
   scaleFrom?: number;
   prefer?: { side: Align; vertical: Vertical; push?: boolean };
   ui?: number;
+  doorway?: Rect;
 }
 
 export interface Placed {
@@ -90,7 +92,11 @@ function candidate(inp: PlaceInput, side: Align, vertical: Vertical, scale: numb
   const w = inp.size.w * scale;
   const h = inp.size.h * scale;
   if (vertical === 'middle') {
-    const x = side === 'left' ? a.x - PIP_GAP.beside * scale - w : a.x + PIP_GAP.beside * scale;
+    let x = side === 'left' ? a.x - PIP_GAP.beside * scale - w : a.x + PIP_GAP.beside * scale;
+    // At a door the pane stands beside the opening, over the pier or the window, its near edge clear of the doorway.
+    // ...as far as staying within its own width of the light allows, so the leader stays short.
+    const d = inp.doorway;
+    if (d) x = side === 'left' ? Math.max(Math.min(x, d.x - DOORWAY.clearPx - w), a.x - DOORWAY.reach * w - w) : Math.min(Math.max(x, d.x + d.w + DOORWAY.clearPx), a.x + DOORWAY.reach * w);
     return { x, y: a.y - h * BESIDE_RISE, w, h };
   }
   const x = a.x - w / 2;
@@ -112,8 +118,12 @@ function clampInto(r: Rect, vp: Viewport): Rect {
   };
 }
 
+// An expanded view being read holds its place while the look is on it or within this margin of it, and lets go after a second off it.
+export const READ = { marginPx: 80, leaveS: 1 } as const;
+
 export const ZONE_GAP = 14;
 const SLIDE_KEEP = 12;
+const SLIDE_GAP = 12;
 
 function pushOutOfZone(r: Rect, zone: Rect, anchorX: number, anchorY: number, vp: Viewport): Rect {
   if (!rectsOverlap(r, zone)) return r;
@@ -140,13 +150,15 @@ export function configRect(
   // Beside its light, a pane slides down its side to clear the glass's own chrome above it (a banner, the clock), while its light stays beside it.
   if (vertical === 'middle') {
     const over = (inp.chrome ?? []).filter((k) => rectsOverlap(r, k) && k.y < r.y + r.h / 2);
-    const y = over.length ? Math.max(...over.map((k) => k.y + k.h + 1)) : r.y;
+    const y = over.length ? Math.max(...over.map((k) => k.y + k.h + SLIDE_GAP)) : r.y;
     if (y > r.y && y + r.h <= vp.h - MARGIN + 0.5 && y <= inp.anchor.y - SLIDE_KEEP) r = { ...r, y };
   }
   const pushed = push && !inp.focusOk && (pushOff !== undefined || rectsOverlap(r, zone));
   if (pushed) r = pushOff ? { ...r, x: inp.anchor.x + pushOff.x, y: inp.anchor.y + pushOff.y } : pushOutOfZone(r, zone, inp.anchor.x, inp.anchor.y, vp);
   const fits = pushed || (vertical === 'middle' ? dx < 0.5 && dy <= MOVE.clampMax : dy < 0.5 && dx <= MOVE.clampMax);
-  const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k)) && !(inp.chrome ?? []).some((k) => rectsOverlap(r, k));
+  // A pane never stands over the middle of the opening, where people pass.
+  const door = inp.doorway && { x: inp.doorway.x + inp.doorway.w * 0.25, y: inp.doorway.y, w: inp.doorway.w * 0.5, h: inp.doorway.h };
+  const clear = !(inp.road ?? []).some((k) => rectsOverlap(r, k)) && !(inp.chrome ?? []).some((k) => rectsOverlap(r, k)) && !(door && rectsOverlap(r, door));
   const gap = Math.hypot(Math.max(r.x - inp.anchor.x, 0, inp.anchor.x - (r.x + r.w)), Math.max(r.y - inp.anchor.y, 0, inp.anchor.y - (r.y + r.h)));
   const ok = inView(r, vp) && fits && clear && (inp.focusOk || inp.zoneOk || !rectsOverlap(r, zone)) && (!pushed || gap <= r.w * 0.9);
   const { fx, fy } = anchorFactors(side, vertical);
@@ -215,7 +227,8 @@ export function placeView(slot: string, size: { w: number; h: number }, vp: View
     case 'view:map':
       return { x: vp.w - 24 * ui - w, y: vp.h - (24 + 44 + 24) * Math.max(1, ui) - h, w, h };
     case 'view:banner':
-      return { x: (vp.w - w) / 2, y: Math.max((14 + 14 + 20) * ui, 52 * Math.max(1, ui)), w, h };
+      // A second text tucks under the open banner.
+      return { x: (vp.w - w) / 2, y: stackIndex > 0 && below > 0 ? below : Math.max((14 + 14 + 20) * ui, 52 * Math.max(1, ui)), w, h };
     case 'view:bottom':
       return { x: (vp.w - w) / 2, y: vp.h - vp.h * 0.09 - h, w, h };
     default:

@@ -219,6 +219,10 @@ export class Brain {
   private routeCause: Cause = 'goal';
   private corner: { lap: number; state: 'wait' | 'done' } | null = null;
   private menu: MenuState = 'closed';
+  private bannerFront: string | null = null;
+  private bannerAsked = false;
+  private gateEndAt = -Infinity;
+  private tucked = new Set<string>();
   private menuOrder: { cat: MenuState; ids: string[] } | null = null;
   private mapUntil = -Infinity;
   private routeCauseNext: Cause | null = null;
@@ -336,7 +340,7 @@ export class Brain {
       this.pocketWants(snap, t, band, stoppedFor, wants);
       this.askWants(snap, t, band, wants);
       this.followupWants(t, wants);
-      this.arrivalWants(snap, t, wants);
+      this.arrivalWants(snap, t, band, wants);
       this.whisperWants(t, wants);
     }
     this.groundWants(snap, t, band, wants);
@@ -489,6 +493,7 @@ export class Brain {
   }
 
   private onGateEnd(t: number): void {
+    this.gateEndAt = t;
     const messages: string[] = [];
     const apps: InboxItem[] = [];
     for (const id of this.heldInGate) {
@@ -549,7 +554,8 @@ export class Brain {
     }
     const moving = band !== 'stopped';
     for (const it of this.inbox.values()) {
-      if (it.status !== 'shown') continue;
+      // The crossing recedes the glass, so a text that landed at the curb still has its time at the far one.
+      if (it.status !== 'shown' || this.gateNow.safety) continue;
       if (moving) it.movingS += dt;
       else it.stillS += dt;
       it.walkS = (band === 'walk' || band === 'brisk') && snap.wearer.gaze.target !== it.n.id ? (it.walkS ?? 0) + dt : 0;
@@ -1185,8 +1191,52 @@ export class Brain {
     }
   }
 
+  // One banner at a time: a second text tucks under the open thread (or the first one up) as a strip, and the banner counts them. A look or a
+  // pinch on the strip brings that text up and tucks the other under.
+  private tuckBanners(snap: WorldSnapshot, wants: Want[]): void {
+    const banners = wants.filter((w) => w.anchor === 'view:banner' && !w.remove);
+    if (banners.length < 2) {
+      if (banners[0]) banners[0].announce = `${banners[0].announce ?? ''}|1`;
+      this.bannerFront = banners[0]?.id ?? null;
+      this.bannerAsked = false;
+      this.tucked.clear();
+      return;
+    }
+    const asked = banners.find((w) => this.tucked.has(w.id) && (snap.wearer.gaze.target === w.id || snap.wearer.pinch?.target === w.id));
+    if (asked) {
+      this.bannerFront = asked.id;
+      this.bannerAsked = true;
+    }
+    if (!this.bannerAsked || !banners.some((w) => w.id === this.bannerFront)) {
+      const at = (w: Want): number => {
+        const it = this.inbox.get(w.id);
+        return it && it.shownAt >= 0 ? it.shownAt : Infinity;
+      };
+      const rank = (w: Want): number => (w.component === 'thread' ? 0 : 1);
+      this.bannerFront = [...banners].sort((a, b) => rank(a) - rank(b) || at(a) - at(b))[0]!.id;
+    }
+    this.tucked = new Set(banners.filter((w) => w.id !== this.bannerFront).map((w) => w.id));
+    for (const w of banners) {
+      if (w.id === this.bannerFront) {
+        w.content = { ...w.content, time: `${banners.length} · ${w.content.time ?? 'now'}` };
+        w.announce = `${w.announce ?? ''}|${banners.length}`;
+        continue;
+      }
+      const c = w.content;
+      w.component = 'strip';
+      w.level = 'glance';
+      w.content = { name: c.name, ...(c.fact ? { fact: c.fact } : {}), ...(c.avatar ? { avatar: c.avatar } : {}), app: 'Messages', reason: c.reason, showReason: false };
+      w.announce = 'tucked';
+    }
+    const front = wants.findIndex((w) => w.id === this.bannerFront);
+    const first = wants.findIndex((w) => banners.includes(w));
+    if (front > first) wants.splice(first, 0, ...wants.splice(front, 1));
+  }
+
   private messageWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const cardOpen = this.cardOpen();
+    const gazed = snap.wearer.gaze.target;
+    const reading = (band === 'stopped' || band === 'stroll') && Boolean(gazed) && this.items.get(gazed!)?.level === 'expanded';
     for (const it of this.inbox.values()) {
       const n = it.n;
       if (it.status === 'done' || n.type === 'social') continue;
@@ -1201,10 +1251,13 @@ export class Brain {
         continue;
       }
       const open = Boolean(n.replies) && (!it.reply || it.offer?.state === 'waiting' || it.offer?.state === 'open');
-      if (n.replies && it.status === 'shown' && band === 'brisk') continue;
+      // Off a crossing the pace is often still Brisk for a moment; a thread that crossed with the wearer leaves only once that has outlasted a level's minimum, so it never blinks out and back.
+      if (n.replies && it.status === 'shown' && band === 'brisk' && t - this.gateEndAt >= this.cfg.ladder.minShownS - 1e-9) continue;
       // A banner nobody looks at folds after 4 s of walking, as a toast does, and is back once the wearer has stood still half a second, never as a crossing begins.
       if (open && it.status === 'shown' && (it.walkS ?? 0) >= this.cfg.viewFoldS - 1e-9) it.folded = true;
-      if (it.folded && band === 'stopped' && this.stoppedSince !== null && t - this.stoppedSince >= 0.5 - 1e-9 && !this.gateNow.safety && snap.env.crosswalk?.signal !== 'walk') {
+      // While the wearer reads a place's expanded view, a banner they are not looking at yields the top of the glass to it.
+      if (reading && it.status === 'shown' && MESSAGE_TYPES.has(n.type) && snap.wearer.gaze.target !== n.id) it.folded = true;
+      if (it.folded && !reading && band === 'stopped' && this.stoppedSince !== null && t - this.stoppedSince >= 0.5 - 1e-9 && !this.gateNow.safety && snap.env.crosswalk?.signal !== 'walk') {
         it.folded = false;
         it.walkS = 0;
       }
@@ -1322,6 +1375,8 @@ export class Brain {
         },
       });
     }
+
+    this.tuckBanners(snap, wants);
 
     if (this.social.count > 0 && !this.social.surfaced && band === 'stopped' && !this.gateNow.safety) {
       this.social.surfaced = true;
@@ -1535,28 +1590,16 @@ export class Brain {
     }
   }
 
-  private arrivalWants(snap: WorldSnapshot, t: number, wants: Want[]): void {
+  private arrivalWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     if (!this.arrival) return;
     const id = this.arrival;
     const e = snap.entities.find((x) => x.id === id);
     if (!e) return;
-    if (this.goal === 'hungry' && this.chosen.get(e.id)?.action === 'hold-seat') {
-      const r = reason('goal', 'Seat held', [{ signal: 'arrived', value: e.id, weight: 1 }]);
-      wants.push({
-        id: 'arrival',
-        component: 'arrival',
-        zone: 'world',
-        level: 'glance',
-        anchor: `door:${e.id}`,
-        content: { name: "Seat's held, inside on the left.", reason: r, showReason: false },
-        reason: r,
-        origin: 'arrival',
-        zoneOk: true,
-      });
-      return;
-    }
-    const level: Level = 'label';
-    const r = reason('goal', this.routeWhy ?? e.reasons.goal ?? 'You made it', [{ signal: 'arrived', value: e.id, weight: 1 }]);
+    // At its door the destination the wearer is looking at comes up as its card once in sight; otherwise as its label.
+    const level: Level = snap.wearer.gaze.target === id ? 'card' : 'label';
+    // A seat held there is the arrival line on the place's own pane, so the look can still open its view.
+    const seat = this.goal === 'hungry' && this.chosen.get(e.id)?.action === 'hold-seat';
+    const r = reason('goal', seat ? "Seat's held, inside on the left." : (this.routeWhy ?? e.reasons.goal ?? 'You made it'), [{ signal: 'arrived', value: e.id, weight: 1 }]);
     const own = wants.findIndex((w) => w.id === e.id);
     const mine = own >= 0 && !wants[own]!.remove ? wants[own]! : null;
     if (mine) {
@@ -1591,12 +1634,16 @@ export class Brain {
       zone: 'world',
       level,
       anchor: `door:${e.id}`,
-      content: { name: e.name, fact: e.glance, reason: r, showReason: true },
+      content: level === 'card' ? this.decorate(e, { ...cardContent(e, r, band, this.goal, false, this.met()), showReason: !sayFor(e, this.goal, this.met()).when }, 'card') : { name: e.name, fact: e.glance, reason: r, showReason: true },
       reason: r,
       origin: 'arrival',
       zoneOk: true,
       onCommit: () => {
         if (LEVEL_RANK[it.level] < LEVEL_RANK[level]) {
+          if (level === 'card') {
+            it.cardAt = t;
+            this.cardGrownAt = t;
+          }
           it.level = level;
           it.since = t;
           it.shownAt = t;

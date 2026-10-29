@@ -6,6 +6,7 @@ import {
   NOMINAL_SIZE,
   Placement,
   boxKeepOut,
+  doorwayRect,
   clamp,
   leftRecently,
   capKeepOut,
@@ -25,6 +26,7 @@ import {
   type Vec3,
   type Viewport,
 } from '@lumen/shared';
+import { STILL_S, STILL_SPEED } from './people';
 import { LANE_BY_ID } from './traffic';
 import { SIM_HZ, type Sim } from './sim';
 
@@ -48,9 +50,10 @@ export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, max
     if (!u || !now || !ahead) return u;
     return { ...u, vx: (ahead.rect.x + ahead.rect.w / 2 - (now.rect.x + now.rect.w / 2)) / LOOKAHEAD };
   };
-  const push = (r: { rect: Rect; depth: number; vx?: number } | null, kind: KeepOut['kind'], moving: boolean, id: string): void => {
+  const push = (r: { rect: Rect; depth: number; vx?: number } | null, kind: KeepOut['kind'], moving: boolean, id: string, still = false): void => {
     if (!r || r.depth >= maxDepth) return;
     const k: KeepOut = { rect: capKeepOut(r.rect, vp), full: r.rect, kind, moving, id, depth: r.depth };
+    if (still) k.still = true;
     if (r.vx !== undefined) k.vx = r.vx;
     out.push(k);
   };
@@ -75,13 +78,14 @@ export function keepOuts(sim: Sim, proj: Projector, vp: Viewport, eye: Vec3, max
     const g = groundY(p.pos.x, p.pos.z);
     const body = both(boxKeepOut(box(0, 0, g, g + p.height), proj, vp), boxKeepOut(box(vx, vz, g, g + p.height), proj, vp));
     if (!body || body.rect.h < 30) continue;
-    const moving = p.speed > 0.2;
-    push(body, 'person', moving, p.id);
+    const moving = p.speed > STILL_SPEED;
+    const still = p.stillSince !== null && sim.t - p.stillSince >= STILL_S;
+    push(body, 'person', moving, p.id, still);
     let dh = Math.atan2(-(eye.x - p.pos.x), -(eye.z - p.pos.z)) - p.heading;
     while (dh > Math.PI) dh -= Math.PI * 2;
     while (dh < -Math.PI) dh += Math.PI * 2;
     if (Math.abs(dh) < 1.1) {
-      push(both(boxKeepOut(box(0, 0, g + p.height - 0.3, g + p.height), proj, vp), boxKeepOut(box(vx, vz, g + p.height - 0.3, g + p.height), proj, vp)), 'face', moving, `${p.id}:face`);
+      push(both(boxKeepOut(box(0, 0, g + p.height - 0.3, g + p.height), proj, vp), boxKeepOut(box(vx, vz, g + p.height - 0.3, g + p.height), proj, vp)), 'face', moving, `${p.id}:face`, still);
     }
   }
   out.push(...roadwayKeepOuts(proj, vp));
@@ -177,7 +181,7 @@ export class HeadlessView {
       }
       const exempt = Boolean(d.placement.focusOk) || leftRecently(sim.t, it.lookedAt);
       const placed = it.place.update(
-        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: exempt, zoneOk: Boolean(d.placement.zoneOk), left: exempt && !d.placement.focusOk },
+        { level: lv, anchor: pr, distance: Math.hypot(a.x - pose.pos.x, a.y - pose.pos.y, a.z - pose.pos.z), size: NOMINAL_SIZE[lv], focusOk: exempt, zoneOk: Boolean(d.placement.zoneOk), left: exempt && !d.placement.focusOk, doorway: doorwayRect(d.placement.anchor, proj, vp) },
         taken.length ? { ...ctx, chrome: [...(ctx.chrome ?? []), ...taken] } : ctx,
       );
       if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && d.level !== 'whisper') {
@@ -226,6 +230,7 @@ export class HeadlessView {
       below = Math.max(below, r.y + r.h + 10);
     }
     stack.clear();
+    let tuck = 0;
     for (const d of this.frame?.items ?? []) {
       if (d.placement.zone === 'ground' || d.component === 'whisper') continue;
       if (d.placement.zone === 'view') {
@@ -233,7 +238,9 @@ export class HeadlessView {
         const size = d.level === 'expanded' ? NOMINAL_SIZE.expanded : (VIEW_SIZE[d.component] ?? VIEW_SIZE.toast!);
         const i = stack.get(slot) ?? 0;
         stack.set(slot, i + 1);
-        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(placeView(slot, size, vp, i, slot === 'view:edge-right' ? below : 0, uiScale(vp))), opacity: 1, gaze: Boolean(d.gaze), visible: true });
+        const rect = placeView(slot, size, vp, i, slot === 'view:edge-right' ? below : slot === 'view:banner' ? tuck : 0, uiScale(vp));
+        if (slot === 'view:banner' && d.component !== 'strip') tuck = rect.y + rect.h + 6 * uiScale(vp);
+        panes.push({ id: d.id, level: d.level, zone: 'view', rect: round(rect), opacity: 1, gaze: Boolean(d.gaze), visible: true });
         continue;
       }
       const p = this.items.get(d.id)?.pane;

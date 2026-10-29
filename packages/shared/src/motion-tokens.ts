@@ -62,6 +62,8 @@ export const MOVE = {
   ropeJump: 80,
   kickReach: 0.9,
   offscreenMs: 250,
+  leaveMs: 300,
+  yieldLookS: 1,
   clampMax: 24,
   foldHold: 40,
   backdropEvery: 0.25,

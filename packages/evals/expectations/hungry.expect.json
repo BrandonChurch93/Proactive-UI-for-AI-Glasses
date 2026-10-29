@@ -420,10 +420,60 @@
       }
     },
     {
-      "name": "1:56 \u00b7 four seconds at the door, then the loop resumes with no destination and no intent",
+      "name": "1:55.5 \u00b7 the Big Bean's expanded view by 1:56, four rows, the action reading for the Cortado",
       "between": [
-        116.5,
-        118
+        115,
+        116
+      ],
+      "must": {
+        "action": "promote",
+        "id": "big-bean",
+        "level": "expanded",
+        "rowsAre": [
+          "Cortado",
+          "Cold brew",
+          "Oat latte",
+          "Pickup at the counter"
+        ],
+        "actionsAre": [
+          "Order ahead",
+          "Not now"
+        ]
+      }
+    },
+    {
+      "name": "1:57.5 \u00b7 the Cortado chosen: that row alone, its confirmation on a choice",
+      "between": [
+        117.5,
+        117.7
+      ],
+      "must": {
+        "id": "big-bean",
+        "level": "expanded",
+        "cause": "choice",
+        "rowsAre": [
+          "Cortado"
+        ],
+        "actionsAre": [],
+        "noteIs": "Cortado ordered \u00b7 ready at 12:46, skip the line."
+      }
+    },
+    {
+      "name": "2:01 \u00b7 the pocket holds what was saved and what was settled",
+      "between": [
+        121.5,
+        122
+      ],
+      "state": {
+        "pocket": 2,
+        "glyph": "Pocket 2"
+      }
+    },
+    {
+      "name": "2:00 \u00b7 the look let go, the door stop ends and the loop resumes with no destination and no intent",
+      "between": [
+        121,
+        122
       ],
       "state": {
         "goal": "walking",

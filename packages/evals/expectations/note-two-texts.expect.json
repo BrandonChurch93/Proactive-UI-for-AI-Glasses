@@ -1,0 +1,57 @@
+{
+  "walk": "note-two-texts",
+  "cases": [
+    {
+      "name": "the first text is the banner",
+      "rule": "notifications",
+      "between": [
+        2,
+        4.9
+      ],
+      "must": {
+        "id": "maya-usual",
+        "component": "toast",
+        "zone": "view"
+      }
+    },
+    {
+      "name": "the second tucks under it as a strip, sender and line",
+      "rule": "notifications",
+      "between": [
+        5,
+        6
+      ],
+      "must": {
+        "id": "jules-tonight",
+        "component": "strip",
+        "nameIs": "Jules",
+        "factIs": "Still on for tonight?"
+      }
+    },
+    {
+      "name": "and is never the banner while the first is up",
+      "rule": "notifications",
+      "between": [
+        5,
+        10
+      ],
+      "mustNot": {
+        "id": "jules-tonight",
+        "component": "toast"
+      }
+    },
+    {
+      "name": "the banner counts them",
+      "rule": "notifications",
+      "between": [
+        5,
+        6
+      ],
+      "must": {
+        "id": "maya-usual",
+        "component": "toast",
+        "timeIs": "2 \u00b7 now"
+      }
+    }
+  ]
+}

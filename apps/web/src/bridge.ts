@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, PLACE_BY_ID, SOUTH_CROSSWALK, groundY, placeDoor, zOf, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
+import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, PLACE_BY_ID, SOUTH_CROSSWALK, doorwayRect, groundY, placeDoor, zOf, type Projected, type Rect, type Vec3, type Viewport } from '@lumen/shared';
 import { keepOuts, pointAt, type Sim } from '@lumen/sim';
 import {
   LIGHT_COLOR,
@@ -141,6 +141,10 @@ export class ThreeBridge implements SceneBridge {
       return { x: d.x, y: groundY(d.x, d.z), z: d.z };
     }
     return this.sim.anchorOf(id);
+  }
+
+  doorway(anchor: string): Rect | null {
+    return doorwayRect(anchor, (v) => this.project(v), this.viewport());
   }
 
   keepOuts(maxDepth = Infinity): KeepOut[] {

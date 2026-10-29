@@ -1,4 +1,4 @@
-import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, PLACE_BY_ID, POST_OFFICE, SOUTH_CROSSWALK, placeDoor, nOf, v3, zOf, type Leg, type Vec3 } from '@lumen/shared';
+import { AVENUE_CROSSWALK, BLOCK, CROSS_CROSSWALK, PLACE_BY_ID, POST_OFFICE, SOUTH_CROSSWALK, placeDoor, nOf, v3, zOf, type Leg, type PlaceData, type Vec3 } from '@lumen/shared';
 
 export interface RoutePoint {
   x: number;
@@ -119,6 +119,11 @@ interface Spur {
 
 const spurs = new Map<string, Spur>();
 
+export function onWalkingLine(place: PlaceData): boolean {
+  const lineX = place.side === 'W' ? WEST_X : BLOCK.wearerX;
+  return place.side !== 'X' && Math.abs(placeDoor(place).x - lineX) < 1.5;
+}
+
 export function doorSpur(id: string): Spur | undefined {
   const cached = spurs.get(id);
   if (cached) return cached;
@@ -132,11 +137,20 @@ export function doorSpur(id: string): Spur | undefined {
     s = { edge: edge(`spur:${id}`, 'XN', 'XN', pts), attach: -1 };
   } else {
     const side = place.side === 'W' ? EDGE_BY_ID.get('W')! : EDGE_BY_ID.get('E')!;
-    const at = project(side, P(place.side === 'W' ? WEST_X : BLOCK.wearerX, dn));
+    const lineX = place.side === 'W' ? WEST_X : BLOCK.wearerX;
+    const at = project(side, P(lineX, dn));
     const from = pointOn(side, at.d);
-    const endX = place.side === 'W' ? door.x + DOOR_STAND : door.x - DOOR_STAND;
-    const far = place.side === 'W' ? endX < from.x - 0.3 : endX > from.x + 0.3;
-    const pts = far ? [from, P(endX, dn)] : [from, from];
+    let pts: RoutePoint[];
+    if (onWalkingLine(place)) {
+      // A place at the curb on the walking line (the bus stop) is faced across the pavement from the shop side, as people
+      // wait for a bus: out to the shop side, then a step back toward it, so the wearer ends facing it.
+      const s = place.side === 'W' ? -1 : 1;
+      pts = [from, P(door.x + s * (DOOR_STAND + 0.7), dn), P(door.x + s * DOOR_STAND, dn)];
+    } else {
+      const endX = place.side === 'W' ? door.x + DOOR_STAND : door.x - DOOR_STAND;
+      const far = place.side === 'W' ? endX < from.x - 0.3 : endX > from.x + 0.3;
+      pts = far ? [from, P(endX, dn)] : [from, from];
+    }
     s = { edge: edge(`spur:${id}`, side.a, side.a, pts), attach: at.d };
   }
   spurs.set(id, s);

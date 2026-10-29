@@ -135,6 +135,9 @@ for (const id of list) {
     await page.waitForTimeout(120);
   }
   log(`  on the glass and clear: ${await shown(id)}`);
+  // From here to the choice the page counts, every 100 ms of walk time, whether the view is on the glass at full opacity.
+  await page.evaluate(`(() => { clearInterval(window.__cw && window.__cw.timer); const cw = { on: 0, all: 0 }; cw.timer = setInterval(() => { const r = window.__app.walk.overlay.report().panes.find((p) => p.id === '${id}'); cw.all++; if (r && r.visible && r.level === 'expanded' && r.opacity > 0.98) cw.on++; }, 100); window.__cw = cw; })()`);
+  let bad = '';
   for (let i = 0; i < 100; i++) {
     const settled = (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${id}'); const r = o.report().panes.find((p) => p.id === '${id}'); return Boolean(r && r.visible && r.opacity > 0.98 && it && it.condensingUntil < o.t - 0.4 && it.cur && it.cur.view.el.querySelector('li')); })()`)) as boolean;
     if (settled) break;
@@ -147,7 +150,9 @@ for (const id of list) {
     const r = (await rows(id)).find((x) => x.row === r0.row) ?? r0;
     await page.mouse.move(r.x, r.y);
     await page.waitForTimeout(200);
-    log(`  pointer on ${r.row.padEnd(38)} lifted ${String(await lifted(id)).padEnd(38)} action ${await label(id)}`);
+    const got = await lifted(id);
+    if (got !== r.row) bad ||= `pointer on ${r.row} lifted ${got}`;
+    log(`  pointer on ${r.row.padEnd(38)} lifted ${String(got).padEnd(38)} action ${await label(id)}`);
     if (r0.row === (await rows(id))[1]?.row) await shot(`${id}-pointer`);
   }
   const want = pick.get(id);
@@ -167,10 +172,15 @@ for (const id of list) {
       const note = (await page.evaluate(`document.querySelector('${pane(id)} [data-k="note"]')?.textContent ?? null`)) as string | null;
       const left = (await page.evaluate(`[...document.querySelectorAll('${pane(id)} li')].map((li) => li.textContent)`)) as string[];
       const st = await read();
+      if (!note) bad ||= `chose ${want} with no confirmation`;
       log(`  chose ${want} with "${before}": "${note}" · ${left.length} row left · glyph ${st.glyph}`);
       await shot(`${id}-chosen`);
     }
   }
+  const cw = (await page.evaluate('(() => { clearInterval(window.__cw.timer); return { on: window.__cw.on, all: window.__cw.all }; })()')) as { on: number; all: number };
+  if (cw.all && cw.on / cw.all < 0.9) bad ||= `on the glass ${Math.round((100 * cw.on) / cw.all)}% of the stop`;
+  if (bad) failures++;
+  log(`  ${bad ? `FAIL: ${bad}` : 'ok'} · on the glass ${cw.all ? Math.round((100 * cw.on) / cw.all) : 0}% of the stop`);
   await park();
   await page.waitForTimeout(300);
   for (const name of (await rows(id)).map((r) => r.row).reverse()) {

@@ -57,7 +57,7 @@ export function resolveChoice(e: Entity, action: string, row?: string): { row?: 
   const x = e.expanded;
   const choices = (x?.rows ?? []).filter((r) => r.act);
   if (choices.length) {
-    const picked = choices.find((r) => rowId(r) === row) ?? defaultRow(e)!;
+    const picked = choices.find((r) => rowId(r).toLowerCase() === row?.toLowerCase()) ?? defaultRow(e)!;
     return { row: picked, ...(picked.after ? { after: picked.after } : {}), ...(picked.pocket ? { pocket: picked.pocket } : {}) };
   }
   const after = x?.after?.[action];
@@ -94,6 +94,7 @@ export function expandedContent(e: Entity, r: Reason, scenario: ScenarioId, arri
   const img = e.img ? { img: e.img } : {};
   if (settled) return { name: e.name, say, rows: [], reason: r, showReason: false, note: settled[1], kind: e.kind, ...img };
   const done = chosen ? resolveChoice(e, chosen.action, chosen.row) : null;
+  const lead = defaultRow(e);
   const rows: ContentRow[] = (x?.rows ?? [])
     .filter((row) => !row.when || arrived.has(row.when))
     .filter((row) => !done?.row || row === done.row)
@@ -107,14 +108,14 @@ export function expandedContent(e: Entity, r: Reason, scenario: ScenarioId, arri
       if (row.tone) out.tone = row.tone;
       if (row.now) out.tone = row.tone ?? 'voice';
       if (row.act && !done) out.act = row.act;
+      if (row === lead && !done) out.lead = true;
       return out;
     });
   const c: Content = { name: e.name, say, rows, reason: r, showReason: false, kind: e.kind, ...img };
   if (e.depth) c.depthRef = e.depth;
   if (done?.after) c.note = done.after;
   else if (x?.actions?.length) {
-    const lead = defaultRow(e)?.act;
-    c.actions = x.actions.map((a) => (a.primary && lead ? { ...a, label: lead } : { ...a }));
+    c.actions = x.actions.map((a) => (a.primary && lead?.act ? { ...a, label: lead.act } : { ...a }));
   }
   return c;
 }

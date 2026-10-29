@@ -20,7 +20,8 @@ export interface AppOptions {
 
 type Mode = 'attract' | 'walk';
 
-const NOT_DECIDED = new Set<ComponentKind>(['menu', 'map', 'thread', 'toast', 'strip']);
+// The glasses asking, reminding or carrying a message is not deciding.
+const NOT_DECIDED = new Set<ComponentKind>(['menu', 'map', 'thread', 'toast', 'strip', 'ask', 'followup', 'pocket', 'whisper']);
 
 // What the street sounds need from the walk: the band for the cadence, the crossing and its signal, and which side the road is on.
 function streetFrame(w: Walk, band: Band, snap: WorldSnapshot): StreetFrame {
@@ -266,7 +267,7 @@ export class App {
     const prefer: { t: number; name: string; reason: string; rank: number }[] = [];
     const noted = new Set<string>();
     let lastPick: (typeof prefer)[number] | null = null;
-    let cards = 0;
+    const carded = new Set<string>();
     let saved = 0;
     let replies = 0;
     const reached: string[] = [];
@@ -307,7 +308,8 @@ export class App {
         const was = level.get(d.id) ?? 0;
         const now = LEVEL_RANK[d.level];
         if ((d.action === 'show' || d.action === 'promote') && now >= LEVEL_RANK.card && was < LEVEL_RANK.card) {
-          cards++;
+          const place = d.id.replace(/^pocket:/, '');
+          if (PLACE_BY_ID.has(place)) carded.add(place);
           ticks.push({ t: f.t, kind: 'card' });
         }
         if (d.action !== 'hold') level.set(d.id, d.action === 'dismiss' ? 0 : now);
@@ -325,12 +327,14 @@ export class App {
     if (gateFrom !== null) gates.push([gateFrom, w.duration]);
     if (lastPick) prefer.push(lastPick);
     const picked = new Map<string, { t: number; name: string; reason: string }>();
-    for (const x of prefer.sort((a, b) => a.rank - b.rank || a.t - b.t)) if (picked.size < 3 && !picked.has(x.name)) picked.set(x.name, x);
+    const named = (name: string): boolean => [...picked.values()].some((x) => x.name === name);
+    // A place can carry a reroute and an order both; an arrival or a plain show only names a place not yet listed.
+    for (const x of prefer.sort((a, b) => a.rank - b.rank || a.t - b.t)) if (picked.size < 3 && !picked.has(`${x.name}|${x.reason}`) && !(x.rank === 2 && named(x.name))) picked.set(`${x.name}|${x.reason}`, x);
     const best = new Map<string, (typeof shows)[number]>();
-    for (const x of shows) if (!picked.has(x.name) && (!best.has(x.name) || best.get(x.name)!.score < x.score)) best.set(x.name, x);
+    for (const x of shows) if (!named(x.name) && (!best.has(x.name) || best.get(x.name)!.score < x.score)) best.set(x.name, x);
     for (const x of [...best.values()].sort((a, b) => b.score - a.score)) if (picked.size < 3) picked.set(x.name, x);
     const decided = [...picked.values()].sort((a, b) => a.t - b.t).map(({ t, name, reason }) => ({ t, name, reason }));
-    return { duration: w.duration, places: places.size, cards, held: held.size, saved, reached, replies, ticks, gates, bands, decided, first };
+    return { duration: w.duration, places: places.size, cards: carded.size, held: held.size, saved, reached, replies, ticks, gates, bands, decided, first };
   }
 
   private inspect(t: number, id: string): void {
@@ -439,7 +443,9 @@ export class App {
       } else if (e.key === ' ') {
         if ((e.target as HTMLElement).closest('button')) return;
         if (this.end.visible) return;
-        this.setPaused(!this.walk.paused);
+        // Space is the pinch while a place's expanded view is up under the look; otherwise it pauses.
+        if (!this.walk.paused && this.walk.canChoose()) this.pinch();
+        else this.setPaused(!this.walk.paused);
         e.preventDefault();
       }
     });

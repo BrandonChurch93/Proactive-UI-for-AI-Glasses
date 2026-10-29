@@ -76,6 +76,7 @@ export interface PlaceRequest {
   zoneOk?: boolean;
   left?: boolean;
   sizeOf?: (level: Level) => { w: number; h: number };
+  doorway?: Rect | null;
 }
 
 export type PaneMode = 'pane' | 'pip' | 'edge';
@@ -125,6 +126,9 @@ export class Placement {
   private scaleAt = -Infinity;
   private ui = 0;
   private last: WorldPlace | null = null;
+  private stood = new Set<string>();
+  private leaveSince: number | null = null;
+  private prevAnchor: { x: number; y: number } | null = null;
   readonly jumpX = new Track(0);
   readonly jumpY = new Track(0);
 
@@ -136,7 +140,28 @@ export class Placement {
     this.scale = null;
   }
 
+  // The pane on the thing being looked at stays where it fits: it leaves only for a cause that has lasted `leaveMs`; an anchor leaving the view folds it at once.
   update(req: PlaceRequest, ctx: FrameCtx): WorldPlace {
+    const prev = this.last;
+    const kept = { cfg: this.cfg, cfgAt: this.cfgAt, shown: this.shown, shownRel: this.shownRel, shownW: this.shownW, shownBox: this.shownBox, offSince: this.offSince, collapsed: this.collapsed, step: this.step, folded: this.folded, scale: this.scale, scaleAt: this.scaleAt };
+    const r = this.decide(req, ctx);
+    const a = req.anchor;
+    const inView = a.inFront && a.x >= 0 && a.x <= ctx.vp.w && a.y >= 0 && a.y <= ctx.vp.h;
+    if (prev?.mode === 'pane' && r.mode !== 'pane' && inView && req.focusOk && !req.left && this.prevAnchor) {
+      this.leaveSince ??= ctx.t;
+      if (ctx.t - this.leaveSince < MOVE.leaveMs / 1000 - 1e-9) {
+        Object.assign(this, kept);
+        const dx = a.x - this.prevAnchor.x;
+        const dy = a.y - this.prevAnchor.y;
+        this.prevAnchor = { x: a.x, y: a.y };
+        return this.remember({ ...prev, rect: { ...prev.rect, x: prev.rect.x + dx, y: prev.rect.y + dy }, leader: { x: prev.leader.x + dx, y: prev.leader.y + dy } });
+      }
+    } else if (r.mode === 'pane') this.leaveSince = null;
+    this.prevAnchor = { x: a.x, y: a.y };
+    return r;
+  }
+
+  private decide(req: PlaceRequest, ctx: FrameCtx): WorldPlace {
     const { vp, t } = ctx;
     const a = req.anchor;
     const out = !a.inFront || a.x < -20 || a.x > vp.w + 20 || a.y < -20 || a.y > vp.h + 20;
@@ -185,6 +210,9 @@ export class Placement {
     }
     const near = keepOutsFor(ctx.keepOuts, a.depth);
     const rects = near.map((k) => k.rect);
+    const loose = near.filter((k) => !(k.still && k.kind === 'person')).map((k) => k.rect);
+    // At a door, people walking in and out are rule 8's business, not placement's: the pane keeps its place beside the opening.
+    const placeRects = req.doorway ? near.filter((k) => k.kind !== 'person' && !(k.kind === 'face' && !k.still)).map((k) => k.rect) : rects;
     const road = near.filter((k) => k.kind === 'roadway').map((k) => k.rect);
     const sizeFor = (lv: Level): { w: number; h: number } =>
       lv === req.level ? req.size : (req.sizeOf?.(lv) ?? NOMINAL_SIZE[lv as 'label' | 'card' | 'expanded'] ?? NOMINAL_SIZE.label);
@@ -197,10 +225,11 @@ export class Placement {
       viewport: vp,
       focusOk: req.focusOk,
       zoneOk: Boolean(req.zoneOk),
-      keepOuts: rects,
+      keepOuts: placeRects,
       road,
       chrome: ctx.chrome ?? [],
       ui,
+      ...(req.doorway ? { doorway: req.doorway } : {}),
       ...(this.scale !== null && t - this.scaleAt < MOVE.scaleHold ? { scaleFrom: this.scale } : {}),
     });
     const near2: 'left' | 'right' = a.x < vp.w / 2 ? 'left' : 'right';
@@ -223,12 +252,19 @@ export class Placement {
     let inp = make(level);
     const scaleOf = (c: Config): number => c.scale;
     let res = this.cfg ? configRect(inp, this.cfg.side, this.cfg.vertical, scaleOf(this.cfg), this.cfg.push, this.cfg.pushOff) : null;
+    // A person who has come to a stand over a placed pane is placed round once, like a parked van.
+    if (res && res.ok) {
+      const standing = near.filter((k) => k.still && rectsOverlap(res!.rect, k.rect)).map((k) => k.id);
+      if (standing.some((id) => !this.stood.has(id))) res = { ...res, ok: false };
+      for (const id of standing) this.stood.add(id);
+    }
     const stilled = Boolean(res && !res.ok && frozen);
     if (res && stilled) res = { ...res, ok: true };
     if (req.left && res && !res.ok && !stilled) return this.fold(a, vp);
     if (req.focusOk && res && !res.ok && !stilled && Math.min(a.x, vp.w - a.x) < inp.size.w * scaleOf(this.cfg!) + PIP_GAP.beside + MARGIN) return this.fold(a, vp);
     if (!res || !res.ok) {
       let placed = placeWorld(withPrefer(inp));
+      if ((placed.mode === 'pip' || placed.mode === 'offscreen') && loose.length < rects.length) placed = placeWorld(withPrefer({ ...inp, keepOuts: loose }));
       if ((placed.mode === 'pip' || placed.mode === 'offscreen') && !req.focusOk) {
         for (const lower of STEP_DOWN[level] ?? []) {
           const p2 = placeWorld(withPrefer(make(lower)));
@@ -278,7 +314,9 @@ export class Placement {
     if (this.folded) {
       const r = res.rect;
       const gap = Math.min(r.x, vp.w - r.x - r.w, r.y, vp.h - r.y - r.h);
-      if (res.held || gap < MARGIN + MOVE.foldHold) return this.fold(a, vp);
+      // Riding at the edge a folded pane needs room to come back; the one being looked at by a wearer standing still needs only the margin.
+      const hold = req.focusOk && !req.left && ctx.band === 'stopped' ? 0 : MOVE.foldHold;
+      if (res.held || gap < MARGIN + hold - 0.5) return this.fold(a, vp);
     }
     this.folded = false;
     const cfg = this.cfg!;
@@ -444,7 +482,8 @@ export class Aside {
       this.clearSince = null;
       return { dx: this.x.at(t), dy: this.y.at(t), opacity: this.o.at(t), dropped: true, active: true, by: this.by, trace: null };
     }
-    const hits = near.filter((k) => k.kind !== 'roadway' && rectsOverlap(home, k.rect));
+    // Someone standing still is scenery: placement goes round them, and they never dim or drop a pane.
+    const hits = near.filter((k) => k.kind !== 'roadway' && !k.still && rectsOverlap(home, k.rect));
     const hard = hits.some((k) => k.kind === 'face' || (k.kind === 'vehicle' && k.moving));
     if (hits.length > 0) {
       this.clearSince = null;
@@ -563,7 +602,9 @@ export class Yield {
     } else if (this.side && inp.t - this.lastFast > 0.08) {
       const back = this.from === null || inp.yaw === undefined || Math.abs(angleWrap(inp.yaw - this.from)) < MOVE.yieldBack;
       const elsewhere = Boolean(inp.target) && inp.target !== this.target;
-      if (back || elsewhere || inp.curbDistance >= 8) {
+      // A turn that comes to rest on a place for a second was a look at it, not a check for traffic.
+      const looking = Boolean(inp.target) && inp.t - this.lastFast >= MOVE.yieldLookS - 1e-9;
+      if (back || elsewhere || looking || inp.curbDistance >= 8) {
         this.side = null;
         this.from = null;
       }

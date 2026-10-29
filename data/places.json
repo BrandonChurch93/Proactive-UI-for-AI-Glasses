@@ -426,10 +426,10 @@
             "value": "$8"
           },
           {
-            "key": "Set lunch",
-            "title": "Pranzo fisso",
-            "sub": "Two courses and coffee · read from Italian",
-            "value": "$24"
+            "key": "1:00",
+            "title": "Table for two",
+            "sub": "Inside, by the window",
+            "value": "20 min"
           }
         ],
         "actions": [

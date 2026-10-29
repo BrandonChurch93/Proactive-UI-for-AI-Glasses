@@ -2,6 +2,8 @@ import { gsap } from 'gsap';
 import { Brain } from '@lumen/brain';
 import {
   LOOK_AWAY_S,
+  READ,
+  uiScale,
   PLACES,
   PLACE_BY_ID,
   WALK_SECONDS,
@@ -257,9 +259,17 @@ export class Walk {
     this.pending = { ...this.pending, ...ev };
   }
 
+  // A pinch on a place whose expanded view is up takes its action for the lifted row.
   pinch(id?: string): void {
     const target = id ?? this.sim.gaze.target ?? undefined;
-    if (target) this.queue({ pinch: target });
+    if (!target) return;
+    const choice = this.overlay?.choiceFor(target);
+    this.queue(choice ? { choice } : { pinch: target });
+  }
+
+  canChoose(): boolean {
+    const target = this.sim.gaze.target;
+    return Boolean(target && this.overlay?.choiceFor(target));
   }
 
   dismiss(): void {
@@ -343,7 +353,8 @@ export class Walk {
     // The viewfinder resting on the expanded view of the place it holds is still a look at that place: it is reading the rows.
     const onPane = (id: string): boolean => {
       const p = this.view?.panes.find((x) => x.id === id && x.level === 'expanded' && x.visible);
-      return Boolean(p && cx >= p.rect.x && cx <= p.rect.x + p.rect.w && cy >= p.rect.y && cy <= p.rect.y + p.rect.h);
+      const m = READ.marginPx * uiScale(vp);
+      return Boolean(p && cx >= p.rect.x - m && cx <= p.rect.x + p.rect.w + m && cy >= p.rect.y - m && cy <= p.rect.y + p.rect.h + m);
     };
     let best: string | null = null;
     let bestOff = Infinity;

@@ -40,7 +40,7 @@ import { ALBEDO, buildLayout, type BlockLayout } from './layout';
 import { SouthSignal } from './crossing';
 import { People, type ScriptedPerson } from './people';
 import { Head, STEEP, ScriptedReviewer, type Events } from './reviewer';
-import { START, crossingAnchor, doorSpur, nearestS, routeLoop, routeTo, type Route } from './route';
+import { START, crossingAnchor, doorSpur, nearestS, onWalkingLine, routeLoop, routeTo, type Route } from './route';
 import { LANE_BY_ID, Traffic, type ScriptedVehicle, type Vehicle } from './traffic';
 import { DOOR_READ_S, DOOR_S, Wearer } from './wearer';
 
@@ -313,7 +313,10 @@ export class Sim {
     this.navigate(t1);
     this.wearer.step(t1, dt);
     this.traffic.step(t1, dt);
-    this.people.step(t1, dt, this.wearer.pos, this.wearer.speed > 0.2);
+    // At a door the wearer faces the shop; people on that pavement pass behind them, on the curb side, out of the way of what they read.
+    const door = this.wearer.arrivedAt !== null && this.dwelling(t1) && this.wearer.route.target !== 'start' ? PLACE_BY_ID.get(this.wearer.route.target) : undefined;
+    const side = door && door.side !== 'X' ? (door.side === 'E' ? 1 : -1) : 0;
+    this.people.step(t1, dt, this.wearer.pos, this.wearer.speed > 0.2, side, door && onWalkingLine(door) ? -side : side);
     if (this.scripted) {
       const aim = this.reviewer.aim(t1, this.wearer.pos, this.wearer.bodyYaw, this.anchorOf, this.wearer.state === 'crossing');
       this.head.step(dt, aim.yaw, aim.pitch, aim.omega);

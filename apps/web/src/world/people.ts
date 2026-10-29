@@ -36,6 +36,7 @@ interface View {
   actions: Record<'walk' | 'idle' | 'sit', THREE.AnimationAction>;
   current: 'walk' | 'idle' | 'sit';
   stride: number;
+  faded?: boolean;
 }
 
 export class PeopleView {
@@ -117,7 +118,8 @@ export class PeopleView {
       const d = Math.hypot(p.pos.x - sim.wearer.pos.x, p.pos.z - sim.wearer.pos.z);
       v.root.visible = d < 70;
       if (!v.root.visible) continue;
-      for (const m of v.meshes) m.castShadow = d < 40;
+      for (const m of v.meshes) m.castShadow = d < 40 && p.opacity > 0.99;
+      if (p.opacity < 0.999) fade(v, p.opacity);
       let yaw = p.heading;
       if (p.facePoint) yaw = Math.atan2(-(p.facePoint.x - p.pos.x), -(p.facePoint.z - p.pos.z));
       v.root.rotation.y = yaw + Math.PI;
@@ -142,6 +144,22 @@ export class PeopleView {
       }
     }
   }
+}
+
+// Someone stepping into a shop fades over the threshold; their materials are their own from then on.
+function fade(v: View, opacity: number): void {
+  if (!v.faded) {
+    v.faded = true;
+    for (const m of v.meshes) {
+      const own = (Array.isArray(m.material) ? m.material : [m.material]).map((x) => {
+        const c = x.clone();
+        c.transparent = true;
+        return c;
+      });
+      m.material = Array.isArray(m.material) ? own : own[0]!;
+    }
+  }
+  for (const m of v.meshes) for (const x of Array.isArray(m.material) ? m.material : [m.material]) x.opacity = opacity;
 }
 
 const personMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0 });

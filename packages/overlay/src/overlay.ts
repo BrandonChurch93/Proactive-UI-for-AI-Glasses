@@ -3,6 +3,7 @@ import {
   LEVEL_RANK,
   MARGIN,
   NOMINAL_SIZE,
+  READ,
   anchorFactors,
   angleWrap,
   clamp,
@@ -26,7 +27,7 @@ import {
 import { BackdropFill } from './backdrop';
 import { leaderPoint, type ColumnHandle, type GroundTextHandle, type KeepOut, type LeaderHandle, type LightHandle, type RouteHandle, type SceneBridge } from './bridge';
 import { batch, condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, slideIn, slideOut, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
-import { MENU_GLYPHS, buildPane, isBanner, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
+import { MENU_GLYPHS, buildPane, isBanner, isTucked, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
 import { Aside, PaneYield, Placement, Track, Yield, leftRecently, type AsideState, type FrameCtx, type WorldPlace } from './place';
 import { Sound } from './sound';
 import { EASE, MOVE, T } from './tokens';
@@ -111,6 +112,8 @@ interface Item {
   lag: number;
   swap: boolean;
   frozen: { x: number; y: number } | null;
+  edgeSince: number | null;
+  read: { off: { x: number; y: number }; outSince: number | null } | null;
 }
 
 const FOLD_LEAD_S = 0.4;
@@ -471,6 +474,8 @@ export class Overlay {
       lag: 0,
       swap: false,
       frozen: null,
+      edgeSince: null,
+      read: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
       it.lights = {
@@ -771,7 +776,7 @@ export class Overlay {
     wrap.style.cssText = 'position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,opacity';
     const box = document.createElement('div');
     box.className = s.pane!;
-    if (isBanner(it.d.component, it.d.content)) box.classList.add(s.bannerPane!);
+    if (isBanner(it.d.component, it.d.content) || isTucked(it.d.component, it.d.content)) box.classList.add(s.bannerPane!);
     box.dataset.pane = it.d.id;
     box.dataset.zone = it.d.placement.zone;
     const seed = document.createElement('div');
@@ -811,7 +816,49 @@ export class Overlay {
   }
 
   // The hold rule fills from the leader's side toward the next level and is the viewfinder's count, read off the same mark.
-  // The row under the pointer, else the one tapped, else the one under the viewfinder's center while the place is looked at.
+  // What a pinch does on a place whose expanded view is up: its action, for the lifted row.
+  choiceFor(id: string): { id: string; action: string; row?: string } | null {
+    const it = this.items.get(id);
+    const b = it?.cur;
+    if (!it || !b || b.level !== 'expanded' || b.fade.v < 0.5 || it.want === 'none') return null;
+    const btn = b.view.el.querySelector<HTMLElement>(`button.${s.primary}`);
+    const action = btn?.dataset.k?.startsWith('a:') ? btn.dataset.k.slice(2) : null;
+    if (!action) return null;
+    const row = b.view.el.querySelector<HTMLElement>('li[data-lift]')?.dataset.row;
+    return row === undefined ? { id, action } : { id, action, row };
+  }
+
+  // While an expanded view is read at Stopped or Stroll it holds its place in the world, so turning the head carries the
+  // viewfinder across its rows; it goes back to following its light once the look has been off the pane (plus 80 px) for 1 s.
+  private reading(it: Item, t: number, vp: { w: number; h: number }, pr: { x: number; y: number; inFront: boolean }): WorldPlace | null {
+    const b = it.cur;
+    const placed = it.placed;
+    const ok = it.d.level === 'expanded' && (this.band === 'stopped' || this.band === 'stroll') && pr.inFront && b?.level === 'expanded' && placed?.mode === 'pane' && b.rect;
+    if (!ok) {
+      it.read = null;
+      return null;
+    }
+    const r = b.rect!;
+    const m = READ.marginPx * this.ui;
+    const cx = vp.w / 2;
+    const cy = vp.h / 2;
+    const over = cx >= r.x - m && cx <= r.x + r.w + m && cy >= r.y - m && cy <= r.y + r.h + m;
+    const look = this.snap?.wearer.gaze.target === it.id;
+    if (!it.read) {
+      if (!look || b.opacity < 0.9 || t < it.condensingUntil) return null;
+      it.read = { off: { x: placed.rect.x - pr.x, y: placed.rect.y - pr.y }, outSince: null };
+    }
+    if (over && look) it.read.outSince = null;
+    else it.read.outSince ??= t;
+    if (it.read.outSince !== null && t - it.read.outSince >= READ.leaveS - 1e-9) {
+      it.read = null;
+      return null;
+    }
+    const rect = { ...placed.rect, x: pr.x + it.read.off.x, y: pr.y + it.read.off.y };
+    return { ...placed, rect, leader: { x: placed.leader.x - placed.rect.x + rect.x, y: placed.leader.y - placed.rect.y + rect.y } };
+  }
+
+  // The row under the pointer, else the one tapped, else the one under the viewfinder's center while the place is looked at, else the row the action reads for.
   private liftRow(it: Item, b: Built, vp: { w: number; h: number }): void {
     const rows = b.view.el.querySelectorAll<HTMLElement>('li[data-row]');
     if (!rows.length) return;
@@ -827,6 +874,8 @@ export class Overlay {
         if (cy >= q.top && cy <= q.bottom) pick = li;
       }
     }
+    // Exactly one row is lifted at all times, so the action's "it" always has a referent the eye can find.
+    pick ??= [...rows].find((li) => li.dataset.lead !== undefined) ?? rows[0]!;
     for (const li of rows) {
       if (li === pick) li.dataset.lift = '';
       else delete li.dataset.lift;
@@ -1196,9 +1245,12 @@ export class Overlay {
     this.stagger(ordered);
     const taken: Rect[] = [];
     let below = 0;
+    let tuck = 0;
     for (const it of ordered) {
       const r = it.kind === 'view' && !it.dying && it.d.placement.anchor === 'view:edge-top' ? it.cur?.rect : null;
       if (r && it.cur!.opacity > 0.05) below = Math.max(below, r.y + r.h + 10);
+      const banner = it.kind === 'view' && !it.dying && it.d.placement.anchor === 'view:banner' && it.d.component !== 'strip' ? it.cur?.rect : null;
+      if (banner && it.cur!.opacity > 0.05) tuck = Math.max(tuck, banner.y + banner.h + 6 * ui);
     }
     for (const it of ordered) {
       const d = it.d;
@@ -1221,8 +1273,10 @@ export class Overlay {
           const sizeOf = (l: Level): { w: number; h: number } =>
             kept && kept.level === l ? { w: kept.width, h: kept.height } : (NOMINAL_SIZE[l as 'label' | 'card' | 'expanded'] ?? NOMINAL_SIZE.label);
           if (d.placement.focusOk) it.lookedAt = t;
-          if (it.frozen && it.yieldS.on && it.placed?.mode === 'pane') placed = it.placed;
-          else placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) || leftRecently(t, it.lookedAt), zoneOk: Boolean(d.placement.zoneOk), left: !d.placement.focusOk && leftRecently(t, it.lookedAt), sizeOf }, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx);
+          const read = this.reading(it, t, vp, p);
+          if (read) placed = read;
+          else if (it.frozen && it.yieldS.on && it.placed?.mode === 'pane') placed = it.placed;
+          else placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) || leftRecently(t, it.lookedAt), zoneOk: Boolean(d.placement.zoneOk), left: !d.placement.focusOk && leftRecently(t, it.lookedAt), sizeOf, doorway: this.bridge.doorway?.(d.placement.anchor) ?? null }, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx);
           if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && !it.dying) {
             const r = placed.rect;
             taken.push({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 });
@@ -1249,7 +1303,11 @@ export class Overlay {
         const dt = it.homeAt ? t - it.homeAt.t : 0;
         const ahead = dt > 1e-4 && dt < 0.2 && t - it.born > FOLD_SETTLE_S ? { ...home, x: home.x + ((home.x - it.homeAt!.x) / dt) * FOLD_LEAD_S, y: home.y + ((home.y - it.homeAt!.y) / dt) * FOLD_LEAD_S } : home;
         it.homeAt = { x: home.x, y: home.y, t };
-        const outside = home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset || chrome.some((r) => rectsOverlap(home, r) || rectsOverlap(ahead, r));
+        // The view's edge must have held 300 ms before it folds a pane that fits (the drawn rect is clamped meanwhile); the chrome folds at once.
+        const atEdge = !it.read && (home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset);
+        if (atEdge && d.placement.focusOk) it.edgeSince ??= t;
+        else it.edgeSince = null;
+        const outside = (atEdge && (it.edgeSince === null || t - it.edgeSince >= MOVE.leaveMs / 1000 - 1e-9)) || chrome.some((r) => rectsOverlap(home, r) || (!d.placement.focusOk && rectsOverlap(ahead, r)));
         if (outside && !it.frozen && pr && it.place) {
           placed = it.place.foldNow(pr, vp);
           it.placed = placed;
@@ -1323,10 +1381,11 @@ export class Overlay {
           }
         } else {
           const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
-          const i = b === it.cur ? (slots.get(slot) ?? 0) : 0;
+          // A strip is the tucked one whatever the draw order; counting banners by order put a banner under itself.
+          const i = slot === 'view:banner' ? (d.component === 'strip' ? 1 : 0) : b === it.cur ? (slots.get(slot) ?? 0) : 0;
           if (b === it.cur) slots.set(slot, i + 1);
           scale = ui;
-          const home = b.home && b !== it.cur ? b.home : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : 0, ui);
+          const home = b.home && b !== it.cur ? b.home : placeView(slot, { w: b.w.at(t) * ui, h: b.h.at(t) * ui }, vp, i, slot === 'view:edge-right' ? below : slot === 'view:banner' ? tuck : 0, ui);
           b.home = home;
           rect = { ...home, y: home.y + b.slide.v };
           if (slot === 'view:glyph') rect = { ...rect, y: vp.h - 44 * ui - b.h.at(t) * ui };
