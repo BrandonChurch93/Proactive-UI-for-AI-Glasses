@@ -3,6 +3,7 @@ import {
   LEVEL_RANK,
   MARGIN,
   NOMINAL_SIZE,
+  NEAR_REACH,
   PIP_GAP,
   READ,
   VIEWFINDER,
@@ -92,6 +93,7 @@ interface Held {
   badSince: number | null;
   came: boolean;
   level: Level;
+  readGap?: number;
 }
 
 const EASE_OUT = (k: number): number => 1 - (1 - k) ** 3;
@@ -147,6 +149,7 @@ interface Item {
   holdEnded: boolean;
   noCome: Level | null;
   ride: { x: number; y: number } | null;
+  foldedUntil: number;
   // Where the light was, and which anchor it was, when the pane was last placed: an arrival moves the anchor to the door.
   placedPr: { x: number; y: number; anchor: string } | null;
 }
@@ -304,6 +307,17 @@ class SafetyView {
   dispose(): void {
     this.h?.dispose();
   }
+}
+
+function nudge(r: Rect, vp: { w: number; h: number }, avoid: Rect[]): { x: number; y: number } | null {
+  const ok = (q: Rect): boolean => q.x >= MARGIN && q.y >= MARGIN && q.x + q.w <= vp.w - MARGIN && q.y + q.h <= vp.h - MARGIN && !avoid.some((k) => rectsOverlap(q, k));
+  for (let d = 0; d <= 56; d += 4) {
+    const e = Math.round(d / Math.SQRT2);
+    for (const [sx, sy] of d === 0 ? [[0, 0]] : [[0, d], [0, -d], [d, 0], [-d, 0], [e, e], [-e, e], [e, -e], [-e, -e]]) {
+      if (ok({ ...r, x: r.x + sx!, y: r.y + sy! })) return { x: sx!, y: sy! };
+    }
+  }
+  return null;
 }
 
 export class Overlay {
@@ -522,6 +536,7 @@ export class Overlay {
       holdEnded: false,
       noCome: null,
       ride: null,
+      foldedUntil: -Infinity,
       placedPr: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
@@ -884,14 +899,30 @@ export class Overlay {
     const placed = it.placed;
     const g = this.gazeNow();
     const look = g.target === it.id;
+    // Giving up the come is for the look that found no room; a new look tries again.
+    if (!look) it.noCome = null;
     const vp = ctx.vp;
-    if (!pr.inFront || it.dying || !b?.rect || b.level === 'none' || !placed || placed.mode !== 'pane' || (g.target && !look) || it.placedPr?.anchor !== it.d.placement.anchor) return this.endHold(it);
+    // The look landing on a place whose placement found no room for it, or folded it at the edge, brings its pane beside the square at once.
+    const inView = pr.x >= 0 && pr.x <= vp.w && pr.y >= 0 && pr.y <= vp.h;
+    if (!it.hold && look && pr.inFront && inView && !it.dying && placed && (placed.mode === 'pip' || placed.mode === 'edge') && !placed.behind && LEVEL_RANK[it.d.level] >= LEVEL_RANK.label && it.placedPr?.anchor === it.d.placement.anchor) {
+      const sc = b?.scale ?? this.ui;
+      const door0 = this.bridge.doorway?.(it.d.placement.anchor) ?? null;
+      const near0 = keepOutsFor(ctx.keepOuts, depth).filter((k) => k.kind === 'roadway' || (k.kind === 'vehicle' && !k.moving) || (k.kind === 'face' && (!door0 || k.still)) || (k.kind === 'person' && k.still && !door0)).map((k) => k.rect);
+      const f = besideSquare({ light: pr, size: { w: size.w * sc, h: size.h * sc }, viewport: vp, half: viewfinderHalf(vp), gap: PIP_GAP.beside * Math.max(1, ctx.ui ?? 1), avoid: [...near0, ...(ctx.chrome ?? [])], ...(door0 ? { doorway: door0 } : {}) });
+      const nearSq = f && Math.hypot(Math.max(0, Math.abs(pr.x - vp.w / 2) - viewfinderHalf(vp)), Math.max(0, Math.abs(pr.y - vp.h / 2) - viewfinderHalf(vp))) <= PIP_GAP.beside * Math.max(1, ctx.ui ?? 1) + f.rect.w;
+      if (f && nearSq) {
+        const c = { x: f.rect.x + f.rect.w * f.fx - pr.x, y: f.rect.y + f.rect.h * f.fy - pr.y };
+        it.hold = { side: f.side, fx: f.fx, fy: f.fy, from: c, to: c, at: t - MOVE.pushOut, w: f.rect.w, h: f.rect.h, outSince: null, badSince: null, came: true, level: it.d.level };
+        return { mode: 'pane', rect: f.rect, leader: { x: pr.x + c.x, y: pr.y + c.y }, scale: sc, side: f.rect.x + f.rect.w / 2 < vp.w / 2 ? 'left' : 'right', fx: f.fx, fy: f.fy };
+      }
+    }
+    if (!pr.inFront || it.dying || !b || (!it.hold && (!b.rect || b.level === 'none')) || !placed || placed.mode !== 'pane' || (g.target && !look) || it.placedPr?.anchor !== it.d.placement.anchor) return this.endHold(it);
     const scale = placed.scale;
     const W = size.w * scale;
     const H = size.h * scale;
     const doorway = this.bridge.doorway?.(it.d.placement.anchor) ?? null;
     const near = keepOutsFor(ctx.keepOuts, depth).filter((k) => k.kind === 'roadway' || (k.kind === 'vehicle' && !k.moving) || (k.kind === 'face' && (!doorway || k.still)) || (k.kind === 'person' && k.still && !doorway)).map((k) => k.rect);
-    const base: BesideInput = { light: pr, size: { w: W, h: H }, viewport: vp, half: viewfinderHalf(vp), gap: PIP_GAP.beside * Math.max(1, ctx.ui ?? 1), avoid: [...near, ...(ctx.chrome ?? [])], current: b.rect };
+    const base: BesideInput = { light: pr, size: { w: W, h: H }, viewport: vp, half: viewfinderHalf(vp), gap: PIP_GAP.beside * Math.max(1, ctx.ui ?? 1), avoid: [...near, ...(ctx.chrome ?? [])], ...(b.rect ? { current: b.rect } : {}) };
     if (doorway) base.doorway = doorway;
     const corner = (r: Rect, f: { fx: number; fy: number }): { x: number; y: number } => ({ x: r.x + r.w * f.fx - pr.x, y: r.y + r.h * f.fy - pr.y });
     // The last placement was made against last frame's light; carried to this frame's, so a fast turn does not skew the offset.
@@ -907,7 +938,7 @@ export class Overlay {
     if (!it.hold) {
       // A pane frozen by a head scan stands where the scan began, not where its placement says: pin it once the scan is over.
       // ...and one still condensing or growing is not yet at its measured size, which its placement still has to catch up with.
-      if (!look || it.frozen || b.level !== it.d.level || t < it.condensingUntil) return null;
+      if (!look || it.frozen || b.level !== it.d.level) return null;
       // In a fast turn the eye is not on it: pin it to its placement rather than to where a catch-up move has it trailing.
       const at = Math.abs(this.yawRate) < FAST_TURN ? stood() : placedRect;
       const pin = aim(null, at);
@@ -915,8 +946,15 @@ export class Overlay {
       it.place?.jumpX.set(0);
       it.place?.jumpY.set(0);
     }
-    if (!it.hold.came && look && g.dwellMs >= VIEWFINDER.holdMs && b.opacity >= 0.9 && t >= it.condensingUntil) {
-      const f = it.noCome === it.d.level ? null : besideSquare(base);
+    if (!it.hold.came && look && g.dwellMs >= VIEWFINDER.holdMs && b.opacity >= 0.9) {
+      // A label takes the side and corner its card will also fit at, so the growth half a second later never changes side.
+      const card = { w: NOMINAL_SIZE.card.w * scale, h: NOMINAL_SIZE.card.h * scale };
+      const room = it.d.level === 'label' && it.noCome !== it.d.level ? besideSquare({ ...base, size: card }) : null;
+      const atCard = room ? besideSquare({ ...base, side: room.side, corner: { x: room.rect.x + room.rect.w * room.fx, y: room.rect.y + room.rect.h * room.fy, fx: room.fx, fy: room.fy }, maxSlide: 0 }) : null;
+      // With no room beside the square a pane stays where it stands, unless that is over the square.
+      const sqHalf = viewfinderHalf(vp);
+      const overSq = rectsOverlap(stood(), { x: vp.w / 2 - sqHalf, y: vp.h / 2 - sqHalf, w: 2 * sqHalf, h: 2 * sqHalf });
+      const f = it.noCome === it.d.level ? null : (atCard ?? besideSquare(base) ?? (overSq ? this.offSquare(base, ctx, depth) : null));
       if (f) it.hold = aim(f, stood());
       else it.hold.came = true;
     }
@@ -933,17 +971,33 @@ export class Overlay {
       hd.h = H;
       const grew = hd.level !== it.d.level;
       hd.level = it.d.level;
-      // A pane held where its placement put it goes back to its placement for the new size, and is held there again.
-      if (!hd.side && grew && look) {
-        it.noCome = it.d.level;
-        return this.endHold(it, true);
+      // With its place already gone a pane's width past the square, it grows where it stands: re-fitting toward the square is for a place still near it.
+      const placeNear = Math.hypot(Math.max(0, Math.abs(pr.x - vp.w / 2) - base.half), Math.max(0, Math.abs(pr.y - vp.h / 2) - base.half)) <= base.gap + W;
+      // A pane held where its placement put it, or growing where it stands, grows in place from its corner while the larger size fits there; where it does not, it goes back to its placement for the new size and is held there.
+      if ((!hd.side || !placeNear) && grew && look) {
+        const now = offAt();
+        const grown = { x: pr.x + now.x - W * hd.fx, y: pr.y + now.y - H * hd.fy, w: W, h: H };
+        // Where the larger size touches the chrome or the edge at its corner, it shifts the least that clears, within 56 px, before giving up its place.
+        const shift = nudge(grown, vp, [...near, ...chrome]);
+        // Not fitting there, it comes beside the square at the new size if its place is still near, rather than going back to a placement that may have no room either and blinking at the edge.
+        if (!shift) {
+          const g = placeNear ? besideSquare(base) : null;
+          if (g) {
+            it.hold = { ...aim(g, stood()), level: it.d.level };
+            return this.hold(it, t, ctx, chrome, pr, depth, size);
+          }
+          it.noCome = it.d.level;
+          return this.endHold(it, true);
+        }
+        if (shift.x || shift.y) Object.assign(hd, { from: now, to: { x: now.x + shift.x, y: now.y + shift.y }, at: t });
       }
-      if (hd.side && grew && look) {
+      if (hd.side && grew && look && placeNear) {
         const now = offAt();
         // A larger pane grows from its corner where it can, else takes another side of the square short of crossing its light; with no room at all it goes back beside its light, once, and is held there.
-        const f = besideSquare({ ...base, side: hd.side, corner: { x: pr.x + now.x, y: pr.y + now.y, fx: hd.fx, fy: hd.fy } });
+        // A pane that grows slides along its edge no more than 56 px to fit; past that it takes another side, or its placement.
+        const f = besideSquare({ ...base, side: hd.side, corner: { x: pr.x + now.x, y: pr.y + now.y, fx: hd.fx, fy: hd.fy }, maxSlide: 56 });
         const across: Record<SquareSide, SquareSide> = { left: 'right', right: 'left', above: 'below', below: 'above' };
-        const g2 = f ? null : besideSquare({ ...base, exclude: across[hd.side] });
+        const g2 = f ? null : besideSquare({ ...base, exclude: across[hd.side], excludeToo: hd.side });
         // Where the larger pane at its old corner would touch the chrome or leave the view, it takes its place at once; the Grow move is animating it anyway.
         const start = { x: pr.x + now.x - W * hd.fx, y: pr.y + now.y - H * hd.fy, w: W, h: H };
         const blocked = start.x < MARGIN || start.y < MARGIN || start.x + W > vp.w - MARGIN || start.y + H > vp.h - MARGIN || chrome.some((k) => rectsOverlap(start, k));
@@ -951,6 +1005,7 @@ export class Overlay {
         else if (g2) {
           it.hold = { ...aim(g2, stood()), level: it.d.level };
           if (blocked) it.hold.from = it.hold.to;
+          return this.hold(it, t, ctx, chrome, pr, depth, size);
         } else {
           it.noCome = it.d.level;
           return this.endHold(it, true);
@@ -967,28 +1022,62 @@ export class Overlay {
     }
     const out = rect.x < MARGIN - 0.5 || rect.y < MARGIN - 0.5 || rect.x + rect.w > vp.w - MARGIN + 0.5 || rect.y + rect.h > vp.h - MARGIN + 0.5;
     // While the wearer turns away, a held pane leaving the view lets go and rides with the world like the rest: re-placing it beside the square would follow the turn.
-    if (out && this.aiming()) {
+    // An expanded view being read is the exception: the head travels its rows with drags, and it holds its place while part of it leaves the glass (walking rule 10).
+    // While the look stays on the place, a drag that keeps the center on the view or the view as near as that drag has brought it is the wearer working its rows; one that
+    // carries it farther away is a turn away. The few pixels allowed are a standing wearer's sway, and with them the frame a drag begins is not a turn away either.
+    const m = READ.marginPx * this.ui;
+    const gapNow = Math.hypot(Math.max(rect.x - vp.w / 2, 0, vp.w / 2 - (rect.x + rect.w)), Math.max(rect.y - vp.h / 2, 0, vp.h / 2 - (rect.y + rect.h)));
+    if (!this.aiming()) hd.readGap = undefined;
+    else hd.readGap = Math.min(hd.readGap ?? gapNow, gapNow);
+    const reading = it.d.level === 'expanded' && this.aiming() && look && (gapNow <= m || gapNow <= (hd.readGap ?? gapNow) + READ.swayPx * this.ui);
+    if (out && this.aiming() && !reading) {
       it.hold = null;
       it.ride = { x: rect.x - pr.x, y: rect.y - pr.y };
       return null;
     }
+    // A view being read stays where the reader's drags put it: re-placing it moves its rows from under the eye, and its light, carried off by the reading, is no cause to let go.
+    // Standing still the center on it is reading; walking, the world carries the view off the glass, and that re-places it.
+    const read = it.d.level === 'expanded' && look && (reading || (gapNow <= m && this.band === 'stopped'));
     // Re-placing beside the square is for a place still near it; once its light has gone a pane's width beyond the square the look has moved on, and re-placing would hold it there.
     const lightOff = Math.hypot(Math.max(0, Math.abs(pr.x - vp.w / 2) - base.half), Math.max(0, Math.abs(pr.y - vp.h / 2) - base.half));
     const near2 = lightOff <= base.gap + W;
     // The chrome acts at once: a held pane that would touch it takes its place beside the square now, rather than folding and coming back.
-    if (t - hd.at >= MOVE.pushOut && chrome.some((k) => rectsOverlap(rect, k))) {
+    if (!read && t - hd.at >= MOVE.pushOut && chrome.some((k) => rectsOverlap(rect, k))) {
+      // The least shift that clears it comes first, as for a pane that grows: a pane the chrome appears beside moves no more than it must.
+      const s = nudge(rect, vp, [...near, ...chrome]);
+      if (s) {
+        Object.assign(hd, { from: off, to: { x: off.x + s.x, y: off.y + s.y }, at: t });
+        return this.hold(it, t, ctx, chrome, pr, depth, size);
+      }
       if (!near2) return this.endHold(it);
-      const f = besideSquare(base);
+      const f = this.replace(base, hd, pr);
       if (!f) return this.endHold(it);
       it.hold = aim(f, stood());
       return this.hold(it, t, ctx, chrome, pr, depth, size);
     }
-    const bad = t - hd.at >= MOVE.pushOut && (out || [...near, ...chrome].some((k) => rectsOverlap(rect, k)));
+    // A pane the hold put beside the square that comes to cover it (its light drifting toward the center) re-places like one leaving the view; an expanded view is read with the center on it.
+    const sq = base.half;
+    const square = { x: vp.w / 2 - sq, y: vp.h / 2 - sq, w: 2 * sq, h: 2 * sq };
+    const overSquare = it.d.level !== 'expanded' && rectsOverlap(rect, square);
+    // ...and so does one whose move under way would end on it, the walk having carried its light there since the move began.
+    const endsOver = it.d.level !== 'expanded' && t - hd.at < MOVE.pushOut && rectsOverlap({ x: pr.x + hd.to.x - W * hd.fx, y: pr.y + hd.to.y - H * hd.fy, w: W, h: H }, square);
+    // ...and so does one its light carries out of the keep square while the place is still near it.
+    const strayed = Boolean(hd.side) && near2 && it.d.level !== 'expanded' && Math.hypot(Math.max(rect.x - vp.w / 2, 0, vp.w / 2 - (rect.x + rect.w)), Math.max(rect.y - vp.h / 2, 0, vp.h / 2 - (rect.y + rect.h))) > base.half * NEAR_REACH + 0.5;
+    const bad = !read && ((t - hd.at >= MOVE.pushOut && (out || overSquare || strayed || [...near, ...chrome].some((k) => rectsOverlap(rect, k)))) || endsOver);
+    // Leaving the glass with its place gone from the square, it folds at once, as a pane whose anchor leaves the view does, rather than being held against the edge.
+    if (bad && out && !near2) {
+      this.endHold(it);
+      it.holdEnded = false;
+      it.foldedUntil = t + T.quick;
+      return it.place ? it.place.foldNow(pr, vp) : null;
+    }
     if (bad) {
       hd.badSince ??= t;
-      if (t - hd.badSince >= MOVE.leaveMs / 1000 - 1e-9) {
-        if (!near2) return this.endHold(it);
-        const f = besideSquare(base);
+      // Covering the square acts at once, as the chrome does: it is where the wearer is looking.
+      if (overSquare || endsOver || t - hd.badSince >= MOVE.leaveMs / 1000 - 1e-9) {
+        // A light gone a pane's width past the square means the look has moved on, unless it has not: handing back then is a jump and a come straight after it.
+        if (!near2 && !look) return this.endHold(it);
+        const f = this.replace(base, hd, pr) ?? (overSquare || endsOver ? this.offSquare(base, ctx, depth) : null);
         // With nowhere better beside the square it stays where it is, drawn inside the view, and tries again 300 ms later.
         if (!f) hd.badSince = t;
         else {
@@ -1006,6 +1095,19 @@ export class Overlay {
 
   // The pane goes back to its placement from where it stands, so placement's own leave hysteresis covers a first frame that does not fit.
   // A level change instead starts placement afresh at the new size, since the old rect at the new size may not fit at all.
+  // A held pane that must move takes the least move: along its edge within 56 px, then another side, then anywhere beside the square.
+  private replace(base: BesideInput, hd: Held, pr: Projected): Beside | null {
+    const c = hd.side ? { x: pr.x + hd.to.x, y: pr.y + hd.to.y, fx: hd.fx, fy: hd.fy } : null;
+    const across: Record<SquareSide, SquareSide> = { left: 'right', right: 'left', above: 'below', below: 'above' };
+    return (hd.side && c ? besideSquare({ ...base, side: hd.side, corner: c, maxSlide: 56 }) : null) ?? (hd.side ? besideSquare({ ...base, exclude: across[hd.side], excludeToo: hd.side }) : null) ?? besideSquare(base);
+  }
+
+  // A pane that would otherwise cover the square: a still person, a face or a parked car is scenery there, and only the road and the chrome rule a place out; failing that, beside the square need not be level with it.
+  private offSquare(base: BesideInput, ctx: FrameCtx, depth: number): Beside | null {
+    const avoid = [...keepOutsFor(ctx.keepOuts, depth).filter((k) => k.kind === 'roadway').map((k) => k.rect), ...(ctx.chrome ?? [])];
+    return besideSquare({ ...base, avoid }) ?? besideSquare({ ...base, avoid, loose: true });
+  }
+
   private endHold(it: Item, fresh = false): null {
     if (it.hold) {
       it.hold = null;
@@ -1449,8 +1551,18 @@ export class Overlay {
           }
           const held = this.hold(it, t, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx, chrome, p, depth, size);
           // While the wearer drags the view, and a moment after, a pane already on the glass rides with the world where it stands, so the one aimed at is where the turn meets it.
-          if (!held && !it.ride && aimingNow && p.inFront && it.placed?.mode === 'pane' && it.cur?.rect && it.want !== 'none' && !it.dying) it.ride = { x: it.placed.rect.x - p.x, y: it.placed.rect.y - p.y };
-          if (held) placed = held;
+          // A move under way stops when the ride begins, so the pane never moves against the world it rides with: one still condensing rides from where its move ends, one already on the glass from where it stands.
+          if (!held && !it.ride && aimingNow && p.inFront && it.placed?.mode === 'pane' && it.cur?.rect && it.want !== 'none' && !it.dying) {
+            const settling = t < it.condensingUntil;
+            const jx = settling ? 0 : it.place.jumpX.at(t);
+            const jy = settling ? 0 : it.place.jumpY.at(t);
+            it.ride = { x: it.placed.rect.x + jx - p.x, y: it.placed.rect.y + jy - p.y };
+            it.place.jumpX.set(0);
+            it.place.jumpY.set(0);
+          }
+          // A pane the hold folded stays folded for its fade, so it comes back by condensing rather than jumping.
+          if (!held && t < it.foldedUntil && it.place) placed = it.place.foldNow(p, vp);
+          else if (held) placed = held;
           else if (it.ride) {
             const { moved: _m, ...last } = it.placed!;
             placed = { ...last, rect: { ...last.rect, x: p.x + it.ride.x, y: p.y + it.ride.y } };
@@ -1498,7 +1610,8 @@ export class Overlay {
         const atEdge = !it.hold && (home.x < inset || home.y < inset || home.x + home.w > vp.w - inset || home.y + home.h > vp.h - inset);
         if (atEdge && d.placement.focusOk) it.edgeSince ??= t;
         else it.edgeSince = null;
-        const outside = (atEdge && (it.edgeSince === null || t - it.edgeSince >= MOVE.leaveMs / 1000 - 1e-9)) || chrome.some((r) => rectsOverlap(home, r) || (!d.placement.focusOk && rectsOverlap(ahead, r)));
+        // A held pane answers to the chrome in the hold itself; folded here, the look's rescue placed it again a frame later and it blinked.
+        const outside = !it.hold && ((atEdge && (it.edgeSince === null || t - it.edgeSince >= MOVE.leaveMs / 1000 - 1e-9)) || chrome.some((r) => rectsOverlap(home, r) || (!d.placement.focusOk && rectsOverlap(ahead, r))));
         if (outside && !it.frozen && pr && it.place) {
           placed = it.place.foldNow(pr, vp);
           it.placed = placed;
@@ -1561,7 +1674,8 @@ export class Overlay {
             const paneSide = (fz ? fz.x - w * fx + w / 2 : base.x + base.w / 2) < vp.w / 2 ? 'left' : 'right';
             const y = it.yieldS.update(t, fz ? (yieldSide !== null ? paneSide : null) : placed.stilled ? paneSide : yieldSide, paneSide);
             yieldO = y.opacity;
-            if (it.yieldS.on) it.frozen ??= { x: at.x + a.dx, y: at.y + a.dy };
+            // A held or riding pane is already pinned to the world; a head scan fades it but does not freeze it, so it has no return to make.
+            if (it.yieldS.on && !it.hold && !it.ride) it.frozen ??= { x: at.x + a.dx, y: at.y + a.dy };
             else if (fz) {
               it.place?.ease(t, fz, { x: at.x + a.dx, y: at.y + a.dy }, MOVE.yieldOut);
               it.frozen = null;
@@ -1746,12 +1860,13 @@ export class Overlay {
   }
 
   // What the live gaze can aim at besides lights and storefronts: every pane on the glass, by its anchor.
-  aimables(): { anchor: string; rect: Rect; opacity: number }[] {
-    const out: { anchor: string; rect: Rect; opacity: number }[] = [];
+  // `placed` marks a pane the hold put beside the square: it is inside the keep square wherever it stands.
+  aimables(): { anchor: string; rect: Rect; opacity: number; placed: boolean }[] {
+    const out: { anchor: string; rect: Rect; opacity: number; placed: boolean }[] = [];
     for (const it of this.items.values()) {
       const b = it.cur;
       if (it.kind !== 'world' || it.dying || !b?.rect || b.level === 'none' || b.opacity <= 0.05 || it.placed?.mode !== 'pane' || it.aside.dropped) continue;
-      out.push({ anchor: it.d.placement.anchor, rect: b.rect, opacity: b.opacity });
+      out.push({ anchor: it.d.placement.anchor, rect: b.rect, opacity: b.opacity, placed: Boolean(it.hold?.came && it.hold.side) });
     }
     return out;
   }

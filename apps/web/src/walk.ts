@@ -102,6 +102,7 @@ interface StepInput {
   yaw: number;
   pitch: number;
   gaze: string | null;
+  since?: number;
 }
 
 export interface WalkOptions {
@@ -142,7 +143,7 @@ export class Walk {
   holding = false;
   private wasHolding = false;
   private releasedAt = -Infinity;
-  private pick: { step: number; cur: string | null; caught: boolean; cand: string | null; candSince: number; outSince: number | null; ref: number } = { step: -2, cur: null, caught: false, cand: null, candSince: 0, outSince: null, ref: Infinity };
+  private pick: { step: number; cur: string | null; caught: boolean; cand: string | null; candSince: number; outSince: number | null; ref: number; takenSince: number | null } = { step: -2, cur: null, caught: false, cand: null, candSince: 0, outSince: null, ref: Infinity, takenSince: null };
   private sound: { ctx: AudioContext | null; ui: AudioNode | null; enabled: boolean } = { ctx: null, ui: null, enabled: false };
 
   constructor(
@@ -319,6 +320,7 @@ export class Walk {
     const g = this.rawGaze(pk.cur, pk.caught);
     // How near the held place was when the wearer's turn ended: the glass moving its pane beside the square is not an aim elsewhere.
     if (t - this.turnedAt <= STEP * 1.5 || this.holding) pk.ref = g.curOff;
+    pk.takenSince = null;
     const take = (id: string | null, caught: boolean, off: number): string | null => {
       pk.ref = off;
       pk.cur = id;
@@ -339,12 +341,16 @@ export class Walk {
     else if (t - this.turnedAt <= TURNING_S + 1e-9) return take(g.best, g.caught, g.bestOff);
     else pk.outSince ??= t;
     // Only the place aimed at takes over: its pane or its light near the center for the 250 ms a look needs.
-    const cand = g.aimed !== pk.cur && g.aimedOff < Math.min(g.curOff, pk.ref) ? g.aimed : null;
+    // Clearly nearer: the smaller-pane tie-break is for two panes under the center at once, not for beating a held place's reference.
+    const cand = g.aimed !== pk.cur && g.aimedOff < Math.min(g.curOff, pk.ref) - 1 ? g.aimed : null;
     if (cand !== pk.cand) {
       pk.cand = cand;
       pk.candSince = t;
     }
-    if (pk.cand && t - pk.candSince >= ACQUIRE_GRACE_S - 1e-9) return take(pk.cand, false, g.aimedOff);
+    if (pk.cand && t - pk.candSince >= ACQUIRE_GRACE_S - 1e-9) {
+      pk.takenSince = pk.candSince;
+      return take(pk.cand, false, g.aimedOff);
+    }
     if (pk.outSince !== null && t - pk.outSince >= LOOK_AWAY_S - 1e-9) return take(null, false, Infinity);
     return pk.cur;
   }
@@ -357,9 +363,11 @@ export class Walk {
     // A pane above 50% can be aimed at; one the world has dimmed is still its place's pane for keeping the look.
     const panes = new Map<string, Rect>();
     const dim = new Set<string>();
+    const beside = new Set<string>();
     for (const p of this.overlay?.aimables() ?? []) {
       panes.set(p.anchor, p.rect);
       if (p.opacity <= 0.5) dim.add(p.anchor);
+      if (p.placed) beside.add(p.anchor);
     }
     const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit, ...panes.keys()]);
     const vp = { w: innerWidth, h: innerHeight };
@@ -418,11 +426,13 @@ export class Walk {
       }
       const pinIn = (h: number): boolean => Boolean(pin && Math.abs(pin.x - cx) <= h && Math.abs(pin.y - cy) <= h);
       const within = (h: number): boolean => Boolean((front && overlapsSquare(front, cx, cy, h)) || pinIn(h) || (pane && rectIn(pane, h)));
-      if (who === cur && (within(keepHalf) || (kept && rectIn(kept, keepHalf)))) curIn = true;
+      if (who === cur && (within(keepHalf) || (kept && rectIn(kept, keepHalf)) || beside.has(id))) curIn = true;
       const pinD = pin ? Math.hypot(pin.x - cx, pin.y - cy) : Infinity;
       const paneD = pane ? rectGap(pane) : Infinity;
       // A pane under the center outranks a light behind it by the bias a light has over a storefront; of two panes under it, the smaller is the finer aim.
-      const off = Math.min(front ? distanceToQuad(cx, cy, front) + bias : Infinity, pinD, pane ? (paneD === 0 ? -bias + (pane.w * pane.h) / 1e7 : paneD) : Infinity) + (Number.isFinite(far) ? far : ATTENTION_M) / 10000;
+      // At its door the destination's light, the one the wearer walked there to face, outranks any other place's pane under the center.
+      const door = id.startsWith('door:') && pinD <= half ? -2 * bias + pinD / 1000 : Infinity;
+      const off = Math.min(door, front ? distanceToQuad(cx, cy, front) + bias : Infinity, pinD, pane ? (paneD === 0 ? -bias + (pane.w * pane.h) / 1e7 : paneD) : Infinity) + (Number.isFinite(far) ? far : ATTENTION_M) / 10000;
       if (who === cur) curOff = Math.min(curOff, off);
       const inside = within(half);
       if ((inside || pinIn(catchHalf) || (pane && rectIn(pane, catchHalf))) && off < bestOff) {
@@ -437,7 +447,8 @@ export class Walk {
       }
     }
     // ...unless another place's pane is under the center: that one is being aimed at.
-    if (cur && onPane(cur)) return { best: cur, caught: false, curIn: true, curOff: aimedUnder ? curOff : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
+    // Another place's pane under the center over the held view is clearly the aim, not a tie the takeover's margin should refuse.
+    if (cur && onPane(cur)) return { best: cur, caught: false, curIn: true, curOff: aimedUnder ? (aimed !== cur ? Infinity : curOff) : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
     return { best, caught: bestCaught, curIn, curOff, aimed, aimedOff, bestOff };
   }
 
@@ -478,12 +489,16 @@ export class Walk {
       let inp = this.inputs[this.stepIndex];
       if (!inp) {
         this.pursue(sim.gaze.target);
-        inp = { yaw: sim.wearer.bodyYaw + this.head.yaw, pitch: this.head.pitch, gaze: this.liveGaze() };
+        const gaze = this.liveGaze();
+        inp = { yaw: sim.wearer.bodyYaw + this.head.yaw, pitch: this.head.pitch, gaze };
+        if (this.pick.takenSince !== null) inp.since = this.pick.takenSince;
         this.inputs[this.stepIndex] = inp;
       }
       sim.live.headYaw = inp.yaw;
       sim.live.headPitch = inp.pitch;
       sim.live.gazeId = inp.gaze;
+      if (inp.since !== undefined) sim.live.gazeSince = inp.since;
+      else delete sim.live.gazeSince;
     }
     sim.step(STEP);
     this.stepIndex++;

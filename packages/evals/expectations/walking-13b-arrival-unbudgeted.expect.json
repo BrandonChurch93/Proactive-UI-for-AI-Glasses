@@ -1,0 +1,29 @@
+{
+  "walk": "walking-13b-arrival-unbudgeted",
+  "cases": [
+    {
+      "rule": "walking-13",
+      "between": [
+        2,
+        2.2
+      ],
+      "must": {
+        "action": "hold",
+        "id": "goldies-counter",
+        "reasonKind": "budget"
+      }
+    },
+    {
+      "rule": "walking-13",
+      "between": [
+        6,
+        6.6
+      ],
+      "must": {
+        "action": "show",
+        "id": "goldies-counter",
+        "level": "label"
+      }
+    }
+  ]
+}

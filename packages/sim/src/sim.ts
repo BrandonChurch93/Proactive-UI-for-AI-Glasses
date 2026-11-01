@@ -59,6 +59,8 @@ export interface LiveInput {
   headYaw?: number;
   headPitch?: number;
   gazeId?: string | null;
+  // When the live pick took the place by a takeover, the look has been on it since it became the candidate.
+  gazeSince?: number;
 }
 
 const GAZE_ACQUIRE = (3.5 * Math.PI) / 180;
@@ -356,7 +358,7 @@ export class Sim {
       if (this.gazeTarget) this.lostGaze = { id: this.gazeTarget, at: t, since: this.gazeSince };
       const back = id !== null && this.lostGaze?.id === id && t - this.lostGaze.at <= LOOK_AWAY_S + 1e-9;
       this.gazeTarget = id;
-      this.gazeSince = back ? this.lostGaze!.since + (t - this.lostGaze!.at) : t;
+      this.gazeSince = back ? this.lostGaze!.since + (t - this.lostGaze!.at) : !this.scripted && this.live.gazeSince !== undefined ? Math.min(t, this.live.gazeSince) : t;
     }
   }
 

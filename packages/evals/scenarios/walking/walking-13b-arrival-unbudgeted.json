@@ -1,0 +1,26 @@
+{
+  "id": "walking-13b-arrival-unbudgeted",
+  "rule": "walking-13",
+  "scenario": "hungry",
+  "duration": 10,
+  "description": "With the budget spent, Goldie's label holds on it; the wearer arrives at Goldie's door and it comes up there: the place they asked to be taken to is not charged to the budget.",
+  "pace": [
+    [
+      0,
+      1.38
+    ],
+    [
+      5,
+      0
+    ]
+  ],
+  "config": {
+    "budget": {
+      "shows": 0
+    }
+  },
+  "arrive": {
+    "t": 6,
+    "id": "goldies-counter"
+  }
+}

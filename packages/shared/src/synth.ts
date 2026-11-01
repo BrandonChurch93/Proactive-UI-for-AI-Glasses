@@ -38,6 +38,7 @@ export interface CaseSpec {
   arrive?: { t: number; id: string };
   conversation?: [number, number];
   only?: string[];
+  hidden?: { from: number; to: number; id: string }[];
   config?: Record<string, unknown>;
 }
 
@@ -89,7 +90,7 @@ export function synthesize(spec: CaseSpec, hz = 10): WorldSnapshot[] {
         depth: p.depth,
         distance: dist(pos, a),
         routeS: p.n ? (p.n[0] + p.n[1]) / 2 : 110,
-        visible: -a.z > n - 5,
+        visible: -a.z > n - 5 && !(spec.hidden ?? []).some((x) => x.id === p.id && t >= x.from - 1e-9 && t < x.to - 1e-9),
         card: p.card,
         short: p.short,
         say: p.say,

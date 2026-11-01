@@ -1,0 +1,63 @@
+{
+  "id": "walking-10h-label-under-look",
+  "rule": "walking-10",
+  "scenario": "walking",
+  "duration": 7,
+  "description": "The look lands on a label as the view settles while its sign is behind something: the label stays; another label whose place is out of view and not looked at leaves.",
+  "startN": 20,
+  "only": [
+    "grace-theater",
+    "trattoria-da-lia",
+    "lucky-lanes"
+  ],
+  "pace": [
+    [
+      0,
+      0
+    ]
+  ],
+  "settled": [
+    [
+      0,
+      false
+    ],
+    [
+      1,
+      true
+    ],
+    [
+      3.5,
+      false
+    ],
+    [
+      4,
+      true
+    ]
+  ],
+  "gaze": [
+    [
+      1,
+      "grace-theater"
+    ],
+    [
+      3.2,
+      "trattoria-da-lia"
+    ],
+    [
+      3.6,
+      null
+    ]
+  ],
+  "hidden": [
+    {
+      "from": 3.8,
+      "to": 7,
+      "id": "trattoria-da-lia"
+    },
+    {
+      "from": 3.8,
+      "to": 7,
+      "id": "lucky-lanes"
+    }
+  ]
+}

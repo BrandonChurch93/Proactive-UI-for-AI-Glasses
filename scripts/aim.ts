@@ -46,9 +46,17 @@ await page.waitForTimeout(1200);
 
 const recorder = `(() => {
   if (window.__aim) return;
-  window.__aim = { log: [] };
+  window.__aim = { log: [], ends: [] };
   const tick = () => {
     const walk = window.__app.walk; const sim = walk.sim; const o = walk.overlay;
+    if (o && !o.__wrapped) {
+      o.__wrapped = true;
+      const end = o.endHold.bind(o);
+      o.endHold = (it, fresh) => {
+        if (it.hold) window.__aim.ends.push(walk.t.toFixed(2) + ' ' + it.id + (fresh ? ' fresh' : '') + ' at ' + ((new Error().stack || '').split('\\n')[2] || '').trim().replace(/^at /, '').replace(/\\(.*overlay\\.ts[^:]*:/, '(overlay.ts:'));
+        return end(it, fresh);
+      };
+    }
     if (o && !walk.paused) {
       const id = sim.gaze.target;
       let p = null;
@@ -57,7 +65,10 @@ const recorder = `(() => {
       if (b && b.rect && b.level !== 'none') {
         const a = sim.anchorOf(it.d.placement.anchor); const pr = a ? walk.bridge.project(a) : null;
         const vis = Boolean(it.placed && it.placed.mode === 'pane' && !it.aside.dropped);
-        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? (it.hold.came ? 'held' : 'pinned') : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null };
+        const pl = it.placed || {}; const fx = pl.fx !== undefined ? pl.fx : pl.align === 'left' ? 1 : pl.align === 'right' ? 0 : 0.5; const fy = pl.fy !== undefined ? pl.fy : pl.vertical === 'middle' ? 0.85 : pl.vertical === 'below' ? 0 : 1;
+        const vw = innerWidth; const vh = innerHeight;
+        const ex = b.rect.x + b.rect.w >= vw - 1 ? 1 : b.rect.x <= 1 ? 0 : fx; const ey = b.rect.y + b.rect.h >= vh - 1 ? 1 : b.rect.y <= 1 ? 0 : fy;
+        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold && it.hold.side ? 'square ' + it.hold.side : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? (it.hold.came ? 'held' : 'pinned') : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null };
       }
       window.__aim.log.push({ t: walk.t, id, p });
     }
@@ -66,7 +77,22 @@ const recorder = `(() => {
   requestAnimationFrame(tick);
 })()`;
 await page.evaluate(recorder);
-
+// --probe id:t0:t1 logs the hold's inputs and result for one place over a window of walk time.
+const probe = arg('probe', '');
+if (probe) {
+  const [pid, t0, t1] = probe.split(':');
+  await page.evaluate(`(() => {
+    const w = window.__app.walk; const o = w.overlay; window.__probe = [];
+    const hold = o.hold.bind(o);
+    o.hold = (it, t, ctx, chrome, pr, depth, size) => {
+      const on = it.id === '${pid}' && t >= ${t0} && t <= ${t1};
+      const before = on && it.hold ? JSON.stringify({ side: it.hold.side, came: it.hold.came, w: Math.round(it.hold.w), h: Math.round(it.hold.h), lv: it.hold.level, at: +it.hold.at.toFixed(2) }) : '-';
+      const r = hold(it, t, ctx, chrome, pr, depth, size);
+      if (on) window.__probe.push(t.toFixed(3) + ' d ' + it.d.level + ' b ' + (it.cur ? it.cur.level : '-') + ' size ' + Math.round(size.w) + 'x' + Math.round(size.h) + ' look ' + (w.sim.gaze.target === it.id) + ' light ' + Math.round(pr.x) + ',' + Math.round(pr.y) + ' before ' + before + ' -> ' + (r ? r.mode + ' ' + [r.rect.x, r.rect.y, r.rect.w, r.rect.h].map(Math.round).join(',') : 'null') + ' hold ' + (it.hold ? (it.hold.side || 'null') + (it.hold.came ? ' came' : '') : 'none') + ' placed ' + (it.placed ? it.placed.mode + (it.placed.why ? ':' + it.placed.why : '') : '-') + ' prIn ' + pr.inFront + ' anchor ' + (it.placedPr ? it.placedPr.anchor : '-') + '/' + it.d.placement.anchor + ' chrome ' + JSON.stringify(chrome.map((k) => [k.x, k.y, k.w, k.h].map(Math.round))));
+      return r;
+    };
+  })()`);
+}
 type PaneS = { id: string; level: string; x: number; y: number; w: number; h: number; op: number; vis: boolean; lx: number | null; ly: number | null };
 type S = { t: number; band: string; lap: number; target: string | null; gate: boolean; panes: PaneS[] };
 const state = (): Promise<S> =>
@@ -81,7 +107,7 @@ const state = (): Promise<S> =>
     }
     return { t: walk.t, band: f ? f.band : 'stopped', lap: sim.lap, target: sim.gaze.target, gate: Boolean(f && f.gate.safety), panes };
   })()`) as Promise<S>;
-type Rec = { t: number; id: string | null; p: { x: number; y: number; w: number; h: number; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null } | null };
+type Rec = { t: number; id: string | null; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null } | null };
 const lightIn = (id: string): Promise<boolean> =>
   page.evaluate(`(() => { const walk = window.__app.walk; const a = walk.sim.anchorOf('${id}'); const p = a && walk.bridge.project(a); return Boolean(p && p.inFront && p.x >= 0 && p.x <= ${w} && p.y >= 0 && p.y <= ${h}); })()`) as Promise<boolean>;
 const drain = async (): Promise<Rec[]> => {
@@ -167,11 +193,12 @@ function scanJumps(rec: Rec[]): number {
     while (j < all.length && all[j]!.t < a.t - 0.1 - 1e-6) j++;
     const b = all[j];
     if (!b || b.id !== a.id || !b.p || !b.p.vis || b.p.o < 0.5 || b.p.lx === null || a.t - b.t < 0.08) continue;
-    if (b.p.lv !== a.p.lv || Math.abs(b.p.w - a.p.w) > 2 || Math.abs(b.p.h - a.p.h) > 2) continue;
-    const move = Math.hypot(mid(a.p).x - mid(b.p).x, mid(a.p).y - mid(b.p).y);
+    // A level change grows the pane from a corner: there the corner is what may not jump, unless the pane changed side for want of room.
+    const growing = b.p.lv !== a.p.lv || Math.abs(b.p.w - a.p.w) > 2 || Math.abs(b.p.h - a.p.h) > 2 || a.t - ((a as Rec & { lvAt?: number }).lvAt ?? -99) < 0.6;
+    if (growing && a.p.side !== b.p.side) continue;
+    const move = growing ? Math.hypot(a.p.gx - b.p.gx, a.p.gy - b.p.gy) : Math.hypot(mid(a.p).x - mid(b.p).x, mid(a.p).y - mid(b.p).y);
     const light = Math.hypot(a.p.lx - b.p.lx!, a.p.ly! - b.p.ly!);
     if (move <= 60 || light >= 20) continue;
-    if (a.t - ((a as Rec & { lvAt?: number }).lvAt ?? -99) < 0.6) continue;
     if (a.p.come || b.p.come) {
       excusedCome++;
       continue;
@@ -179,12 +206,31 @@ function scanJumps(rec: Rec[]): number {
     n++;
     jumpTotal++;
     const r = (q: NonNullable<Rec['p']>): string => `${q.lv} ${q.how} ${q.x.toFixed(0)},${q.y.toFixed(0)} ${q.w.toFixed(0)}x${q.h.toFixed(0)}${q.come ? ' come' : ''}`;
-    if (jumps.length < 30) jumps.push(`${a.t.toFixed(2)} ${a.id} moved ${move.toFixed(0)} px in ${(a.t - b.t).toFixed(2)} s, light ${light.toFixed(0)} px (${r(b.p)} to ${r(a.p)})`);
+    if (jumps.length < 30) jumps.push(`${a.t.toFixed(2)} ${a.id} ${growing ? 'grew, its corner moved' : 'moved'} ${move.toFixed(0)} px in ${(a.t - b.t).toFixed(2)} s, light ${light.toFixed(0)} px (${r(b.p)} to ${r(a.p)})`);
     while (i + 1 < rec.length && rec[i + 1]!.t - a.t < 0.1) i++;
+  }
+  // Every level change of a held pane: how far the corner it grows from moved, from the frame before to 0.6 s after.
+  for (let i = 1; i < all.length; i++) {
+    const a = all[i - 1]!;
+    const b = all[i]!;
+    if (!a.p || !b.p || a.id !== b.id || a.p.lv === b.p.lv || !/held|pinned/.test(a.p.how) || grownSeen.has(`${b.id}@${b.t}`)) continue;
+    const span = all.slice(i).filter((q) => q.id === b.id && q.p && q.t - b.t <= 0.6);
+    const after = span[span.length - 1];
+    if (!after || !after.p || after.t - b.t < 0.55) continue;
+    // A rule 8 step aside in the window moves the pane for the world, not for its growth.
+    if (span.some((q) => q.p!.aside) || a.p.aside) continue;
+    // Measured against its light: a pane that moves with the world has not moved for its growth.
+    const moved = a.p.lx !== null && after.p.lx !== null ? Math.hypot(after.p.gx - after.p.lx - (a.p.gx - a.p.lx), after.p.gy - after.p.ly! - (a.p.gy - a.p.ly!)) : Math.hypot(after.p.gx - a.p.gx, after.p.gy - a.p.gy);
+    const sideChanged = after.p.side !== a.p.side;
+    grownSeen.add(`${b.id}@${b.t}`);
+    const d = (q: NonNullable<Rec['p']>): string => `${q.lv} ${q.how} ${q.side} ${q.x.toFixed(0)},${q.y.toFixed(0)} ${q.w.toFixed(0)}x${q.h.toFixed(0)}`;
+    grows.push({ t: b.t, id: b.id!, from: a.p.lv, to: b.p.lv, moved, sideChanged, detail: `${d(a.p)} to ${d(after.p)}` });
   }
   lastRec = all.slice(-120);
   return n;
 }
+const grows: { t: number; id: string; from: string; to: string; moved: number; sideChanged: boolean; detail: string }[] = [];
+const grownSeen = new Set<string>();
 
 // With nothing to aim at, look back along the street, to one side and then the other, as a wearer does.
 let side = 1;
@@ -205,6 +251,8 @@ async function lookAlong(): Promise<void> {
   await page.waitForTimeout(1200);
 }
 
+const edgeAims: boolean[] = [];
+const ui = Math.min(w / 1280, h / 800) < 1 ? Math.max(0.74, Math.min(1, Math.min(w / 1280, h / 800) * 1.3)) : Math.min(1.9, Math.max(1, Math.min(w / 1280, h / 800)));
 const recent = new Map<string, number>();
 let idleSince: number | null = null;
 const tStart = Date.now();
@@ -248,11 +296,12 @@ for (;;) {
   await page.waitForTimeout(500);
   const s05 = await state();
   const tag = `${String(aims.length + 1).padStart(2, '0')}-${s.band}-${pick.id}`;
-  if (shots) {
-    await page.waitForTimeout(400);
-    await page.screenshot({ path: `${shots}/${tag}-a.png` });
-  }
-  await page.waitForTimeout(shots ? 1900 : 2500);
+  await page.waitForTimeout(400);
+  const s09 = await state();
+  // A pane rule 8 is acting on at that moment (stepping aside, or dropped to its light for a mover) is not judged on where it stands.
+  const steppedAside = (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return Boolean(it && (it.aside.dropped || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5)); })()`)) as boolean;
+  if (shots) await page.screenshot({ path: `${shots}/${tag}-a.png` });
+  await page.waitForTimeout(shots ? 1900 : 2100);
   const s3 = await state();
   if (shots) await page.screenshot({ path: `${shots}/${tag}-b.png` });
   const p3 = s3.panes.find((p) => p.id === pick.id);
@@ -279,6 +328,21 @@ for (;;) {
   const why = at3 === null ? ((await page.evaluate(`(() => { const r = window.__app.walk.overlay.report().panes.find((p) => p.id === '${pick.id}'); return r ? r.level + ' ' + (r.hiddenBy ?? (r.visible ? 'visible' : 'hidden')) + ' op ' + r.opacity : 'no pane'; })()`)) as string) : '';
   const where = at3 !== null ? `${at3.toFixed(0)} px from the center` : `not on the glass (${why})`;
   console.log(`${a.skip ? 'skip' : a.ok ? 'ok  ' : 'MISS'} ${a.t.toFixed(1).padStart(6)} ${a.band.padEnd(6)} aimed at ${a.id}:${a.level} · held ${a.held ?? 'nothing'} 0.5 s later · 3 s later ${where}${excused ? ` (${excused}, excused)` : a.near ? '' : ' FAR'}${j ? ` · ${j} jump${j > 1 ? 's' : ''}` : ''}`);
+  // An aim whose light stands within 40 px of the square's edge: 0.9 s later the pane must be beside the square, its near edge within the gap plus 36 px.
+  const sq = 80 * Math.max(1, ui);
+  const lr = rel.panes.find((q) => q.id === pick.id);
+  const edgeOff = lr && lr.lx !== null ? Math.max(Math.abs(lr.lx - cx) - sq, Math.abs(lr.ly! - cy) - sq) : null;
+  if (edgeOff !== null && Math.abs(edgeOff) <= 40 && !a.skip && s09.target === pick.id && !steppedAside) {
+    const p9 = s09.panes.find((q) => q.id === pick.id);
+    const sep = p9 ? Math.max(p9.x - (cx + sq), cx - sq - (p9.x + p9.w), p9.y - (cy + sq), cy - sq - (p9.y + p9.h)) : null;
+    // The pane keeps its offset from its light, so as the wearer walks it drifts with the light; its 12 px clearance is allowed for that.
+    const ok = sep !== null && sep >= -12 && sep <= (24 + 36) * Math.max(1, ui) + 12;
+    edgeAims.push(ok);
+    console.log(`     light at the square's edge (${edgeOff.toFixed(0)} px): 0.9 s later the ${p9 ? p9.level : 'pane'} is ${sep === null ? 'gone' : `${sep.toFixed(0)} px outside the square`} ${ok ? 'ok' : 'NOT BESIDE'}`);
+    if (!ok && verbose) console.log('       log ' + (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) + ' · look ' + (await page.evaluate(`JSON.stringify(window.__app.walk.pick)`)));
+    if (!ok && verbose) console.log('       near the square ' + (await page.evaluate(`(() => { const w = window.__app.walk; const cx = innerWidth / 2; const cy = innerHeight / 2; const near = (r) => r.x < cx + 600 && r.x + r.w > cx - 600 && r.y < cy + 400 && r.y + r.h > cy - 400; return JSON.stringify([...w.bridge.keepOuts().filter((k) => near(k.rect)).map((k) => [k.kind + (k.still ? ' still' : '') + (k.moving ? ' moving' : ''), ...[k.rect.x - cx, k.rect.y - cy, k.rect.w, k.rect.h].map(Math.round)]), ...(w.bridge.chromeRects ? w.bridge.chromeRects() : []).filter(near).map((r) => ['chrome', ...[r.x - cx, r.y - cy, r.w, r.h].map(Math.round)])]); })()`)));
+    if (!ok && verbose) console.log('       ' + (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return JSON.stringify({ hold: it && it.hold && { side: it.hold.side, came: it.hold.came, to: it.hold.to, at: it.hold.at, fx: it.hold.fx, fy: it.hold.fy }, ride: it && it.ride, placed: it && it.placed && { mode: it.placed.mode, rect: it.placed.rect }, cur: it && it.cur && it.cur.rect, aside: it && [it.aside.x.at(o.t), it.aside.y.at(o.t)], yield: it && it.yieldS && it.yieldS.on, t: o.t }); })()`)));
+  }
   if (verbose && (!a.ok || (!a.near && !a.excused))) {
     const log = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '') + (e.level ? ' ' + e.level : '')).join(' | ')`)) as string;
     console.log(`       overlay log: ${log || 'nothing'}`);
@@ -303,9 +367,19 @@ for (const j of jumps) {
   const [t, id] = j.split(' ');
   const near = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${id}' && Math.abs(e.t - ${t}) < 0.5).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string;
   console.log('  jump ' + j + (near ? ` · log: ${near}` : ''));
+  if (verbose) console.log('    hold ended ' + ((await page.evaluate(`window.__aim.ends.filter((e) => e.includes(' ${id}') && Math.abs(parseFloat(e) - ${t}) < 0.5).join(' | ')`)) as string));
 }
 for (const e of errors.slice(0, 5)) console.log('  error ' + e);
-const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0;
+const edgeBad = edgeAims.filter((x) => !x).length;
+const growBad = grows.filter((g) => g.moved >= 60 && !g.sideChanged);
+console.log(`lights at the square's edge: ${edgeAims.length} aims, ${edgeAims.length - edgeBad} with the pane beside the square 0.9 s later`);
+console.log(`level changes of a held pane: ${grows.length}, the corner it grows from moved under 60 px in ${grows.length - growBad.length}${grows.some((g) => g.sideChanged) ? ` (${grows.filter((g) => g.sideChanged).length} changed side for want of room)` : ''}`);
+for (const g of growBad) {
+  console.log(`  grew ${g.t.toFixed(2)} ${g.id} ${g.from} to ${g.to}: its corner moved ${g.moved.toFixed(0)} px (${g.detail})`);
+  if (verbose) console.log('    log ' + ((await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${g.id}' && e.t > ${g.t - 0.2} && e.t < ${g.t + 0.8}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string) + ' · hold ended ' + ((await page.evaluate(`window.__aim.ends.filter((e) => e.includes(' ${g.id}') && parseFloat(e) > ${g.t - 0.2} && parseFloat(e) < ${g.t + 0.8}).join(' | ')`)) as string));
+}
+if (probe) console.log((await page.evaluate('window.__probe.join("\\n")')) as string);
+const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && edgeBad === 0 && growBad.length === 0;
 console.log(pass ? 'PASS' : 'FAIL');
 await browser.close();
 await server?.close();

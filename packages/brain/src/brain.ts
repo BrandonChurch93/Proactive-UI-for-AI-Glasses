@@ -27,6 +27,7 @@ import {
   type WearerModel,
   type WorldSnapshot,
   type Zone,
+  viewfinderHalf,
 } from '@lumen/shared';
 import { DEFAULT_CONFIG, withConfig, type Config, type ConfigOverride } from './config';
 import {
@@ -189,6 +190,7 @@ export class Brain {
   private quietS = 0;
   private budget: number;
   private labels = new Map<string, number>();
+  private lookedAt = new Map<string, number>();
   private seen = new Map<string, { visible: boolean; since: number }>();
   private wasSettled = true;
   private cardGrownAt = -Infinity;
@@ -951,18 +953,29 @@ export class Brain {
       const x = this.seen.get(id);
       return Boolean(x && x.visible === visible && t - x.since >= s - 1e-9);
     };
+    // The place under the look, or under it within the last second, keeps its label whatever the roster says: its sign may be behind a tree.
+    const look = snap.wearer.gaze.target;
+    if (look) this.lookedAt.set(look, t);
+    // ...and so does a label whose pane is under the viewfinder: the look may be counting toward it but not have taken it yet.
+    const v = snap.view;
+    if (v) {
+      const half = viewfinderHalf(v);
+      for (const p of v.panes) if (p.zone === 'world' && p.visible && p.opacity > 0.5 && p.rect.x < v.w / 2 + half && p.rect.x + p.rect.w > v.w / 2 - half && p.rect.y < v.h / 2 + half && p.rect.y + p.rect.h > v.h / 2 - half) this.lookedAt.set(p.id, t);
+    }
+    const kept = (id: string): boolean => id === target || id === look || t - (this.lookedAt.get(id) ?? -Infinity) <= lc.goneS + 1e-9;
     for (const e of snap.entities) {
-      if (!this.labels.has(e.id) || e.visible || e.id === target) continue;
+      if (!this.labels.has(e.id) || e.visible || kept(e.id)) continue;
       // A place at the edge of the view can blink out for a moment; it keeps its label through that.
       if (held(e.id, false, lc.goneS) && t - this.labels.get(e.id)! >= this.cfg.ladder.minShownS - 1e-9) this.labels.delete(e.id);
     }
     if (band === 'brisk') {
-      for (const id of [...this.labels.keys()]) if (id !== target) this.labels.delete(id);
+      for (const id of [...this.labels.keys()]) if (!kept(id)) this.labels.delete(id);
     } else if (settled) {
       const inView = snap.entities.filter((e) => e.visible && e.distance <= lc.rangeM).sort((a, b) => a.distance - b.distance).slice(0, lc.max);
       if (rose) {
         const next = new Map<string, number>();
         for (const e of inView) next.set(e.id, this.labels.get(e.id) ?? t);
+        for (const [id, at] of this.labels) if (!next.has(id) && kept(id)) next.set(id, at);
         this.labels = next;
       } else if (this.headMoved && band !== 'stopped' && Math.abs(snap.wearer.gaze.yawRate) < SETTLE.stillRate) {
         for (const e of inView) if (e.id !== target && e.id !== snap.wearer.gaze.target && !this.labels.has(e.id) && held(e.id, true, lc.joinS) && this.labels.size < lc.max) this.labels.set(e.id, t);
@@ -1878,7 +1891,8 @@ export class Brain {
       return { reason: reason('pace', 'Saved for the next stop', parts), timing: 'next-pause', keep: false };
     }
     const newShow = (!prev || LEVEL_RANK[prev.level] < LEVEL_RANK.whisper) && LEVEL_RANK[w.level] >= LEVEL_RANK.whisper;
-    const asked = w.component === 'menu' || w.component === 'map';
+    // The destination at its door is the place the wearer asked to be taken to, however its want began.
+    const asked = w.component === 'menu' || w.component === 'map' || w.anchor === `door:${w.id}`;
     const budgeted = !asked && (w.origin === 'proactive' || w.origin === 'message' || w.origin === 'social' || w.origin === 'app' || w.origin === 'goal');
     if (newShow && budgeted && this.budget <= 0) {
       return {

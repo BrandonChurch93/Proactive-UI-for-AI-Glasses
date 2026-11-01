@@ -121,7 +121,7 @@ function clampInto(r: Rect, vp: Viewport): Rect {
 }
 
 // An expanded view being read holds its place while the look is on it or within this margin of it, and lets go after a second off it.
-export const READ = { marginPx: 80, leaveS: 1 } as const;
+export const READ = { marginPx: 80, leaveS: 1, swayPx: 6 } as const;
 
 export const ZONE_GAP = 14;
 const SLIDE_KEEP = 12;
@@ -228,6 +228,10 @@ export interface BesideInput {
   side?: SquareSide;
   corner?: { x: number; y: number; fx: number; fy: number };
   exclude?: SquareSide;
+  maxSlide?: number;
+  excludeToo?: SquareSide;
+  // The last resort for a pane that would otherwise cover the square: beside it on any of its sides, not necessarily level with it.
+  loose?: boolean;
 }
 
 export interface Beside {
@@ -238,10 +242,15 @@ export interface Beside {
 }
 
 const LIGHT_CLEAR = 12;
+const LEVEL_REACH = 0.55;
+// How far past the square's edge (at scale 1) a pane set past its light may stand and still have its nearest point in the keep square.
+const PAST_REACH = 38;
+// Beside the square means within the keep square: a held pane's nearest point stays within this many half-widths of the center.
+export const NEAR_REACH = 1.48;
 
 // The held pane sits beside the viewfinder on its light's side, its near edge `gap` outside the square, centered along
-// that edge and slid along it only as far as clearing its light, the chrome, the road and faces needs, never off the
-// square's center line, so it is always level with the square. A held pane that
+// that edge and slid along it only as far as clearing its light, the chrome, the road and faces needs, never more than
+// 0.55 of the square's half-height off its center line, so it is always level with the square. A held pane that
 // grows keeps its side and the corner nearest the square, so it never flips across its light.
 export function besideSquare(inp: BesideInput): Beside | null {
   const { light: l, viewport: vp, half, gap } = inp;
@@ -258,20 +267,29 @@ export function besideSquare(inp: BesideInput): Beside | null {
   else first = inp.current && inp.current.x + inp.current.w / 2 < cx ? 'left' : 'right';
   const horiz: SquareSide = l.x < cx ? 'left' : 'right';
   const all: SquareSide[] = inp.side ? [inp.side] : first === 'above' || first === 'below' ? [first, horiz] : [first, l.y < cy ? 'above' : 'below', l.y < cy ? 'below' : 'above', first === 'left' ? 'right' : 'left'];
-  const order = all.filter((x) => x !== inp.exclude);
+  const order = all.filter((x) => x !== inp.exclude && x !== inp.excludeToo);
   const d = inp.doorway;
   const door = d && { x: d.x + d.w * 0.25, y: d.y, w: d.w * 0.5, h: d.h };
   const lightBox = { x: l.x - LIGHT_CLEAR, y: l.y - LIGHT_CLEAR, w: 2 * LIGHT_CLEAR, h: 2 * LIGHT_CLEAR };
+  // Level with the square: the pane reaches to within this much of the square's center line, so its nearest point stays near the square.
+  const level = half * LEVEL_REACH;
+  // A pane beside the square never covers it.
+  const square = { x: cx - half, y: cy - half, w: 2 * half, h: 2 * half };
   const fits = (r: Rect): boolean =>
     r.x >= MARGIN - 0.5 &&
     r.y >= MARGIN - 0.5 &&
     r.x + r.w <= vp.w - MARGIN + 0.5 &&
     r.y + r.h <= vp.h - MARGIN + 0.5 &&
     !rectsOverlap(r, lightBox) &&
+    !rectsOverlap(r, square) &&
+    (inp.loose || Math.hypot(Math.max(r.x - cx, 0, cx - (r.x + r.w)), Math.max(r.y - cy, 0, cy - (r.y + r.h))) <= half * NEAR_REACH + 0.5) &&
     !(door && rectsOverlap(r, door)) &&
     !inp.avoid.some((k) => rectsOverlap(r, k)) &&
-    (r.x + r.w <= cx - half || r.x >= cx + half ? r.y <= cy && r.y + r.h >= cy : r.x <= cx && r.x + r.w >= cx) &&
+    (inp.loose || (r.x + r.w <= cx - half || r.x >= cx + half ? r.y <= cy + level && r.y + r.h >= cy - level : r.x <= cx + level && r.x + r.w >= cx - level)) &&
     Math.hypot(Math.max(r.x - l.x, 0, l.x - (r.x + r.w)), Math.max(r.y - l.y, 0, l.y - (r.y + r.h))) <= r.w * 0.95;
+  // How far the light stands past the square's edge on a side; within the gap and its clearance it stands where the pane's near edge would go.
+  let lastResort: Beside | null = null;
+  const past = (side: SquareSide): number => (side === 'left' ? cx - half - l.x : side === 'right' ? l.x - cx - half : side === 'above' ? cy - half - l.y : l.y - cy - half);
   for (const side of order) {
     const across = side === 'left' || side === 'right';
     let x: number;
@@ -287,22 +305,33 @@ export function besideSquare(inp: BesideInput): Beside | null {
     else if (side === 'below') y = cy + half + gap;
     else y = cy - H / 2;
     const c = inp.corner;
+    const pick = (r: Rect): Beside => {
+      const fx = side === 'left' ? 1 : side === 'right' ? 0 : l.x >= r.x + r.w / 2 ? 1 : 0;
+      const fy = side === 'above' ? 1 : side === 'below' ? 0 : l.y >= r.y + r.h / 2 ? 1 : 0;
+      return { rect: r, side, fx: c && side === inp.side ? c.fx : fx, fy: c && side === inp.side ? c.fy : fy };
+    };
+    // A pane that grows keeps the corner it grows from, near edge and all.
     if (c && side === inp.side) {
-      if (across) y = c.y - H * c.fy;
-      else x = c.x - W * c.fx;
+      x = c.x - W * c.fx;
+      y = c.y - H * c.fy;
+    } else if (side === first && past(side) >= 0 && past(side) <= gap + LIGHT_CLEAR && rectsOverlap({ x, y, w: W, h: H }, lightBox)) {
+      // Its light stands in the band just outside the square where the pane would go: it sits just past the light on the same side, 12 px beyond it, still level with the square,
+      // while that keeps its near edge within the keep square; a light farther out sends it to another side first, and past the light only if nothing else fits.
+      const beyond = { x: side === 'left' ? l.x - LIGHT_CLEAR - W : side === 'right' ? l.x + LIGHT_CLEAR : x, y: side === 'above' ? l.y - LIGHT_CLEAR - H : side === 'below' ? l.y + LIGHT_CLEAR : y, w: W, h: H };
+      if (fits(beyond)) {
+        if (past(side) + LIGHT_CLEAR <= (PAST_REACH * gap) / 24) return pick(beyond);
+        lastResort ??= pick(beyond);
+      }
     }
-    const span = across ? vp.h : vp.w;
+    const span = c && side === inp.side && inp.maxSlide !== undefined ? inp.maxSlide : across ? vp.h : vp.w;
     for (let s = 0; s <= span; s += 4) {
       for (const sg of s === 0 ? [1] : [1, -1]) {
         const r = across ? { x, y: y + s * sg, w: W, h: H } : { x: x + s * sg, y, w: W, h: H };
-        if (!fits(r)) continue;
-        const fx = side === 'left' ? 1 : side === 'right' ? 0 : l.x >= r.x + r.w / 2 ? 1 : 0;
-        const fy = side === 'above' ? 1 : side === 'below' ? 0 : l.y >= r.y + r.h / 2 ? 1 : 0;
-        return { rect: r, side, fx: c && side === inp.side ? (across ? fx : c.fx) : fx, fy: c && side === inp.side ? (across ? c.fy : fy) : fy };
+        if (fits(r)) return pick(r);
       }
     }
   }
-  return null;
+  return lastResort;
 }
 
 export type ViewSlot = 'view:edge-right' | 'view:edge-top' | 'view:glyph' | 'view:bottom';

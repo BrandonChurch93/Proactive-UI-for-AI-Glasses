@@ -1,4 +1,5 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { PLACES } from '@lumen/shared';
 import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 
@@ -9,6 +10,8 @@ import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 // action's label, pinches with Enter, and reads the confirmation. One line per place; a place fails when the view is
 // on the glass for less than 90% of the stop, when a row of choices does not lift under the look, or when the
 // choice brings no confirmation. --laps 2 visits every place twice; --places a,b limits the list; --hold seconds.
+// A stop that fails writes its whole trace, every 100 ms from the choice in the menu, to --tracedir (.cache/doors);
+// --keep writes it for every stop.
 const base = arg('base', 'http://localhost:5199/')!;
 const w = Number(arg('w', '1920'));
 const h = Number(arg('h', '1080'));
@@ -19,6 +22,9 @@ const ORDER = ['goldies-counter', 'grace-theater', 'kathys-cupcakes', 'trattoria
 const list = (only ?? ORDER).filter((id) => PLACES.some((p) => p.id === id));
 const CATEGORY: Record<string, string> = { 'grace-theater': 'things', 'lucky-lanes': 'things', 'atlas-books': 'things', 'pocket-park': 'things', 'main-street-pharmacy': 'shops', 'corner-hardware': 'shops', 'post-office': 'shops', 'big-bean': 'food', 'goldies-counter': 'food', 'mega-burger': 'food', 'trattoria-da-lia': 'food', 'kathys-cupcakes': 'food', 'm4-stop': 'transit', '47th-st-station': 'transit' };
 const verbose = process.argv.includes('--verbose');
+const traceDir = arg('tracedir', fileURLToPath(new URL('../.cache/doors', import.meta.url)))!;
+mkdirSync(traceDir, { recursive: true });
+const keepAll = process.argv.includes('--keep');
 const shots = arg('shots');
 const burst = new Set(arg('burst')?.split(',') ?? []);
 if (shots) mkdirSync(shots, { recursive: true });
@@ -37,12 +43,54 @@ await page.goto(`${base}?scenario=walking`);
 await page.waitForFunction(() => Boolean((window as unknown as { __app?: { walk?: unknown } }).__app?.walk), null, { timeout: 120_000 });
 await page.waitForTimeout(1200);
 
+// The stop's trace: what the brain had for the place, what the glass showed, why, and where the look was, every 100 ms.
+const recorder = `(() => {
+  if (window.__door) return;
+  window.__door = { id: null, rows: [] };
+  const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const wrap = () => {
+    const w = window.__app && window.__app.walk; const o = w && w.overlay;
+    if (!o || o.__wrapped) return;
+    o.__wrapped = true;
+    const end = o.endHold.bind(o);
+    o.endHold = (it, fresh) => {
+      const d = window.__door;
+      if (d.id && it.id === d.id && it.hold) d.rows.push(w.t.toFixed(2) + ' · hold ended at ' + (new Error().stack || '').split('\\n').slice(2, 3).join('').trim());
+      return end(it, fresh);
+    };
+  };
+  setInterval(() => {
+    wrap();
+    const d = window.__door; const w = window.__app && window.__app.walk;
+    if (!d.id || !w || !w.overlay) return;
+    const o = w.overlay; const it = o.items.get(d.id); const f = w.last() && w.last().frame;
+    const dec = f && f.items.find((x) => x.id === d.id); const r = o.report().panes.find((p) => p.id === d.id); const g = w.sim.gaze;
+    const rect = it && it.cur && it.cur.rect;
+    const ko = rect ? w.bridge.keepOuts().filter((k) => hit(k.rect, rect)).map((k) => k.id).join('|') : '';
+    const mk = f && f.dwell && f.dwell.mark;
+    d.rows.push([w.t.toFixed(2), f ? f.band : '-', dec ? dec.level + '@' + dec.placement.anchor : 'none', r ? r.level : '-', r ? (r.visible ? 'visible' : 'hidden:' + r.hiddenBy) : '-', r ? r.opacity : 0, it && it.placed ? it.placed.mode + (it.placed.why ? ':' + it.placed.why : '') : '-', it ? it.want : '-', it && it.hold ? (it.hold.came ? 'held' : 'pinned') + (it.hold.side ? ':' + it.hold.side : '') : it && it.ride ? 'ride' : '', it && it.aside && it.aside.dropped ? 'dropped' : '', g.target ? g.target + ' ' + g.dwellMs : 'no look', mk ? (mk.next || '-') + ' ' + mk.p.toFixed(2) : '', ko, w.sim.lostGaze ? 'lost ' + w.sim.lostGaze.id + '@' + w.sim.lostGaze.at.toFixed(2) : '', w.sim.wearer.arrivedAt === null ? '' : 'at door since ' + w.sim.wearer.arrivedAt.toFixed(2) + ' for ' + w.sim.wearer.route.target, w.pick ? 'pick ' + w.pick.cur + (w.pick.cand ? ' cand ' + w.pick.cand : '') : '', rect ? [rect.x, rect.y, rect.w, rect.h].map(Math.round).join(',') : ''].join(' · '));
+  }, 100);
+})()`;
+const watchStop = async (id: string | null): Promise<void> => {
+  await page.evaluate(recorder);
+  await page.evaluate(`window.__door.id = ${id ? `'${id}'` : 'null'}; window.__door.rows = [];`);
+};
+const writeTrace = async (id: string, lap: number, line: string): Promise<string> => {
+  const rows = (await page.evaluate('window.__door.rows')) as string[];
+  const decisions = (await page.evaluate(`window.__app.walk.brain.log.entries.filter((e) => e.decision.id === '${id}').slice(-40).map((e) => e.t.toFixed(2) + ' ' + e.decision.action + ' ' + e.decision.level + ' ' + e.decision.cause)`)) as string[];
+  const glass = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${id}').slice(-60).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.level ?? '') + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? ''))`)) as string[];
+  const reroutes = (await page.evaluate(`window.__app.walk.sim.reroutes.slice(-8).map((r) => r.t.toFixed(2) + ' to ' + r.to)`)) as string[];
+  const file = `${traceDir}/${id}-lap${lap}.txt`;
+  writeFileSync(file, [line, '', 'every 100 ms: walk time · band · brain level@anchor · glass level · visible or hidden:why · opacity · placed mode · want · hold · aside · look and dwell · mark · keep-outs over the pane · the last look lost · the door dwell · the live pick · the pane x,y,w,h', ...rows, '', 'brain decisions for the place', ...decisions, '', 'reroutes', ...reroutes, '', 'overlay log for the place', ...glass, ''].join('\n'));
+  return file;
+};
+
 type State = { t: number; band: string; target: string | null; arrived: boolean; dest: string | null; glyph: string | null; body: number; head: { yaw: number; pitch: number }; level: string | null };
 const read = (id: string): Promise<State> =>
   page.evaluate(`(() => {
     const walk = window.__app.walk; const sim = walk.sim; const l = walk.last(); const f = l && l.frame;
     const it = f && f.items.find((d) => d.id === '${id}');
-    return { t: walk.t, band: f ? f.band : 'stopped', target: sim.gaze.target, arrived: Boolean(l && l.snap.goal.arrived), dest: f ? (f.goal.destination ?? null) : null, glyph: f && f.glyph ? f.glyph.label : null, body: sim.wearer.bodyYaw, head: { ...walk.head }, level: it ? it.level : null };
+    return { t: walk.t, band: f ? f.band : 'stopped', target: sim.gaze.target, arrived: Boolean(l && l.snap.goal.arrived && l.snap.goal.destination === '${id}'), dest: f ? (f.goal.destination ?? null) : null, glyph: f && f.glyph ? f.glyph.label : null, body: sim.wearer.bodyYaw, head: { ...walk.head }, level: it ? it.level : null };
   })()`) as Promise<State>;
 const glass = (id: string): Promise<{ on: boolean; why: string }> =>
   page.evaluate(`(() => {
@@ -148,6 +196,7 @@ for (let lap = 1; lap <= laps; lap++) {
 async function visit(id: string, lap: number): Promise<void> {
   {
     const name = PLACES.find((p) => p.id === id)!.name;
+    await watchStop(id);
     for (let tries = 0; tries < 6; tries++) {
       await until(id, (s) => s.band !== 'brisk', 60);
       try {
@@ -166,7 +215,7 @@ async function visit(id: string, lap: number): Promise<void> {
     if (!at) {
       failures++;
       lines.push(`${name.padEnd(22)} never reached the door`);
-      console.log(lines[lines.length - 1]);
+      console.log(`${lines[lines.length - 1]} · trace ${await writeTrace(id, lap, lines[lines.length - 1]!)}`);
       return;
     }
     await aim(id, `door:${id}`);
@@ -217,7 +266,7 @@ async function visit(id: string, lap: number): Promise<void> {
     if (fail) failures++;
     const line = `${fail ? 'FAIL' : 'ok  '} ${name.padEnd(22)} lap ${lap} · door ${(t0 - at.t + tally.all).toFixed(1)} s · expanded in ${Number.isFinite(inS) ? inS.toFixed(1) : '-'} s · on the glass ${tally.on.toFixed(1)} of ${tally.all.toFixed(1)} s (${pct.toFixed(0)}%)${hid ? ` · hidden by ${hid}` : ''} · rows lifted by the look ${seen.length} of ${want.length}${labels.length ? ` (${[...new Set(labels)].join(' / ')})` : ''} · chose ${choice ?? (asks ? 'the action' : 'nothing')}: ${note ?? (asks ? 'NO CONFIRMATION' : 'no action, as meant')}`;
     lines.push(line);
-    console.log(line);
+    console.log(fail || keepAll ? `${line} · trace ${await writeTrace(id, lap, line)}` : line);
     if (verbose) console.log(`   ${JSON.stringify(await page.evaluate(`window.__app.walk.overlay.report().panes.filter((p) => p.visible).map((p) => p.id + ':' + p.level)`))}`);
     await drag(w * 0.35, 0);
     await until(id, (s) => !s.arrived, 40);

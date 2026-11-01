@@ -1,0 +1,23 @@
+{
+  "walk": "walking-10h-label-under-look",
+  "cases": [
+    {
+      "name": "the label just looked at keeps its place through the settle, its sign out of view",
+      "rule": "walking-10",
+      "between": [4, 4.6],
+      "state": { "has": "trattoria-da-lia" }
+    },
+    {
+      "name": "and leaves once a second has passed since the look",
+      "rule": "walking-10",
+      "between": [5, 7],
+      "state": { "hasNot": "trattoria-da-lia" }
+    },
+    {
+      "name": "a label not looked at, its place out of view, leaves with the settle",
+      "rule": "walking-10",
+      "between": [4.2, 7],
+      "state": { "hasNot": "lucky-lanes" }
+    }
+  ]
+}

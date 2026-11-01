@@ -1,10 +1,10 @@
 {
  "version": 1,
  "totals": {
-  "suites": 42,
-  "passed": 42,
-  "cases": 969,
-  "casesPassed": 969
+  "suites": 44,
+  "passed": 44,
+  "cases": 1012,
+  "casesPassed": 1012
  },
  "byGroup": {
   "walks": {
@@ -28,8 +28,8 @@
    "passed": 6
   },
   "walking": {
-   "suites": 23,
-   "passed": 23
+   "suites": 25,
+   "passed": 25
   }
  },
  "suites": [
@@ -5710,6 +5710,147 @@
    "description": "Until the head has moved 5 degrees since the walk began, a look lights a label and nothing grows."
   },
   {
+   "id": "walking-10h-label-under-look",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world label outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door, the start corner or a stop where a choice was just settled), never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the label just looked at keeps its place through the settle, its sign out of view",
+     "pass": true,
+     "detail": "6 frames",
+     "rule": "walking-10"
+    },
+    {
+     "name": "and leaves once a second has passed since the look",
+     "pass": true,
+     "detail": "20 frames",
+     "rule": "walking-10"
+    },
+    {
+     "name": "a label not looked at, its place out of view, leaves with the settle",
+     "pass": true,
+     "detail": "28 frames",
+     "rule": "walking-10"
+    }
+   ],
+   "rule": "walking-10",
+   "description": "The look lands on a label as the view settles while its sign is behind something: the label stays; another label whose place is out of view and not looked at leaves."
+  },
+  {
    "id": "walking-11-whisper",
    "group": "walking",
    "pass": true,
@@ -6149,6 +6290,141 @@
    ],
    "rule": "walking-13",
    "description": "With a budget of one show, Goldie's spends it; a text that arrives next holds on the budget; a dwell still shows."
+  },
+  {
+   "id": "walking-13b-arrival-unbudgeted",
+   "group": "walking",
+   "pass": true,
+   "results": [
+    {
+     "name": "determinism: two runs produce identical logs",
+     "rule": "determinism",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every reason cites an allowed kind, is at most 48 characters and never cites the wearer",
+     "rule": "reasons",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every say line is under 60 characters, holds at most two numbers, never repeats the name, never uses a banned word and is never repeated by the reason shown under it; a live line fits the card in 28 characters; a glance shows its say line only in Stopped, within two lines (56 characters)",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no em dash in any line the brain produces",
+     "rule": "copy",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "during a safety gate every decision outside the ground layer is a hold with reason kind gate",
+     "rule": "gates",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "focus zone: no world pane intersects the zone for its band, except a label at Stopped or Stroll, the pane being looked at and, for minShownS after the look leaves, the pane it left, shrinking where it stands (a pane leaves over 320 ms when the zone grows or that time runs out)",
+     "rule": "walking-1",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "reading budget: a label while moving fits three words and a number with no reason; no card in Walk without its hold; in Brisk a place is a label at most, within the same cap",
+     "rule": "walking-2",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "auto-fold: no proactive world label outlives its band limit",
+     "rule": "walking-3",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "entry: a world pane born while moving is outside the focus zone unless it is the thing being looked at or a label at Stroll",
+     "rule": "walking-4",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket: a pinch in Walk or Brisk saves and never opens a card",
+     "rule": "walking-6",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the pocket surfaces within 500 ms of a qualifying stop (not at a door, the start corner or a stop where a choice was just settled), never in a gate, never under 6 s",
+     "rule": "walking-7",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "rule": "walking-10",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "whisper: only in Brisk, name plus three words and a number, gone after 2.5 s",
+     "rule": "walking-11",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "snooze: nothing but safety shows while snoozed, and the glyph counts down",
+     "rule": "walking-12",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "budget: budgeted shows never exceed the budget plus refills, and the meter matches the show count",
+     "rule": "walking-13",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "no score-driven level change within 1.2 s of the last change on the same item, no band change within 600 ms",
+     "rule": "hysteresis",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "messages shown while moving are next-pause; held in a gate they are after-gate",
+     "rule": "timing",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "nobody on the path gets a message: none shows while a person is on the path ahead",
+     "rule": "social",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "every show carries a zone, a preference and its band; only the pane being looked at may enter the focus zone",
+     "rule": "placement",
+     "pass": true,
+     "detail": ""
+    },
+    {
+     "name": "[2, 2.2) must {\"action\":\"hold\",\"id\":\"goldies-counter\",\"reasonKind\":\"budget\"}",
+     "pass": true,
+     "detail": "t=2 hold goldies-counter label",
+     "rule": "walking-13"
+    },
+    {
+     "name": "[6, 6.6) must {\"action\":\"show\",\"id\":\"goldies-counter\",\"level\":\"label\"}",
+     "pass": true,
+     "detail": "t=6 show goldies-counter label",
+     "rule": "walking-13"
+    }
+   ],
+   "rule": "walking-13",
+   "description": "With the budget spent, Goldie's label holds on it; the wearer arrives at Goldie's door and it comes up there: the place they asked to be taken to is not charged to the budget."
   }
  ]
 }
