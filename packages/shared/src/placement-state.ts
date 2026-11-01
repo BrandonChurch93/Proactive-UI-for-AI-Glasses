@@ -289,7 +289,7 @@ export class Placement {
         const same = this.cfg?.side === 'center' && this.cfg.vertical === 'lift' && this.cfg.scale === squeeze;
         if (!same) {
           if (this.cfg) {
-            jump ??= MOVE.pushOut;
+            jump ??= MOVE.drift;
             moved ??= 'replace';
           }
           this.cfg = { side: 'center', vertical: 'lift', scale: squeeze, push: false };
@@ -309,7 +309,7 @@ export class Placement {
         this.cfgAt = t;
         res = configRect(inp, placed.align, placed.vertical, scaleOf(this.cfg), placed.push, this.cfg.pushOff);
         if (!fresh) {
-          jump ??= MOVE.pushOut;
+          jump ??= MOVE.drift;
           moved ??= 'replace';
         }
       }
@@ -342,7 +342,7 @@ export class Placement {
     // A move starts no farther back than keeps the pane's edge within its own width of the light, the gap it already stands at included.
     const reach = Math.max(0, rect.w * 0.98 - Math.hypot(Math.max(rect.x - a.x, 0, a.x - (rect.x + rect.w)), Math.max(rect.y - a.y, 0, a.y - (rect.y + rect.h)))) / MOVE.kickReach;
     if (jump !== null && this.shown && this.shownBox && !resized && pathClear(this.shownBox)) {
-      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump, Math.min(rect.w, reach));
+      this.kickFrom(t, { x: this.shownBox.x + this.shownBox.w * fx, y: this.shownBox.y + this.shownBox.h * fy }, c, jump, Math.min(rect.w, reach), 'gate');
     } else if (this.shown && jump === null) {
       const d = Math.hypot(c.x - this.shown.x, c.y - this.shown.y);
       const rel = this.shownRel ? Math.hypot(c.x - a.x - this.shownRel.x, c.y - a.y - this.shownRel.y) : 0;
@@ -429,19 +429,19 @@ export class Placement {
     return p;
   }
 
-  ease(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number, w = Infinity): void {
-    if (Math.hypot(from.x - to.x, from.y - to.y) > MOVE.deadBand) this.kickFrom(t, from, to, dur, w);
+  ease(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number, w = Infinity, curve: Curve = 'out'): void {
+    if (Math.hypot(from.x - to.x, from.y - to.y) > MOVE.deadBand) this.kickFrom(t, from, to, dur, w, curve);
   }
 
   // A move during a fast head turn starts no farther back than the pane's width, so it never trails its light.
-  private kickFrom(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number, w = Infinity): void {
+  private kickFrom(t: number, from: { x: number; y: number }, to: { x: number; y: number }, dur: number, w = Infinity, curve: Curve = 'out'): void {
     const dx = this.jumpX.at(t) + from.x - to.x;
     const dy = this.jumpY.at(t) + from.y - to.y;
     const k = Math.min(1, (w * MOVE.kickReach) / Math.max(1e-6, Math.hypot(dx, dy)));
     this.jumpX.set(dx * k);
     this.jumpY.set(dy * k);
-    this.jumpX.go(t, 0, dur, 'out');
-    this.jumpY.go(t, 0, dur, 'out');
+    this.jumpX.go(t, 0, dur, curve);
+    this.jumpY.go(t, 0, dur, curve);
   }
 }
 

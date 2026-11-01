@@ -78,6 +78,7 @@ if (probes) {
         if (on === null) continue;
         if (glance === null && (shown('label') || shown('glance') || shown('card') || shown('expanded'))) glance = dt - on;
         if (card === null && (shown('card') || shown('expanded'))) card = dt - on;
+        if (${process.argv.includes('--aside')}) { const it = o.items.get(id); if (it && it.cur && Math.round(dt * 60) % 6 === 0) console.log('far aside', dt.toFixed(2), it.cur.level, it.cur.opacity.toFixed(2), it.aside ? it.aside.by || '-' : '-', it.hold ? (it.hold.pull ? 'pull' : 'hold') : ''); }
       }
       const dec = walk.brain.log.entries.filter((e) => e.decision.id === id && e.t >= t0 - 0.05).slice(0, 6).map((e) => [+(e.t - t0).toFixed(2), e.decision.action, e.decision.level, e.decision.cause]);
       if (${process.argv.includes('--why')}) console.log(JSON.stringify(dec));

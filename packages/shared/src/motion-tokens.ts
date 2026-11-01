@@ -50,6 +50,8 @@ export const MOVE = {
   coverM: 12,
   droppedPip: 0.45,
   pushOut: 0.32,
+  pull: 1.4,
+  drift: 0.9,
   saveRise: 0.25,
   saveHold: 0.6,
   whisperHold: 2.5,

@@ -28,6 +28,8 @@ export interface Person {
   facePoint?: Vec3;
   opacity: number;
   stillSince: number | null;
+  // Where the person has been since stillSince was last reset: a walker jammed in place, stepping to and fro, is standing there.
+  rest?: { x: number; z: number };
   goneAt: number | null;
 }
 
@@ -80,6 +82,7 @@ const CURB_LANE_X = 7.45;
 const FACADE_LANE_X = 12.5;
 export const STILL_SPEED = 0.2;
 export const STILL_S = 2;
+const STILL_RADIUS_M = 0.3;
 
 function enters(p: Person): boolean {
   const last = p.path[p.path.length - 1]!;
@@ -343,9 +346,11 @@ export class People {
         }
       }
       p.speed = speed;
-      if (Math.hypot(p.pos.x - before.x, p.pos.z - before.z) < STILL_SPEED * dt) p.stillSince ??= t;
-      else p.stillSince = null;
-      p.anim = 'walk';
+      if (!p.rest || Math.hypot(p.pos.x - p.rest.x, p.pos.z - p.rest.z) > STILL_RADIUS_M) {
+        p.rest = { x: p.pos.x, z: p.pos.z };
+        p.stillSince = Math.hypot(p.pos.x - before.x, p.pos.z - before.z) < STILL_SPEED * dt ? t : null;
+      } else p.stillSince ??= t;
+      p.anim = p.stillSince !== null && t - p.stillSince > 0.5 ? 'wait' : 'walk';
       const target = Math.atan2(-(vx / vl), -(vz / vl));
       let dh = target - p.heading;
       while (dh > Math.PI) dh -= Math.PI * 2;
