@@ -24,6 +24,11 @@ function node(tag: string, cls: string | undefined, text?: string): HTMLElement 
   return e;
 }
 
+// A line never breaks before its interpunct: the dot ends the first line rather than starting the second.
+function keepDot(t: string): string {
+  return t.replace(/ · /g, '\u00a0· ');
+}
+
 function tone(t: string | undefined): string {
   if (t === 'go') return s.go!;
   if (t === 'warn') return s.warn!;
@@ -114,7 +119,7 @@ function keyed<T extends HTMLElement>(e: T, k: string): T {
 
 function glanceKids(c: Content): HTMLElement[] {
   const out: HTMLElement[] = [keyed(node('div', `${s.glanceName} ${s.t}`, c.name), 'name')];
-  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
+  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, keepDot(c.say)), 'say'));
   else if (c.fact) out.push(keyed(node('div', `${s.fact} ${s.t}`, c.fact), 'fact'));
   return out;
 }
@@ -190,11 +195,17 @@ function cardKids(c: Content, thumbed = Boolean(c.img)): HTMLElement[] {
     top.append(thumb(c.img, c.kind, s.thumbCard!, 'thumb'), out[0]!);
     out[0] = top;
   }
-  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, c.say), 'say'));
+  if (c.say) out.push(keyed(node('div', `${s.say} ${s.t}`, keepDot(c.say)), 'say'));
   if (c.live) {
-    const live = node('div', `${s.live} ${s.t}`);
+    // A tone colors the dot and the status after the interpunct; the fact before it stays in ink.
+    const live = node('div', `${s.live} ${s.t}${c.liveTone === 'warn' ? ` ${s.liveWarn}` : c.liveTone === 'stop' ? ` ${s.liveStop}` : ''}`);
     live.appendChild(node('i', undefined));
-    live.appendChild(keyed(node('span', undefined, c.live), 'live'));
+    const cut = c.liveTone ? c.live.indexOf(' · ') : -1;
+    if (cut > 0) {
+      const span = node('span', undefined);
+      span.append(c.live.slice(0, cut + 3), node('b', tone(c.liveTone), c.live.slice(cut + 3)));
+      live.appendChild(keyed(span, 'live'));
+    } else live.appendChild(keyed(node('span', undefined, c.live), 'live'));
     out.push(live);
   }
   if (below) {

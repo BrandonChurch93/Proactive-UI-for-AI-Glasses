@@ -41,7 +41,7 @@ export interface SayLine {
 export type SayTable = { default: SayLine } & Partial<Record<ScenarioId, SayLine>>;
 
 export interface PlaceCopy {
-  card: { meta: string; live: string };
+  card: { meta: string; live: string; tone?: 'go' | 'warn' | 'stop' };
   say: SayTable;
   sayLive?: Record<string, SayTable>;
   short: string;
@@ -181,6 +181,7 @@ function validatePlace(raw: unknown, i: number): PlaceData {
   if (!isRecord(raw.card) || typeof raw.card.meta !== 'string' || typeof raw.card.live !== 'string') {
     fail(where, 'card needs meta and live');
   }
+  if (raw.card.tone !== undefined && raw.card.tone !== 'go' && raw.card.tone !== 'warn' && raw.card.tone !== 'stop') fail(where, 'card tone must be go, warn or stop');
   if (typeof raw.short !== 'string') fail(where, 'short must be a string');
   const sayOk = (t: unknown): boolean => isRecord(t) && isRecord(t.default) && Object.values(t).every((v) => isRecord(v) && typeof v.line === 'string' && typeof v.short === 'string');
   if (!sayOk(raw.say)) fail(where, 'say needs a default line and short form, and every entry a line and a short form');

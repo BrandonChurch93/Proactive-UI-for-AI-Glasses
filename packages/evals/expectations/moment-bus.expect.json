@@ -34,7 +34,7 @@
         "action": "show",
         "id": "m4-stop",
         "level": "label",
-        "factIs": "M4 in 2"
+        "factIs": "Bus in 2 min"
       }
     }
   ]

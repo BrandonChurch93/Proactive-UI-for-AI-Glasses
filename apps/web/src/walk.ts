@@ -144,7 +144,6 @@ export class Walk {
   private wasHolding = false;
   private releasedAt = -Infinity;
   private pick: { step: number; cur: string | null; caught: boolean; cand: string | null; candSince: number; outSince: number | null; ref: number; takenSince: number | null } = { step: -2, cur: null, caught: false, cand: null, candSince: 0, outSince: null, ref: Infinity, takenSince: null };
-  private sound: { ctx: AudioContext | null; ui: AudioNode | null; enabled: boolean } = { ctx: null, ui: null, enabled: false };
 
   constructor(
     readonly world: World,
@@ -217,15 +216,7 @@ export class Walk {
       },
     });
     o.setFocusOutline(this.focusOutline);
-    if (this.sound.ctx) o.sound.attach(this.sound.ctx, this.sound.ui ?? undefined);
-    o.sound.enabled = this.sound.enabled;
     return o;
-  }
-
-  setSound(ctx: AudioContext | null, enabled: boolean, ui: AudioNode | null = null): void {
-    if (ctx && ctx !== this.sound.ctx && this.overlay) this.overlay.sound.attach(ctx, ui ?? undefined);
-    this.sound = { ctx: ctx ?? this.sound.ctx, ui: ui ?? this.sound.ui, enabled };
-    if (this.overlay) this.overlay.sound.enabled = enabled;
   }
 
   private reset(): void {
@@ -318,7 +309,7 @@ export class Walk {
     }
     pk.step = this.stepIndex;
     const g = this.rawGaze(pk.cur, pk.caught);
-    // How near the held place was when the wearer's turn ended: the glass moving its pane beside the square is not an aim elsewhere.
+    // How near the held place was when the wearer's turn ended: the glass drawing its pane to the center is not an aim elsewhere.
     if (t - this.turnedAt <= STEP * 1.5 || this.holding) pk.ref = g.curOff;
     pk.takenSince = null;
     const take = (id: string | null, caught: boolean, off: number): string | null => {
@@ -363,11 +354,9 @@ export class Walk {
     // A pane above 50% can be aimed at; one the world has dimmed is still its place's pane for keeping the look.
     const panes = new Map<string, Rect>();
     const dim = new Set<string>();
-    const beside = new Set<string>();
     for (const p of this.overlay?.aimables() ?? []) {
       panes.set(p.anchor, p.rect);
       if (p.opacity <= 0.5) dim.add(p.anchor);
-      if (p.placed) beside.add(p.anchor);
     }
     const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit, ...panes.keys()]);
     const vp = { w: innerWidth, h: innerHeight };
@@ -426,7 +415,7 @@ export class Walk {
       }
       const pinIn = (h: number): boolean => Boolean(pin && Math.abs(pin.x - cx) <= h && Math.abs(pin.y - cy) <= h);
       const within = (h: number): boolean => Boolean((front && overlapsSquare(front, cx, cy, h)) || pinIn(h) || (pane && rectIn(pane, h)));
-      if (who === cur && (within(keepHalf) || (kept && rectIn(kept, keepHalf)) || beside.has(id))) curIn = true;
+      if (who === cur && (within(keepHalf) || (kept && rectIn(kept, keepHalf)))) curIn = true;
       const pinD = pin ? Math.hypot(pin.x - cx, pin.y - cy) : Infinity;
       const paneD = pane ? rectGap(pane) : Infinity;
       // A pane under the center outranks a light behind it by the bias a light has over a storefront; of two panes under it, the smaller is the finer aim.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Brain } from '@lumen/brain';
-import { FOCUS_ZONE, KEEPOUT, anchorFactors, besideSquare, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
+import { FOCUS_ZONE, KEEPOUT, anchorFactors, LEVEL_RANK, NOMINAL_SIZE, SCENARIO_IDS, boxKeepOut, capKeepOut, focusRect, project, rectsOverlap, roadwayKeepOuts, zOf, type CameraPose, type Rect } from '@lumen/shared';
 import { ALBEDO, SHADE, Sim, TICK_HZ, keepOuts } from '@lumen/sim';
 import type { KeepOut } from '../src/bridge';
 import { primaryContrast, secondaryContrast, tierFor } from '../src/backdrop';
@@ -273,39 +273,6 @@ describe('rule 1 · the zone grows, content is pushed out over 320 ms, not cut',
     const after = p.update(req, { ...base, t: 2 + MOVE.pushOut + 0.05, band: 'brisk' });
     expect(p.jumpX.at(2 + MOVE.pushOut + 0.05)).toBe(0);
     expect(rectsOverlap(after.rect, zone)).toBe(false);
-  });
-});
-
-describe('rule 1 · the held pane beside the viewfinder', () => {
-  it("sits on its light's side 24 px outside the square, or just past its light where the light stands there, level with the square, and grows from that corner", () => {
-    const vp = { w: 1920, h: 1080 };
-    const base = { viewport: vp, half: 108, gap: 32, avoid: [] };
-    const clear = (l: { x: number; y: number }) => ({ x: l.x - 12, y: l.y - 12, w: 24, h: 24 });
-    const away = { x: 500, y: 560 };
-    const f = besideSquare({ ...base, light: away, size: { w: 290, h: 81 } })!;
-    expect(f.side).toBe('left');
-    expect(f.rect.x + f.rect.w).toBeCloseTo(960 - 108 - 32);
-    expect(f.rect.y <= 540 && f.rect.y + f.rect.h >= 540).toBe(true);
-    const inWay = { x: 830, y: 560 };
-    const g = besideSquare({ ...base, light: inWay, size: { w: 290, h: 81 } })!;
-    expect(g.side).toBe('left');
-    expect(g.rect.x + g.rect.w).toBeCloseTo(830 - 12);
-    expect(g.rect.y <= 540 && g.rect.y + g.rect.h >= 540).toBe(true);
-    expect(rectsOverlap(g.rect, clear(inWay))).toBe(false);
-    const grown = besideSquare({ ...base, light: inWay, size: { w: 394, h: 205 }, side: g.side, corner: { x: g.rect.x + g.rect.w * g.fx, y: g.rect.y + g.rect.h * g.fy, fx: g.fx, fy: g.fy } })!;
-    expect(grown.rect.x + grown.rect.w).toBeCloseTo(g.rect.x + g.rect.w);
-    expect(grown.rect.y + grown.rect.h * grown.fy).toBeCloseTo(g.rect.y + g.rect.h * g.fy);
-    expect(rectsOverlap(grown.rect, clear(inWay))).toBe(false);
-  });
-
-  it('with every place level with the square blocked, the loose last resort still finds one beside it rather than none', () => {
-    const vp = { w: 1920, h: 1080 };
-    const band = [{ x: 0, y: 540 - 160, w: 1920, h: 320 }];
-    const base = { viewport: vp, half: 108, gap: 32, avoid: band, light: { x: 760, y: 360 }, size: { w: 290, h: 81 } };
-    expect(besideSquare(base)).toBeNull();
-    const f = besideSquare({ ...base, loose: true })!;
-    expect(rectsOverlap(f.rect, { x: 960 - 108, y: 540 - 108, w: 216, h: 216 })).toBe(false);
-    expect(band.some((k) => rectsOverlap(f.rect, k))).toBe(false);
   });
 });
 

@@ -3,7 +3,6 @@ import css from './chrome.module.css';
 
 export class Chrome {
   readonly el: HTMLElement;
-  private sound: HTMLButtonElement;
   private hint: HTMLButtonElement;
   private pace: HTMLElement;
   private pausedEl: HTMLElement;
@@ -12,21 +11,9 @@ export class Chrome {
   private mark: HTMLElement;
   private markKey = '';
 
-  constructor(parent: HTMLElement, handlers: { sound(): boolean; inspector(): void; pause(): boolean }, touch: boolean, under?: HTMLElement) {
+  constructor(parent: HTMLElement, handlers: { inspector(): void; pause(): boolean }, touch: boolean, under?: HTMLElement) {
     this.el = document.createElement('div');
     this.el.className = css.chrome!;
-    this.sound = document.createElement('button');
-    this.sound.type = 'button';
-    this.sound.className = `${css.btn} ${css.sound}`;
-    this.sound.setAttribute('aria-pressed', 'false');
-    this.sound.textContent = 'Sound · off';
-    this.sound.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const on = handlers.sound();
-      this.sound.setAttribute('aria-pressed', String(on));
-      this.sound.textContent = on ? 'Sound · on' : 'Sound · off';
-      this.cache = null;
-    });
     this.hint = document.createElement('button');
     this.hint.type = 'button';
     this.hint.className = `${css.btn} ${css.hint}`;
@@ -58,11 +45,11 @@ export class Chrome {
     this.mark.className = css.mark!;
     this.mark.setAttribute('aria-hidden', 'true');
     const tick = '<svg viewBox="0 0 22 22"><path d="M0.75 22V10.75A10 10 0 0 1 10.75 0.75H22"/></svg>';
-    this.mark.innerHTML = ['tl', 'tr', 'br', 'bl'].map((c) => `<i class="${css.corner} ${css[c]}">${tick}</i>`).join('') + `<span class="${css.focus}">FOCUS</span>`;
+    this.mark.innerHTML = ['tl', 'tr', 'br', 'bl'].map((c) => `<i class="${css.corner} ${css[c]}">${tick}</i>`).join('') + `<span class="${css.focus}">EYE TRACKING</span>`;
     // The viewfinder sits under the glasses: a pane over it covers its ticks, and the pane's hold rule carries the count.
     if (under) under.before(this.mark);
     else this.el.append(this.mark);
-    this.el.append(this.sound, this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
+    this.el.append(this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
     parent.appendChild(this.el);
     addEventListener('resize', () => (this.cache = null));
   }
@@ -71,7 +58,7 @@ export class Chrome {
   private cache: Rect[] | null = null;
 
   rects(): Rect[] {
-    this.cache ??= [this.sound, this.pauseBtn, this.hint, this.pace]
+    this.cache ??= [this.pauseBtn, this.hint, this.pace]
       .filter((e) => e.style.display !== 'none' && e.offsetWidth > 0)
       .map((e) => {
         const r = e.getBoundingClientRect();
@@ -96,14 +83,15 @@ export class Chrome {
     this.rotate.style.display = on ? 'grid' : 'none';
   }
 
-  setMark(state: { lit: boolean; held: boolean; p: number | null } | null): void {
-    const key = state ? `${state.lit}|${state.held}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
+  setMark(state: { lit: boolean; held: boolean; p: number | null; quiet?: boolean } | null): void {
+    const key = state ? `${state.lit}|${state.held}|${state.quiet ? 'q' : ''}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
     if (key === this.markKey) return;
     this.markKey = key;
     this.mark.style.display = state ? '' : 'none';
     if (!state) return;
     this.mark.classList.toggle(css.lit!, state.lit);
     this.mark.classList.toggle(css.held!, state.held);
+    this.mark.classList.toggle(css.quiet!, Boolean(state.quiet));
     this.mark.style.setProperty('--p', String(state.p ?? 0));
   }
 

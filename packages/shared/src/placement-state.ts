@@ -475,7 +475,7 @@ export class Aside {
   dropped = false;
   by: string | null = null;
 
-  update(home: Rect, ctx: FrameCtx, focusOk: boolean, depth = Infinity, anchor?: { x: number; y: number }): AsideState {
+  update(home: Rect, ctx: FrameCtx, focusOk: boolean, depth = Infinity, anchor?: { x: number; y: number }, held = false): AsideState {
     const { t } = ctx;
     const near = keepOutsFor(ctx.keepOuts, depth);
     // A light hidden behind a near vehicle has nothing to point at: its pane waits as the light rather than riding the vehicle.
@@ -509,7 +509,8 @@ export class Aside {
         if (!move && covered > MOVE.asideDropCover) this.coveredSince ??= t;
         else this.coveredSince = null;
         const face = hits.some((k) => k.kind === 'face');
-        if (!move && (face || (this.coveredSince !== null && t - this.coveredSince >= MOVE.asideDropMs / 1000 - 1e-9))) {
+        // The pane the look is held on dims rather than drops: the pull, which keeps clear of faces and anyone moving, carries it off them.
+        if (!move && !held && (face || (this.coveredSince !== null && t - this.coveredSince >= MOVE.asideDropMs / 1000 - 1e-9))) {
           this.dropped = true;
           this.coveredSince = null;
           this.x.go(t, 0, MOVE.asideIn, 'out');
@@ -643,5 +644,9 @@ export class PaneYield {
       this.o.go(t, 1, MOVE.yieldOut, 'out');
     }
     return { dx: this.x.at(t), opacity: this.o.at(t) };
+  }
+
+  offset(t: number): number {
+    return this.x.at(t);
   }
 }

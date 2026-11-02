@@ -190,6 +190,8 @@ export interface Content {
   reason: Reason;
   depthRef?: string;
   live?: string;
+  // The live line's status, after its interpunct, in a semantic tone: good news go, a caution warn, bad news stop.
+  liveTone?: 'go' | 'warn' | 'stop';
   rows?: ContentRow[];
   actions?: { id: string; label: string; primary?: boolean; hint?: string }[];
   note?: string;

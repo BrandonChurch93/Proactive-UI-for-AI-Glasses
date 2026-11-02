@@ -116,7 +116,7 @@ export class TitleScreen {
       e.stopPropagation();
       this.choose();
     });
-    choices.append(this.startButton, el('p', css.lede, 'Explore the block. Open the menu at the bottom right to find a place and go there.'));
+    choices.append(this.startButton, el('p', css.lede, 'Explore the block. Find a place at the bottom right and go there.'));
     const controls = el('div', css.controls);
     (TOUCH ? CONTROLS_TOUCH : CONTROLS).forEach(([k, v], i) => {
       if (i) controls.appendChild(el('span', css.dot, '·'));

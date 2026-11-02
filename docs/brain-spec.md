@@ -56,7 +56,7 @@ interface WorldSnapshot {
 }
 ```
 
-Entities carry a `kind` (food, cafe, theater, venue, shop, service, transit, park, sign), a position and anchor height, live data (wait, seats, hours, next departures), and a `depth` payload for the expanded view. See `docs/world-spec.md` and `data/places.json`.
+Entities carry a `kind` (food, cafe, theater, venue, shop, service, transit, park, sign), a position and anchor height, live data (wait, seats, hours, next departures), and a `depth` payload for the expanded view. See `docs/world-spec.md` and `data/places.json`. A place's card copy may give its live line a `tone` (`go`, `warn` or `stop`, for the status after the interpunct: `Uptown 4 min · elevator out` is `warn`); the brain passes it through as `content.liveTone` on the card while that line is the one shown (a live flag that swaps the line drops it), and the loader refuses any other tone.
 
 ## 3. Output: `Decision[]`
 

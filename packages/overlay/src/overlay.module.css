@@ -180,6 +180,20 @@
   flex: none;
 }
 
+.live b {
+  font-weight: inherit;
+}
+
+.liveWarn i {
+  background: var(--warn);
+  box-shadow: 0 0 0 3px rgba(255, 201, 138, 0.18), 0 0 8px rgba(255, 201, 138, 0.9);
+}
+
+.liveStop i {
+  background: var(--stop);
+  box-shadow: 0 0 0 3px rgba(255, 143, 122, 0.18), 0 0 8px rgba(255, 143, 122, 0.9);
+}
+
 .cardWhy {
   margin-top: 9px;
   padding-top: 8px;
@@ -1211,8 +1225,15 @@
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
 }
 
-.menuFound .menuFind {
-  display: none;
+.menuFind {
+  white-space: nowrap;
+}
+
+/* The word says what the button does; a narrow glass keeps the verb. */
+@media (max-width: 899.98px) {
+  .menuWide {
+    display: none;
+  }
 }
 
 .pane[data-pane='map'] {

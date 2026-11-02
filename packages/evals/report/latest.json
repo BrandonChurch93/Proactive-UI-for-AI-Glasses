@@ -3,8 +3,8 @@
  "totals": {
   "suites": 44,
   "passed": 44,
-  "cases": 1012,
-  "casesPassed": 1012
+  "cases": 1014,
+  "casesPassed": 1014
  },
  "byGroup": {
   "walks": {
@@ -650,6 +650,18 @@
     },
     {
      "name": "every live line in places.json fits the card in 28 characters",
+     "rule": "copy",
+     "pass": true,
+     "detail": "14 places"
+    },
+    {
+     "name": "every live line with a tone carries go, warn or stop, and a warn or stop line names its status after the interpunct",
+     "rule": "copy",
+     "pass": true,
+     "detail": "14 places"
+    },
+    {
+     "name": "every expanded row has a key or a thumbnail, a title, a sub and a value",
      "rule": "copy",
      "pass": true,
      "detail": "14 places"
@@ -2346,7 +2358,7 @@
      "rule": "moments"
     },
     {
-     "name": "[6.2, 6.4) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"label\",\"factIs\":\"M4 in 2\"}",
+     "name": "[6.2, 6.4) must {\"action\":\"show\",\"id\":\"m4-stop\",\"level\":\"label\",\"factIs\":\"Bus in 2 min\"}",
      "pass": true,
      "detail": "t=6.3 show m4-stop label",
      "rule": "moments"

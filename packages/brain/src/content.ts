@@ -79,6 +79,7 @@ export function cardContent(e: Entity, r: Reason, band: Band, scenario: Scenario
     say,
     live: liveLine(e),
     reason: r,
+    ...(e.card.tone && liveLine(e) === e.card.live ? { liveTone: e.card.tone } : {}),
     showReason: !compact && !line.when && (band === 'stopped' || band === 'stroll') && !say.toLowerCase().includes(r.text.replace(/\.$/, '').toLowerCase()),
     kind: e.kind,
   };

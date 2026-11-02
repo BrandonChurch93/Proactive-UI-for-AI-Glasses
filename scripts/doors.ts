@@ -219,6 +219,19 @@ async function visit(id: string, lap: number): Promise<void> {
       return;
     }
     await aim(id, `door:${id}`);
+    if (shots) {
+      // The arrival card, once it stands on the glass at full opacity, before the view opens.
+      const t0c = Date.now();
+      while (Date.now() - t0c < 3000) {
+        const ok = (await page.evaluate(`(() => { const r = window.__app.walk.overlay.report().panes.find((p) => p.id === '${id}'); return Boolean(r && r.visible && r.level === 'card' && r.opacity > 0.97); })()`)) as boolean;
+        if (ok) {
+          await page.waitForTimeout(800);
+          await page.screenshot({ path: `${shots}/${id}-lap${lap}-card.png` });
+          break;
+        }
+        await page.waitForTimeout(50);
+      }
+    }
     const open = await until(id, (s) => s.level === 'expanded', 6);
     const inS = open ? open.t - at.t : NaN;
     if (verbose) console.log(`   report ${(await page.evaluate(`(() => { const w = window.__app.walk; const o = w.overlay; const it = o.items.get('${id}'); const r = o.report().panes.find((p) => p.id === '${id}'); const a = w.bridge.project(w.sim.anchorOf('door:${id}')); return JSON.stringify({ a: [Math.round(a.x), Math.round(a.y), +a.depth.toFixed(1)], door: w.bridge.doorway('door:${id}'), pl: it && it.place && { folded: it.place.folded, cfg: it.place.cfg, collapsed: it.place.collapsed, step: it.place.step, leave: it.place.leaveSince }, size: it && it.cur && [it.cur.width, it.cur.height], edgeSince: it && it.edgeSince, r, placed: it && it.placed && [it.placed.mode, it.placed.why], want: it && it.want, anchor: it && it.d.placement.anchor, cmp: it && it.d.component, items: w.last().frame.items.filter((d) => d.placement.anchor === 'door:${id}').map((d) => d.id + ':' + d.component + ':' + d.level) }); })()`)) as string}`);

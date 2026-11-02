@@ -63,14 +63,15 @@ const recorder = `(() => {
       const it = id ? [...o.items.values()].find((x) => x.id === id && x.kind === 'world' && !x.dying) : null;
       const b = it && it.cur;
       if (b && b.rect && b.level !== 'none') {
-        const a = sim.anchorOf(it.d.placement.anchor); const pr = a ? walk.bridge.project(a) : null;
+        // The light the overlay placed this frame against: projecting anew at this moment can catch the camera a step on in a fast drag.
+        const a = sim.anchorOf(it.d.placement.anchor); const pr0 = a ? walk.bridge.project(a) : null; const pr = it.placedPr && pr0 && pr0.inFront ? { x: it.placedPr.x, y: it.placedPr.y, inFront: true } : pr0;
         const vis = Boolean(it.placed && it.placed.mode === 'pane' && !it.aside.dropped);
         const pl = it.placed || {}; const fx = pl.fx !== undefined ? pl.fx : pl.align === 'left' ? 1 : pl.align === 'right' ? 0 : 0.5; const fy = pl.fy !== undefined ? pl.fy : pl.vertical === 'middle' ? 0.85 : pl.vertical === 'below' ? 0 : 1;
         const vw = innerWidth; const vh = innerHeight;
         const ex = b.rect.x + b.rect.w >= vw - 1 ? 1 : b.rect.x <= 1 ? 0 : fx; const ey = b.rect.y + b.rect.h >= vh - 1 ? 1 : b.rect.y <= 1 ? 0 : fy;
-        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold && it.hold.pull ? 'pull' : it.hold && it.hold.side ? 'square ' + it.hold.side : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? (it.hold.came ? 'held' : 'pinned') : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null };
+        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
       }
-      window.__aim.log.push({ t: walk.t, id, p });
+      window.__aim.log.push({ t: walk.t, id, p, down: walk.holding });
     }
     requestAnimationFrame(tick);
   };
@@ -86,9 +87,9 @@ if (probe) {
     const hold = o.hold.bind(o);
     o.hold = (it, t, ctx, chrome, pr, depth, size) => {
       const on = it.id === '${pid}' && t >= ${t0} && t <= ${t1};
-      const before = on && it.hold ? JSON.stringify({ side: it.hold.side, came: it.hold.came, w: Math.round(it.hold.w), h: Math.round(it.hold.h), lv: it.hold.level, at: +it.hold.at.toFixed(2), pull: it.hold.pull, v: it.hold.vx === undefined ? null : Math.round(Math.hypot(it.hold.vx, it.hold.vy)) }) + ' aiming ' + o.aiming() + ' yaw ' + o.yawRate.toFixed(2) : '-';
+      const before = on && it.hold ? JSON.stringify({ off: [Math.round(it.hold.off.x), Math.round(it.hold.off.y)], w: Math.round(it.hold.w), h: Math.round(it.hold.h), lv: it.hold.level, v: Math.round(Math.hypot(it.hold.vx || 0, it.hold.vy || 0)) }) + ' aiming ' + o.aiming() + ' yaw ' + o.yawRate.toFixed(2) : '-';
       const r = hold(it, t, ctx, chrome, pr, depth, size);
-      if (on) window.__probe.push(t.toFixed(3) + ' d ' + it.d.level + ' b ' + (it.cur ? it.cur.level : '-') + ' size ' + Math.round(size.w) + 'x' + Math.round(size.h) + ' look ' + (w.sim.gaze.target === it.id) + ' light ' + Math.round(pr.x) + ',' + Math.round(pr.y) + ' before ' + before + ' -> ' + (r ? r.mode + ' ' + [r.rect.x, r.rect.y, r.rect.w, r.rect.h].map(Math.round).join(',') : 'null') + ' hold ' + (it.hold ? (it.hold.side || 'null') + (it.hold.came ? ' came' : '') : 'none') + ' placed ' + (it.placed ? it.placed.mode + (it.placed.why ? ':' + it.placed.why : '') : '-') + ' prIn ' + pr.inFront + ' anchor ' + (it.placedPr ? it.placedPr.anchor : '-') + '/' + it.d.placement.anchor + ' chrome ' + JSON.stringify(chrome.map((k) => [k.x, k.y, k.w, k.h].map(Math.round))));
+      if (on) window.__probe.push(t.toFixed(3) + ' d ' + it.d.level + ' b ' + (it.cur ? it.cur.level : '-') + ' size ' + Math.round(size.w) + 'x' + Math.round(size.h) + ' look ' + (w.sim.gaze.target === it.id) + ' light ' + Math.round(pr.x) + ',' + Math.round(pr.y) + ' before ' + before + ' -> ' + (r ? r.mode + ' ' + [r.rect.x, r.rect.y, r.rect.w, r.rect.h].map(Math.round).join(',') : 'null') + ' hold ' + (it.hold ? 'pull' : 'none') + ' drawn ' + (it.cur && it.cur.rect ? [it.cur.rect.x, it.cur.rect.y, it.cur.rect.w, it.cur.rect.h].map(Math.round).join(',') : '-') + ' aside ' + Math.round(it.aside.x.at(o.t)) + ',' + Math.round(it.aside.y.at(o.t)) + (it.aside.by ? ' by ' + it.aside.by : '') + ' yield ' + (it.yieldS && it.yieldS.on ? 'on' : 'off') + ' placed ' + (it.placed ? it.placed.mode + (it.placed.why ? ':' + it.placed.why : '') : '-') + ' prIn ' + pr.inFront + ' anchor ' + (it.placedPr ? it.placedPr.anchor : '-') + '/' + it.d.placement.anchor + ' chrome ' + JSON.stringify(chrome.map((k) => [k.x, k.y, k.w, k.h].map(Math.round))));
       return r;
     };
   })()`);
@@ -107,7 +108,7 @@ const state = (): Promise<S> =>
     }
     return { t: walk.t, band: f ? f.band : 'stopped', lap: sim.lap, target: sim.gaze.target, gate: Boolean(f && f.gate.safety), panes };
   })()`) as Promise<S>;
-type Rec = { t: number; id: string | null; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null } | null };
+type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; edge?: boolean } | null };
 const lightIn = (id: string): Promise<boolean> =>
   page.evaluate(`(() => { const walk = window.__app.walk; const a = walk.sim.anchorOf('${id}'); const p = a && walk.bridge.project(a); return Boolean(p && p.inFront && p.x >= 0 && p.x <= ${w} && p.y >= 0 && p.y <= ${h}); })()`) as Promise<boolean>;
 const drain = async (): Promise<Rec[]> => {
@@ -177,6 +178,55 @@ let lastRec: Rec[] = [];
 
 const levelAt = new Map<string, { lv: string; t: number }>();
 let jumpTotal = 0;
+// From the frame the look lands to the pull's first move, the aimed pane's center keeps its offset from its light: under
+// 2 px a frame and 6 px in all. While the pointer is down, the looked-at pane's offset is constant to 1 px a frame.
+type Landing = { still: number | null; perFrame: number; total: number; dragFrames: number; drag: number; dragAt?: string; landAt?: string; ok: boolean };
+const landings: Landing[] = [];
+function landing(rec: Rec[], id: string): Landing {
+  // Rule 8's step aside and rule 5's yield are their own moves, for a real thing and a head check, as the jump check already excludes them; the hold's offset is what is judged here.
+  const off = (r: Rec): { x: number; y: number } | null => (r.p && r.p.lx !== null ? { x: r.p.x + r.p.w / 2 - r.p.lx - (r.p.ax ?? 0), y: r.p.y + r.p.h / 2 - r.p.ly! - (r.p.ay ?? 0) } : null);
+  let drag = 0;
+  let dragAt: string | undefined;
+  let dragFrames = 0;
+  for (let i = 1; i < rec.length; i++) {
+    const a = rec[i - 1]!;
+    const b = rec[i]!;
+    if (!a.down || !b.down || !a.id || a.id !== b.id) continue;
+    const oa = off(a);
+    const ob = off(b);
+    if (!oa || !ob || Math.abs(a.p!.w - b.p!.w) > 0.5 || Math.abs(a.p!.h - b.p!.h) > 0.5) continue;
+    dragFrames++;
+    const dd = Math.hypot(ob.x - oa.x, ob.y - oa.y);
+    if (dd > drag) {
+      drag = dd;
+      dragAt = `${b.id} at ${b.t.toFixed(2)}, ${a.p!.how} to ${b.p!.how} ${b.p!.lv} ${b.p!.w.toFixed(0)}x${b.p!.h.toFixed(0)}${b.p!.edge ? ' at the view edge' : ''}${b.p!.ax ? ` aside ${b.p!.ax.toFixed(0)}` : ''} op ${b.p!.o.toFixed(2)}`;
+    }
+  }
+  const k = rec.findIndex((r) => r.id === id && off(r));
+  if (k < 0) return { still: null, perFrame: 0, total: 0, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ok: drag <= 1 };
+  const o0 = off(rec[k]!)!;
+  let perFrame = 0;
+  let landAt: string | undefined;
+  let total = 0;
+  let still = 0;
+  for (let i = k + 1; i < rec.length; i++) {
+    const r = rec[i]!;
+    const o = off(r);
+    if (r.id !== id || !o || (r.p!.pv ?? 0) > 0) break;
+    const prev = off(rec[i - 1]!);
+    if (prev && Math.abs(rec[i - 1]!.p!.w - r.p!.w) <= 0.5) {
+      const d = Math.hypot(o.x - prev.x, o.y - prev.y);
+      if (d > perFrame) {
+        perFrame = d;
+        landAt = `${r.t.toFixed(2)}${r.p!.edge ? ' at the view edge' : ''} ${r.p!.how} ${r.p!.lv} ${r.p!.w.toFixed(0)}x${r.p!.h.toFixed(0)}`;
+      }
+    }
+    total = Math.max(total, Math.hypot(o.x - o0.x, o.y - o0.y));
+    still++;
+  }
+  return { still, perFrame, total, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ...(landAt ? { landAt } : {}), ok: perFrame < 2 && total < 6 && drag <= 1 };
+}
+
 function scanJumps(rec: Rec[]): number {
   for (const r of rec) {
     if (!r.id || !r.p) continue;
@@ -324,12 +374,16 @@ for (;;) {
     else if (mover) excused = `rule 8 for ${mover}`;
     else if (level3 === 'expanded') excused = 'changed level to expanded';
   }
-  const j = scanJumps(await drain());
+  const recs = await drain();
+  const j = scanJumps(recs);
+  const land = landing(recs, pick.id);
+  landings.push(land);
   const a: Aim = { t: rel.t, band: s.band, id: pick.id, level: pick.level, held: s05.target, ok: s05.target === pick.id, skip: crossing || Boolean(excused?.endsWith('while aiming')), at3, excused, near: at3 !== null && at3 <= NEAR_PX, jumps: j };
   aims.push(a);
   const why = at3 === null ? ((await page.evaluate(`(() => { const r = window.__app.walk.overlay.report().panes.find((p) => p.id === '${pick.id}'); return r ? r.level + ' ' + (r.hiddenBy ?? (r.visible ? 'visible' : 'hidden')) + ' op ' + r.opacity : 'no pane'; })()`)) as string) : '';
   const where = at3 !== null ? `${at3.toFixed(0)} px from the center` : `not on the glass (${why})`;
   console.log(`${a.skip ? 'skip' : a.ok ? 'ok  ' : 'MISS'} ${a.t.toFixed(1).padStart(6)} ${a.band.padEnd(6)} aimed at ${a.id}:${a.level} · held ${a.held ?? 'nothing'} 0.5 s later · 3 s later ${where}${excused ? ` (${excused}, excused)` : a.near ? '' : ' FAR'}${j ? ` · ${j} jump${j > 1 ? 's' : ''}` : ''}`);
+  console.log(`     landing: ${land.still === null ? 'the look never landed' : `${land.still} frames still, at most ${land.perFrame.toFixed(1)} px a frame, ${land.total.toFixed(1)} px in all${land.perFrame >= 2 && land.landAt ? ` (${land.landAt})` : ''}`} · drag: ${land.dragFrames} frames, at most ${land.drag.toFixed(1)} px a frame${land.drag > 1 && land.dragAt ? ` (${land.dragAt})` : ''}${land.ok ? '' : ' NOT STILL'}`);
   // The owner's rule since Phase 27: the place held is drawn slowly into the center. Every held aim prints how far the pane's center is from the view's 0.9 s and 3 s later; the near measure judges it.
   const sq = 80 * Math.max(1, ui);
   const lr = rel.panes.find((q) => q.id === pick.id);
@@ -344,7 +398,7 @@ for (;;) {
     console.log(`     drawn in: the ${p9 ? p9.level : 'pane'}'s center ${c(p9)} from the view's 0.9 s later, ${c(p3)} 3 s later`);
     if (!ok && verbose) console.log('       log ' + (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) + ' · look ' + (await page.evaluate(`JSON.stringify(window.__app.walk.pick)`)));
     if (!ok && verbose) console.log('       near the square ' + (await page.evaluate(`(() => { const w = window.__app.walk; const cx = innerWidth / 2; const cy = innerHeight / 2; const near = (r) => r.x < cx + 600 && r.x + r.w > cx - 600 && r.y < cy + 400 && r.y + r.h > cy - 400; return JSON.stringify([...w.bridge.keepOuts().filter((k) => near(k.rect)).map((k) => [k.kind + (k.still ? ' still' : '') + (k.moving ? ' moving' : ''), ...[k.rect.x - cx, k.rect.y - cy, k.rect.w, k.rect.h].map(Math.round)]), ...(w.bridge.chromeRects ? w.bridge.chromeRects() : []).filter(near).map((r) => ['chrome', ...[r.x - cx, r.y - cy, r.w, r.h].map(Math.round)])]); })()`)));
-    if (!ok && verbose) console.log('       ' + (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return JSON.stringify({ hold: it && it.hold && { side: it.hold.side, came: it.hold.came, to: it.hold.to, at: it.hold.at, fx: it.hold.fx, fy: it.hold.fy }, ride: it && it.ride, placed: it && it.placed && { mode: it.placed.mode, rect: it.placed.rect }, cur: it && it.cur && it.cur.rect, aside: it && [it.aside.x.at(o.t), it.aside.y.at(o.t)], yield: it && it.yieldS && it.yieldS.on, t: o.t }); })()`)));
+    if (!ok && verbose) console.log('       ' + (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return JSON.stringify({ hold: it && it.hold && { off: it.hold.off, v: Math.hypot(it.hold.vx || 0, it.hold.vy || 0) }, ride: it && it.ride, placed: it && it.placed && { mode: it.placed.mode, rect: it.placed.rect }, cur: it && it.cur && it.cur.rect, aside: it && [it.aside.x.at(o.t), it.aside.y.at(o.t)], yield: it && it.yieldS && it.yieldS.on, t: o.t }); })()`)));
   }
   if (verbose && (!a.ok || (!a.near && !a.excused))) {
     const log = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '') + (e.level ? ' ' + e.level : '')).join(' | ')`)) as string;
@@ -382,7 +436,9 @@ for (const g of growBad) {
   if (verbose) console.log('    log ' + ((await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${g.id}' && e.t > ${g.t - 0.2} && e.t < ${g.t + 0.8}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string) + ' · hold ended ' + ((await page.evaluate(`window.__aim.ends.filter((e) => e.includes(' ${g.id}') && parseFloat(e) > ${g.t - 0.2} && parseFloat(e) < ${g.t + 0.8}).join(' | ')`)) as string));
 }
 if (probe) console.log((await page.evaluate('window.__probe.join("\\n")')) as string);
-const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && growBad.length === 0;
+const landBad = landings.filter((l) => !l.ok).length;
+console.log(`landings: ${landings.filter((l) => l.still !== null).length} aims, ${landings.filter((l) => l.still !== null && l.perFrame < 2 && l.total < 6).length} still from the landing to the pull; drags: ${landings.filter((l) => l.dragFrames).length}, ${landings.filter((l) => l.dragFrames && l.drag <= 1).length} with the looked-at pane exact to 1 px a frame`);
+const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && growBad.length === 0 && landBad === 0;
 console.log(pass ? 'PASS' : 'FAIL');
 await browser.close();
 await server?.close();

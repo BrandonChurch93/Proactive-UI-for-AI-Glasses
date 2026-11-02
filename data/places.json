@@ -154,6 +154,7 @@
             "value": "$3.50"
           },
           {
+            "key": "Drink",
             "title": "Shake",
             "sub": "Vanilla or chocolate",
             "value": "$5"
@@ -521,7 +522,7 @@
       },
       "say": {
         "default": {
-          "line": "Benches in the shade · end of the walk",
+          "line": "Benches in the shade · a bench free now",
           "short": "Shaded benches"
         }
       },
@@ -582,6 +583,7 @@
             "value": "$4.50"
           },
           {
+            "key": "Side",
             "title": "Half sour pickle",
             "sub": "On the side",
             "value": "$2"
@@ -667,10 +669,12 @@
           {
             "img": "img/dish-cupcake3.webp",
             "title": "Double chocolate",
+            "sub": "Back tomorrow",
             "value": "Sold out",
             "tone": "stop"
           },
           {
+            "key": "Classic",
             "title": "Red velvet",
             "sub": "Last two",
             "value": "$4",
@@ -701,7 +705,7 @@
           "short": "Batch at 2"
         },
         "default": {
-          "line": "Brown butter batch at 2 · 80 min from now",
+          "line": "Brown butter batch at 2 · in 80 min",
           "short": "Batch at 2"
         }
       },
@@ -745,6 +749,7 @@
           {
             "img": "img/dish-cortado.webp",
             "title": "Cortado",
+            "sub": "Double shot · 4 oz",
             "value": "$4.25",
             "act": "Order ahead",
             "after": "Cortado ordered · ready at 12:46, skip the line.",
@@ -753,6 +758,7 @@
           {
             "img": "img/dish-coldbrew.webp",
             "title": "Cold brew",
+            "sub": "12 h steep · over ice",
             "value": "$5",
             "act": "Order ahead",
             "after": "Cold brew ordered · ready at 12:46, skip the line.",
@@ -761,6 +767,7 @@
           {
             "img": "img/dish-latte.webp",
             "title": "Oat latte",
+            "sub": "Oat milk · 12 oz",
             "value": "$5.75",
             "act": "Order ahead",
             "after": "Oat latte ordered · ready at 12:46, skip the line.",
@@ -769,7 +776,8 @@
           {
             "key": "12:46",
             "title": "Pickup at the counter",
-            "sub": "Skip the line of 4"
+            "sub": "Skip the line of 4",
+            "value": "no wait"
           }
         ],
         "actions": [
@@ -823,7 +831,8 @@
       ],
       "card": {
         "meta": "Pharmacy · open till 9",
-        "live": "Ready at counter 2 · no line"
+        "live": "Ready at counter 2 · no line",
+        "tone": "go"
       },
       "short": "Ready, counter 2",
       "reasons": {
@@ -988,7 +997,7 @@
         "next": 2,
         "then": 11
       },
-      "glance": "2 min · next in 11",
+      "glance": "Bus in 2 min · next in 11",
       "depth": "departures",
       "scenarios": [
         "walking"
@@ -998,10 +1007,10 @@
         58
       ],
       "card": {
-        "meta": "Bus · uptown",
-        "live": "M4 in 2 · seats open"
+        "meta": "Bus stop · M4 uptown",
+        "live": "Bus in 2 · seats open"
       },
-      "short": "M4 in 2",
+      "short": "Bus in 2 min",
       "reasons": {
         "world": "Bus at the stop"
       },
@@ -1055,8 +1064,8 @@
       },
       "say": {
         "default": {
-          "line": "M4 in 2 min · then 11",
-          "short": "M4 in 2"
+          "line": "M4 bus in 2 min · then 11",
+          "short": "Bus in 2 min"
         }
       },
       "img": "img/hero-m4.webp"
@@ -1074,7 +1083,7 @@
         "uptown": 4,
         "downtown": 7
       },
-      "glance": "Uptown trains · 4 min",
+      "glance": "Uptown train · 4 min",
       "depth": "departures",
       "scenarios": [
         "hungry"
@@ -1084,10 +1093,11 @@
         90
       ],
       "card": {
-        "meta": "Subway · stairs at the corner",
-        "live": "Uptown in 4 · elevator out"
+        "meta": "Subway · uptown and downtown",
+        "live": "Uptown 4 min · elevator out",
+        "tone": "warn"
       },
-      "short": "Uptown in 4",
+      "short": "Train in 4 min",
       "reasons": {
         "goal": "Stairs at the corner",
         "world": "Stairs at the corner"
@@ -1142,12 +1152,12 @@
       },
       "say": {
         "hungry": {
-          "line": "Uptown in 4 · stairs at the corner",
-          "short": "Uptown in 4"
+          "line": "Uptown train in 4 min · stairs at the corner",
+          "short": "Train in 4 min"
         },
         "default": {
-          "line": "Uptown in 4 · stairs at the corner",
-          "short": "Uptown in 4"
+          "line": "Uptown train in 4 min · stairs at the corner",
+          "short": "Train in 4 min"
         }
       },
       "img": "img/hero-station.webp"
@@ -1174,7 +1184,8 @@
       "n": null,
       "card": {
         "meta": "Post office · counter service",
-        "live": "Line of 8 · package ready"
+        "live": "Line of 8 · package ready",
+        "tone": "go"
       },
       "short": "Line of 8",
       "reasons": {

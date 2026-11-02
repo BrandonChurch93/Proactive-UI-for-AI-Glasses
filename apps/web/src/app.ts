@@ -1,6 +1,5 @@
-import { LEVEL_RANK, PLACE_BY_ID, angleWrap, isShow, reasonIsClean, uiScale, VIEWFINDER, yawToward, type Band, type ComponentKind, type ScenarioId, type WorldSnapshot } from '@lumen/shared';
+import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, VIEWFINDER, type Band, type ComponentKind, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
-import { Ambient, type StreetFrame } from './audio/ambient';
 import { Chrome } from './chrome/chrome';
 import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
 
@@ -23,20 +22,6 @@ type Mode = 'attract' | 'walk';
 // The glasses asking, reminding or carrying a message is not deciding.
 const NOT_DECIDED = new Set<ComponentKind>(['menu', 'map', 'thread', 'toast', 'strip', 'ask', 'followup', 'pocket', 'whisper']);
 
-// What the street sounds need from the walk: the band for the cadence, the crossing and its signal, and which side the road is on.
-function streetFrame(w: Walk, band: Band, snap: WorldSnapshot): StreetFrame {
-  const sim = w.sim;
-  const eye = sim.wearer.pos;
-  const cw = snap.env.crosswalk;
-  const crossing = sim.wearer.state === 'crossing';
-  const waiting = Boolean(cw && cw.signal !== 'walk' && cw.distance < 1.5 && sim.wearer.speed < 0.2);
-  const post = cw ? sim.anchorOf(`signal:${cw.id}`) : undefined;
-  const head = sim.head.yaw;
-  const signalPan = post ? -Math.sin(angleWrap(yawToward(eye, post) - head)) : 0;
-  const roadPan = -Math.sin(angleWrap(yawToward(eye, { x: 0, y: eye.y, z: eye.z }) - sim.wearer.bodyYaw));
-  return { t: w.t, band, crossing, walkSignal: Boolean(cw && cw.signal === 'walk'), beeping: crossing || waiting, roadPan, signalPan, paint: crossing };
-}
-
 export class App {
   walk: Walk;
   mode: Mode;
@@ -44,8 +29,6 @@ export class App {
   readonly end: EndCard;
   readonly chrome: Chrome;
   private inspector: Inspector | null = null;
-  private ambient = new Ambient();
-  private soundOn = false;
   private endShown = false;
   private pace = false;
   private gazeMark = true;
@@ -73,7 +56,6 @@ export class App {
     this.chrome = new Chrome(
       ui,
       {
-        sound: () => this.toggleSound(),
         inspector: () => this.inspector?.toggle(),
         pause: () => {
           this.setPaused(!this.walk.paused);
@@ -96,7 +78,6 @@ export class App {
     this.pace = Boolean(opts.pace);
     this.bindInput();
     this.resize();
-    document.addEventListener('visibilitychange', () => this.ambient.pause(document.hidden));
   }
 
   resize(): void {
@@ -125,7 +106,6 @@ export class App {
       ...(this.opts.focusOutline ? { focusOutline: true } : {}),
       chrome: () => this.chrome.rects(),
     });
-    this.syncSound(w);
     return w;
   }
 
@@ -195,9 +175,14 @@ export class App {
   private updateMark(): void {
     const w = this.walk;
     const f = w.last()?.frame;
-    const show = this.gazeMark && this.mode === 'walk' && !this.title.visible && !this.end.visible && !w.hoverId && !f?.gate.safety;
+    // On the walk the viewfinder is always on the glass; in a gate it goes quiet where it stands, as the crossing line says.
+    const show = this.gazeMark && this.mode === 'walk' && !this.title.visible && !this.end.visible;
     if (!show) {
       this.chrome.setMark(null);
+      return;
+    }
+    if (f?.gate.safety) {
+      this.chrome.setMark({ lit: false, held: false, p: null, quiet: true });
       return;
     }
     const target = f?.dwell.target;
@@ -235,7 +220,6 @@ export class App {
       this.mountInspector();
       this.chrome.setInspectorHint(true);
       this.title.reveal();
-      this.syncSound(this.walk);
     };
     if (fromEnd) {
       this.title.show(true);
@@ -253,7 +237,6 @@ export class App {
     this.mode = 'attract';
     this.walk = this.makeWalk('walking', true);
     this.chrome.setInspectorHint(false);
-    this.syncSound(this.walk);
     this.title.show(true);
   }
 
@@ -360,18 +343,6 @@ export class App {
     this.endShown = false;
   }
 
-  private toggleSound(): boolean {
-    this.soundOn = !this.soundOn;
-    this.syncSound(this.walk);
-    return this.soundOn;
-  }
-
-  private syncSound(w: Walk): void {
-    const live = this.soundOn && this.mode !== 'attract';
-    if (live !== this.ambient.on) this.ambient.toggle();
-    w.setSound(this.ambient.context, live, this.ambient.ui);
-  }
-
   private dismiss(): void {
     if (this.mode !== 'walk' || performance.now() - this.lastDismiss < 400) return;
     this.lastDismiss = performance.now();
@@ -466,8 +437,6 @@ export class App {
     if (this.mode !== 'attract' && w.ended && !this.endShown && !this.inspector?.isOpen) this.showEnd();
     this.updatePace();
     this.updateMark();
-    const last = w.last();
-    if (last) this.ambient.update(streetFrame(w, last.frame.band, last.snap));
     void dt;
   }
 }

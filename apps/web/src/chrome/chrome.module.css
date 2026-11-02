@@ -29,26 +29,20 @@
   border-color: rgba(240, 180, 41, 0.5);
 }
 
-.sound {
+.pause {
   position: absolute;
   top: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-top));
   right: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right));
 }
 
-.pause {
-  position: absolute;
-  top: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-top));
-  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(112px * max(1, var(--ui, 1))));
-}
-
 .hint {
   position: absolute;
   top: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-top));
-  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(124px * max(1, var(--ui, 1))));
+  right: max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right));
 }
 
 .hint.withPause {
-  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(224px * max(1, var(--ui, 1))));
+  right: calc(max(calc(14px * max(1, var(--ui, 1))), env(safe-area-inset-right)) + calc(112px * max(1, var(--ui, 1))));
 }
 
 .btn {
@@ -221,7 +215,6 @@
   position: absolute;
   left: 50%;
   bottom: calc(6px * var(--s));
-  transition: bottom 220ms cubic-bezier(0.22, 1, 0.36, 1);
   transform: translateX(-50%);
   font-family: var(--font-mono);
   font-size: calc(9.5px * var(--s));
@@ -229,5 +222,14 @@
   letter-spacing: 0.12em;
   color: var(--chrome-accent);
   opacity: 0.8;
+  white-space: nowrap;
   text-shadow: 0 calc(1px * var(--s)) 0 rgba(0, 0, 0, 0.55);
+  transition: bottom 220ms cubic-bezier(0.22, 1, 0.36, 1), color 120ms ease-out, opacity 120ms ease-out;
+}
+
+/* A gate: the square stays where it is, quiet, as the crossing line says. */
+.quiet .corner,
+.quiet .focus {
+  color: var(--ink);
+  opacity: 0.3;
 }

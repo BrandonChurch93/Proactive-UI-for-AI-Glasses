@@ -141,6 +141,22 @@ export function runData(): SuiteResult {
     'copy',
     PLACES.filter((p) => p.card.live.length > 28).map((p) => `${p.id}: ${p.card.live}`),
   );
+  // A tone is one of three, and bad news names its status after the interpunct, which is what takes the color.
+  add(
+    'every live line with a tone carries go, warn or stop, and a warn or stop line names its status after the interpunct',
+    'copy',
+    PLACES.filter((p) => p.card.tone !== undefined).flatMap((p) => {
+      const t = p.card.tone as string;
+      if (t !== 'go' && t !== 'warn' && t !== 'stop') return [`${p.id}: tone ${t}`];
+      const cut = p.card.live.indexOf(' · ');
+      return (t === 'warn' || t === 'stop') && (cut < 0 || !p.card.live.slice(cut + 3).trim()) ? [`${p.id}: ${t} line names no status: ${p.card.live}`] : [];
+    }),
+  );
+  add(
+    'every expanded row has a key or a thumbnail, a title, a sub and a value',
+    'copy',
+    PLACES.flatMap((p) => (p.expanded?.rows ?? []).filter((r) => !(r.key || r.img) || !r.title || !r.sub || !r.value).map((r) => `${p.id}: ${r.title}`)),
+  );
   const shapeBad: string[] = [];
   for (const p of PLACES) {
     const x = p.expanded;

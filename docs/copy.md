@@ -10,7 +10,7 @@ A panel on the left, reviewer chrome, over the live street; top to bottom:
 - Name: **Proactive UI for AI Glasses**
 - Setting: You're walking through a big city. The AI in your glasses decides what to show you, how much, and when to stay quiet.
 - What this is (mono caps), three lines with mono keys: BRAIN · A deterministic rules engine, not a model. Same walk, same decisions, every time. / RULES · Thirteen walking rules for a person who is moving: content scales with speed, yields to a head check, saves itself for the red light, never covers a face or a car. / PROOF · Every decision is logged with its reasons and scored by an eval suite. Press I during a walk.
-- The walk (mono caps): Start the walk (primary, its label centered). Under it, in the setting's type: Explore the block. Open the menu at the bottom right to find a place and go there.
+- The walk (mono caps): Start the walk (primary, its label centered). Under it, in the setting's type: Explore the block. Find a place at the bottom right and go there.
 - Controls: LOOK drag · DWELL hold · PINCH click · ESC dismiss · I inspector
 - Controls, on touch screens: LOOK drag · DWELL hold · PINCH tap · LONG-PRESS dismiss · I inspector
 - Footer: Built by Brandon Church · Three.js, TypeScript, GSAP · About this project (no Source link: the README names no repository address)
@@ -99,7 +99,7 @@ Rules for a say line: under 60 characters; at most two numbers (a unit counts wi
 | Goldie's Counter | Fastest lunch on this side · 3 min, 9 seats | Pastrami counter · 3 min wait | 3 min, 9 seats (Lunch) · 3 min wait |
 | Mega Burger | 4 seats open, 6 min · across the street, on your way | Burgers till 1 am · 6 min wait | 6 min wait |
 | Trattoria da Lia | Sit-down, about 20 min · menu read from Italian | Sign reads home cooking · table in 20 min | Table in 20 |
-| Kathy's Cupcakes | Not lunch, but a brown butter batch at 2 | Brown butter batch at 2 · 80 min from now | Batch at 2 |
+| Kathy's Cupcakes | Not lunch, but a brown butter batch at 2 | Brown butter batch at 2 · in 80 min | Batch at 2 |
 | The Big Bean | Maya's meeting you here at 1 (once the wearer has said On my way and Yes; before that, the default) | Line of 4 · 5 min | Maya at 1 (Lunch, met) · Line of 4 |
 | Main Street Pharmacy | | Your prescription is ready · counter 2, no line | Ready, counter 2 |
 | Corner Hardware | | Keys cut while you wait · till 5 | Keys cut till 5 |
@@ -107,13 +107,15 @@ Rules for a say line: under 60 characters; at most two numbers (a unit counts wi
 | Grace Theater | | Dune: Part Two at 8 · 12 seats left | Dune at 8 |
 | Lucky Lanes | | 5 lanes open till 5 · walk right in | 5 lanes open |
 | Atlas Books | | Four staff picks in stock · reading at 7, free | Reading at 7 |
-| M4 stop | | M4 in 2 min · then 11 | M4 in 2 |
-| 47th St Station | Uptown in 4 · stairs at the corner | Uptown in 4 · stairs at the corner | Uptown in 4 |
-| Pocket Park | | Benches in the shade · end of the walk | Shaded benches |
+| M4 stop | | M4 bus in 2 min · then 11 | Bus in 2 min |
+| 47th St Station | Uptown train in 4 min · stairs at the corner | Uptown train in 4 min · stairs at the corner | Train in 4 min |
+| Pocket Park | | Benches in the shade · a bench free now | Shaded benches |
 
 A say line that names a plan speaks only once the wearer has agreed to it, and while it speaks the card shows no reason line, so the friend is read once and the line once.
 
-Live lines on cards are always a fact from inside, never the hours (the hours live in the card's small meta line and never lead), fit one line of the card in 28 characters, and hint at what the expanded view holds, so a walker knows the stop is worth it. The glance line is what a label grows from. From `data/places.json`:
+Every say line, short form, glance, card live line and row reads for someone who has never been to this city: no transit shorthand (a route number or a direction is never the subject on its own; "bus" or "train" is), every quantity carries its unit the first time it appears on a pane, and no line relies on the place's kind to be understood. Every expanded row has a key or a thumbnail, a title, a sub and a value.
+
+Live lines on cards are always a fact from inside, never the hours (the hours live in the card's small meta line and never lead), fit one line of the card in 28 characters, carry a tone (in brackets below) where the status after the interpunct is news (the dot and that phrase in go, warn or stop; bad news is tagged), and hint at what the expanded view holds, so a walker knows the stop is worth it. The glance line is what a label grows from. From `data/places.json`:
 
 | Place | Live line | Glance | Meta |
 | --- | --- | --- | --- |
@@ -122,10 +124,10 @@ Live lines on cards are always a fact from inside, never the hours (the hours li
 | Corner Hardware | Keys cut till 5 · no wait | Keys cut · no wait | Hardware · keys cut |
 | Pocket Park | Shade till 2:30 · bench free | Benches in the shade | Park · shade and benches |
 | Trattoria da Lia | Table in 20 min · translated | Table in 20 min | Home cooking · open until 11 PM |
-| Main Street Pharmacy | Ready at counter 2 · no line | Prescription ready | Pharmacy · open till 9 |
-| M4 stop | M4 in 2 · seats open | 2 min · next in 11 | Bus · uptown |
-| 47th St Station | Uptown in 4 · elevator out | Uptown trains · 4 min | Subway · stairs at the corner |
-| Post Office | Line of 8 · package ready | Package ready · line of 8 | Post office · counter service |
+| Main Street Pharmacy | Ready at counter 2 · no line (go) | Prescription ready | Pharmacy · open till 9 |
+| M4 stop | Bus in 2 · seats open | Bus in 2 min · next in 11 | Bus stop · M4 uptown |
+| 47th St Station | Uptown 4 min · elevator out (warn) | Uptown train · 4 min | Subway · uptown and downtown |
+| Post Office | Line of 8 · package ready (go) | Package ready · line of 8 | Post office · counter service |
 | Goldie's Counter | 3 min wait · 9 seats open | 3 min wait · 9 seats | Deli · $ · counter seating |
 | Mega Burger | 6 min wait · 4 seats open | 6 min wait · $ | Burgers · $ · open late |
 | Kathy's Cupcakes | Fresh batch at 2:00 | Fresh batch at 2 | Bakery · cupcakes and coffee |
@@ -153,16 +155,16 @@ Each place, in `data/places.json` order of interest: its sub line, its rows (key
 - **M4 stop** · Next four buses: 2 min · M4 uptown · Seats open · on time (go) / 11 min · M4 uptown · Standing room · 3 min late (warn) / 19 min · M4 uptown · Seats open · on time / 24 min · M4 Limited · Skips 50th to 59th · on time. Action: Remind me at 11 · Not now. After: I'll tell you when it's 3 min out. Pocket: M4 uptown · I'll say at 3 min.
 - **47th St Station** · Next departures · access: 4 min · Uptown local · Platform A · crowded · on time / 7 min · Downtown local · Platform B · seats · on time / 10 min · Uptown express · Skips 50th · 2 min late (warn) / Access · Elevator out of service · Stairs at the corner, 24 steps · till Fri (warn). Action: Route me there · Not now. After: Stairs on your right at the corner · 24 steps. Pocket: Stairs at the corner · 24 steps.
 - **Post Office** · Counter · open till 5: Line · 8 ahead · About 12 min · till 5 / Window · A package for you · Pickup window · no line · till 6 (go) / Stamps · Kiosk · No line · 24 h. Action: Take a number · Not now. After: You're number 9 · about 12 min. I'll say when it's close. Pocket: Number 9 · about 12 min.
-- **Mega Burger** · Counter and booths · open till 1: The Mega · Double patty · cheddar · $9.50 (photo) / Classic · Single patty · pickles · $7 (photo) / Fries · Hand cut · sea salt · $3.50 (photo) / Shake · Vanilla or chocolate · $5. Action: Hold a seat · Not now. After: Seat held. Follow the route, across and back. Pocket: Mega Burger · seat held.
-- **Goldie's Counter** · Counter seating · open till 4: Pastrami on rye · Hand sliced · mustard · $14 (photo) / Matzo ball soup · Chicken broth · dill · $8 (photo) / Egg cream · Chocolate · seltzer · $4.50 (photo) / Half sour pickle · On the side · $2. Action: Hold a seat · Not now. After: Seat held. Follow the route, 40 m. Pocket: Goldie's Counter · seat held.
-- **Kathy's Cupcakes** · Today's flavors: Brown butter · Fresh at 2 · $4 (photo) / Lemon poppy · In the case · $4 (photo) / Double chocolate · Sold out (stop, photo) / Red velvet · Last two · $4 (warn). Action: Save me one · Not now. After: One brown butter, held at the counter. Pocket: Brown butter · held at 2.
+- **Mega Burger** · Counter and booths · open till 1: The Mega · Double patty · cheddar · $9.50 (photo) / Classic · Single patty · pickles · $7 (photo) / Fries · Hand cut · sea salt · $3.50 (photo) / Drink · Shake · Vanilla or chocolate · $5. Action: Hold a seat · Not now. After: Seat held. Follow the route, across and back. Pocket: Mega Burger · seat held.
+- **Goldie's Counter** · Counter seating · open till 4: Pastrami on rye · Hand sliced · mustard · $14 (photo) / Matzo ball soup · Chicken broth · dill · $8 (photo) / Egg cream · Chocolate · seltzer · $4.50 (photo) / Side · Half sour pickle · On the side · $2. Action: Hold a seat · Not now. After: Seat held. Follow the route, 40 m. Pocket: Goldie's Counter · seat held.
+- **Kathy's Cupcakes** · Today's flavors: Brown butter · Fresh at 2 · $4 (photo) / Lemon poppy · In the case · $4 (photo) / Double chocolate · Back tomorrow · Sold out (stop, photo) / Classic · Red velvet · Last two · $4 (warn). Action: Save me one · Not now. After: One brown butter, held at the counter. Pocket: Brown butter · held at 2.
 - **Lucky Lanes** · Lanes right now: 1 to 4 · League play · Till 6 · Booked (warn) / 5 to 9 · Walk in · $12 an hour till 5 · Open (go) / 10 to 12 · Party · From 4 · Booked (warn) / Rental · Shoes · Sizes 4 to 15 · $4. Action: Book a lane · Not now. After: Lane 6 is yours at 3:30. Pocket: Lane 6 · 3:30 · booked.
-- **The Big Bean** · Order ahead · skip the line: Cortado · $4.25 (photo) / Cold brew · $5 (photo) / Oat latte · $5.75 (photo) / 12:46 · Pickup at the counter · Skip the line of 4. Action, following the row: Order ahead · Not now. After: Cortado ordered · ready at 12:46, skip the line. / Cold brew ordered · ready at 12:46, skip the line. / Oat latte ordered · ready at 12:46, skip the line. Pocket: Cortado · ready at 12:46 / Cold brew · ready at 12:46 / Oat latte · ready at 12:46. Not a choice: Pickup at the counter.
+- **The Big Bean** · Order ahead · skip the line: Cortado · Double shot · 4 oz · $4.25 (photo) / Cold brew · 12 h steep · over ice · $5 (photo) / Oat latte · Oat milk · 12 oz · $5.75 (photo) / 12:46 · Pickup at the counter · Skip the line of 4 · no wait. Action, following the row: Order ahead · Not now. After: Cortado ordered · ready at 12:46, skip the line. / Cold brew ordered · ready at 12:46, skip the line. / Oat latte ordered · ready at 12:46, skip the line. Pocket: Cortado · ready at 12:46 / Cold brew · ready at 12:46 / Oat latte · ready at 12:46. Not a choice: Pickup at the counter.
 
 - Settled at a door: the destination's expanded view carries no reason line; the arrival line (You made it, or the route's why) stays on its card.
 ## The menu
 
-- The button, bottom right, the wearer's own: a compass in a round glass; FIND beside it until the first time it is opened.
+- The button, bottom right, the wearer's own: a compass in a round glass; FIND A PLACE beside it for the whole walk (FIND below 900 px wide).
 - The panel (a click on the button, or the pointer resting on it 0.5 s): the eyebrow from the walk's clock, TUE 12:42 · FIND A PLACE (mono caps) / Where to? / Food and drink · {Five} places · nearest {40} m (food and cafe places, the nearest by straight distance, to 10 m) / Things to do · Theater, lanes, a reading, a park / Shops and services · Pharmacy, hardware, post office / Getting around · M4 in {4} min · uptown in {3} (the bus stop's and the station's live times) / Close (quiet). Things to do reads Cinema, lanes, a reading, a park. Reason in the log: Find a place.
 - A category's places: {CATEGORY} · BY WALK TIME (mono caps) / Where to? / Back (quiet, above the rows) / one row per place by walk time: {name} · {picker line, else the short form} · {walk time} · {live line}, the walk time below 60 s as the distance (40 m, rounded to 5 m), otherwise whole minutes rounded up (1 min, 2 min), so no two rows read the same; the rows sort by the true seconds when the list opens and keep that order while it is open; the route offer's {walk time} and the route's glance read the same way. Picker lines: Goldie's Counter · Fastest lunch on this side. Kathy's Cupcakes · Not lunch, a batch at 2. The Big Bean · Coffee after. Trattoria da Lia · Home cooking, sit-down. Mega Burger · Burgers, counter seats.
 - A place chosen: the panel folds, the route draws, and the route's ground glance reads {name} · {walk time} (Goldie's Counter · 40 m): its name and its fact, the walk time from where the route was drawn, read out to a screen reader and kept in the log; the end panel names the place alone.
@@ -176,7 +178,7 @@ Each place, in `data/places.json` order of interest: its sub line, its rows (key
 
 ## Reviewer chrome
 
-- FOCUS (inside the viewfinder, at its bottom edge, always)
+- EYE TRACKING (inside the viewfinder, at its bottom edge, always on the walk; quiet at 30% in a gate)
 - I · INSPECTOR
 - Pace readout (reviewer chrome, off by default): PACE · WALK · 1.4 M/S
 - Inspector headers: Timeline · Decisions · Signals · Overrides · Evals · Export
