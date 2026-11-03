@@ -97,7 +97,7 @@ if (probes) {
     if (${nolookup}) sim.reviewer.lookUps = [];
     const lap = { laps: 0, pauses: [], stillFrom: null, crossBirths: [], crossFrames: 0, routes: [], destAt: null, dest: null, corners: [], cornerFrom: null };
     const vp = { w: innerWidth, h: innerHeight };
-    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {}, levels: {} };
+    const m = { frames: 0, paneFrames: 0, farFrames: 0, worstFar: 0, worstFarAt: null, roadFrames: 0, roadHeld: 0, worstRoad: 0, worstRoadAt: null, keepW: 0, keepH: 0, pipsMax: 0, pipsAt: null, hiddenPromotes: [], per: {}, snoozes: 0, outFrames: 0, outAt: [], chromeFrames: 0, chromeAt: [], scaleLast: {}, scaleAt: {}, levels: {} };
     let lastTick = -1;
     const overlap = (a, r) => Math.max(0, Math.min(a.x + a.w, r.x + r.w) - Math.max(a.x, r.x)) * Math.max(0, Math.min(a.y + a.h, r.y + r.h) - Math.max(a.y, r.y));
     const birthsBefore = () => walk.overlayLog.length;
@@ -172,7 +172,7 @@ if (probes) {
         if (ratio > 1) { m.farFrames++; if (ratio > m.worstFar) { m.worstFar = ratio; m.worstFarAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
         if (ratio > 1 && ${process.argv.includes('--far')}) console.log('far', walk.t.toFixed(3), it.id, JSON.stringify(r), Math.round(pr.x), Math.round(pr.y), c.opacity.toFixed(2), JSON.stringify(it.placed && { mode: it.placed.mode, moved: it.placed.moved }), it.aside ? JSON.stringify({ a: it.aside.active, by: it.aside.by }) : '');
         let ov = 0; for (const k of road) ov += overlap(r, k.rect);
-        if (ov > 1) { m.roadFrames++; const f = ov / (r.w * r.h); if (f > m.worstRoad) { m.worstRoad = f; m.worstRoadAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
+        if (ov > 1) { m.roadFrames++; if (it.hold) m.roadHeld = (m.roadHeld || 0) + 1; const f = ov / (r.w * r.h); if (f > m.worstRoad) { m.worstRoad = f; m.worstRoadAt = [+walk.t.toFixed(2), it.id, it.cur.level]; } }
       }
       const chromeRects = [];
       for (const el of window.__app.chrome.el.children) {
@@ -224,7 +224,7 @@ if (probes) {
     await p.screenshot({ path: `${shotDir}/${scenario}-live-${at}.png` });
   }
   const out = (await p.evaluate(`(() => { const walk = window.__app.walk; return { m: window.__bar.m, log: walk.overlayLog, t: walk.t, lap: window.__bar.lap }; })()`)) as {
-    m: { frames: number; quietBad?: number; quietAt?: unknown; gateFrames?: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
+    m: { frames: number; quietBad?: number; quietAt?: unknown; gateFrames?: number; paneFrames: number; farFrames: number; worstFar: number; worstFarAt: unknown; roadFrames: number; roadHeld?: number; worstRoad: number; worstRoadAt: unknown; keepW: number; keepH: number; pipsMax: number; pipsAt: number | null; hiddenPromotes: unknown[]; per: Record<string, number>; snoozes: number };
     log: { t: number; id: string; kind: string; level: string; from?: string; cause: string; detail?: string }[];
     t: number;
     lap: { laps: number; pauses: [number, number][]; crossBirths: unknown[]; routes: [number, string, number | null][]; corners: [number, number | null][] };
@@ -275,7 +275,7 @@ if (probes) {
   console.log(`  level changes inside 2.5 s (not gate, dismiss, look-away, dwell climb, right of way): ${fast.length}${fast.length ? `  ${fast.slice(0, 6).join('; ')}` : ''}`);
   console.log(`  most births per item per life: ${maxBirths} (${maxBirthsAt})`);
   console.log(`  pane edge farther than 1.0 x its width from its pip (pip in view): ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
-  console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
+  console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}; the held pane, drawn in by the pull, ${m.roadHeld ?? 0} of them), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
   console.log(`  largest keep-out: ${(100 * m.keepW).toFixed(0)}% x ${(100 * m.keepH).toFixed(0)}% of the view`);
   console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt} ${JSON.stringify((m as unknown as { pipsIds?: string[] }).pipsIds ?? [])}` : ''}`);
   if (process.argv.includes('--per')) console.log(`  pane frames per item: ${JSON.stringify(m.per)}`);
