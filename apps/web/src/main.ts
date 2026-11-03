@@ -105,7 +105,6 @@ async function boot(): Promise<void> {
     window.__stepTo = async (t: number) => {
       app.walk.seek(t);
       if (app.title.visible) app.title.skipToChoice();
-      app.syncChrome();
       world.update(0);
       if (cam && cam.length === 5) {
         world.core.camera.position.set(cam[0]!, cam[1]!, -cam[2]!);
@@ -113,6 +112,8 @@ async function boot(): Promise<void> {
         world.core.camera.updateMatrixWorld();
       }
       world.render();
+      // After the frame, so the viewfinder's caption knows which panes the frame drew over it.
+      app.syncChrome();
     };
     await document.fonts.ready;
     await window.__stepTo(Number(params.get('t') ?? 0));

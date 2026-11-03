@@ -83,9 +83,17 @@ export class Chrome {
     this.rotate.style.display = on ? 'grid' : 'none';
   }
 
-  captionRect(): DOMRect | null {
+  // The band the caption can stand in, at rest (6 px up) or lifted by a hold (20 px up), so the test does not depend on its transition.
+  captionRect(): { left: number; right: number; top: number; bottom: number } | null {
     const el = this.mark.querySelector<HTMLElement>(`.${css.focus}`);
-    return el && this.mark.style.display !== 'none' ? el.getBoundingClientRect() : null;
+    if (!el) return null;
+    const hidden = this.mark.style.display === 'none';
+    if (hidden) this.mark.style.display = '';
+    const m = this.mark.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    if (hidden) this.mark.style.display = 'none';
+    const s = m.width / 160;
+    return { left: r.left, right: r.right, top: m.bottom - (20 * s + r.height), bottom: m.bottom - 6 * s };
   }
 
   setMark(state: { lit: boolean; held: boolean; p: number | null; quiet?: boolean; covered?: boolean } | null): void {

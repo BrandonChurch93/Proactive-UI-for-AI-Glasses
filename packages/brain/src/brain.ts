@@ -1620,7 +1620,7 @@ export class Brain {
       mine.anchor = `door:${e.id}`;
       mine.zoneOk = true;
       // A card or view kept up from the approach that the wearer is not looking at comes down to the arrival line as it comes into sight: looking away shrinks it.
-      if (LEVEL_RANK[mine.level] > LEVEL_RANK[level] && this.arrivalSaid !== e.id && this.paneVisible(e.id)) {
+      if (LEVEL_RANK[mine.level] > LEVEL_RANK[level] && snap.wearer.gaze.target !== id && this.arrivalSaid !== e.id && this.paneVisible(e.id)) {
         const it = this.item(e.id);
         it.level = level;
         it.since = t;

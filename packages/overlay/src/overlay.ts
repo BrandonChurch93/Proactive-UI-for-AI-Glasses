@@ -1020,7 +1020,8 @@ export class Overlay {
     // A view being read stays where the reader's drags put it. Standing still the center on it is reading.
     const read = it.d.level === 'expanded' && look && (reading || (gapNow <= m && this.band === 'stopped'));
     // Not resting, the chrome acts at once, by the least shift that clears it; resting, the pull carries the pane clear of it.
-    if (!read && !rest && hd.pulled && chrome.some((k) => rectsOverlap(rect, k))) {
+    // While the wearer drags the pane rides with the world: a shift then would move it against the world under the pointer.
+    if (!read && !rest && hd.pulled && !this.aiming() && chrome.some((k) => rectsOverlap(rect, k))) {
       const s2 = nudge(rect, vp, chrome);
       if (s2) {
         hd.off = { x: hd.off.x + s2.x, y: hd.off.y + s2.y };
@@ -1650,7 +1651,8 @@ export class Overlay {
             rect = { ...rect, x: rect.x + y.dx };
           }
         }
-        if (it.kind === 'world') rect = { ...rect, x: clamp(rect.x, 0, Math.max(0, vp.w - rect.w)), y: clamp(rect.y, 0, Math.max(0, vp.h - rect.h)) };
+        // A held pane is not clamped: one being read may run off the glass and keeps its place in the world (its pull keeps it inside at rest).
+        if (it.kind === 'world' && !(b === it.cur && it.hold)) rect = { ...rect, x: clamp(rect.x, 0, Math.max(0, vp.w - rect.w)), y: clamp(rect.y, 0, Math.max(0, vp.h - rect.h)) };
         b.rect = rect;
         // In a gate the crossing line is the only line on the glass: a pane receded under the blur read as an empty grey rectangle, so it goes with the recede and comes back with it.
         const gateO = d.placement.anchor !== 'view:glyph' ? clamp((this.gateK.v - 0.2) / 0.8, 0, 1) : 1;

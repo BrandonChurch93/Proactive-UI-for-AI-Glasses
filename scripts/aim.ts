@@ -6,8 +6,8 @@ import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 // down, and lets go once the square shows it holds the place or the pane is under the center. One line per aim: the band, the
 // place aimed at, the place the gaze holds 0.5 s after letting go, how far the aimed pane sits from the center 3 s
 // later, and any jump. A frame recorder in the page watches the looked-at pane all the way round: a jump is a move of
-// more than 60 px in 100 ms while its light moves less than 20 px, outside a level change and outside the 320 ms the
-// held pane takes to come beside the square. Passes at 95% held, 95% near, and no jump. --laps, --w, --h, --verbose.
+// more than 60 px in 100 ms while its light moves less than 20 px, outside a level change and outside a rule 8 step
+// aside. Passes at 95% held, 95% near, no jump, every landing still and every drag exact. --laps, --w, --h, --verbose.
 const base = arg('base', 'http://localhost:5199/')!;
 const w = Number(arg('w', '1920'));
 const h = Number(arg('h', '1080'));
@@ -427,7 +427,7 @@ const jumpN = jumpTotal;
 const bands = [...new Set(aims.map((a) => a.band))].join(' and ');
 const pctOk = n ? (100 * okN) / n : 0;
 const pctNear = judged.length ? (100 * nearN) / judged.length : 0;
-console.log(`\n${n} aims over ${laps} laps (${aims.length - n} more ran into a crossing or rule 8) at ${w} x ${h} (${bands}): held the aimed place 0.5 s later ${okN} of ${n} (${pctOk.toFixed(1)}%); aimed pane within ${NEAR_PX} px of the center 3 s later ${nearN} of ${judged.length} (${pctNear.toFixed(1)}%, ${n - judged.length} excused); jumps ${jumpN} (${excusedCome} frames of the 320 ms come-beside move not counted); console errors ${errors.length}${reloads ? `; ${reloads} reloads` : ''}`);
+console.log(`\n${n} aims over ${laps} laps (${aims.length - n} more ran into a crossing or rule 8) at ${w} x ${h} (${bands}): held the aimed place 0.5 s later ${okN} of ${n} (${pctOk.toFixed(1)}%); aimed pane within ${NEAR_PX} px of the center 3 s later ${nearN} of ${judged.length} (${pctNear.toFixed(1)}%, ${n - judged.length} excused); jumps ${jumpN} (${excusedCome} frames of a rule 8 step aside not counted); console errors ${errors.length}${reloads ? `; ${reloads} reloads` : ''}`);
 for (const j of jumps) {
   const [t, id] = j.split(' ');
   const near = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${id}' && Math.abs(e.t - ${t}) < 0.5).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string;
