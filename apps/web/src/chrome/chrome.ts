@@ -83,8 +83,13 @@ export class Chrome {
     this.rotate.style.display = on ? 'grid' : 'none';
   }
 
-  setMark(state: { lit: boolean; held: boolean; p: number | null; quiet?: boolean } | null): void {
-    const key = state ? `${state.lit}|${state.held}|${state.quiet ? 'q' : ''}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
+  captionRect(): DOMRect | null {
+    const el = this.mark.querySelector<HTMLElement>(`.${css.focus}`);
+    return el && this.mark.style.display !== 'none' ? el.getBoundingClientRect() : null;
+  }
+
+  setMark(state: { lit: boolean; held: boolean; p: number | null; quiet?: boolean; covered?: boolean } | null): void {
+    const key = state ? `${state.lit}|${state.held}|${state.quiet ? 'q' : ''}|${state.covered ? 'c' : ''}|${state.p === null ? '-' : state.p.toFixed(3)}` : 'off';
     if (key === this.markKey) return;
     this.markKey = key;
     this.mark.style.display = state ? '' : 'none';
@@ -92,6 +97,7 @@ export class Chrome {
     this.mark.classList.toggle(css.lit!, state.lit);
     this.mark.classList.toggle(css.held!, state.held);
     this.mark.classList.toggle(css.quiet!, Boolean(state.quiet));
+    this.mark.classList.toggle(css.covered!, Boolean(state.covered));
     this.mark.style.setProperty('--p', String(state.p ?? 0));
   }
 

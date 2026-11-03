@@ -2,6 +2,10 @@
 
 *A UX study in when an assistant should speak, and when it should stay quiet.*
 
+## What it became
+
+By 2026-11-03 the demo is one city block that loops, seen through the glasses at game quality, with two walks: Explore, where the wearer wanders and looks, and Lunch, which opens the menu on Food. A viewfinder at the center of the view stands in for eye tracking: whatever it rests on is drawn slowly into it, a label grows to its card and the card to its expanded view while the look holds, at any pace short of brisk, and looking away shrinks it again a second later. FIND A PLACE at the bottom right chooses a destination and walks there, with a map tile on the way; texts arrive as banners and a reply can change the walk; at the door the place's expanded view offers one choice; what was saved waits in the pocket for a red light; an end panel sums up the session; the inspector shows every decision with its reason. Errands, the call, the Watch mode and sound were cut along the way. The rest of this brief is the intent it started from.
+
 ## What we are building
 
 A browser demo of a near-future pair of AI glasses on a city walk, where a deterministic brain decides what to show, how much, when, and when to go quiet. The overlay is the product. The street is the stage. The inspector is the proof.

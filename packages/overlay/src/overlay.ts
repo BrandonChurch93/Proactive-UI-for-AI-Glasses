@@ -877,6 +877,18 @@ export class Overlay {
     return row === undefined ? { id, action } : { id, action, row };
   }
 
+  // The center of the pane as the frame draws it: from its placement's anchor corner at the size it is drawn at now, which a resize
+  // under way can leave short of the placement's rect; the hold draws from the center, so pinning the rect's center moved it.
+  private drawnCenter(it: Item, pl: WorldPlace, r: Rect, t: number, jump: boolean): { x: number; y: number } {
+    const f = factors(pl);
+    const b = it.cur;
+    const w = b ? b.w.at(t) * pl.scale : r.w;
+    const h = b ? b.h.at(t) * pl.scale : r.h;
+    const jx = jump ? (it.place?.jumpX.at(t) ?? 0) : 0;
+    const jy = jump ? (it.place?.jumpY.at(t) ?? 0) : 0;
+    return { x: r.x + r.w * f.fx + jx + w * (0.5 - f.fx), y: r.y + r.h * f.fy + jy + h * (0.5 - f.fy) };
+  }
+
   // The held place's pane is pinned to the world the frame the look lands: its center keeps its offset from its light exactly
   // where it stands, drawn or riding, and nothing moves it until the look has held and the wearer rests; then the pull draws it
   // toward the center of the viewfinder. It goes back to following its light once the look has been gone 1 s.
@@ -898,7 +910,8 @@ export class Overlay {
       if (lightAway <= gap + w0) {
         // Still drawn as it folds, it is pinned where it is; gone, it comes back just above its light.
         const shown = b?.rect && b.opacity > 0.05 && b.level !== 'none';
-        const c = shown ? { x: b.rect!.x + b.rect!.w / 2 - pr.x, y: b.rect!.y + b.rect!.h / 2 - pr.y } : { x: 0, y: -h0 / 2 - gap };
+        // Its offset from the light as last drawn, carried to this frame's light.
+        const c = shown ? { x: (b.off?.x ?? b.rect!.x - pr.x) + b.rect!.w / 2, y: (b.off?.y ?? b.rect!.y - pr.y) + b.rect!.h / 2 } : { x: 0, y: -h0 / 2 - gap };
         it.hold = { fx: 0.5, fy: 0.5, off: c, w: w0, h: h0, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
         const r0 = { x: pr.x + c.x - w0 / 2, y: pr.y + c.y - h0 / 2, w: w0, h: h0 };
         return { mode: 'pane', rect: r0, leader: { x: pr.x + c.x, y: pr.y + c.y }, scale: sc, side: r0.x + r0.w / 2 < vp.w / 2 ? 'left' : 'right', fx: 0.5, fy: 0.5 };
@@ -916,8 +929,8 @@ export class Overlay {
       // ...and one still condensing or growing is not yet at its measured size, which its placement still has to catch up with.
       if (!look || it.frozen || b.level !== it.d.level) return null;
       // Pinned where it is drawn: its placement plus any move under way, so the landing frame never moves it.
-      const at = { x: placed.rect.x + lag.x + (it.place?.jumpX.at(t) ?? 0), y: placed.rect.y + lag.y + (it.place?.jumpY.at(t) ?? 0) };
-      const c = { x: at.x + placed.rect.w / 2 - pr.x, y: at.y + placed.rect.h / 2 - pr.y };
+      const at = this.drawnCenter(it, placed, placed.rect, t, true);
+      const c = { x: at.x + lag.x - pr.x, y: at.y + lag.y - pr.y };
       it.hold = { fx: 0.5, fy: 0.5, off: c, w: W, h: H, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
       it.place?.jumpX.set(0);
       it.place?.jumpY.set(0);
@@ -1469,8 +1482,9 @@ export class Overlay {
           if (it.ride && (!aimingNow || !p.inFront || it.dying)) {
             const r = it.placed?.mode === 'pane' ? { ...it.placed.rect, x: p.x + it.ride.x, y: p.y + it.ride.y } : null;
             it.ride = null;
-            if (r && p.inFront && this.gazeNow().target === it.id && !it.hold) {
-              it.hold = { fx: 0.5, fy: 0.5, off: { x: r.x + r.w / 2 - p.x, y: r.y + r.h / 2 - p.y }, w: r.w, h: r.h, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
+            if (r && p.inFront && this.gazeNow().target === it.id && !it.hold && it.placed?.mode === 'pane') {
+              const c = this.drawnCenter(it, it.placed, r, t, false);
+              it.hold = { fx: 0.5, fy: 0.5, off: { x: c.x - p.x, y: c.y - p.y }, w: r.w, h: r.h, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
             } else {
               it.place.reset(true);
               it.holdEnded = true;
@@ -1638,7 +1652,9 @@ export class Overlay {
         }
         if (it.kind === 'world') rect = { ...rect, x: clamp(rect.x, 0, Math.max(0, vp.w - rect.w)), y: clamp(rect.y, 0, Math.max(0, vp.h - rect.h)) };
         b.rect = rect;
-        const o = b.fade.v * asideO * yieldO;
+        // In a gate the crossing line is the only line on the glass: a pane receded under the blur read as an empty grey rectangle, so it goes with the recede and comes back with it.
+        const gateO = d.placement.anchor !== 'view:glyph' ? clamp((this.gateK.v - 0.2) / 0.8, 0, 1) : 1;
+        const o = b.fade.v * asideO * yieldO * gateO;
         b.opacity = o;
         if (b === it.cur) paneOpacity = o;
         b.wrap.style.transform = `translate3d(${rect.x.toFixed(1)}px, ${rect.y.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
@@ -1797,12 +1813,12 @@ export class Overlay {
 
   // What the live gaze can aim at besides lights and storefronts: every pane on the glass, by its anchor.
   // `placed` marks a pane the hold put beside the square: it is inside the keep square wherever it stands.
-  aimables(): { anchor: string; rect: Rect; opacity: number }[] {
-    const out: { anchor: string; rect: Rect; opacity: number }[] = [];
+  aimables(): { anchor: string; rect: Rect; opacity: number; level: Level }[] {
+    const out: { anchor: string; rect: Rect; opacity: number; level: Level }[] = [];
     for (const it of this.items.values()) {
       const b = it.cur;
       if (it.kind !== 'world' || it.dying || !b?.rect || b.level === 'none' || b.opacity <= 0.05 || it.placed?.mode !== 'pane' || it.aside.dropped) continue;
-      out.push({ anchor: it.d.placement.anchor, rect: b.rect, opacity: b.opacity });
+      out.push({ anchor: it.d.placement.anchor, rect: b.rect, opacity: b.opacity, level: b.level });
     }
     return out;
   }

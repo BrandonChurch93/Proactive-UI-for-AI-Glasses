@@ -2,7 +2,7 @@
   "walk": "hungry",
   "cases": [
     {
-      "name": "0:00 \u00b7 the light is held at the corner and the glasses say so",
+      "name": "0:00 · the light is held at the corner and the glasses say so",
       "between": [
         0,
         0.5
@@ -15,7 +15,7 @@
       }
     },
     {
-      "name": "0:00 to 0:01 \u00b7 nothing before the street has faded up",
+      "name": "0:00 to 0:01 · nothing before the street has faded up",
       "between": [
         0,
         0.75
@@ -25,7 +25,7 @@
       }
     },
     {
-      "name": "0:00 to 0:01 \u00b7 nothing asks at the corner",
+      "name": "0:00 to 0:01 · nothing asks at the corner",
       "between": [
         0,
         1.15
@@ -35,7 +35,7 @@
       }
     },
     {
-      "name": "0:01 \u00b7 the menu opens on Food: its places by walk time",
+      "name": "0:01 · the menu opens on Food: its places by walk time",
       "between": [
         1.2,
         1.4
@@ -45,11 +45,11 @@
         "id": "menu",
         "component": "menu",
         "nameIs": "Where to?",
-        "factIs": "Food and drink \u00b7 by walk time"
+        "factIs": "Food and drink · by walk time"
       }
     },
     {
-      "name": "0:02 \u00b7 one label, the best fit, reason in the log only",
+      "name": "0:02 · one label, the best fit, reason in the log only",
       "between": [
         1.5,
         3
@@ -64,7 +64,7 @@
       }
     },
     {
-      "name": "0:03 \u00b7 Goldie's picked: the route draws, caused by the choice",
+      "name": "0:03 · Goldie's picked: the route draws, caused by the choice",
       "between": [
         3.0,
         3.3
@@ -77,7 +77,7 @@
       }
     },
     {
-      "name": "0:03 \u00b7 and Goldie's is the destination",
+      "name": "0:03 · and Goldie's is the destination",
       "between": [
         3.2,
         10.9
@@ -87,7 +87,7 @@
       }
     },
     {
-      "name": "0:03 \u00b7 Goldie's chosen from the menu: it folds and the light releases",
+      "name": "0:03 · Goldie's chosen from the menu: it folds and the light releases",
       "between": [
         3.0,
         3.3
@@ -98,7 +98,7 @@
       }
     },
     {
-      "name": "0:09 \u00b7 a look at Mega Burger, 69 m: its label",
+      "name": "0:09 · a look at Mega Burger, 69 m: its label",
       "between": [
         8.6,
         9.2
@@ -111,7 +111,7 @@
       }
     },
     {
-      "name": "0:10 \u00b7 a second of hold later (beyond 35 m), its compact card, offering itself instead",
+      "name": "0:10 · a second of hold later (beyond 35 m), its compact card, offering itself instead",
       "between": [
         9.6,
         10.2
@@ -124,7 +124,7 @@
       }
     },
     {
-      "name": "0:11 \u00b7 Go here instead: the route redraws to Mega Burger, caused by the choice",
+      "name": "0:11 · Go here instead: the route redraws to Mega Burger, caused by the choice",
       "between": [
         11.0,
         11.3
@@ -136,7 +136,7 @@
       }
     },
     {
-      "name": "0:11 \u00b7 Mega Burger is the destination until the reply",
+      "name": "0:11 · Mega Burger is the destination until the reply",
       "between": [
         11.2,
         80.4
@@ -146,7 +146,7 @@
       }
     },
     {
-      "name": "0:03 to 0:38 \u00b7 no place card except the one looked at",
+      "name": "0:03 to 0:38 · no place card except the one looked at",
       "between": [
         3.3,
         38
@@ -158,7 +158,7 @@
       }
     },
     {
-      "name": "0:26 \u00b7 Maya's text, 25 s after Hungry, at the top while walking: glance size, the line and the replies",
+      "name": "0:26 · Maya's text, 25 s after Hungry, at the top while walking: glance size, the line and the replies",
       "between": [
         25.9,
         26.3
@@ -172,7 +172,7 @@
       }
     },
     {
-      "name": "0:39 \u00b7 a look at Trattoria da Lia across the street lights its label, then its card",
+      "name": "0:39 · a look at Trattoria da Lia across the street lights its label, then its card",
       "between": [
         39.0,
         40.2
@@ -184,7 +184,7 @@
       }
     },
     {
-      "name": "0:41 \u00b7 pinch while walking saves",
+      "name": "0:41 · pinch while walking saves",
       "between": [
         40.9,
         41.4
@@ -195,10 +195,10 @@
       }
     },
     {
-      "name": "0:41 \u00b7 nothing opens",
+      "name": "0:41 · the pinch opens nothing",
       "between": [
-        41,
-        45
+        40.9,
+        41.75
       ],
       "mustNot": {
         "id": "trattoria-da-lia",
@@ -206,7 +206,21 @@
       }
     },
     {
-      "name": "0:41 to 1:19 \u00b7 Pocket 1 on the glyph",
+      "name": "0:42 · the look held at Walk opens its view 2 s after the card",
+      "between": [
+        41.7,
+        41.9
+      ],
+      "must": {
+        "action": "promote",
+        "id": "trattoria-da-lia",
+        "level": "expanded",
+        "band": "walk",
+        "cause": "dwell"
+      }
+    },
+    {
+      "name": "0:41 to 1:19 · Pocket 1 on the glyph",
       "between": [
         41.5,
         79.4
@@ -216,7 +230,7 @@
       }
     },
     {
-      "name": "0:45 \u00b7 the look moves on and the card shrinks back to its label",
+      "name": "0:45 · the look moves on and the card shrinks back to its label",
       "between": [
         44.8,
         45.6
@@ -230,7 +244,7 @@
       }
     },
     {
-      "name": "0:52 \u00b7 the station stair, labelled with the view since 0:45, holds its label for the look",
+      "name": "0:52 · the station stair, labelled with the view since 0:45, holds its label for the look",
       "at": 51.6,
       "state": {
         "level": {
@@ -239,7 +253,7 @@
       }
     },
     {
-      "name": "0:40 \u00b7 walking, not looked at, the banner folds after 4 s of Walk",
+      "name": "0:40 · walking, not looked at, the banner folds after 4 s of Walk",
       "between": [
         39.5,
         40.2
@@ -250,7 +264,7 @@
       }
     },
     {
-      "name": "1:02 to 1:15 \u00b7 Brisk: labels at most, never a card",
+      "name": "1:02 to 1:15 · Brisk: labels at most, never a card",
       "between": [
         62.5,
         74.5
@@ -261,7 +275,7 @@
       }
     },
     {
-      "name": "1:15 \u00b7 no need to run",
+      "name": "1:15 · no need to run",
       "between": [
         74.5,
         76
@@ -273,7 +287,7 @@
       }
     },
     {
-      "name": "1:18 \u00b7 stopped half a second at the red light, the banner is back with the full thread",
+      "name": "1:18 · stopped half a second at the red light, the banner is back with the full thread",
       "between": [
         78.0,
         78.3
@@ -286,7 +300,7 @@
       }
     },
     {
-      "name": "1:18.5 \u00b7 On my way: the offer within 1 s, in the brain's voice",
+      "name": "1:18.5 · On my way: the offer within 1 s, in the brain's voice",
       "between": [
         78.5,
         79.5
@@ -294,11 +308,11 @@
       "must": {
         "action": "promote",
         "id": "maya-lunch",
-        "noteIs": "Big Bean \u00b7 40 m \u00b7 route there?"
+        "noteIs": "Big Bean · 40 m · route there?"
       }
     },
     {
-      "name": "1:20.5 \u00b7 Yes: the route redraws to the Big Bean, caused by the reply, for Maya",
+      "name": "1:20.5 · Yes: the route redraws to the Big Bean, caused by the reply, for Maya",
       "between": [
         80.5,
         80.8
@@ -311,7 +325,7 @@
       }
     },
     {
-      "name": "1:20.5 \u00b7 after Yes the thread keeps the reply and says where it is routing",
+      "name": "1:20.5 · after Yes the thread keeps the reply and says where it is routing",
       "between": [
         80.4,
         80.8
@@ -324,7 +338,7 @@
       }
     },
     {
-      "name": "1:23 \u00b7 the thread leaves once, 2.5 s after Yes",
+      "name": "1:23 · the thread leaves once, 2.5 s after Yes",
       "between": [
         82.9,
         83.2
@@ -335,7 +349,7 @@
       }
     },
     {
-      "name": "1:23 to 1:58 \u00b7 and does not return",
+      "name": "1:23 to 1:58 · and does not return",
       "between": [
         83.2,
         118
@@ -349,7 +363,7 @@
       }
     },
     {
-      "name": "1:20.5 \u00b7 the Big Bean is the destination",
+      "name": "1:20.5 · the Big Bean is the destination",
       "between": [
         80.7,
         111.9
@@ -359,7 +373,7 @@
       }
     },
     {
-      "name": "1:20 \u00b7 the pocket surfaces with the time available",
+      "name": "1:20 · the pocket surfaces with the time available",
       "between": [
         79,
         80.5
@@ -371,7 +385,7 @@
       }
     },
     {
-      "name": "restraint \u00b7 shows within the budget, the menu included",
+      "name": "restraint · shows within the budget, the menu included",
       "between": [
         0,
         118
@@ -381,7 +395,7 @@
       }
     },
     {
-      "name": "1:44 \u00b7 a look at the Big Bean on the way: its card, Going here (the chip has moved)",
+      "name": "1:44 · a look at the Big Bean on the way: its card, Going here (the chip has moved)",
       "between": [
         103.3,
         104.6
@@ -393,7 +407,20 @@
       }
     },
     {
-      "name": "1:52 \u00b7 at the Big Bean door the arrival line is decided, with why (on the glass at 1:53)",
+      "name": "1:46 · held at Walk, the Big Bean's expanded view 2 s after its card",
+      "between": [
+        105.9,
+        106.1
+      ],
+      "must": {
+        "action": "promote",
+        "id": "big-bean",
+        "level": "expanded",
+        "band": "walk"
+      }
+    },
+    {
+      "name": "1:52 · at the Big Bean door the arrival line is decided, with why; the view held open on the approach, not looked at now, comes down to it",
       "between": [
         111.9,
         112.3
@@ -401,7 +428,8 @@
       "must": {
         "action": [
           "show",
-          "promote"
+          "promote",
+          "demote"
         ],
         "id": "big-bean",
         "cause": "arrival",
@@ -409,7 +437,7 @@
       }
     },
     {
-      "name": "1:52 \u00b7 no pocket at the door",
+      "name": "1:52 · no pocket at the door",
       "between": [
         111.9,
         116
@@ -420,7 +448,7 @@
       }
     },
     {
-      "name": "1:55.5 \u00b7 the Big Bean's expanded view by 1:56, four rows, the action reading for the Cortado",
+      "name": "1:55.5 · the Big Bean's expanded view by 1:56, four rows, the action reading for the Cortado",
       "between": [
         115,
         116
@@ -442,7 +470,7 @@
       }
     },
     {
-      "name": "1:57.5 \u00b7 the Cortado chosen: that row alone, its confirmation on a choice",
+      "name": "1:57.5 · the Cortado chosen: that row alone, its confirmation on a choice",
       "between": [
         117.5,
         117.7
@@ -455,11 +483,24 @@
           "Cortado"
         ],
         "actionsAre": [],
-        "noteIs": "Cortado ordered \u00b7 ready at 12:46, skip the line."
+        "noteIs": "Cortado ordered · ready at 12:46, skip the line."
       }
     },
     {
-      "name": "2:01 \u00b7 the pocket holds what was saved and what was settled",
+      "name": "1:59.5 · the look leaves the view at the door: its label 1 s later",
+      "between": [
+        119.5,
+        120.5
+      ],
+      "must": {
+        "action": "demote",
+        "id": "big-bean",
+        "level": "label",
+        "cause": "look-away"
+      }
+    },
+    {
+      "name": "2:01 · the pocket holds what was saved and what was settled",
       "between": [
         121.5,
         122
@@ -470,7 +511,7 @@
       }
     },
     {
-      "name": "2:00 \u00b7 the look let go, the door stop ends and the loop resumes with no destination and no intent",
+      "name": "2:00 · the look let go, the door stop ends and the loop resumes with no destination and no intent",
       "between": [
         121,
         122

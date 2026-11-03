@@ -181,8 +181,10 @@ export class App {
       this.chrome.setMark(null);
       return;
     }
+    const cap = this.chrome.captionRect();
+    const covered = Boolean(cap && w.overlay?.report().panes.some((q) => q.opacity > 0.05 && q.rect.w > 0 && q.rect.x < cap.right && q.rect.x + q.rect.w > cap.left && q.rect.y < cap.bottom && q.rect.y + q.rect.h > cap.top));
     if (f?.gate.safety) {
-      this.chrome.setMark({ lit: false, held: false, p: null, quiet: true });
+      this.chrome.setMark({ lit: false, held: false, p: null, quiet: true, covered });
       return;
     }
     const target = f?.dwell.target;
@@ -193,7 +195,7 @@ export class App {
     // The corners pull in while a place is held, the look on it as long as a look needs; they brighten on the count.
     const gz = w.sim.gaze;
     const held = !reduced && Boolean(gz.target && PLACE_BY_ID.has(gz.target) && gz.dwellMs >= VIEWFINDER.holdMs);
-    this.chrome.setMark({ lit: Boolean(mark), held, p: reduced ? null : p });
+    this.chrome.setMark({ lit: Boolean(mark), held, p: reduced ? null : p, covered });
   }
 
   syncChrome(): void {

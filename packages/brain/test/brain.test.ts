@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FOCUS_ZONE, WALK, synthesize, type CaseSpec, type WorldSnapshot } from '@lumen/shared';
+import { FOCUS_ZONE, WALK, lookOnPane, synthesize, type CaseSpec, type WorldSnapshot } from '@lumen/shared';
 import { Brain, DEFAULT_CONFIG, Pace, countCopy, trimForPace } from '../src';
 import { computeGates } from '../src/gates';
 import { newLadderItem, step } from '../src/ladder';
@@ -117,8 +117,8 @@ describe('walking rules, unit level', () => {
     expect(step(dwelt, { ...inp, t: 2.2 }, cfg)).toMatchObject({ level: 'label', via: 'look-away' });
   });
 
-  it('rule 10: a look lights the label, holds grow the card, and only Stopped or Stroll expand', () => {
-    const climb = (band: 'stopped' | 'walk'): string[] => {
+  it('rule 10: a look lights the label, holds grow the card, and Brisk never expands', () => {
+    const climb = (band: 'stopped' | 'walk' | 'brisk'): string[] => {
       let it = newLadderItem('x');
       const seen: string[] = [];
       for (let t = 0; t <= 3 + 1e-9; t += 0.1) {
@@ -131,7 +131,20 @@ describe('walking rules, unit level', () => {
       return seen;
     };
     expect(climb('stopped')).toEqual(['label@0.3', 'card@0.8', 'expanded@2.8']);
-    expect(climb('walk')).toEqual(['label@0.3', 'card@0.8']);
+    expect(climb('walk')).toEqual(['label@0.3', 'card@0.8', 'expanded@2.8']);
+    expect(climb('brisk')).toEqual(['label@0.3']);
+  });
+
+  it('rule 10: the look leaves an expanded view 30 px outside its rect, and the view is its label 1 s later; inside it, the view holds', () => {
+    const view = { x: 440, y: 185, w: 400, h: 430 };
+    const it0 = { ...newLadderItem('x'), level: 'expanded' as const, since: 0, shownAt: 0, dwelt: true, lastGazeAt: 5, gazeSince: 0 };
+    const at = (cx: number, t: number) => {
+      const target = lookOnPane(view, cx, 400, 1);
+      return step({ ...it0, lastGazeAt: target ? t : 5 }, { t, band: 'walk', target, dwellS: t, pinch: false, floor: 'none', labelled: true, proactive: false, scoreAbove: false, canProactive: false }, cfg);
+    };
+    expect(at(view.x - 30, 5.9).level).toBe('expanded');
+    expect(at(view.x - 30, 6)).toMatchObject({ level: 'label', via: 'look-away' });
+    expect(at(view.x + 10, 6).level).toBe('expanded');
   });
 
   it('rule 6 and 7: the pocket holds an item once and surfaces only with 6 s or more', () => {

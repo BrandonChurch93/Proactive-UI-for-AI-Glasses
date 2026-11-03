@@ -17,8 +17,21 @@
     {
       "rule": "walking-10",
       "between": [
+        2.35,
+        2.45
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "card",
+        "band": "walk"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
         0,
-        8
+        4.35
       ],
       "mustNot": {
         "level": "expanded"
@@ -26,11 +39,38 @@
     },
     {
       "rule": "walking-10",
+      "between": [
+        4.35,
+        4.45
+      ],
+      "must": {
+        "action": "promote",
+        "id": "grace-theater",
+        "level": "expanded",
+        "band": "walk",
+        "cause": "dwell"
+      }
+    },
+    {
+      "rule": "walking-10",
       "at": 5.3,
       "state": {
         "level": {
-          "grace-theater": "card"
+          "grace-theater": "expanded"
         }
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        6.25,
+        6.45
+      ],
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
+        "level": "label",
+        "cause": "look-away"
       }
     }
   ]

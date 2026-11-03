@@ -233,3 +233,8 @@
   color: var(--ink);
   opacity: 0.3;
 }
+
+/* A pane over the caption: the words step back rather than run into its text. */
+.covered .focus {
+  opacity: 0;
+}

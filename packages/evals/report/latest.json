@@ -3,8 +3,8 @@
  "totals": {
   "suites": 44,
   "passed": 44,
-  "cases": 1014,
-  "casesPassed": 1014
+  "cases": 1020,
+  "casesPassed": 1020
  },
  "byGroup": {
   "walks": {
@@ -105,7 +105,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -233,9 +233,14 @@
      "detail": "t=41.001 save trattoria-da-lia card"
     },
     {
-     "name": "0:41 · nothing opens",
+     "name": "0:41 · the pinch opens nothing",
      "pass": true,
      "detail": ""
+    },
+    {
+     "name": "0:42 · the look held at Walk opens its view 2 s after the card",
+     "pass": true,
+     "detail": "t=41.801 promote trattoria-da-lia expanded"
     },
     {
      "name": "0:41 to 1:19 · Pocket 1 on the glyph",
@@ -318,9 +323,14 @@
      "detail": "t=104.002 promote big-bean card"
     },
     {
-     "name": "1:52 · at the Big Bean door the arrival line is decided, with why (on the glass at 1:53)",
+     "name": "1:46 · held at Walk, the Big Bean's expanded view 2 s after its card",
      "pass": true,
-     "detail": "t=112.202 promote big-bean card"
+     "detail": "t=106.002 promote big-bean expanded"
+    },
+    {
+     "name": "1:52 · at the Big Bean door the arrival line is decided, with why; the view held open on the approach, not looked at now, comes down to it",
+     "pass": true,
+     "detail": "t=112.202 demote big-bean label"
     },
     {
      "name": "1:52 · no pocket at the door",
@@ -330,12 +340,17 @@
     {
      "name": "1:55.5 · the Big Bean's expanded view by 1:56, four rows, the action reading for the Cortado",
      "pass": true,
-     "detail": "t=115.502 promote big-bean expanded"
+     "detail": "t=115.802 promote big-bean expanded"
     },
     {
      "name": "1:57.5 · the Cortado chosen: that row alone, its confirmation on a choice",
      "pass": true,
      "detail": "t=117.502 promote big-bean expanded"
+    },
+    {
+     "name": "1:59.5 · the look leaves the view at the door: its label 1 s later",
+     "pass": true,
+     "detail": "t=120.402 demote big-bean label"
     },
     {
      "name": "2:01 · the pocket holds what was saved and what was settled",
@@ -422,7 +437,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -747,7 +762,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -888,7 +903,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1023,7 +1038,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1164,7 +1179,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1317,7 +1332,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1458,7 +1473,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1605,7 +1620,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1740,7 +1755,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -1881,7 +1896,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2016,7 +2031,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2163,7 +2178,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2298,7 +2313,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2439,7 +2454,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2586,7 +2601,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2721,7 +2736,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2862,7 +2877,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -2991,7 +3006,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3138,7 +3153,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3273,7 +3288,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3402,7 +3417,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3543,7 +3558,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3684,7 +3699,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3813,7 +3828,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -3948,7 +3963,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4083,7 +4098,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4224,7 +4239,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4359,7 +4374,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4494,7 +4509,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4629,7 +4644,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4764,7 +4779,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4911,7 +4926,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -4965,20 +4980,38 @@
      "rule": "walking-10"
     },
     {
-     "name": "[0, 8) mustNot {\"level\":\"expanded\"}",
+     "name": "[2.35, 2.45) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"card\",\"band\":\"walk\"}",
+     "pass": true,
+     "detail": "t=2.4 promote grace-theater card",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[0, 4.35) mustNot {\"level\":\"expanded\"}",
      "pass": true,
      "detail": "",
      "rule": "walking-10"
     },
     {
-     "name": "@5.3 state {\"level\":{\"grace-theater\":\"card\"}}",
+     "name": "[4.35, 4.45) must {\"action\":\"promote\",\"id\":\"grace-theater\",\"level\":\"expanded\",\"band\":\"walk\",\"cause\":\"dwell\"}",
+     "pass": true,
+     "detail": "t=4.4 promote grace-theater expanded",
+     "rule": "walking-10"
+    },
+    {
+     "name": "@5.3 state {\"level\":{\"grace-theater\":\"expanded\"}}",
      "pass": true,
      "detail": "1 frames",
+     "rule": "walking-10"
+    },
+    {
+     "name": "[6.25, 6.45) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
+     "pass": true,
+     "detail": "t=6.3 demote grace-theater label",
      "rule": "walking-10"
     }
    ],
    "rule": "walking-10",
-   "description": "The same 4.4 s dwell in Walk ends at card."
+   "description": "The same dwell in Walk: the compact card at 1.8 s, the full card as it comes within 30 m at 2.4 s, its expanded view 2 s later, its label 1 s after the look leaves."
   },
   {
    "id": "walking-10c-look-away",
@@ -5052,7 +5085,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5193,7 +5226,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5364,7 +5397,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5511,7 +5544,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5658,7 +5691,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5793,7 +5826,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -5934,7 +5967,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -6081,7 +6114,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -6240,7 +6273,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""
@@ -6375,7 +6408,7 @@
      "detail": ""
     },
     {
-     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards",
+     "name": "the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards",
      "rule": "walking-10",
      "pass": true,
      "detail": ""

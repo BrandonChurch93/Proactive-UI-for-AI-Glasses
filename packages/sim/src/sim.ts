@@ -221,11 +221,13 @@ export class Sim {
   }
 
   // The wearer stands at the door 4 s, and for as long as they keep looking at the place, up to 30 s: they are reading it.
+  // A look that has just left could still come back within the look-away second, and the view shrinks at its door before they walk on.
   private dwelling(t: number): boolean {
     const w = this.wearer;
     if (w.arrivedAt === null || w.route.target === 'start') return false;
     const at = t - w.arrivedAt;
-    return at < DOOR_S || (at < DOOR_READ_S && this.gazeTarget === w.route.target);
+    const looking = this.gazeTarget === w.route.target || (this.lostGaze?.id === w.route.target && t - this.lostGaze.at < LOOK_AWAY_S + 0.15);
+    return at < DOOR_S || (at < DOOR_READ_S && looking);
   }
 
   private navigate(t: number): void {

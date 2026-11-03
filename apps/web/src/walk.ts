@@ -2,7 +2,7 @@ import { gsap } from 'gsap';
 import { Brain } from '@lumen/brain';
 import {
   LOOK_AWAY_S,
-  READ,
+  lookOnPane,
   uiScale,
   PLACES,
   PLACE_BY_ID,
@@ -329,7 +329,8 @@ export class Walk {
       return pk.cur;
     }
     if (g.curIn) pk.outSince = null;
-    else if (t - this.turnedAt <= TURNING_S + 1e-9) return take(g.best, g.caught, g.bestOff);
+    // Off a card or an expanded view the look has left it now: the brain's second of look-away is the only grace.
+    else if (t - this.turnedAt <= TURNING_S + 1e-9 || g.curBig) return take(g.best, g.caught, g.bestOff);
     else pk.outSince ??= t;
     // Only the place aimed at takes over: its pane or its light near the center for the 250 ms a look needs.
     // Clearly nearer: the smaller-pane tie-break is for two panes under the center at once, not for beating a held place's reference.
@@ -347,16 +348,22 @@ export class Walk {
   }
 
   // A place is where its pane, its light or its storefront is: the wearer aims at what they can read.
-  private rawGaze(cur: string | null, caught: boolean): { best: string | null; caught: boolean; curIn: boolean; curOff: number; aimed: string | null; aimedOff: number; bestOff: number } {
+  private rawGaze(cur: string | null, caught: boolean): { best: string | null; caught: boolean; curIn: boolean; curBig: boolean; curOff: number; aimed: string | null; aimedOff: number; bestOff: number } {
     const eye = this.sim.wearer.pos;
     const lit = new Set<string>();
     for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') lit.add(d.placement.anchor);
     // A pane above 50% can be aimed at; one the world has dimmed is still its place's pane for keeping the look.
     const panes = new Map<string, Rect>();
     const dim = new Set<string>();
+    // A card or an expanded view the wearer turns off has been looked away from: while they turn, only the pane keeps or takes the look,
+    // the center on it or within the read margin. Resting, a pane off the center is the glass's doing (the pull under way, a door or a
+    // face it keeps clear of), and the place keeps the look as a label's does.
+    const strict = this.holding || this.sim.t - this.turnedAt <= LOOK_AWAY_S + 0.2;
+    const big = new Set<string>();
     for (const p of this.overlay?.aimables() ?? []) {
       panes.set(p.anchor, p.rect);
       if (p.opacity <= 0.5) dim.add(p.anchor);
+      if (strict && (p.level === 'card' || p.level === 'expanded')) big.add(p.anchor.startsWith('door:') ? p.anchor.slice(5) : p.anchor);
     }
     const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit, ...panes.keys()]);
     const vp = { w: innerWidth, h: innerHeight };
@@ -371,8 +378,7 @@ export class Walk {
     // The viewfinder resting on the expanded view of the place it holds is still a look at that place: it is reading the rows.
     const onPane = (id: string): boolean => {
       const p = this.view?.panes.find((x) => x.id === id && x.level === 'expanded' && x.visible);
-      const m = READ.marginPx * uiScale(vp);
-      return Boolean(p && cx >= p.rect.x - m && cx <= p.rect.x + p.rect.w + m && cy >= p.rect.y - m && cy <= p.rect.y + p.rect.h + m);
+      return Boolean(p && lookOnPane(p.rect, cx, cy, uiScale(vp)));
     };
     const rectIn = (r: Rect, h: number): boolean => r.x <= cx + h && r.x + r.w >= cx - h && r.y <= cy + h && r.y + r.h >= cy - h;
     const rectGap = (r: Rect): number => Math.hypot(Math.max(r.x - cx, 0, cx - (r.x + r.w)), Math.max(r.y - cy, 0, cy - (r.y + r.h)));
@@ -392,6 +398,29 @@ export class Walk {
       const kept = panes.get(id) ?? null;
       const pane = kept && !dim.has(id) ? kept : null;
       if (!kept && (!a || far > ATTENTION_M)) continue;
+      if (big.has(who)) {
+        if (!kept) continue;
+        // At its door the pane stands beside the opening the wearer walked there to face: the door's light in the viewfinder is a look at it too.
+        const dp = id.startsWith('door:') && a ? this.bridge.project(a) : null;
+        const on = lookOnPane(kept, cx, cy, uiScale(vp)) || Boolean(dp?.inFront && Math.abs(dp.x - cx) <= half && Math.abs(dp.y - cy) <= half);
+        const gapB = rectGap(kept);
+        const offB = (gapB === 0 ? -bias + (kept.w * kept.h) / 1e7 : gapB) + (Number.isFinite(far) ? far : ATTENTION_M) / 10000;
+        if (who === cur) {
+          curIn ||= on;
+          curOff = Math.min(curOff, offB);
+        }
+        if (on && pane && offB < bestOff) {
+          best = who;
+          bestOff = offB;
+          bestCaught = false;
+        }
+        if (on && pane && offB < aimedOff) {
+          aimed = who;
+          aimedOff = offB;
+          aimedUnder = gapB === 0;
+        }
+        continue;
+      }
       const place = PLACE_BY_ID.get(id);
       let front: { x: number; y: number }[] | null = null;
       let pin: { x: number; y: number } | null = null;
@@ -437,8 +466,9 @@ export class Walk {
     }
     // ...unless another place's pane is under the center: that one is being aimed at.
     // Another place's pane under the center over the held view is clearly the aim, not a tie the takeover's margin should refuse.
-    if (cur && onPane(cur)) return { best: cur, caught: false, curIn: true, curOff: aimedUnder ? (aimed !== cur ? Infinity : curOff) : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
-    return { best, caught: bestCaught, curIn, curOff, aimed, aimedOff, bestOff };
+    const curBig = cur !== null && big.has(cur);
+    if (cur && onPane(cur)) return { best: cur, caught: false, curIn: true, curBig, curOff: aimedUnder ? (aimed !== cur ? Infinity : curOff) : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
+    return { best, caught: bestCaught, curIn, curBig, curOff, aimed, aimedOff, bestOff };
   }
 
   private pursue(gaze: string | null): void {

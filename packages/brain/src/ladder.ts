@@ -59,7 +59,6 @@ export const isPane = (l: PaneLevel | Level): boolean => LEVEL_RANK[l] >= LEVEL_
 
 export function bandCap(band: Band): PaneLevel {
   if (band === 'brisk') return 'label';
-  if (band === 'walk') return 'card';
   return 'expanded';
 }
 
@@ -104,7 +103,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     if (
       it.level === 'card' &&
       !inp.far &&
-      (band === 'stopped' || band === 'stroll') &&
+      band !== 'brisk' &&
       it.gazeSince !== null &&
       t - Math.max(it.cardAt, it.gazeSince) >= cfg.ladder.cardHoldS - 1e-9
     ) {

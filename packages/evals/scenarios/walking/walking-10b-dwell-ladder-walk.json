@@ -3,7 +3,7 @@
   "rule": "walking-10",
   "scenario": "walking",
   "duration": 8,
-  "description": "The same 4.4 s dwell in Walk ends at card.",
+  "description": "The same dwell in Walk: the compact card at 1.8 s, the full card as it comes within 30 m at 2.4 s, its expanded view 2 s later, its label 1 s after the look leaves.",
   "pace": [
     [
       0,

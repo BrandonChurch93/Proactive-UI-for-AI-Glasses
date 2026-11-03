@@ -69,7 +69,7 @@ const recorder = `(() => {
         const pl = it.placed || {}; const fx = pl.fx !== undefined ? pl.fx : pl.align === 'left' ? 1 : pl.align === 'right' ? 0 : 0.5; const fy = pl.fy !== undefined ? pl.fy : pl.vertical === 'middle' ? 0.85 : pl.vertical === 'below' ? 0 : 1;
         const vw = innerWidth; const vh = innerHeight;
         const ex = b.rect.x + b.rect.w >= vw - 1 ? 1 : b.rect.x <= 1 ? 0 : fx; const ey = b.rect.y + b.rect.h >= vh - 1 ? 1 : b.rect.y <= 1 ? 0 : fy;
-        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
+        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), pl: it.placed && it.placed.rect ? [it.placed.rect.x, it.placed.rect.y, it.placed.rect.w, it.placed.rect.h, fx, fy].map((v) => Math.round(v * 100) / 100) : null, edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
       }
       window.__aim.log.push({ t: walk.t, id, p, down: walk.holding });
     }
@@ -108,7 +108,7 @@ const state = (): Promise<S> =>
     }
     return { t: walk.t, band: f ? f.band : 'stopped', lap: sim.lap, target: sim.gaze.target, gate: Boolean(f && f.gate.safety), panes };
   })()`) as Promise<S>;
-type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; edge?: boolean } | null };
+type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; pl?: number[] | null; edge?: boolean } | null };
 const lightIn = (id: string): Promise<boolean> =>
   page.evaluate(`(() => { const walk = window.__app.walk; const a = walk.sim.anchorOf('${id}'); const p = a && walk.bridge.project(a); return Boolean(p && p.inFront && p.x >= 0 && p.x <= ${w} && p.y >= 0 && p.y <= ${h}); })()`) as Promise<boolean>;
 const drain = async (): Promise<Rec[]> => {
@@ -180,7 +180,7 @@ const levelAt = new Map<string, { lv: string; t: number }>();
 let jumpTotal = 0;
 // From the frame the look lands to the pull's first move, the aimed pane's center keeps its offset from its light: under
 // 2 px a frame and 6 px in all. While the pointer is down, the looked-at pane's offset is constant to 1 px a frame.
-type Landing = { still: number | null; perFrame: number; total: number; dragFrames: number; drag: number; dragAt?: string; landAt?: string; ok: boolean };
+type Landing = { still: number | null; perFrame: number; total: number; dragFrames: number; drag: number; dragAt?: string; landAt?: string; dragFails: string[]; ok: boolean };
 const landings: Landing[] = [];
 function landing(rec: Rec[], id: string): Landing {
   // Rule 8's step aside and rule 5's yield are their own moves, for a real thing and a head check, as the jump check already excludes them; the hold's offset is what is judged here.
@@ -188,6 +188,12 @@ function landing(rec: Rec[], id: string): Landing {
   let drag = 0;
   let dragAt: string | undefined;
   let dragFrames = 0;
+  const dragFails: string[] = [];
+  const frame = (r: Rec): string => {
+    const p = r.p!;
+    const o = off(r)!;
+    return `${r.t.toFixed(3)} ${p.how} ${p.lv} drawn ${[p.x, p.y, p.w, p.h].map((v) => v.toFixed(1)).join(',')} light ${p.lx!.toFixed(1)},${p.ly!.toFixed(1)} offset ${o.x.toFixed(1)},${o.y.toFixed(1)}${p.pl ? ` placed ${p.pl.slice(0, 4).join(',')} at ${p.pl[4]},${p.pl[5]}` : ''}${p.ax || p.ay ? ` aside ${(p.ax ?? 0).toFixed(1)},${(p.ay ?? 0).toFixed(1)}` : ''} op ${p.o.toFixed(2)}`;
+  };
   for (let i = 1; i < rec.length; i++) {
     const a = rec[i - 1]!;
     const b = rec[i]!;
@@ -197,13 +203,14 @@ function landing(rec: Rec[], id: string): Landing {
     if (!oa || !ob || Math.abs(a.p!.w - b.p!.w) > 0.5 || Math.abs(a.p!.h - b.p!.h) > 0.5) continue;
     dragFrames++;
     const dd = Math.hypot(ob.x - oa.x, ob.y - oa.y);
+    if (dd > 1) dragFails.push(`${b.id} moved ${dd.toFixed(1)} px · before ${frame(a)} · then ${frame(b)}`);
     if (dd > drag) {
       drag = dd;
       dragAt = `${b.id} at ${b.t.toFixed(2)}, ${a.p!.how} to ${b.p!.how} ${b.p!.lv} ${b.p!.w.toFixed(0)}x${b.p!.h.toFixed(0)}${b.p!.edge ? ' at the view edge' : ''}${b.p!.ax ? ` aside ${b.p!.ax.toFixed(0)}` : ''} op ${b.p!.o.toFixed(2)}`;
     }
   }
   const k = rec.findIndex((r) => r.id === id && off(r));
-  if (k < 0) return { still: null, perFrame: 0, total: 0, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ok: drag <= 1 };
+  if (k < 0) return { still: null, perFrame: 0, total: 0, dragFrames, drag, ...(dragAt ? { dragAt } : {}), dragFails, ok: drag <= 1 };
   const o0 = off(rec[k]!)!;
   let perFrame = 0;
   let landAt: string | undefined;
@@ -224,7 +231,7 @@ function landing(rec: Rec[], id: string): Landing {
     total = Math.max(total, Math.hypot(o.x - o0.x, o.y - o0.y));
     still++;
   }
-  return { still, perFrame, total, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ...(landAt ? { landAt } : {}), ok: perFrame < 2 && total < 6 && drag <= 1 };
+  return { still, perFrame, total, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ...(landAt ? { landAt } : {}), dragFails, ok: perFrame < 2 && total < 6 && drag <= 1 };
 }
 
 function scanJumps(rec: Rec[]): number {
@@ -384,6 +391,7 @@ for (;;) {
   const where = at3 !== null ? `${at3.toFixed(0)} px from the center` : `not on the glass (${why})`;
   console.log(`${a.skip ? 'skip' : a.ok ? 'ok  ' : 'MISS'} ${a.t.toFixed(1).padStart(6)} ${a.band.padEnd(6)} aimed at ${a.id}:${a.level} · held ${a.held ?? 'nothing'} 0.5 s later · 3 s later ${where}${excused ? ` (${excused}, excused)` : a.near ? '' : ' FAR'}${j ? ` · ${j} jump${j > 1 ? 's' : ''}` : ''}`);
   console.log(`     landing: ${land.still === null ? 'the look never landed' : `${land.still} frames still, at most ${land.perFrame.toFixed(1)} px a frame, ${land.total.toFixed(1)} px in all${land.perFrame >= 2 && land.landAt ? ` (${land.landAt})` : ''}`} · drag: ${land.dragFrames} frames, at most ${land.drag.toFixed(1)} px a frame${land.drag > 1 && land.dragAt ? ` (${land.dragAt})` : ''}${land.ok ? '' : ' NOT STILL'}`);
+  for (const f of land.dragFails) console.log(`       drag failed: ${f}`);
   // The owner's rule since Phase 27: the place held is drawn slowly into the center. Every held aim prints how far the pane's center is from the view's 0.9 s and 3 s later; the near measure judges it.
   const sq = 80 * Math.max(1, ui);
   const lr = rel.panes.find((q) => q.id === pick.id);

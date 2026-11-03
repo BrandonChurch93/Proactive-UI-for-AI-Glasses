@@ -788,7 +788,8 @@ export class Brain {
         if (it.wasTarget && it.gazeSince !== null) it.paused = { held: t - it.gazeSince, at: t };
         it.gazeSince = null;
         if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
-        if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2) it.lastGazeAt = t;
+        // Coming up to the door, the destination's pane folding at the view's edge is not a look-away; once there, looking away is.
+        if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2 && !snap.goal.arrived && !this.paneVisible(e.id)) it.lastGazeAt = t;
       }
       it.wasTarget = isT;
 
@@ -930,7 +931,7 @@ export class Brain {
     const ramp = (from: number, s: number): { p: number; rate: number } => ({ p: Math.min(1, Math.max(0, (t - from) / s)), rate: shown ? 1 / s : 0 });
     if (it.level === 'expanded') return { mark: { p: 1, rate: 0 } };
     if (it.level === 'card') {
-      const opens = (band === 'stopped' || band === 'stroll') && e.distance <= L.cardWithinM && it.gazeSince !== null && it.gazeSince <= it.cardAt + 1e-9;
+      const opens = band !== 'brisk' && e.distance <= L.cardWithinM && it.gazeSince !== null && it.gazeSince <= it.cardAt + 1e-9;
       return { mark: opens ? { ...ramp(it.cardAt, L.cardHoldS), next: 'expanded' } : { p: 1, rate: 0 } };
     }
     if (it.level === 'label' && band !== 'brisk' && this.headMoved) {
@@ -1249,7 +1250,7 @@ export class Brain {
   private messageWants(snap: WorldSnapshot, t: number, band: Band, wants: Want[]): void {
     const cardOpen = this.cardOpen();
     const gazed = snap.wearer.gaze.target;
-    const reading = (band === 'stopped' || band === 'stroll') && Boolean(gazed) && this.items.get(gazed!)?.level === 'expanded';
+    const reading = band !== 'brisk' && Boolean(gazed) && this.items.get(gazed!)?.level === 'expanded';
     for (const it of this.inbox.values()) {
       const n = it.n;
       if (it.status === 'done' || n.type === 'social') continue;
@@ -1618,6 +1619,16 @@ export class Brain {
     if (mine) {
       mine.anchor = `door:${e.id}`;
       mine.zoneOk = true;
+      // A card or view kept up from the approach that the wearer is not looking at comes down to the arrival line as it comes into sight: looking away shrinks it.
+      if (LEVEL_RANK[mine.level] > LEVEL_RANK[level] && this.arrivalSaid !== e.id && this.paneVisible(e.id)) {
+        const it = this.item(e.id);
+        it.level = level;
+        it.since = t;
+        it.stepAt = t;
+        mine.level = level;
+        mine.onCommit = undefined;
+        delete mine.announce;
+      }
       if (LEVEL_RANK[mine.level] >= LEVEL_RANK[level]) {
         const named = sayFor(e, this.goal, this.met()).when !== undefined;
         mine.content = mine.level === 'label' ? { name: e.name, fact: e.glance, reason: r, showReason: true } : { ...mine.content, reason: r, showReason: mine.level !== 'expanded' && !named };

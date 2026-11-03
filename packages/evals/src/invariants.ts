@@ -235,7 +235,7 @@ const checks: { rule: string; name: string; check: Check }[] = [
   },
   {
     rule: 'walking-10',
-    name: 'the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded above Stroll, never two place cards',
+    name: 'the dwell ladder: no card or expanded without its dwell, a pinch or arrival at the door, never expanded in Brisk, a pinch opening nothing while walking, never two place cards',
     check: (r, cfg) => {
       const cardAt = new Map<string, number>();
       const was = new Map<string, string>();
@@ -260,9 +260,9 @@ const checks: { rule: string; name: string; check: Check }[] = [
             if (!ok) return `t=${f.t} card on ${d.id} without dwell (${s.wearer.gaze.dwellMs} ms in ${f.band})`;
           }
           if (d.level === 'expanded') {
-            if (f.band !== 'stopped' && f.band !== 'stroll') return `t=${f.t} expanded ${d.id} in ${f.band}`;
+            if (f.band === 'brisk') return `t=${f.t} expanded ${d.id} in ${f.band}`;
             const c = cardAt.get(d.id);
-            const ok = pinched || (c !== undefined && f.t - c >= cfg.ladder.cardHoldS - 1e-6 && s.wearer.gaze.target === d.id);
+            const ok = (pinched && (f.band === 'stopped' || f.band === 'stroll')) || (c !== undefined && f.t - c >= cfg.ladder.cardHoldS - 1e-6 && s.wearer.gaze.target === d.id);
             if (!ok) return `t=${f.t} expanded ${d.id} without 2 s on the card`;
           }
         }
