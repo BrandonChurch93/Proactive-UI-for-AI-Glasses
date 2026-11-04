@@ -1,5 +1,6 @@
-// One number for the walk's release grace, the sim's flicker and the brain's look-away.
-export const LOOK_AWAY_S = 1;
+// One number for the walk's release grace and aiming window, the sim's flicker and the brain's look-away: the owner's
+// "the moment", with room to ride out a glance.
+export const LOOK_AWAY_S = 0.5;
 
 export const SETTLE = { stillRate: 0.3, stillS: 0.3, moveRate: 0.6, moveS: 0.2, lookRad: 0.2 } as const;
 

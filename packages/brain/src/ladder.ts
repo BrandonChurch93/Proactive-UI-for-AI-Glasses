@@ -78,6 +78,7 @@ export interface LadderInput {
   cardWait?: boolean;
   growS?: number;
   still?: boolean;
+  scanKeep?: boolean;
 }
 
 export interface LadderOut {
@@ -128,7 +129,7 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
   }
 
   if (rank(it.level) > rank('label')) {
-    if (t - Math.max(it.lastGazeAt, it.stepAt) >= cfg.ladder.lookAwayS - 1e-9) return { level: 'label', via: 'look-away', gaze: false };
+    if (!inp.scanKeep && t - Math.max(it.lastGazeAt, it.stepAt) >= cfg.ladder.lookAwayS - 1e-9) return { level: 'label', via: 'look-away', gaze: false };
     const cap = bandCap(band);
     if (rank(it.level) > rank(cap) && (band === 'brisk' || !held)) return { level: cap, via: 'band', gaze: false };
     return { level: it.level, via: 'hold', gaze: false };
@@ -136,7 +137,8 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
 
   if (isPane(it.level)) {
     if (inp.labelled) return { level: it.level, via: 'hold', gaze: false };
-    if (it.dwelt || it.byLabels) return { level: inp.floor, via: 'settle', gaze: false };
+    // A card the look left came down to its label to stay a while, not to vanish the next tick with the roster.
+    if ((it.dwelt || it.byLabels) && t - it.stepAt >= cfg.ladder.minShownS - 1e-9) return { level: inp.floor, via: 'settle', gaze: false };
     const limit = cfg.autoFoldS[band];
     if (limit !== null && !held && t - it.shownAt >= limit - 1e-9) return { level: inp.floor, via: 'auto-fold', gaze: false };
     if (!inp.scoreAbove && !held && scoreChangeAllowed(it.since, t, cfg)) return { level: inp.floor, via: 'score', gaze: false };

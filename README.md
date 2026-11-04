@@ -23,7 +23,7 @@ The street is one block that loops, rendered in real time in Three.js. The weare
 ## What you can do in it
 
 - **Two walks.** Explore lets you wander the block and look at anything; Lunch opens the menu on Food and gets you to lunch. Both loop around the block until you end them.
-- **Look.** Drag to turn your head. The square in the middle is the eye tracker real glasses would have (`EYE TRACKING`). When the view settles, every place in sight shows its label; rest the square on one and it grows into its card after half a second, and into its expanded view after two seconds more, at any pace short of brisk. The card you hold is drawn slowly into the center and stays there while you rest on it; the others drift out of the way. Look away and it is a label again one second later.
+- **Look.** Drag to turn your head. The square in the middle is the eye tracker real glasses would have (`EYE TRACKING`). When the view settles, every place in sight shows its label; rest the square on one and it grows into its card after half a second, and into its expanded view after two seconds more, at any pace short of brisk. The card you hold is drawn slowly into the center and stays there while you rest on it; the others drift out of the way. Turn off it and it is a label again half a second later, and resting on the building does not bring it back.
 - **Find a place.** `FIND A PLACE` at the bottom right lists places by category and walk time. Choose one and the route draws on the pavement, a map tile keeps the way, and the wearer walks there.
 - **Texts that change the walk.** Messages arrive as banners at the top. Reply to Maya and the glasses offer to route you to her; say yes and the walk goes there.
 - **The door and the choice.** At the door the place's expanded view stands beside the opening, never over it. Move the square down its rows and the row under it lifts; a click, Space or Enter chooses it (order the Cortado, hold a table, book a lane).
@@ -77,7 +77,7 @@ The center of the project is `docs/walking-rules.md`.
 | 7 · The pocket surfaces at the pause | Stopped 2 s with at least 6 s available | "12 s · what you saved" grows beside the held glyph |
 | 8 · The world has right of way | A person or vehicle over a pane | The pane dims and steps aside, or waits as its light; a face is never covered |
 | 9 · Backdrop adaptivity | Every 250 ms | The glass deepens and the type thickens over bright façades; text never below 4.5:1 |
-| 10 · Labels, then one card | The view settles, or a look rests | Labels for every place in sight; the one under the center grows to its card after 0.5 s and to its expanded view after 2 s more, in every band but Brisk; looking away shrinks it to its label 1 s later |
+| 10 · Labels, then one card | The view settles, or a look rests | Labels for every place in sight; the one under the center grows to its card after 0.5 s and to its expanded view after 2 s more, in every band but Brisk; turning off it shrinks it to its label 0.5 s later |
 | 11 · The whisper channel | Brisk | One captioned line at the bottom edge for 2.5 s instead of a pane |
 | 12 · Snooze | Looking up at nothing for 2 s | Everything folds; the glyph counts down 60 s |
 | 13 · The budget is visible | Always, in the inspector | Seven proactive shows per walk, one back per 40 s of quiet; looks, choices and arrivals are free |

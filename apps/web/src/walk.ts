@@ -140,6 +140,17 @@ export class Walk {
   private pursuit: { id: string; on: boolean; dyaw: number; dpitch: number } | null = null;
   private turned = false;
   private turnedAt = -Infinity;
+  // Where the held card or view stood on the glass when the wearer was last at rest: a turn that carries it further than half the
+  // held square has left it, however big it is.
+  private travelRef: { id: string; x: number; y: number; yaw: number; pitch: number; d: number } | null = null;
+  // The held card or view the center has been on: only then can the center leave it. One grown from a storefront look can be born
+  // off the center, and until the pull brings it under the viewfinder it keeps the look as a label does.
+  private onCard: string | null = null;
+  // Places the look has left, and whether each one's pane was under the center last frame. Only aiming brings the look back: the
+  // pane brought under the center by a drag, or the light inside the viewfinder as a turn ends; the world carrying it back does not.
+  private leftLook = new Map<string, { under: boolean }>();
+  // The last change of the look and what made it, for the live checks to read.
+  lastTake: { t: number; from: string | null; to: string | null; by: string } | null = null;
   holding = false;
   private wasHolding = false;
   private releasedAt = -Infinity;
@@ -312,7 +323,10 @@ export class Walk {
     // How near the held place was when the wearer's turn ended: the glass drawing its pane to the center is not an aim elsewhere.
     if (t - this.turnedAt <= STEP * 1.5 || this.holding) pk.ref = g.curOff;
     pk.takenSince = null;
-    const take = (id: string | null, caught: boolean, off: number): string | null => {
+    const take = (id: string | null, caught: boolean, off: number, by: string): string | null => {
+      if (pk.cur !== id) this.lastTake = { t, from: pk.cur, to: id, by: id === g.best && !by.startsWith('aimed') ? `${by} (${g.bestBy})` : by };
+      if (pk.cur && pk.cur !== id && !g.curDoor) this.leftLook.set(pk.cur, { under: true });
+      if (id) this.leftLook.delete(id);
       pk.ref = off;
       pk.cur = id;
       pk.caught = caught;
@@ -320,7 +334,7 @@ export class Walk {
       pk.outSince = null;
       return id;
     };
-    if (pk.cur === null) return take(g.best, g.caught, g.bestOff);
+    if (pk.cur === null) return take(g.best, g.caught, g.bestOff, 'free');
     // Held still, the place keeps the look while any of it is in the keep square; only a turn lets another take it.
     const aiming = t - this.turnedAt <= LOOK_AWAY_S + 1e-9;
     if (g.curIn && !aiming) {
@@ -329,8 +343,8 @@ export class Walk {
       return pk.cur;
     }
     if (g.curIn) pk.outSince = null;
-    // Off a card or an expanded view the look has left it now: the brain's second of look-away is the only grace.
-    else if (t - this.turnedAt <= TURNING_S + 1e-9 || g.curBig) return take(g.best, g.caught, g.bestOff);
+    // Off a card or an expanded view the look has left it now: the brain's look-away is the only grace.
+    else if (t - this.turnedAt <= TURNING_S + 1e-9 || g.curBig) return take(g.best, g.caught, g.bestOff, g.curBig ? 'left the card' : 'turning');
     else pk.outSince ??= t;
     // Only the place aimed at takes over: its pane or its light near the center for the 250 ms a look needs.
     // Clearly nearer: the smaller-pane tie-break is for two panes under the center at once, not for beating a held place's reference.
@@ -341,29 +355,51 @@ export class Walk {
     }
     if (pk.cand && t - pk.candSince >= ACQUIRE_GRACE_S - 1e-9) {
       pk.takenSince = pk.candSince;
-      return take(pk.cand, false, g.aimedOff);
+      return take(pk.cand, false, g.aimedOff, `aimed (${g.aimedBy})`);
     }
-    if (pk.outSince !== null && t - pk.outSince >= LOOK_AWAY_S - 1e-9) return take(null, false, Infinity);
+    if (pk.outSince !== null && t - pk.outSince >= LOOK_AWAY_S - 1e-9) return take(null, false, Infinity, 'released');
     return pk.cur;
   }
 
   // A place is where its pane, its light or its storefront is: the wearer aims at what they can read.
-  private rawGaze(cur: string | null, caught: boolean): { best: string | null; caught: boolean; curIn: boolean; curBig: boolean; curOff: number; aimed: string | null; aimedOff: number; bestOff: number } {
+  private rawGaze(cur: string | null, caught: boolean): { best: string | null; caught: boolean; curIn: boolean; curBig: boolean; curDoor: boolean; curOff: number; aimed: string | null; aimedOff: number; aimedBy: string; bestOff: number; bestBy: string } {
     const eye = this.sim.wearer.pos;
     const lit = new Set<string>();
     for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') lit.add(d.placement.anchor);
     // A pane above 50% can be aimed at; one the world has dimmed is still its place's pane for keeping the look.
     const panes = new Map<string, Rect>();
     const dim = new Set<string>();
-    // A card or an expanded view the wearer turns off has been looked away from: while they turn, only the pane keeps or takes the look,
-    // the center on it or within the read margin. Resting, a pane off the center is the glass's doing (the pull under way, a door or a
-    // face it keeps clear of), and the place keeps the look as a label's does.
-    const strict = this.holding || this.sim.t - this.turnedAt <= LOOK_AWAY_S + 0.2;
+    // A card or an expanded view keeps the look only while the viewfinder stays on it: the center on its rect, and no turn carrying
+    // it further than half the held square. Its storefront and its light keep nothing. At the destination's door the view keeps the
+    // look by its rect plus the read margin and the door's light while the wearer turns, and as a label does at rest: they stand
+    // there to read it.
+    const t = this.sim.t;
+    const strict = this.holding || t - this.turnedAt <= LOOK_AWAY_S + 0.2;
+    const resting = !this.holding && t - this.turnedAt > TURNING_S + 1e-9;
     const big = new Set<string>();
+    const doors = new Set<string>();
+    const withPane = new Set<string>();
+    // Card or view by the brain's level: the glass can draw a card collapsed to its label for want of room, and it is a card still.
+    const brainLevel = new Map<string, string>();
+    for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world') brainLevel.set(d.id, d.level);
     for (const p of this.overlay?.aimables() ?? []) {
       panes.set(p.anchor, p.rect);
       if (p.opacity <= 0.5) dim.add(p.anchor);
-      if (strict && (p.level === 'card' || p.level === 'expanded')) big.add(p.anchor.startsWith('door:') ? p.anchor.slice(5) : p.anchor);
+      const who = p.anchor.startsWith('door:') ? p.anchor.slice(5) : p.anchor;
+      withPane.add(who);
+      if (p.anchor.startsWith('door:')) doors.add(who);
+      const lv = brainLevel.get(who) ?? p.level;
+      if ((lv === 'card' || lv === 'expanded') && (strict || !p.anchor.startsWith('door:'))) big.add(who);
+    }
+    // A place stays looked away from while the brain has a pane up for it, through a moment the world hides that pane,
+    const up = new Set<string>();
+    for (const d of this.last()?.frame.items ?? []) if (d.placement.zone === 'world' && (d.level === 'label' || d.level === 'card' || d.level === 'expanded')) up.add(d.id);
+    // ...and while the place is still in view, so a label that leaves the roster and comes back is not a fresh look.
+    for (const id of [...this.leftLook.keys()]) {
+      if (up.has(id)) continue;
+      const a0 = this.sim.anchorOf(id);
+      const q = a0 ? this.bridge.project(a0) : null;
+      if (!q || !q.inFront || q.x < 0 || q.x > innerWidth || q.y < 0 || q.y > innerHeight) this.leftLook.delete(id);
     }
     const ids = new Set<string>([...PLACES.map((p) => p.id), ...lit, ...panes.keys()]);
     const vp = { w: innerWidth, h: innerHeight };
@@ -373,19 +409,23 @@ export class Walk {
     const half = viewfinderHalf(vp);
     const catchHalf = half + VIEWFINDER.catchPx * s;
     const keepHalf = viewfinderHalf(vp, true) + (caught ? VIEWFINDER.catchPx * s : 0);
+    const travelMax = (VIEWFINDER.held / 2) * s;
     const aimR = VIEWFINDER.aimPx * s;
     const bias = FRONT_BIAS_PX * (half / viewfinderHalf({ w: 1280, h: 800 }));
     // The viewfinder resting on the expanded view of the place it holds is still a look at that place: it is reading the rows.
     const onPane = (id: string): boolean => {
+      if (!doors.has(id)) return false;
       const p = this.view?.panes.find((x) => x.id === id && x.level === 'expanded' && x.visible);
       return Boolean(p && lookOnPane(p.rect, cx, cy, uiScale(vp)));
     };
     const rectIn = (r: Rect, h: number): boolean => r.x <= cx + h && r.x + r.w >= cx - h && r.y <= cy + h && r.y + r.h >= cy - h;
     const rectGap = (r: Rect): number => Math.hypot(Math.max(r.x - cx, 0, cx - (r.x + r.w)), Math.max(r.y - cy, 0, cy - (r.y + r.h)));
     let best: string | null = null;
+    let bestBy = '';
     let bestOff = Infinity;
     let bestCaught = false;
     let aimed: string | null = null;
+    let aimedBy = '';
     let aimedOff = Infinity;
     let aimedUnder = false;
     let curIn = false;
@@ -398,24 +438,80 @@ export class Walk {
       const kept = panes.get(id) ?? null;
       const pane = kept && !dim.has(id) ? kept : null;
       if (!kept && (!a || far > ATTENTION_M)) continue;
+      // A place the look has left is looked at again only as a turn lands on it: its pane brought under the center by a drag, or its
+      // light inside the viewfinder as the turn ends. Resting on its storefront, or with its pane still at the center, it takes nothing.
+      const lk = this.leftLook.get(who);
+      const left = lk !== undefined;
+      const under = Boolean(kept && rectGap(kept) === 0);
+      let arrived = false;
+      if (lk && kept) {
+        arrived = under && this.holding && !lk.under;
+        lk.under = under;
+        // Brought back under the center by a drag, it has been aimed at again: the ordinary rules take it from here.
+        if (arrived) this.leftLook.delete(who);
+      }
+      const lightLands = (): boolean => {
+        const pr = a && far <= ATTENTION_M ? this.bridge.project(a) : null;
+        return Boolean(pr?.inFront && Math.abs(pr.x - cx) <= half && Math.abs(pr.y - cy) <= half && t - this.turnedAt <= LOOK_AWAY_S + 1e-9);
+      };
+      // Only at the end of a turn: resting on the place, or the glass carrying its pane back toward its light, brings nothing back.
+      const may = !left || ((arrived || lightLands()) && t - this.turnedAt <= LOOK_AWAY_S + 1e-9);
+      // A card or a view the world hides (rule 8) is still a card: the look rests on it through the hide, a turn away ends it, and
+      // its storefront and light keep nothing.
+      if (!kept && !big.has(who) && who === cur && !id.startsWith('door:') && (brainLevel.get(who) === 'card' || brainLevel.get(who) === 'expanded')) {
+        const r0 = this.travelRef?.id === who ? this.travelRef : null;
+        const k0 = vp.w / TURN_PER_VIEW;
+        const away = r0 ? Math.hypot(angleWrap(this.head.yaw - r0.yaw), this.head.pitch - r0.pitch) * k0 > travelMax : !resting;
+        if (!away) curIn = true;
+        continue;
+      }
       if (big.has(who)) {
         if (!kept) continue;
-        // At its door the pane stands beside the opening the wearer walked there to face: the door's light in the viewfinder is a look at it too.
-        const dp = id.startsWith('door:') && a ? this.bridge.project(a) : null;
-        const on = lookOnPane(kept, cx, cy, uiScale(vp)) || Boolean(dp?.inFront && Math.abs(dp.x - cx) <= half && Math.abs(dp.y - cy) <= half);
+        const atDoor = id.startsWith('door:');
+        let on: boolean;
+        if (atDoor) {
+          // At its door the pane stands beside the opening the wearer walked there to face: the door's light in the viewfinder is a look at it too.
+          // ...and so is the door itself, its upright from the pavement to the light, which is what a label at the door keeps the look by.
+          const dp = a ? this.bridge.project(a) : null;
+          const upright = a ? [{ x: a.x, y: 0.9, z: a.z }, { x: a.x, y: a.y + 0.8, z: a.z }].map((c) => this.bridge.project(c)) : null;
+          on = lookOnPane(kept, cx, cy, uiScale(vp)) || Boolean(dp?.inFront && Math.abs(dp.x - cx) <= half && Math.abs(dp.y - cy) <= half) || Boolean(upright?.every((q) => q.inFront) && overlapsSquare(upright, cx, cy, half));
+        } else {
+          const onRect = rectGap(kept) === 0;
+          if (who === cur && onRect) this.onCard = who;
+          on = onRect || (who === cur && this.onCard !== who && rectIn(kept, keepHalf));
+          if (who === cur) {
+            const c = { x: kept.x + kept.w / 2, y: kept.y + kept.h / 2 };
+            const d = Math.hypot(c.x - cx, c.y - cy);
+            if (resting || this.travelRef?.id !== who) this.travelRef = { id: who, x: c.x, y: c.y, yaw: this.head.yaw, pitch: this.head.pitch, d };
+            // The pane's own travel across the glass, or the turn itself where walking past a shop carries the pane along with it; a
+            // turn that brings the pane toward the center is aiming at it, not away.
+            // The turn is judged by where it carries the pane from where it stood, not by where the glass draws it now (a card it
+            // collapses to its label for want of room is drawn somewhere else).
+            const k = vp.w / TURN_PER_VIEW;
+            const tx = this.travelRef.x + angleWrap(this.head.yaw - this.travelRef.yaw) * k;
+            const ty = this.travelRef.y + (this.head.pitch - this.travelRef.pitch) * k;
+            const turnedAway = Math.hypot(tx - this.travelRef.x, ty - this.travelRef.y) > travelMax && Math.hypot(tx - cx, ty - cy) > this.travelRef.d;
+            const movedAway = Math.hypot(c.x - this.travelRef.x, c.y - this.travelRef.y) > travelMax && d > this.travelRef.d;
+            if (turnedAway || movedAway) on = false;
+          }
+        }
         const gapB = rectGap(kept);
         const offB = (gapB === 0 ? -bias + (kept.w * kept.h) / 1e7 : gapB) + (Number.isFinite(far) ? far : ATTENTION_M) / 10000;
         if (who === cur) {
           curIn ||= on;
           curOff = Math.min(curOff, offB);
         }
-        if (on && pane && offB < bestOff) {
+        if (who !== cur && !may) continue;
+        // A card or a view under the center is what the wearer aims at, dimmed by the world or not: it has no light to fall back on.
+        if (on && offB < bestOff) {
           best = who;
           bestOff = offB;
           bestCaught = false;
+          bestBy = left ? (arrived ? 'pane landed' : 'light landed') : 'pane';
         }
-        if (on && pane && offB < aimedOff) {
+        if (on && offB < aimedOff) {
           aimed = who;
+          aimedBy = left ? (arrived ? 'pane landed' : 'light landed') : 'pane';
           aimedOff = offB;
           aimedUnder = gapB === 0;
         }
@@ -445,6 +541,10 @@ export class Walk {
       const pinIn = (h: number): boolean => Boolean(pin && Math.abs(pin.x - cx) <= h && Math.abs(pin.y - cy) <= h);
       const within = (h: number): boolean => Boolean((front && overlapsSquare(front, cx, cy, h)) || pinIn(h) || (pane && rectIn(pane, h)));
       if (who === cur && (within(keepHalf) || (kept && rectIn(kept, keepHalf)))) curIn = true;
+      if (who !== cur && !may) continue;
+      // A storefront lands a look only for a place with no pane up, the dark one it lights, and only as a turn ends: resting on a
+      // building takes nothing.
+      if (who !== cur && (withPane.has(who) || !(this.holding || t - this.turnedAt <= LOOK_AWAY_S + 1e-9))) front = null;
       const pinD = pin ? Math.hypot(pin.x - cx, pin.y - cy) : Infinity;
       const paneD = pane ? rectGap(pane) : Infinity;
       // A pane under the center outranks a light behind it by the bias a light has over a storefront; of two panes under it, the smaller is the finer aim.
@@ -457,18 +557,22 @@ export class Walk {
         best = who;
         bestOff = off;
         bestCaught = !inside;
+        bestBy = `${left ? 'landed ' : ''}${inside ? 'inside' : 'caught'}${front && overlapsSquare(front, cx, cy, half) ? ' front' : ''}${pinIn(half) ? ' light' : ''}`;
       }
       if ((pinD <= aimR || paneD <= aimR) && off < aimedOff) {
         aimed = who;
+        aimedBy = `${left ? 'landed ' : ''}${pinD <= aimR ? 'light' : 'pane'}`;
         aimedOff = off;
         aimedUnder = paneD === 0;
       }
     }
     // ...unless another place's pane is under the center: that one is being aimed at.
     // Another place's pane under the center over the held view is clearly the aim, not a tie the takeover's margin should refuse.
+    if (this.onCard !== cur) this.onCard = null;
     const curBig = cur !== null && big.has(cur);
-    if (cur && onPane(cur)) return { best: cur, caught: false, curIn: true, curBig, curOff: aimedUnder ? (aimed !== cur ? Infinity : curOff) : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
-    return { best, caught: bestCaught, curIn, curBig, curOff, aimed, aimedOff, bestOff };
+    const curDoor = cur !== null && doors.has(cur);
+    if (cur && onPane(cur)) return { best: cur, bestBy: 'reading', aimedBy, caught: false, curIn: true, curBig, curDoor, curOff: aimedUnder ? (aimed !== cur ? Infinity : curOff) : Math.min(curOff, -bias), aimed: aimedUnder ? aimed : cur, aimedOff, bestOff };
+    return { best, bestBy, aimedBy, caught: bestCaught, curIn, curBig, curDoor, curOff, aimed, aimedOff, bestOff };
   }
 
   private pursue(gaze: string | null): void {

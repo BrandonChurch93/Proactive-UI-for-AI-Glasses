@@ -11,7 +11,8 @@ import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 const base = arg('base', 'http://localhost:5199/')!;
 const w = Number(arg('w', '1920'));
 const h = Number(arg('h', '1080'));
-const laps = Number(arg('laps', '2'));
+// Four laps: the turn off every card or view and the rest after it take about 4 s of each aim.
+const laps = Number(arg('laps', '4'));
 // A lap of the loop with its crossings is about 165 s of walk time; the bar's two-lap run uses the same 330 s.
 const until = Number(arg('until', String(laps * 165)));
 const maxS = Number(arg('seconds', '1200'));
@@ -69,7 +70,7 @@ const recorder = `(() => {
         const pl = it.placed || {}; const fx = pl.fx !== undefined ? pl.fx : pl.align === 'left' ? 1 : pl.align === 'right' ? 0 : 0.5; const fy = pl.fy !== undefined ? pl.fy : pl.vertical === 'middle' ? 0.85 : pl.vertical === 'below' ? 0 : 1;
         const vw = innerWidth; const vh = innerHeight;
         const ex = b.rect.x + b.rect.w >= vw - 1 ? 1 : b.rect.x <= 1 ? 0 : fx; const ey = b.rect.y + b.rect.h >= vh - 1 ? 1 : b.rect.y <= 1 ? 0 : fy;
-        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), pl: it.placed && it.placed.rect ? [it.placed.rect.x, it.placed.rect.y, it.placed.rect.w, it.placed.rect.h, fx, fy].map((v) => Math.round(v * 100) / 100) : null, edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
+        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), fv: Math.round(b.fade.v * 100) / 100, pl: it.placed && it.placed.rect ? [it.placed.rect.x, it.placed.rect.y, it.placed.rect.w, it.placed.rect.h, fx, fy].map((v) => Math.round(v * 100) / 100) : null, edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
       }
       window.__aim.log.push({ t: walk.t, id, p, down: walk.holding });
     }
@@ -108,7 +109,7 @@ const state = (): Promise<S> =>
     }
     return { t: walk.t, band: f ? f.band : 'stopped', lap: sim.lap, target: sim.gaze.target, gate: Boolean(f && f.gate.safety), panes };
   })()`) as Promise<S>;
-type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; pl?: number[] | null; edge?: boolean } | null };
+type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; fv?: number; pl?: number[] | null; edge?: boolean } | null };
 const lightIn = (id: string): Promise<boolean> =>
   page.evaluate(`(() => { const walk = window.__app.walk; const a = walk.sim.anchorOf('${id}'); const p = a && walk.bridge.project(a); return Boolean(p && p.inFront && p.x >= 0 && p.x <= ${w} && p.y >= 0 && p.y <= ${h}); })()`) as Promise<boolean>;
 const drain = async (): Promise<Rec[]> => {
@@ -182,6 +183,7 @@ let jumpTotal = 0;
 // 2 px a frame and 6 px in all. While the pointer is down, the looked-at pane's offset is constant to 1 px a frame.
 type Landing = { still: number | null; perFrame: number; total: number; dragFrames: number; drag: number; dragAt?: string; landAt?: string; dragFails: string[]; ok: boolean };
 const landings: Landing[] = [];
+const awayRuns: boolean[] = [];
 function landing(rec: Rec[], id: string): Landing {
   // Rule 8's step aside and rule 5's yield are their own moves, for a real thing and a head check, as the jump check already excludes them; the hold's offset is what is judged here.
   const off = (r: Rec): { x: number; y: number } | null => (r.p && r.p.lx !== null ? { x: r.p.x + r.p.w / 2 - r.p.lx - (r.p.ax ?? 0), y: r.p.y + r.p.h / 2 - r.p.ly! - (r.p.ay ?? 0) } : null);
@@ -192,7 +194,7 @@ function landing(rec: Rec[], id: string): Landing {
   const frame = (r: Rec): string => {
     const p = r.p!;
     const o = off(r)!;
-    return `${r.t.toFixed(3)} ${p.how} ${p.lv} drawn ${[p.x, p.y, p.w, p.h].map((v) => v.toFixed(1)).join(',')} light ${p.lx!.toFixed(1)},${p.ly!.toFixed(1)} offset ${o.x.toFixed(1)},${o.y.toFixed(1)}${p.pl ? ` placed ${p.pl.slice(0, 4).join(',')} at ${p.pl[4]},${p.pl[5]}` : ''}${p.ax || p.ay ? ` aside ${(p.ax ?? 0).toFixed(1)},${(p.ay ?? 0).toFixed(1)}` : ''} op ${p.o.toFixed(2)}`;
+    return `${r.t.toFixed(3)} ${p.how} ${p.lv} drawn ${[p.x, p.y, p.w, p.h].map((v) => v.toFixed(1)).join(',')} light ${p.lx!.toFixed(1)},${p.ly!.toFixed(1)} offset ${o.x.toFixed(1)},${o.y.toFixed(1)}${p.pl ? ` placed ${p.pl.slice(0, 4).join(',')} at ${p.pl[4]},${p.pl[5]}` : ''}${p.ax || p.ay ? ` aside ${(p.ax ?? 0).toFixed(1)},${(p.ay ?? 0).toFixed(1)}` : ''} op ${p.o.toFixed(2)}${p.fv !== undefined ? ` fade ${p.fv}` : ''}`;
   };
   for (let i = 1; i < rec.length; i++) {
     const a = rec[i - 1]!;
@@ -200,7 +202,8 @@ function landing(rec: Rec[], id: string): Landing {
     if (!a.down || !b.down || !a.id || a.id !== b.id) continue;
     const oa = off(a);
     const ob = off(b);
-    if (!oa || !ob || Math.abs(a.p!.w - b.p!.w) > 0.5 || Math.abs(a.p!.h - b.p!.h) > 0.5) continue;
+    // A pane at no opacity in either frame cannot be seen to move.
+    if (!oa || !ob || Math.abs(a.p!.w - b.p!.w) > 0.5 || Math.abs(a.p!.h - b.p!.h) > 0.5 || a.p!.o < 0.05 || b.p!.o < 0.05) continue;
     dragFrames++;
     const dd = Math.hypot(ob.x - oa.x, ob.y - oa.y);
     if (dd > 1) dragFails.push(`${b.id} moved ${dd.toFixed(1)} px · before ${frame(a)} · then ${frame(b)}`);
@@ -416,6 +419,91 @@ for (;;) {
     console.log(`       at release ${f(l0)} · at 3 s ${f(p3)}`);
   }
   if (verbose && !a.ok) console.log(`       at release: ${rel.panes.filter((p) => p.vis).map((p) => `${p.id}:${p.level} pane ${gap(p).toFixed(0)} px light ${p.lx === null ? '-' : Math.hypot(p.lx - cx, p.ly! - cy).toFixed(0)} px`).join(', ')}`);
+  // The owner's move: from a card or a view, one turn off it, then rest where the turn ended. The look must be off the place by
+  // the end of the turn, the pane its label within the look-away (on the brain's 10 Hz tick) and its morph, and the place not
+  // looked at again during the rest unless its light is inside the viewfinder.
+  const brainLevel = (): Promise<string | null> => page.evaluate(`(() => { const f = window.__app.walk.last() && window.__app.walk.last().frame; const d = f && f.items.find((x) => x.id === '${pick.id}'); return d ? d.level : null; })()`) as Promise<string | null>;
+  const lv0 = await brainLevel();
+  if (!a.skip && (lv0 === 'card' || lv0 === 'expanded')) {
+    const sb = await state();
+    const pb = sb.panes.find((q) => q.id === pick.id);
+    if (pb && pb.vis && !sb.gate) {
+      const tag2 = `${String(aims.length).padStart(2, '0')}-${pick.id}-away`;
+      if (shots) await page.screenshot({ path: `${shots}/${tag2}-0-before.png` });
+      // Off it: away from the center on the pane's side, or away from its light when the pane is at the center (a turn that carries
+      // the light into the viewfinder is a look at the place, and rightly takes it back).
+      const side = Math.abs(mid(pb).x - cx) > 10 ? mid(pb).x - cx : (pb.lx ?? mid(pb).x) - cx;
+      const turn = 100 * Math.max(1, ui) * (side >= 0 ? 1 : -1);
+      const turnAt = sb.t;
+      const p0 = await startPoint();
+      await page.mouse.move(p0.x, p0.y);
+      await page.mouse.down();
+      for (let i = 1; i <= 8; i++) {
+        await page.mouse.move(p0.x + (turn * i) / 8, p0.y);
+        await page.waitForTimeout(16);
+      }
+      await page.mouse.up();
+      await park();
+      // The turn has ended once the walk has stepped past its last move: two frames.
+      await page.waitForTimeout(40);
+      const se = await state();
+      const lastTake = async (): Promise<{ t: number; from: string | null; to: string | null; by: string } | null> => page.evaluate('window.__app.walk.lastTake') as Promise<{ t: number; from: string | null; to: string | null; by: string } | null>;
+      // Off by the turn's end: not the target, or let go during the turn and taken back by its light inside the viewfinder.
+      const lt0 = await lastTake();
+      const retakenByLight = (q: typeof lt0): boolean => Boolean(q && q.to === pick.id && q.t >= turnAt && /light/.test(q.by));
+      const off = se.target !== pick.id || retakenByLight(lt0);
+      const look = (): Promise<string> => page.evaluate(`(() => { const w = window.__app.walk; return JSON.stringify({ t: +w.t.toFixed(2), pick: w.pick.cur, cand: w.pick.cand, left: [...w.leftLook.entries()], take: w.lastTake, ref: w.travelRef && { id: w.travelRef.id, x: Math.round(w.travelRef.x), y: Math.round(w.travelRef.y), yaw: +w.travelRef.yaw.toFixed(3), d: Math.round(w.travelRef.d) }, head: +w.head.yaw.toFixed(3), onCard: w.onCard, aim: w.overlay.aimables().filter((x) => x.anchor === '${pick.id}').map((x) => [x.level, ...[x.rect.x, x.rect.y, x.rect.w, x.rect.h].map(Math.round), +x.opacity.toFixed(2)]), brain: (w.last().frame.items.find((x) => x.id === '${pick.id}') || {}).level, sinceTurn: +(w.sim.t - w.turnedAt).toFixed(2), holding: w.holding }); })()`) as Promise<string>;
+      const lookAtEnd = off ? '' : await look();
+      let lookAtBack = '';
+      let gated = false;
+      let lightBack = retakenByLight(lt0);
+      if (shots) await page.screenshot({ path: `${shots}/${tag2}-1-after.png` });
+      let brainAt: number | null = null;
+      let glassAt: number | null = null;
+      let back: string | null = null;
+      let shot6 = false;
+      while (true) {
+        const sr = await state();
+        const dt = sr.t - se.t;
+        if (sr.gate) {
+          gated = true;
+          break;
+        }
+        if (dt > 3) break;
+        const lv = await brainLevel();
+        if (brainAt === null && lv !== 'card' && lv !== 'expanded') brainAt = dt;
+        const pr = sr.panes.find((q) => q.id === pick.id);
+        if (glassAt === null && (!pr || (pr.level !== 'card' && pr.level !== 'expanded'))) glassAt = dt;
+        if (sr.target === pick.id && retakenByLight(await lastTake())) lightBack = true;
+        if (!back && sr.target === pick.id) {
+          const lightIn = (pr && pr.lx !== null && Math.abs(pr.lx - cx) <= 80 * Math.max(1, ui) && Math.abs(pr.ly! - cy) <= 80 * Math.max(1, ui)) || retakenByLight(await lastTake());
+          if (!lightIn) {
+            back = `${dt.toFixed(2)} s`;
+            lookAtBack = await look();
+          }
+        }
+        if (shots && !shot6 && dt >= 0.6) {
+          shot6 = true;
+          await page.screenshot({ path: `${shots}/${tag2}-2-label.png` });
+        }
+        await page.waitForTimeout(100);
+      }
+      if (shots) await page.screenshot({ path: `${shots}/${tag2}-3-rest.png` });
+      // A safety gate holds every pane on the glass: a look-away it interrupts says nothing about looking away.
+      if (gated) {
+        console.log(`     look-away: a turn off the ${lv0}, interrupted by a safety gate; not counted`);
+        continue;
+      }
+      // Taken back by its light inside the viewfinder is a look at the place, and then its card rightly stays.
+      const byLight = !back && lightBack;
+      const ok = off && !back && (byLight || (brainAt !== null && brainAt <= 0.6 + 1e-6 && glassAt !== null && glassAt <= 1.1 + 1e-6));
+      awayRuns.push(ok);
+      console.log(`     look-away: a turn of ${Math.abs(turn).toFixed(0)} px off the ${lv0}; the look ${off ? 'off the place' : `still on it (${se.target})`} as the turn ends; its label on the brain ${brainAt === null ? 'never' : `${brainAt.toFixed(2)} s`} and on the glass ${glassAt === null ? 'never' : `${glassAt.toFixed(2)} s`} after; ${back ? `looked at again at ${back} while resting` : byLight ? 'looked at again by its light in the viewfinder, so it stays' : 'not looked at again while resting'}${ok ? '' : ' FAILED'}`);
+      if (!ok && lookAtEnd) console.log(`       the look at the turn's end: ${lookAtEnd}`);
+      if (!ok && lookAtBack) console.log(`       the look when taken back: ${lookAtBack}`);
+      if (!ok && brainAt === null) console.log(`       the brain after the rest: ${await page.evaluate(`(() => { const w = window.__app.walk; const b = w.brain; const it = b.items.get('${pick.id}'); const l = w.last(); const e = l && l.snap.entities.find((x) => x.id === '${pick.id}'); return JSON.stringify({ t: +w.t.toFixed(2), level: it && it.level, lastGazeAt: it && +it.lastGazeAt.toFixed(2), stepAt: it && +it.stepAt.toFixed(2), since: it && +it.since.toFixed(2), gate: b.gateNow, scanHold: b.scanHold, scanUntil: +b.scanUntil.toFixed(2), band: l && l.frame.band, dest: l && l.frame.goal.destination, dist: e && e.distance, target: w.sim.gaze.target, labelled: b.labels && b.labels.has && b.labels.has('${pick.id}') }); })()`)}`);
+    }
+  }
 }
 
 const counted = aims.filter((a) => !a.skip);
@@ -446,7 +534,8 @@ for (const g of growBad) {
 if (probe) console.log((await page.evaluate('window.__probe.join("\\n")')) as string);
 const landBad = landings.filter((l) => !l.ok).length;
 console.log(`landings: ${landings.filter((l) => l.still !== null).length} aims, ${landings.filter((l) => l.still !== null && l.perFrame < 2 && l.total < 6).length} still from the landing to the pull; drags: ${landings.filter((l) => l.dragFrames).length}, ${landings.filter((l) => l.dragFrames && l.drag <= 1).length} with the looked-at pane exact to 1 px a frame`);
-const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && growBad.length === 0 && landBad === 0;
+console.log(`look-aways: ${awayRuns.length} turns off a card or a view, ${awayRuns.filter(Boolean).length} with the look gone by the turn's end, the label within 0.6 s (glass 1.1 s) and the place not taken back while resting`);
+const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && growBad.length === 0 && landBad === 0 && awayRuns.every(Boolean);
 console.log(pass ? 'PASS' : 'FAIL');
 await browser.close();
 await server?.close();

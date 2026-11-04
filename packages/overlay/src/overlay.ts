@@ -142,6 +142,8 @@ interface Item {
   lag: number;
   swap: boolean;
   frozen: { x: number; y: number } | null;
+  // The step aside and head-scan yield the pane was last drawn with.
+  lastShift: { x: number; y: number };
   edgeSince: number | null;
   hold: Held | null;
   holdEnded: boolean;
@@ -526,6 +528,7 @@ export class Overlay {
       lag: 0,
       swap: false,
       frozen: null,
+      lastShift: { x: 0, y: 0 },
       edgeSince: null,
       hold: null,
       holdEnded: false,
@@ -928,9 +931,14 @@ export class Overlay {
       // A pane frozen by a head scan stands where the scan began, not where its placement says: pin it once the scan is over.
       // ...and one still condensing or growing is not yet at its measured size, which its placement still has to catch up with.
       if (!look || it.frozen || b.level !== it.d.level) return null;
-      // Pinned where it is drawn: its placement plus any move under way, so the landing frame never moves it.
-      const at = this.drawnCenter(it, placed, placed.rect, t, true);
-      const c = { x: at.x + lag.x - pr.x, y: at.y + lag.y - pr.y };
+      // Pinned where it was drawn last frame, carried to this frame's light, the step aside and yield it was drawn with set apart (the
+      // draw adds them still): a move under way stops at the frame the look lands rather than taking one more step.
+      let c: { x: number; y: number };
+      if (b.rect && b.level === it.d.level && it.placedPr) c = { x: b.rect.x + b.rect.w / 2 - it.lastShift.x - it.placedPr.x, y: b.rect.y + b.rect.h / 2 - it.lastShift.y - it.placedPr.y };
+      else {
+        const at = this.drawnCenter(it, placed, placed.rect, t, true);
+        c = { x: at.x + lag.x - pr.x, y: at.y + lag.y - pr.y };
+      }
       it.hold = { fx: 0.5, fy: 0.5, off: c, w: W, h: H, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
       it.place?.jumpX.set(0);
       it.place?.jumpY.set(0);
@@ -1226,7 +1234,8 @@ export class Overlay {
     const tl = this.tl();
     gsap.set(b.box, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 });
     gsap.set(b.seed, { opacity: 0 });
-    b.fade.v = 1;
+    // A box that had faded out comes back over the morph rather than at full opacity in one frame.
+    if (b.fade.v < 1) tl.to(b.fade, { v: 1, duration: T.quick, ease: EASE.out }, 0);
     if (it.lights) gsap.set(it.L, { lead: 1, leadO: 1, head: 0 });
     const old = b.view;
     tl.to(old.kids, { opacity: 0, filter: 'blur(4px)', duration: MOVE.morphOut, ease: EASE.in }, 0);
@@ -1501,6 +1510,14 @@ export class Overlay {
             // Against the light its placement was made with: this frame's has already turned with the drag.
             const at = it.placedPr ?? p;
             it.ride = { x: it.placed.rect.x + jx - at.x, y: it.placed.rect.y + jy - at.y };
+            // A pane a head scan froze is drawn where the scan left it, not at its placement: it rides from there, and the freeze
+            // ends without its ease back, which would carry it against the world under the pointer.
+            const fz = it.frozen;
+            if (fz) {
+              const f = factors(it.placed);
+              it.ride = { x: fz.x - it.placed.rect.w * f.fx - p.x, y: fz.y - it.placed.rect.h * f.fy - p.y };
+              it.frozen = null;
+            }
             it.place.jumpX.set(0);
             it.place.jumpY.set(0);
           }
@@ -1628,10 +1645,11 @@ export class Overlay {
             // A riding pane is already pinned to the world; a head scan fades it but does not freeze it, so it has no return to make.
             if (it.yieldS.on && !it.hold && !it.ride) it.frozen ??= { x: at.x + a.dx, y: at.y + a.dy };
             else if (fz) {
-              it.place?.ease(t, fz, { x: at.x + a.dx, y: at.y + a.dy }, MOVE.yieldOut);
+              if (!it.ride && !it.hold) it.place?.ease(t, fz, { x: at.x + a.dx, y: at.y + a.dy }, MOVE.yieldOut);
               it.frozen = null;
             }
             rect = fz ? { x: fz.x - w * fx + y.dx, y: fz.y - h * fy, w, h } : { x: base.x + a.dx + y.dx, y: base.y + a.dy, w: base.w, h: base.h };
+            it.lastShift = fz ? { x: y.dx, y: 0 } : { x: a.dx + y.dx, y: a.dy };
             this.setTrace(it, a.trace && !a.dropped ? a.trace : null, a.opacity);
             if (pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
           }

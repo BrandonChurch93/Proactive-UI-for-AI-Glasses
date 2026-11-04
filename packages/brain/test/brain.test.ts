@@ -37,7 +37,7 @@ describe('the first 30 seconds of Hungry, hand-written', () => {
     expect(at('show mega-burger label')).toBeCloseTo(14.3, 5);
     expect(at('promote mega-burger card')).toBeCloseTo(15.3, 5);
     expect(at('save mega-burger card')).toBeCloseTo(22.0, 5);
-    expect(at('demote mega-burger label')).toBeCloseTo(30.9, 5);
+    expect(at('demote mega-burger label')).toBeCloseTo(30.4, 5);
     expect(at('demote mega-burger pip')).toBeUndefined();
     expect(lines.filter((e) => e.line === 'show mega-burger label')).toHaveLength(1);
   });
@@ -135,16 +135,17 @@ describe('walking rules, unit level', () => {
     expect(climb('brisk')).toEqual(['label@0.3']);
   });
 
-  it('rule 10: the look leaves an expanded view 30 px outside its rect, and the view is its label 1 s later; inside it, the view holds', () => {
+  it('rule 10: the look leaves an expanded view 30 px outside its rect, and the view is its label the look-away later; inside it, the view holds', () => {
     const view = { x: 440, y: 185, w: 400, h: 430 };
     const it0 = { ...newLadderItem('x'), level: 'expanded' as const, since: 0, shownAt: 0, dwelt: true, lastGazeAt: 5, gazeSince: 0 };
     const at = (cx: number, t: number) => {
       const target = lookOnPane(view, cx, 400, 1);
       return step({ ...it0, lastGazeAt: target ? t : 5 }, { t, band: 'walk', target, dwellS: t, pinch: false, floor: 'none', labelled: true, proactive: false, scoreAbove: false, canProactive: false }, cfg);
     };
-    expect(at(view.x - 30, 5.9).level).toBe('expanded');
-    expect(at(view.x - 30, 6)).toMatchObject({ level: 'label', via: 'look-away' });
-    expect(at(view.x + 10, 6).level).toBe('expanded');
+    const away = 5 + cfg.ladder.lookAwayS;
+    expect(at(view.x - 30, away - 0.1).level).toBe('expanded');
+    expect(at(view.x - 30, away)).toMatchObject({ level: 'label', via: 'look-away' });
+    expect(at(view.x + 10, away).level).toBe('expanded');
   });
 
   it('rule 6 and 7: the pocket holds an item once and surfaces only with 6 s or more', () => {

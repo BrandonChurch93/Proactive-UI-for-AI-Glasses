@@ -4,8 +4,8 @@
     {
       "rule": "walking-10",
       "between": [
-        6.25,
-        6.55
+        5.75,
+        5.95
       ],
       "must": {
         "action": "demote",
@@ -17,7 +17,7 @@
     {
       "rule": "walking-10",
       "between": [
-        6.55,
+        5.95,
         12
       ],
       "mustNot": {

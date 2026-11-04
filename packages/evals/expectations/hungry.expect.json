@@ -230,9 +230,9 @@
       }
     },
     {
-      "name": "0:45 · the look moves on and the card shrinks back to its label",
+      "name": "0:44 · the look moves on and the card shrinks back to its label, half a second later",
       "between": [
-        44.8,
+        44.3,
         45.6
       ],
       "must": {
@@ -487,10 +487,10 @@
       }
     },
     {
-      "name": "1:59.5 · the look leaves the view at the door: its label 1 s later",
+      "name": "1:59.5 · the look leaves the view at the door: its label by 2:00.0",
       "between": [
         119.5,
-        120.5
+        120.0
       ],
       "must": {
         "action": "demote",

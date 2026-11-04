@@ -113,10 +113,10 @@
       }
     },
     {
-      "name": "0:29 \u00b7 the theater shrinks back to its label in the same move",
+      "name": "0:28 \u00b7 the theater shrinks back to its label in the same move, half a second after the look",
       "between": [
-        28.5,
-        29.8
+        28.0,
+        29.3
       ],
       "must": {
         "action": "demote",

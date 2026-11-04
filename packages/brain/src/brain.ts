@@ -787,7 +787,6 @@ export class Brain {
       } else {
         if (it.wasTarget && it.gazeSince !== null) it.paused = { held: t - it.gazeSince, at: t };
         it.gazeSince = null;
-        if (this.scanHold === e.id && t < this.scanUntil) it.lastGazeAt = t;
         // Coming up to the door, the destination's pane folding at the view's edge is not a look-away; once there, looking away is.
         if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2 && !snap.goal.arrived && !this.paneVisible(e.id)) it.lastGazeAt = t;
       }
@@ -836,6 +835,8 @@ export class Brain {
           cardWait: t - this.cardGrownAt < this.cfg.ladder.swapGapS - 1e-9,
           growS: e.distance > this.cfg.ladder.nearM ? this.cfg.ladder.growFarS : this.cfg.ladder.growS,
           still: !this.headMoved,
+          // A head scan at the curb keeps the level while the scan lasts; a look that does not come back counts from the turn.
+          scanKeep: !isT && this.scanHold === e.id && t < this.scanUntil && t - it.lastGazeAt < 0.8,
           pinch: pinch === e.id,
           floor: aware.has(e.id) ? 'pip' : 'none',
           labelled,

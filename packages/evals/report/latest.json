@@ -248,9 +248,9 @@
      "detail": "379 frames"
     },
     {
-     "name": "0:45 · the look moves on and the card shrinks back to its label",
+     "name": "0:44 · the look moves on and the card shrinks back to its label, half a second later",
      "pass": true,
-     "detail": "t=44.901 demote trattoria-da-lia label"
+     "detail": "t=44.401 demote trattoria-da-lia label"
     },
     {
      "name": "0:52 · the station stair, labelled with the view since 0:45, holds its label for the look",
@@ -348,9 +348,9 @@
      "detail": "t=117.502 promote big-bean expanded"
     },
     {
-     "name": "1:59.5 · the look leaves the view at the door: its label 1 s later",
+     "name": "1:59.5 · the look leaves the view at the door: its label by 2:00.0",
      "pass": true,
-     "detail": "t=120.402 demote big-bean label"
+     "detail": "t=119.902 demote big-bean label"
     },
     {
      "name": "2:01 · the pocket holds what was saved and what was settled",
@@ -530,9 +530,9 @@
      "detail": "t=28.901 promote trattoria-da-lia card"
     },
     {
-     "name": "0:29 · the theater shrinks back to its label in the same move",
+     "name": "0:28 · the theater shrinks back to its label in the same move, half a second after the look",
      "pass": true,
-     "detail": "t=28.901 demote grace-theater label"
+     "detail": "t=28.401 demote grace-theater label"
     },
     {
      "name": "0:31 · Kathy's from the shopfront lights its label",
@@ -5004,14 +5004,14 @@
      "rule": "walking-10"
     },
     {
-     "name": "[6.25, 6.45) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
+     "name": "[5.75, 5.85) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
      "pass": true,
-     "detail": "t=6.3 demote grace-theater label",
+     "detail": "t=5.8 demote grace-theater label",
      "rule": "walking-10"
     }
    ],
    "rule": "walking-10",
-   "description": "The same dwell in Walk: the compact card at 1.8 s, the full card as it comes within 30 m at 2.4 s, its expanded view 2 s later, its label 1 s after the look leaves."
+   "description": "The same dwell in Walk: the compact card at 1.8 s, the full card as it comes within 30 m at 2.4 s, its expanded view 2 s later, its label half a second after the look leaves."
   },
   {
    "id": "walking-10c-look-away",
@@ -5133,13 +5133,13 @@
      "detail": ""
     },
     {
-     "name": "[6.25, 6.55) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
+     "name": "[5.75, 5.95) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
      "pass": true,
-     "detail": "t=6.3 demote grace-theater label",
+     "detail": "t=5.8 demote grace-theater label",
      "rule": "walking-10"
     },
     {
-     "name": "[6.55, 12) mustNot {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
+     "name": "[5.95, 12) mustNot {\"id\":\"grace-theater\",\"action\":[\"demote\",\"dismiss\"]}",
      "pass": true,
      "detail": "",
      "rule": "walking-10"
@@ -5152,7 +5152,7 @@
     }
    ],
    "rule": "walking-10",
-   "description": "Looking away shrinks the expanded view straight to its label after 1.2 s; at Stopped the label stays."
+   "description": "Looking away shrinks the expanded view straight to its label half a second after the look leaves; at Stopped the label stays."
   },
   {
    "id": "walking-10d-labels",
@@ -5312,7 +5312,7 @@
     {
      "name": "[3.5, 4.1) must {\"action\":\"demote\",\"id\":\"grace-theater\",\"level\":\"label\",\"cause\":\"look-away\"}",
      "pass": true,
-     "detail": "t=4 demote grace-theater label",
+     "detail": "t=3.9 demote grace-theater label",
      "rule": "walking-10"
     },
     {
