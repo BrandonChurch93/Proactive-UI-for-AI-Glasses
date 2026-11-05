@@ -487,10 +487,23 @@
       }
     },
     {
-      "name": "1:59.5 · the look leaves the view at the door: its label by 2:00.0",
+      "name": "1:59.5 · the look leaves the view at the door: its card at 2:00.0",
       "between": [
         119.5,
         120.0
+      ],
+      "must": {
+        "action": "demote",
+        "id": "big-bean",
+        "level": "card",
+        "cause": "look-away"
+      }
+    },
+    {
+      "name": "1:59.5 · the look leaves the view at the door: its label a tick later",
+      "between": [
+        119.6,
+        120.1
       ],
       "must": {
         "action": "demote",

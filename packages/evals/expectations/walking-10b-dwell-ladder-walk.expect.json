@@ -69,6 +69,19 @@
       "must": {
         "action": "demote",
         "id": "grace-theater",
+        "level": "card",
+        "cause": "look-away"
+      }
+    },
+    {
+      "rule": "walking-10",
+      "between": [
+        5.85,
+        5.95
+      ],
+      "must": {
+        "action": "demote",
+        "id": "grace-theater",
         "level": "label",
         "cause": "look-away"
       }

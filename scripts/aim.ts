@@ -4,10 +4,10 @@ import { arg, ensureServer, launch, waitQuiet } from './lib/browser';
 // pnpm aim: plays Explore live for two laps and aims the way the owner does, at Stroll and at Walk. It picks a label
 // or a card on the glass that the look is not on, drags the viewfinder onto it, steering by eye while the button is
 // down, and lets go once the square shows it holds the place or the pane is under the center. One line per aim: the band, the
-// place aimed at, the place the gaze holds 0.5 s after letting go, how far the aimed pane sits from the center 3 s
-// later, and any jump. A frame recorder in the page watches the looked-at pane all the way round: a jump is a move of
-// more than 60 px in 100 ms while its light moves less than 20 px, outside a level change and outside a rule 8 step
-// aside. Passes at 95% held, 95% near, no jump, every landing still and every drag exact. --laps, --w, --h, --verbose.
+// place aimed at, the place the gaze holds 0.5 s after letting go, and any jump. A frame recorder in the page watches every world
+// pane all the way round: a jump of the looked-at pane is a move of more than 60 px in 100 ms while its light moves less than 20 px;
+// around each landing no pane within 300 px of the center may move more than 6 px against the world in a frame, for any reason.
+// Passes at 95% held, no jump, every landing still, every drag exact, every look-away right. --laps, --w, --h, --verbose.
 const base = arg('base', 'http://localhost:5199/')!;
 const w = Number(arg('w', '1920'));
 const h = Number(arg('h', '1080'));
@@ -30,7 +30,8 @@ const tr = async (what: string, id: string): Promise<void> => {
 if (shots) mkdirSync(shots, { recursive: true });
 const cx = w / 2;
 const cy = h / 2;
-const NEAR_PX = 160;
+const NEAR_PANE_PX = 300;
+const FRAME_PX = 6;
 
 await waitQuiet();
 const server = await ensureServer(base);
@@ -70,31 +71,22 @@ const recorder = `(() => {
         const pl = it.placed || {}; const fx = pl.fx !== undefined ? pl.fx : pl.align === 'left' ? 1 : pl.align === 'right' ? 0 : 0.5; const fy = pl.fy !== undefined ? pl.fy : pl.vertical === 'middle' ? 0.85 : pl.vertical === 'below' ? 0 : 1;
         const vw = innerWidth; const vh = innerHeight;
         const ex = b.rect.x + b.rect.w >= vw - 1 ? 1 : b.rect.x <= 1 ? 0 : fx; const ey = b.rect.y + b.rect.h >= vh - 1 ? 1 : b.rect.y <= 1 ? 0 : fy;
-        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'pull' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.placed && it.placed.moved === 'held') || Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, pv: it.hold ? Math.hypot(it.hold.vx || 0, it.hold.vy || 0) : 0, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), fv: Math.round(b.fade.v * 100) / 100, pl: it.placed && it.placed.rect ? [it.placed.rect.x, it.placed.rect.y, it.placed.rect.w, it.placed.rect.h, fx, fy].map((v) => Math.round(v * 100) / 100) : null, edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
+        p = { x: b.rect.x, y: b.rect.y, w: b.rect.w, h: b.rect.h, gx: b.rect.x + b.rect.w * ex, gy: b.rect.y + b.rect.h * ey, side: it.hold ? 'held' : 'light ' + (pl.align || '-') + ' ' + (pl.vertical || '-'), yld: Boolean(it.frozen) || Boolean(it.yieldS && it.yieldS.on), aside: Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, o: b.opacity, lv: b.level, vis, come: Boolean(it.asideOn) || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5, how: it.hold ? 'held' : it.ride ? 'ride' : it.frozen ? 'frozen' : (it.placed && it.placed.mode) || '-', lx: pr && pr.inFront ? pr.x : null, ly: pr && pr.inFront ? pr.y : null, ax: it.aside.x.at(o.t) + (it.yieldS ? it.yieldS.offset(o.t) : 0), ay: it.aside.y.at(o.t), fv: Math.round(b.fade.v * 100) / 100, pl: it.placed && it.placed.rect ? [it.placed.rect.x, it.placed.rect.y, it.placed.rect.w, it.placed.rect.h, fx, fy].map((v) => Math.round(v * 100) / 100) : null, edge: b.rect.x <= 0.5 || b.rect.y <= 0.5 || b.rect.x + b.rect.w >= vw - 0.5 || b.rect.y + b.rect.h >= vh - 0.5 };
       }
-      window.__aim.log.push({ t: walk.t, id, p, down: walk.holding });
+      const all = [];
+      for (const q of o.items.values()) {
+        const c = q.cur;
+        if (q.kind !== 'world' || q.dying || !c || !c.rect || c.level === 'none' || !q.placedPr) continue;
+        const pz = q.placed || {}; const qx = pz.fx !== undefined ? pz.fx : pz.align === 'left' ? 1 : pz.align === 'right' ? 0 : 0.5; const qy = pz.fy !== undefined ? pz.fy : pz.vertical === 'middle' ? 0.85 : pz.vertical === 'below' ? 0 : 1;
+        all.push({ id: q.id, x: c.rect.x, y: c.rect.y, w: c.rect.w, h: c.rect.h, fx: qx, fy: qy, lx: q.placedPr.x, ly: q.placedPr.y, o: c.opacity, lv: c.level, dl: q.d.level, how: q.hold ? 'held' : q.ride ? 'ride' : q.frozen ? 'frozen' : pz.mode || '-', moved: pz.moved, why: pz.why, ax: q.aside.x.at(o.t), ay: q.aside.y.at(o.t), yl: Boolean(q.yieldS && q.yieldS.on), jx: q.place ? q.place.jumpX.at(o.t) : 0, jy: q.place ? q.place.jumpY.at(o.t) : 0 });
+      }
+      window.__aim.log.push({ t: walk.t, id, p, down: walk.holding, all });
     }
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
 })()`;
 await page.evaluate(recorder);
-// --probe id:t0:t1 logs the hold's inputs and result for one place over a window of walk time.
-const probe = arg('probe', '');
-if (probe) {
-  const [pid, t0, t1] = probe.split(':');
-  await page.evaluate(`(() => {
-    const w = window.__app.walk; const o = w.overlay; window.__probe = [];
-    const hold = o.hold.bind(o);
-    o.hold = (it, t, ctx, chrome, pr, depth, size) => {
-      const on = it.id === '${pid}' && t >= ${t0} && t <= ${t1};
-      const before = on && it.hold ? JSON.stringify({ off: [Math.round(it.hold.off.x), Math.round(it.hold.off.y)], w: Math.round(it.hold.w), h: Math.round(it.hold.h), lv: it.hold.level, v: Math.round(Math.hypot(it.hold.vx || 0, it.hold.vy || 0)) }) + ' aiming ' + o.aiming() + ' yaw ' + o.yawRate.toFixed(2) : '-';
-      const r = hold(it, t, ctx, chrome, pr, depth, size);
-      if (on) window.__probe.push(t.toFixed(3) + ' d ' + it.d.level + ' b ' + (it.cur ? it.cur.level : '-') + ' size ' + Math.round(size.w) + 'x' + Math.round(size.h) + ' look ' + (w.sim.gaze.target === it.id) + ' light ' + Math.round(pr.x) + ',' + Math.round(pr.y) + ' before ' + before + ' -> ' + (r ? r.mode + ' ' + [r.rect.x, r.rect.y, r.rect.w, r.rect.h].map(Math.round).join(',') : 'null') + ' hold ' + (it.hold ? 'pull' : 'none') + ' drawn ' + (it.cur && it.cur.rect ? [it.cur.rect.x, it.cur.rect.y, it.cur.rect.w, it.cur.rect.h].map(Math.round).join(',') : '-') + ' aside ' + Math.round(it.aside.x.at(o.t)) + ',' + Math.round(it.aside.y.at(o.t)) + (it.aside.by ? ' by ' + it.aside.by : '') + ' yield ' + (it.yieldS && it.yieldS.on ? 'on' : 'off') + ' placed ' + (it.placed ? it.placed.mode + (it.placed.why ? ':' + it.placed.why : '') : '-') + ' prIn ' + pr.inFront + ' anchor ' + (it.placedPr ? it.placedPr.anchor : '-') + '/' + it.d.placement.anchor + ' chrome ' + JSON.stringify(chrome.map((k) => [k.x, k.y, k.w, k.h].map(Math.round))));
-      return r;
-    };
-  })()`);
-}
 type PaneS = { id: string; level: string; x: number; y: number; w: number; h: number; op: number; vis: boolean; lx: number | null; ly: number | null };
 type S = { t: number; band: string; lap: number; target: string | null; gate: boolean; panes: PaneS[] };
 const state = (): Promise<S> =>
@@ -109,9 +101,8 @@ const state = (): Promise<S> =>
     }
     return { t: walk.t, band: f ? f.band : 'stopped', lap: sim.lap, target: sim.gaze.target, gate: Boolean(f && f.gate.safety), panes };
   })()`) as Promise<S>;
-type Rec = { t: number; id: string | null; down?: boolean; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; pv?: number; ax?: number; ay?: number; fv?: number; pl?: number[] | null; edge?: boolean } | null };
-const lightIn = (id: string): Promise<boolean> =>
-  page.evaluate(`(() => { const walk = window.__app.walk; const a = walk.sim.anchorOf('${id}'); const p = a && walk.bridge.project(a); return Boolean(p && p.inFront && p.x >= 0 && p.x <= ${w} && p.y >= 0 && p.y <= ${h}); })()`) as Promise<boolean>;
+type All = { id: string; x: number; y: number; w: number; h: number; fx: number; fy: number; lx: number; ly: number; o: number; lv: string; dl: string; how: string; moved?: string; why?: string; ax: number; ay: number; yl: boolean; jx: number; jy: number };
+type Rec = { t: number; id: string | null; down?: boolean; all?: All[]; p: { x: number; y: number; w: number; h: number; gx: number; gy: number; side: string; aside: boolean; yld: boolean; o: number; lv: string; vis: boolean; come: boolean; how: string; lx: number | null; ly: number | null; ax?: number; ay?: number; fv?: number; pl?: number[] | null; edge?: boolean } | null };
 const drain = async (): Promise<Rec[]> => {
   await page.evaluate(recorder);
   return (await page.evaluate(`(() => { const l = window.__aim.log; window.__aim.log = []; return l; })()`)) as Rec[];
@@ -148,7 +139,7 @@ async function drag(id: string): Promise<{ ok: boolean; held: boolean }> {
       await tr('lost', id);
       break;
     }
-    // Let go once the square shows the hold (the corners pull in after the 250 ms a look needs), as a person watching it would.
+    // Let go once the square shows the hold (the corners close in after the 250 ms a look needs), as a person watching it would.
     if (s.target === id && ((await page.evaluate(`window.__app.walk.sim.gaze.dwellMs`)) as number) >= 250) {
       held = true;
       break;
@@ -171,7 +162,7 @@ async function drag(id: string): Promise<{ ok: boolean; held: boolean }> {
   return { ok: true, held };
 }
 
-type Aim = { t: number; band: string; id: string; level: string; held: string | null; ok: boolean; skip: boolean; at3: number | null; excused: string | null; near: boolean; jumps: number };
+type Aim = { t: number; band: string; id: string; level: string; held: string | null; ok: boolean; skip: boolean; excused: string | null; jumps: number };
 const aims: Aim[] = [];
 const jumps: string[] = [];
 let excusedCome = 0;
@@ -179,14 +170,13 @@ let lastRec: Rec[] = [];
 
 const levelAt = new Map<string, { lv: string; t: number }>();
 let jumpTotal = 0;
-// From the frame the look lands to the pull's first move, the aimed pane's center keeps its offset from its light: under
-// 2 px a frame and 6 px in all. While the pointer is down, the looked-at pane's offset is constant to 1 px a frame.
+// From the frame the look lands on, the aimed pane's center keeps its offset from its light: under 2 px a frame and 6 px in all,
+// and nothing but the world moves it. While the pointer is down, the looked-at pane's offset is constant to 1 px a frame.
 type Landing = { still: number | null; perFrame: number; total: number; dragFrames: number; drag: number; dragAt?: string; landAt?: string; dragFails: string[]; ok: boolean };
 const landings: Landing[] = [];
 const awayRuns: boolean[] = [];
 function landing(rec: Rec[], id: string): Landing {
-  // Rule 8's step aside and rule 5's yield are their own moves, for a real thing and a head check, as the jump check already excludes them; the hold's offset is what is judged here.
-  const off = (r: Rec): { x: number; y: number } | null => (r.p && r.p.lx !== null ? { x: r.p.x + r.p.w / 2 - r.p.lx - (r.p.ax ?? 0), y: r.p.y + r.p.h / 2 - r.p.ly! - (r.p.ay ?? 0) } : null);
+  const off = (r: Rec): { x: number; y: number } | null => (r.p && r.p.lx !== null ? { x: r.p.x + r.p.w / 2 - r.p.lx, y: r.p.y + r.p.h / 2 - r.p.ly! } : null);
   let drag = 0;
   let dragAt: string | undefined;
   let dragFrames = 0;
@@ -222,7 +212,7 @@ function landing(rec: Rec[], id: string): Landing {
   for (let i = k + 1; i < rec.length; i++) {
     const r = rec[i]!;
     const o = off(r);
-    if (r.id !== id || !o || (r.p!.pv ?? 0) > 0) break;
+    if (r.id !== id || !o) break;
     const prev = off(rec[i - 1]!);
     if (prev && Math.abs(rec[i - 1]!.p!.w - r.p!.w) <= 0.5) {
       const d = Math.hypot(o.x - prev.x, o.y - prev.y);
@@ -235,6 +225,32 @@ function landing(rec: Rec[], id: string): Landing {
     still++;
   }
   return { still, perFrame, total, dragFrames, drag, ...(dragAt ? { dragAt } : {}), ...(landAt ? { landAt } : {}), dragFails, ok: perFrame < 2 && total < 6 && drag <= 1 };
+}
+
+// Around a landing, from 0.5 s before it to 0.5 s after, no world pane within 300 px of the center moves more than 6 px against the
+// world in a frame, whatever moves it. A pane changing size is judged at the corner it grows from, a frame the browser dropped at its length.
+const steadyFails: string[] = [];
+let steadyPairs = 0;
+function steady(rec: Rec[], id: string): void {
+  const land = rec.find((r) => r.id === id);
+  if (!land) return;
+  const near = (q: All): boolean => gap(q) <= NEAR_PANE_PX;
+  const line = (q: All): string => `${q.how} ${q.lv}/${q.dl} center ${(q.x + q.w / 2 - cx).toFixed(0)},${(q.y + q.h / 2 - cy).toFixed(0)} ${q.w.toFixed(0)}x${q.h.toFixed(0)} op ${q.o.toFixed(2)} light ${(q.lx - cx).toFixed(0)},${(q.ly - cy).toFixed(0)}${q.moved ? ` moved:${q.moved}` : ''}${q.why ? ` why:${q.why}` : ''}${q.ax || q.ay ? ` aside ${q.ax.toFixed(0)},${q.ay.toFixed(0)}` : ''}${q.yl ? ' yield' : ''}${q.jx || q.jy ? ` jump ${q.jx.toFixed(0)},${q.jy.toFixed(0)}` : ''}`;
+  for (let i = 1; i < rec.length; i++) {
+    const a = rec[i - 1]!;
+    const b = rec[i]!;
+    if (b.t < land.t - 0.5 || b.t > land.t + 0.5 || b.t <= a.t) continue;
+    const limit = FRAME_PX * Math.max(1, Math.round((b.t - a.t) * 60));
+    for (const q of b.all ?? []) {
+      const was = a.all?.find((x) => x.id === q.id);
+      if (!was || was.o < 0.05 || q.o < 0.05 || (!near(was) && !near(q))) continue;
+      steadyPairs++;
+      const dx = q.x + q.w * q.fx - q.lx - (was.x + was.w * q.fx - was.lx);
+      const dy = q.y + q.h * q.fy - q.ly - (was.y + was.h * q.fy - was.ly);
+      const d = Math.hypot(dx, dy);
+      if (d > limit) steadyFails.push(`${q.id} moved ${d.toFixed(1)} px in ${((b.t - a.t) * 1000).toFixed(0)} ms, ${(b.t - land.t).toFixed(2)} s from the landing on ${id} · before ${a.t.toFixed(3)} ${line(was)} · then ${b.t.toFixed(3)} ${line(q)}`);
+    }
+  }
 }
 
 function scanJumps(rec: Rec[]): number {
@@ -279,8 +295,6 @@ function scanJumps(rec: Rec[]): number {
     if (!after || !after.p || after.t - b.t < 0.55) continue;
     // A rule 8 step aside in the window moves the pane for the world, not for its growth.
     if (span.some((q) => q.p!.aside) || a.p.aside) continue;
-    // A pane drawn to the center grows about its own center while the pull carries it; it has no corner to keep.
-    if (a.p.side === 'pull' || span.some((q) => q.p!.side === 'pull')) continue;
     // Measured against its light: a pane that moves with the world has not moved for its growth.
     const moved = a.p.lx !== null && after.p.lx !== null ? Math.hypot(after.p.gx - after.p.lx - (a.p.gx - a.p.lx), after.p.gy - after.p.ly! - (a.p.gy - a.p.ly!)) : Math.hypot(after.p.gx - a.p.gx, after.p.gy - a.p.gy);
     const sideChanged = after.p.side !== a.p.side;
@@ -313,9 +327,9 @@ async function lookAlong(): Promise<void> {
   await page.waitForTimeout(1200);
 }
 
-const edgeAims: boolean[] = [];
 const ui = Math.min(w / 1280, h / 800) < 1 ? Math.max(0.74, Math.min(1, Math.min(w / 1280, h / 800) * 1.3)) : Math.min(1.9, Math.max(1, Math.min(w / 1280, h / 800)));
 const recent = new Map<string, number>();
+let tail: Rec[] = [];
 let idleSince: number | null = null;
 const tStart = Date.now();
 let lastT = -1;
@@ -332,7 +346,9 @@ for (;;) {
     if (verbose) console.log(`(stopped at ${s.t.toFixed(1)} s of walk time, ${((Date.now() - tStart) / 1000).toFixed(0)} s real)`);
     break;
   }
-  scanJumps(await drain());
+  const between = await drain();
+  scanJumps(between);
+  tail = [...tail, ...between].slice(-90);
   if (s.band !== 'stroll' && s.band !== 'walk') {
     await page.waitForTimeout(250);
     continue;
@@ -359,66 +375,32 @@ for (;;) {
   const s05 = await state();
   const tag = `${String(aims.length + 1).padStart(2, '0')}-${s.band}-${pick.id}`;
   await page.waitForTimeout(400);
-  const s09 = await state();
-  // A pane rule 8 is acting on at that moment (stepping aside, or dropped to its light for a mover) is not judged on where it stands.
-  const steppedAside = (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return Boolean(it && (it.aside.dropped || Math.abs(it.aside.x.at(o.t)) + Math.abs(it.aside.y.at(o.t)) > 0.5)); })()`)) as boolean;
   if (shots) await page.screenshot({ path: `${shots}/${tag}-a.png` });
   await page.waitForTimeout(shots ? 1900 : 2100);
   const s3 = await state();
   if (shots) await page.screenshot({ path: `${shots}/${tag}-b.png` });
-  const p3 = s3.panes.find((p) => p.id === pick.id);
-  const at3 = p3 && p3.vis && p3.op > 0.05 ? gap(p3) : null;
-  const far = at3 === null || at3 > NEAR_PX;
   // The glass is quiet in a crossing by design, and a vehicle or a person passing between the eye and the place while
-  // the wearer aims has right of way over the pane (rule 8): those aims say nothing about aiming and count in neither measure.
+  // the wearer aims has right of way over the pane (rule 8): those aims say nothing about aiming and are not counted.
   const crossing = s05.gate || s3.gate;
   const mover = (await page.evaluate(`(() => { const e = window.__app.walk.overlayLog.find((e) => e.id === '${pick.id}' && e.t >= ${s.t} && (e.kind === 'aside' || e.kind === 'drop') && e.cause === 'keepout' && /vehicle|person/.test(e.detail ?? '')); return e ? e.detail.match(/(?:vehicle|person) ([^,]+)/)[1] : null; })()`)) as string | null;
   const moverEarly = mover !== null && ((await page.evaluate(`window.__app.walk.overlayLog.some((e) => e.id === '${pick.id}' && e.t >= ${s.t} && e.t <= ${rel.t + 0.5} && (e.kind === 'aside' || e.kind === 'drop') && e.cause === 'keepout' && /vehicle|person/.test(e.detail ?? ''))`)) as boolean);
-  let excused: string | null = crossing ? 'a crossing paused the glass' : moverEarly && s05.target !== pick.id ? `rule 8 for ${mover} while aiming` : null;
-  // A far pane is excused when its place left the view, passed 120° behind the walking direction (the head stops following there), was hidden by a mover under rule 8, or grew to an expanded view with no room beside the square.
-  if (!excused && far) {
-    const level3 = (await page.evaluate(`window.__app.walk.overlay.report().panes.find((p) => p.id === '${pick.id}')?.level ?? null`)) as string | null;
-    const behind = (await page.evaluate(`(() => { const s = window.__app.walk.sim; const a = s.anchorOf('${pick.id}'); const e = s.wearer.pos; const y = Math.atan2(-(a.x - e.x), -(a.z - e.z)) - s.wearer.bodyYaw; return Math.abs(Math.atan2(Math.sin(y), Math.cos(y))) > (2 * Math.PI) / 3 - 0.05; })()`)) as boolean;
-    if (!(await lightIn(pick.id))) excused = 'its place left the view';
-    else if (behind) excused = 'its place passed behind the shoulder';
-    else if (mover) excused = `rule 8 for ${mover}`;
-    else if (level3 === 'expanded') excused = 'changed level to expanded';
-  }
+  const excused: string | null = crossing ? 'a crossing paused the glass' : moverEarly && s05.target !== pick.id ? `rule 8 for ${mover} while aiming` : null;
   const recs = await drain();
   const j = scanJumps(recs);
   const land = landing(recs, pick.id);
   landings.push(land);
-  const a: Aim = { t: rel.t, band: s.band, id: pick.id, level: pick.level, held: s05.target, ok: s05.target === pick.id, skip: crossing || Boolean(excused?.endsWith('while aiming')), at3, excused, near: at3 !== null && at3 <= NEAR_PX, jumps: j };
+  steady([...tail, ...recs], pick.id);
+  tail = recs.slice(-90);
+  const a: Aim = { t: rel.t, band: s.band, id: pick.id, level: pick.level, held: s05.target, ok: s05.target === pick.id, skip: crossing || Boolean(excused), excused, jumps: j };
   aims.push(a);
-  const why = at3 === null ? ((await page.evaluate(`(() => { const r = window.__app.walk.overlay.report().panes.find((p) => p.id === '${pick.id}'); return r ? r.level + ' ' + (r.hiddenBy ?? (r.visible ? 'visible' : 'hidden')) + ' op ' + r.opacity : 'no pane'; })()`)) as string) : '';
-  const where = at3 !== null ? `${at3.toFixed(0)} px from the center` : `not on the glass (${why})`;
-  console.log(`${a.skip ? 'skip' : a.ok ? 'ok  ' : 'MISS'} ${a.t.toFixed(1).padStart(6)} ${a.band.padEnd(6)} aimed at ${a.id}:${a.level} · held ${a.held ?? 'nothing'} 0.5 s later · 3 s later ${where}${excused ? ` (${excused}, excused)` : a.near ? '' : ' FAR'}${j ? ` · ${j} jump${j > 1 ? 's' : ''}` : ''}`);
+  console.log(`${a.skip ? 'skip' : a.ok ? 'ok  ' : 'MISS'} ${a.t.toFixed(1).padStart(6)} ${a.band.padEnd(6)} aimed at ${a.id}:${a.level} · held ${a.held ?? 'nothing'} 0.5 s later${excused ? ` (${excused}, excused)` : ''}${j ? ` · ${j} jump${j > 1 ? 's' : ''}` : ''}`);
   console.log(`     landing: ${land.still === null ? 'the look never landed' : `${land.still} frames still, at most ${land.perFrame.toFixed(1)} px a frame, ${land.total.toFixed(1)} px in all${land.perFrame >= 2 && land.landAt ? ` (${land.landAt})` : ''}`} · drag: ${land.dragFrames} frames, at most ${land.drag.toFixed(1)} px a frame${land.drag > 1 && land.dragAt ? ` (${land.dragAt})` : ''}${land.ok ? '' : ' NOT STILL'}`);
   for (const f of land.dragFails) console.log(`       drag failed: ${f}`);
-  // The owner's rule since Phase 27: the place held is drawn slowly into the center. Every held aim prints how far the pane's center is from the view's 0.9 s and 3 s later; the near measure judges it.
-  const sq = 80 * Math.max(1, ui);
-  const lr = rel.panes.find((q) => q.id === pick.id);
-  const edgeOff = lr && lr.lx !== null ? Math.max(Math.abs(lr.lx - cx) - sq, Math.abs(lr.ly! - cy) - sq) : null;
-  if (edgeOff !== null && !a.skip && s09.target === pick.id && !steppedAside) {
-    const p9 = s09.panes.find((q) => q.id === pick.id);
-    const sep = p9 ? Math.max(p9.x - (cx + sq), cx - sq - (p9.x + p9.w), p9.y - (cy + sq), cy - sq - (p9.y + p9.h)) : null;
-    // The pane keeps its offset from its light, so as the wearer walks it drifts with the light; its 12 px clearance is allowed for that.
-    const ok = true;
-    const c = (q: PaneS | undefined): string => (q ? Math.hypot(q.x + q.w / 2 - cx, q.y + q.h / 2 - cy).toFixed(0) + ' px' : 'gone');
-    edgeAims.push(sep !== null && sep < 0);
-    console.log(`     drawn in: the ${p9 ? p9.level : 'pane'}'s center ${c(p9)} from the view's 0.9 s later, ${c(p3)} 3 s later`);
-    if (!ok && verbose) console.log('       log ' + (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) + ' · look ' + (await page.evaluate(`JSON.stringify(window.__app.walk.pick)`)));
-    if (!ok && verbose) console.log('       near the square ' + (await page.evaluate(`(() => { const w = window.__app.walk; const cx = innerWidth / 2; const cy = innerHeight / 2; const near = (r) => r.x < cx + 600 && r.x + r.w > cx - 600 && r.y < cy + 400 && r.y + r.h > cy - 400; return JSON.stringify([...w.bridge.keepOuts().filter((k) => near(k.rect)).map((k) => [k.kind + (k.still ? ' still' : '') + (k.moving ? ' moving' : ''), ...[k.rect.x - cx, k.rect.y - cy, k.rect.w, k.rect.h].map(Math.round)]), ...(w.bridge.chromeRects ? w.bridge.chromeRects() : []).filter(near).map((r) => ['chrome', ...[r.x - cx, r.y - cy, r.w, r.h].map(Math.round)])]); })()`)));
-    if (!ok && verbose) console.log('       ' + (await page.evaluate(`(() => { const o = window.__app.walk.overlay; const it = [...o.items.values()].find((x) => x.id === '${pick.id}'); return JSON.stringify({ hold: it && it.hold && { off: it.hold.off, v: Math.hypot(it.hold.vx || 0, it.hold.vy || 0) }, ride: it && it.ride, placed: it && it.placed && { mode: it.placed.mode, rect: it.placed.rect }, cur: it && it.cur && it.cur.rect, aside: it && [it.aside.x.at(o.t), it.aside.y.at(o.t)], yield: it && it.yieldS && it.yieldS.on, t: o.t }); })()`)));
-  }
-  if (verbose && (!a.ok || (!a.near && !a.excused))) {
+  if (verbose && !a.ok) {
     const log = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${pick.id}' && e.t >= ${rel.t - 0.6}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '') + (e.level ? ' ' + e.level : '')).join(' | ')`)) as string;
     console.log(`       overlay log: ${log || 'nothing'}`);
-    const l0 = rel.panes.find((q) => q.id === pick.id);
-    const f = (q: PaneS | undefined): string => (q && q.lx !== null ? `light ${(q.lx - cx).toFixed(0)},${(q.ly! - cy).toFixed(0)} pane ${(q.x - cx).toFixed(0)},${(q.y - cy).toFixed(0)} ${q.w.toFixed(0)}x${q.h.toFixed(0)}` : '-');
-    console.log(`       at release ${f(l0)} · at 3 s ${f(p3)}`);
+    console.log(`       at release: ${rel.panes.filter((p) => p.vis).map((p) => `${p.id}:${p.level} pane ${gap(p).toFixed(0)} px light ${p.lx === null ? '-' : Math.hypot(p.lx - cx, p.ly! - cy).toFixed(0)} px`).join(', ')}`);
   }
-  if (verbose && !a.ok) console.log(`       at release: ${rel.panes.filter((p) => p.vis).map((p) => `${p.id}:${p.level} pane ${gap(p).toFixed(0)} px light ${p.lx === null ? '-' : Math.hypot(p.lx - cx, p.ly! - cy).toFixed(0)} px`).join(', ')}`);
   // The owner's move: from a card or a view, one turn off it, then rest where the turn ended. The look must be off the place by
   // the end of the turn, the pane its label within the look-away (on the brain's 10 Hz tick) and its morph, and the place not
   // looked at again during the rest unless its light is inside the viewfinder.
@@ -473,9 +455,10 @@ for (;;) {
         const lv = await brainLevel();
         if (brainAt === null && lv !== 'card' && lv !== 'expanded') brainAt = dt;
         const pr = sr.panes.find((q) => q.id === pick.id);
-        if (glassAt === null && (!pr || (pr.level !== 'card' && pr.level !== 'expanded'))) glassAt = dt;
+        if (glassAt === null && (!pr || (pr.level !== 'card' && pr.level !== 'expanded' && pr.h <= 80 * Math.max(1, ui)))) glassAt = dt;
         if (sr.target === pick.id && retakenByLight(await lastTake())) lightBack = true;
-        if (!back && sr.target === pick.id) {
+        // Taken back by its light is a look at the place: leaving again later, in the frame this samples, is not a second taking.
+        if (!back && !lightBack && sr.target === pick.id) {
           const lightIn = (pr && pr.lx !== null && Math.abs(pr.lx - cx) <= 80 * Math.max(1, ui) && Math.abs(pr.ly! - cy) <= 80 * Math.max(1, ui)) || retakenByLight(await lastTake());
           if (!lightIn) {
             back = `${dt.toFixed(2)} s`;
@@ -496,7 +479,7 @@ for (;;) {
       }
       // Taken back by its light inside the viewfinder is a look at the place, and then its card rightly stays.
       const byLight = !back && lightBack;
-      const ok = off && !back && (byLight || (brainAt !== null && brainAt <= 0.6 + 1e-6 && glassAt !== null && glassAt <= 1.1 + 1e-6));
+      const ok = off && !back && (byLight || (brainAt !== null && brainAt <= 0.75 + 1e-6 && glassAt !== null && glassAt <= 1.6 + 1e-6));
       awayRuns.push(ok);
       console.log(`     look-away: a turn of ${Math.abs(turn).toFixed(0)} px off the ${lv0}; the look ${off ? 'off the place' : `still on it (${se.target})`} as the turn ends; its label on the brain ${brainAt === null ? 'never' : `${brainAt.toFixed(2)} s`} and on the glass ${glassAt === null ? 'never' : `${glassAt.toFixed(2)} s`} after; ${back ? `looked at again at ${back} while resting` : byLight ? 'looked at again by its light in the viewfinder, so it stays' : 'not looked at again while resting'}${ok ? '' : ' FAILED'}`);
       if (!ok && lookAtEnd) console.log(`       the look at the turn's end: ${lookAtEnd}`);
@@ -509,13 +492,10 @@ for (;;) {
 const counted = aims.filter((a) => !a.skip);
 const n = counted.length;
 const okN = counted.filter((a) => a.ok).length;
-const judged = counted.filter((a) => !a.excused);
-const nearN = judged.filter((a) => a.near).length;
 const jumpN = jumpTotal;
 const bands = [...new Set(aims.map((a) => a.band))].join(' and ');
 const pctOk = n ? (100 * okN) / n : 0;
-const pctNear = judged.length ? (100 * nearN) / judged.length : 0;
-console.log(`\n${n} aims over ${laps} laps (${aims.length - n} more ran into a crossing or rule 8) at ${w} x ${h} (${bands}): held the aimed place 0.5 s later ${okN} of ${n} (${pctOk.toFixed(1)}%); aimed pane within ${NEAR_PX} px of the center 3 s later ${nearN} of ${judged.length} (${pctNear.toFixed(1)}%, ${n - judged.length} excused); jumps ${jumpN} (${excusedCome} frames of a rule 8 step aside not counted); console errors ${errors.length}${reloads ? `; ${reloads} reloads` : ''}`);
+console.log(`\n${n} aims over ${laps} laps (${aims.length - n} more ran into a crossing or rule 8) at ${w} x ${h} (${bands}): held the aimed place 0.5 s later ${okN} of ${n} (${pctOk.toFixed(1)}%); jumps ${jumpN} (${excusedCome} frames of a rule 8 step aside not counted); console errors ${errors.length}${reloads ? `; ${reloads} reloads` : ''}`);
 for (const j of jumps) {
   const [t, id] = j.split(' ');
   const near = (await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${id}' && Math.abs(e.t - ${t}) < 0.5).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string;
@@ -523,19 +503,18 @@ for (const j of jumps) {
   if (verbose) console.log('    hold ended ' + ((await page.evaluate(`window.__aim.ends.filter((e) => e.includes(' ${id}') && Math.abs(parseFloat(e) - ${t}) < 0.5).join(' | ')`)) as string));
 }
 for (const e of errors.slice(0, 5)) console.log('  error ' + e);
-const edgeBad = edgeAims.filter((x) => !x).length;
 const growBad = grows.filter((g) => g.moved >= 60 && !g.sideChanged);
-console.log(`held aims: ${edgeAims.length}, ${edgeAims.length - edgeBad} with the pane on the square 0.9 s later`);
 console.log(`level changes of a held pane: ${grows.length}, the corner it grows from moved under 60 px in ${grows.length - growBad.length}${grows.some((g) => g.sideChanged) ? ` (${grows.filter((g) => g.sideChanged).length} changed side for want of room)` : ''}`);
 for (const g of growBad) {
   console.log(`  grew ${g.t.toFixed(2)} ${g.id} ${g.from} to ${g.to}: its corner moved ${g.moved.toFixed(0)} px (${g.detail})`);
   if (verbose) console.log('    log ' + ((await page.evaluate(`window.__app.walk.overlayLog.filter((e) => e.id === '${g.id}' && e.t > ${g.t - 0.2} && e.t < ${g.t + 0.8}).map((e) => e.t.toFixed(2) + ' ' + e.kind + ' ' + (e.cause ?? '') + ' ' + (e.detail ?? '')).join(' | ')`)) as string) + ' · hold ended ' + ((await page.evaluate(`window.__aim.ends.filter((e) => e.includes(' ${g.id}') && parseFloat(e) > ${g.t - 0.2} && parseFloat(e) < ${g.t + 0.8}).join(' | ')`)) as string));
 }
-if (probe) console.log((await page.evaluate('window.__probe.join("\\n")')) as string);
 const landBad = landings.filter((l) => !l.ok).length;
-console.log(`landings: ${landings.filter((l) => l.still !== null).length} aims, ${landings.filter((l) => l.still !== null && l.perFrame < 2 && l.total < 6).length} still from the landing to the pull; drags: ${landings.filter((l) => l.dragFrames).length}, ${landings.filter((l) => l.dragFrames && l.drag <= 1).length} with the looked-at pane exact to 1 px a frame`);
-console.log(`look-aways: ${awayRuns.length} turns off a card or a view, ${awayRuns.filter(Boolean).length} with the look gone by the turn's end, the label within 0.6 s (glass 1.1 s) and the place not taken back while resting`);
-const pass = n >= 40 && pctOk >= 95 && pctNear >= 95 && jumpN === 0 && errors.length === 0 && growBad.length === 0 && landBad === 0 && awayRuns.every(Boolean);
+console.log(`landings: ${landings.filter((l) => l.still !== null).length} aims, ${landings.filter((l) => l.still !== null && l.perFrame < 2 && l.total < 6).length} still from the landing on; drags: ${landings.filter((l) => l.dragFrames).length}, ${landings.filter((l) => l.dragFrames && l.drag <= 1).length} with the looked-at pane exact to 1 px a frame`);
+console.log(`look-aways: ${awayRuns.length} turns off a card or a view, ${awayRuns.filter(Boolean).length} with the look gone by the turn's end, the label within 0.75 s (at its size on the glass by 1.6 s) and the place not taken back while resting`);
+console.log(`around the landings: ${steadyPairs} frame pairs of panes within ${NEAR_PANE_PX} px of the center, ${steadyFails.length} over ${FRAME_PX} px a frame against the world`);
+for (const f of steadyFails.slice(0, 30)) console.log(`  moved: ${f}`);
+const pass = n >= 40 && pctOk >= 95 && steadyFails.length === 0 && jumpN === 0 && errors.length === 0 && growBad.length === 0 && landBad === 0 && awayRuns.every(Boolean);
 console.log(pass ? 'PASS' : 'FAIL');
 await browser.close();
 await server?.close();

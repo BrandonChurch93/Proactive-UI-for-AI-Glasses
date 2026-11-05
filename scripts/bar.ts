@@ -275,7 +275,7 @@ if (probes) {
   console.log(`  level changes inside 2.5 s (not gate, dismiss, look-away, dwell climb, right of way): ${fast.length}${fast.length ? `  ${fast.slice(0, 6).join('; ')}` : ''}`);
   console.log(`  most births per item per life: ${maxBirths} (${maxBirthsAt})`);
   console.log(`  pane edge farther than 1.0 x its width from its pip (pip in view): ${m.farFrames} of ${m.paneFrames} pane frames (${pct(m.farFrames, m.paneFrames)}), worst ${m.worstFar.toFixed(2)} x ${JSON.stringify(m.worstFarAt)}`);
-  console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}; the held pane, drawn in by the pull, ${m.roadHeld ?? 0} of them), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
+  console.log(`  pane over the roadway: ${m.roadFrames} of ${m.paneFrames} pane frames (${pct(m.roadFrames, m.paneFrames)}; the held pane ${m.roadHeld ?? 0} of them), worst ${(100 * m.worstRoad).toFixed(1)}% of the pane ${JSON.stringify(m.worstRoadAt)}`);
   console.log(`  largest keep-out: ${(100 * m.keepW).toFixed(0)}% x ${(100 * m.keepH).toFixed(0)}% of the view`);
   console.log(`  most pips lit with no gaze: ${m.pipsMax}${m.pipsAt !== null ? ` at ${m.pipsAt} ${JSON.stringify((m as unknown as { pipsIds?: string[] }).pipsIds ?? [])}` : ''}`);
   if (process.argv.includes('--per')) console.log(`  pane frames per item: ${JSON.stringify(m.per)}`);
@@ -318,6 +318,7 @@ if (probes) {
   }
   console.log(`  most labels born per settle (within 0.5 s): ${perSettle}${perSettle ? ` at ${perSettleAt.toFixed(2)}` : ''}`);
   console.log(`  most cards grown in any second: ${swaps}${swaps ? ` at ${swapsAt.toFixed(2)}` : ''}`);
+  if (swaps > 1) console.log(`    ${log.filter((e) => e.t >= swapsAt - 0.2 && e.t <= swapsAt + 1.1 && e.kind !== 'move').map((e) => `${e.t.toFixed(2)} ${e.id} ${e.kind} ${e.level} ${e.cause} ${e.detail ?? ''}`).join(' | ')}`);
   console.log(`  pane frames partly outside the view above 20% opacity: ${mm.outFrames}${mm.outFrames ? `  ${JSON.stringify(mm.outAt)}` : ''}`);
   console.log(`  pane frames overlapping chrome: ${mm.chromeFrames}${mm.chromeFrames ? `  ${JSON.stringify(mm.chromeAt)}` : ''}`);
   console.log(`  most scale changes per pane inside 2.5 s: ${scaleMax}${scaleMax ? ` (${scaleWorst})` : ''}`);

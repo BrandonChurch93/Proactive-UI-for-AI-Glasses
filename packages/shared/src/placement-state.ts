@@ -8,7 +8,7 @@ import { LEVEL_RANK, type Level } from './types';
 import { angleWrap } from './vec';
 import { rectsOverlap, type Rect } from './vec';
 
-export type Curve = 'out' | 'out2' | 'in' | 'gate' | 'linear';
+export type Curve = 'out' | 'out2' | 'in' | 'gate' | 'linear' | 'softIn' | 'softOut';
 
 const CURVES: Record<Curve, (x: number) => number> = {
   out: (x) => 1 - (1 - x) ** 4,
@@ -16,6 +16,9 @@ const CURVES: Record<Curve, (x: number) => number> = {
   in: (x) => x ** 3,
   gate: (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2),
   linear: (x) => x,
+  // The two halves of 'gate' at full length: the steps of a descent join at speed, so it has no stop at the card.
+  softIn: (x) => x * x,
+  softOut: (x) => 1 - (1 - x) ** 2,
 };
 
 export class Track {
@@ -89,7 +92,7 @@ export interface WorldPlace {
   side: 'left' | 'right';
   collapsed?: Level;
   why?: 'collapse' | 'step-down' | 'room' | 'edge';
-  moved?: 'replace' | 'rope' | 'clamp' | 'zone' | 'held';
+  moved?: 'replace' | 'rope' | 'clamp' | 'zone';
   fx?: number;
   fy?: number;
   align?: Align;
@@ -390,11 +393,17 @@ export class Placement {
     return this.remember(placed);
   }
 
-  adopt(p: WorldPlace, anchor: { x: number; y: number }): void {
-    this.reset(true);
+  // A hold or a ride hands the pane back: its place stands, so a pane that kept its offset from its light has nowhere to go.
+  rebase(p: WorldPlace, anchor: { x: number; y: number }): void {
     this.last = p;
     this.prevAnchor = { x: anchor.x, y: anchor.y };
     this.leaveSince = null;
+    if (!this.cfg) return;
+    const { fx, fy } = anchorFactors(this.cfg.side, this.cfg.vertical);
+    this.shown = { x: p.rect.x + p.rect.w * fx, y: p.rect.y + p.rect.h * fy };
+    this.shownRel = { x: this.shown.x - anchor.x, y: this.shown.y - anchor.y };
+    this.shownW = p.rect.w;
+    this.shownBox = { ...p.rect };
   }
 
   get placedAt(): number {
@@ -502,14 +511,14 @@ export class Aside {
       this.overlapSince ??= t;
       const due = hard || t - this.overlapSince >= MOVE.asideHoldMs / 1000 - 1e-9;
       if (due && !this.dropped) {
-        const move = this.solve(home, hits, near, ctx, focusOk);
+        // The pane the look is pinned on only dims: nothing but the world moves it.
+        const move = held ? null : this.solve(home, hits, near, ctx, focusOk);
         this.by = hits.map((k) => `${k.kind} ${k.id}`).join(', ');
         this.active = true;
         const covered = Math.min(1, hits.reduce((sum, k) => sum + overlapArea(home, k.rect), 0) / Math.max(1, home.w * home.h));
         if (!move && covered > MOVE.asideDropCover) this.coveredSince ??= t;
         else this.coveredSince = null;
         const face = hits.some((k) => k.kind === 'face');
-        // The pane the look is held on dims rather than drops: the pull, which keeps clear of faces and anyone moving, carries it off them.
         if (!move && !held && (face || (this.coveredSince !== null && t - this.coveredSince >= MOVE.asideDropMs / 1000 - 1e-9))) {
           this.dropped = true;
           this.coveredSince = null;
@@ -553,6 +562,12 @@ export class Aside {
       by: this.by,
       trace: moved ? { from: home, to: { ...home, x: home.x + dx, y: home.y + dy } } : null,
     };
+  }
+
+  // The pane is pinned where it is drawn: what it has stepped aside by becomes part of where it stands.
+  bake(): void {
+    this.x.set(0);
+    this.y.set(0);
   }
 
   private solve(home: Rect, hits: KeepOut[], near: KeepOut[], ctx: FrameCtx, focusOk: boolean): { dx: number; dy: number } | null {
@@ -648,5 +663,9 @@ export class PaneYield {
 
   offset(t: number): number {
     return this.x.at(t);
+  }
+
+  bake(): void {
+    this.x.set(0);
   }
 }

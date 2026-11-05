@@ -1358,3 +1358,8 @@
 .menu .pickRows {
   max-height: min(calc(6 * 64px), calc((100vh - 150px * max(1, var(--ui, 1))) / var(--ui, 1) - 118px));
 }
+
+/* A pane the look is pinned on is not moved for the chrome: what it stands over steps back under it. */
+.stepsBack {
+  opacity: 0 !important;
+}

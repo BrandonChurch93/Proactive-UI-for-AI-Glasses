@@ -28,6 +28,8 @@ import {
   type WorldSnapshot,
   type Zone,
   viewfinderHalf,
+  uiScale,
+  VIEWFINDER,
 } from '@lumen/shared';
 import { DEFAULT_CONFIG, withConfig, type Config, type ConfigOverride } from './config';
 import {
@@ -784,8 +786,10 @@ export class Brain {
       if (isT) {
         if (it.gazeSince === null || !it.wasTarget) this.resumeGaze(it, t);
         it.lastGazeAt = t;
+        it.falling = false;
       } else {
-        if (it.wasTarget && it.gazeSince !== null) it.paused = { held: t - it.gazeSince, at: t };
+        // The body's steps can carry the look off for a moment and its hold goes on; a turn off the place ends the hold with the look.
+        if (it.wasTarget && it.gazeSince !== null) it.paused = Math.abs(snap.wearer.gaze.yawRate) >= SETTLE.moveRate ? null : { held: t - it.gazeSince, at: t };
         it.gazeSince = null;
         // Coming up to the door, the destination's pane folding at the view's edge is not a look-away; once there, looking away is.
         if (this.routeTarget(snap) === e.id && e.distance < this.cfg.arrival.distanceM * 2 && !snap.goal.arrived && !this.paneVisible(e.id)) it.lastGazeAt = t;
@@ -835,6 +839,7 @@ export class Brain {
           cardWait: t - this.cardGrownAt < this.cfg.ladder.swapGapS - 1e-9,
           growS: e.distance > this.cfg.ladder.nearM ? this.cfg.ladder.growFarS : this.cfg.ladder.growS,
           still: !this.headMoved,
+          turning: Math.abs(snap.wearer.gaze.yawRate) >= SETTLE.moveRate,
           // A head scan at the curb keeps the level while the scan lasts; a look that does not come back counts from the turn.
           scanKeep: !isT && this.scanHold === e.id && t < this.scanUntil && t - it.lastGazeAt < 0.8,
           pinch: pinch === e.id,
@@ -885,7 +890,7 @@ export class Brain {
         focusOk: isT,
         zoneOk: level === 'label' && (band === 'stopped' || band === 'stroll'),
         announce: level === 'expanded' ? `x:${chosenKey(this.chosen.get(e.id))}` : level === 'card' ? (e.distance > this.cfg.ladder.cardWithinM ? 'c:compact' : 'c:full') : undefined,
-        cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) ? 'look-away' : via === 'hold' ? undefined : via,
+        cause: this.dismissedNow.has(e.id) ? 'dismiss' : this.forcedDown.delete(e.id) || via === 'undo' ? 'look-away' : via === 'hold' ? undefined : via,
         onCommit: () => this.commitLadder(it, prevLevel, commitLevel, via, t, e, contentKey),
       };
       if (level === 'none') {
@@ -958,11 +963,11 @@ export class Brain {
     // The place under the look, or under it within the last second, keeps its label whatever the roster says: its sign may be behind a tree.
     const look = snap.wearer.gaze.target;
     if (look) this.lookedAt.set(look, t);
-    // ...and so does a label whose pane is under the viewfinder: the look may be counting toward it but not have taken it yet.
+    // ...and so does a label whose pane is under the viewfinder, dimmed or not: the wearer has turned onto it, and the look may not have taken it yet.
     const v = snap.view;
     if (v) {
-      const half = viewfinderHalf(v);
-      for (const p of v.panes) if (p.zone === 'world' && p.visible && p.opacity > 0.5 && p.rect.x < v.w / 2 + half && p.rect.x + p.rect.w > v.w / 2 - half && p.rect.y < v.h / 2 + half && p.rect.y + p.rect.h > v.h / 2 - half) this.lookedAt.set(p.id, t);
+      const half = viewfinderHalf(v) + VIEWFINDER.catchPx * Math.max(1, uiScale(v));
+      for (const p of v.panes) if (p.zone === 'world' && p.visible && p.rect.x < v.w / 2 + half && p.rect.x + p.rect.w > v.w / 2 - half && p.rect.y < v.h / 2 + half && p.rect.y + p.rect.h > v.h / 2 - half) this.lookedAt.set(p.id, t);
     }
     const kept = (id: string): boolean => id === target || id === look || t - (this.lookedAt.get(id) ?? -Infinity) <= lc.goneS + 1e-9;
     for (const e of snap.entities) {
@@ -1002,7 +1007,7 @@ export class Brain {
     contentKey: string,
   ): void {
     if (level === prev) return;
-    if (rank(level) < rank(prev)) it.stepAt = t;
+    if (rank(level) < rank(prev) && via !== 'undo') it.stepAt = t;
     if (!isPane(prev) && isPane(level)) {
       it.shownAt = t;
       it.dwelt = false;
@@ -1017,6 +1022,7 @@ export class Brain {
       it.cardAt = t;
       if (rank(prev) < rank('card')) this.cardGrownAt = t;
     }
+    it.falling = via === 'look-away' && level === 'card';
     if (!isPane(level)) it.dwelt = rank(level) > 0 && it.dwelt && t - it.lastGazeAt < this.cfg.ladder.lookAwayS;
     it.level = level;
     it.since = t;
@@ -1533,7 +1539,7 @@ export class Brain {
         reason: r,
         origin: 'gaze',
         gaze: isT,
-        cause: this.dismissedNow.has(id) ? 'dismiss' : openedNow.has(id) ? 'pinch' : out.via === 'hold' || out.via === 'score' ? 'dwell' : out.via,
+        cause: this.dismissedNow.has(id) ? 'dismiss' : openedNow.has(id) ? 'pinch' : out.via === 'hold' || out.via === 'score' ? 'dwell' : out.via === 'undo' ? 'look-away' : out.via,
         announce: level === 'expanded' ? `x:${chosenKey(this.chosen.get(id.slice(7)))}` : undefined,
         onCommit: () => {
           if (level !== prev) {

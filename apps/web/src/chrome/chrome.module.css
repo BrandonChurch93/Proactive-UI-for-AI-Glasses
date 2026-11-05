@@ -238,3 +238,7 @@
 .covered .focus {
   opacity: 0;
 }
+
+.stepsBack {
+  opacity: 0 !important;
+}

@@ -135,7 +135,7 @@ describe('walking rules, unit level', () => {
     expect(climb('brisk')).toEqual(['label@0.3']);
   });
 
-  it('rule 10: the look leaves an expanded view 30 px outside its rect, and the view is its label the look-away later; inside it, the view holds', () => {
+  it('rule 10: the look leaves an expanded view 30 px outside its rect, and the view comes down a level a tick from the look-away on; inside it, the view holds', () => {
     const view = { x: 440, y: 185, w: 400, h: 430 };
     const it0 = { ...newLadderItem('x'), level: 'expanded' as const, since: 0, shownAt: 0, dwelt: true, lastGazeAt: 5, gazeSince: 0 };
     const at = (cx: number, t: number) => {
@@ -144,8 +144,25 @@ describe('walking rules, unit level', () => {
     };
     const away = 5 + cfg.ladder.lookAwayS;
     expect(at(view.x - 30, away - 0.1).level).toBe('expanded');
-    expect(at(view.x - 30, away)).toMatchObject({ level: 'label', via: 'look-away' });
+    expect(at(view.x - 30, away)).toMatchObject({ level: 'card', via: 'look-away' });
+    expect(step({ ...it0, level: 'card', falling: true, stepAt: away }, { t: away + 0.1, band: 'walk', target: false, dwellS: 0, pinch: false, floor: 'none', labelled: true, proactive: false, scoreAbove: false, canProactive: false }, cfg)).toMatchObject({ level: 'label', via: 'look-away' });
     expect(at(view.x + 10, away).level).toBe('expanded');
+  });
+
+  it('rule 10: nothing climbs while the head turns; the hold goes on counting, and the level holds', () => {
+    const it0 = { ...newLadderItem('x'), level: 'card' as const, since: 0, shownAt: 0, cardAt: 0, gazeSince: 0, lastGazeAt: 3 };
+    const inp = { t: 3, band: 'walk' as const, target: true, dwellS: 3, pinch: false, floor: 'none' as const, labelled: true, proactive: false, scoreAbove: false, canProactive: false };
+    expect(step(it0, inp, cfg).level).toBe('expanded');
+    expect(step(it0, { ...inp, turning: true }, cfg).level).toBe('card');
+    expect(step(it0, { ...inp, target: false, t: 3.2, turning: true }, cfg).level).toBe('card');
+  });
+
+  it('rule 10: a view the look leaves before it has opened goes back to its card at once, and the card holds its look-away', () => {
+    const it0 = { ...newLadderItem('x'), level: 'expanded' as const, since: 3, shownAt: 0, cardAt: 1, gazeSince: null, lastGazeAt: 3.1, stepAt: 0 };
+    const inp = { band: 'walk' as const, target: false, dwellS: 0, pinch: false, floor: 'none' as const, labelled: true, proactive: false, scoreAbove: false, canProactive: false };
+    expect(step(it0, { ...inp, t: 3.2 }, cfg)).toMatchObject({ level: 'card', via: 'undo' });
+    expect(step({ ...it0, level: 'card' }, { ...inp, t: 3.4 }, cfg).level).toBe('card');
+    expect(step({ ...it0, level: 'card' }, { ...inp, t: 3.6 }, cfg)).toMatchObject({ level: 'label', via: 'look-away' });
   });
 
   it('rule 6 and 7: the pocket holds an item once and surfaces only with 6 s or more', () => {

@@ -177,6 +177,7 @@ export class App {
     const f = w.last()?.frame;
     // On the walk the viewfinder is always on the glass; in a gate it goes quiet where it stands, as the crossing line says.
     const show = this.gazeMark && this.mode === 'walk' && !this.title.visible && !this.end.visible;
+    this.chrome.stepBack(w.overlay?.heldRects() ?? []);
     if (!show) {
       this.chrome.setMark(null);
       return;
@@ -195,7 +196,7 @@ export class App {
     if (this.snapTarget && this.snapTarget !== w.sim.gaze.target) this.snapTarget = null;
     const reduced = this.opts.reducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
     const p = mark ? (this.snapTarget === target ? 1 : Math.min(1, mark.p + mark.rate * Math.max(0, w.t - f!.t))) : null;
-    // The corners pull in while a place is held, the look on it as long as a look needs; they brighten on the count.
+    // The corners close in while a place is held, the look on it as long as a look needs; they brighten on the count.
     const gz = w.sim.gaze;
     const held = !reduced && Boolean(gz.target && PLACE_BY_ID.has(gz.target) && gz.dwellMs >= VIEWFINDER.holdMs);
     this.chrome.setMark({ lit: Boolean(mark), held, p: reduced ? null : p, covered: covered() });

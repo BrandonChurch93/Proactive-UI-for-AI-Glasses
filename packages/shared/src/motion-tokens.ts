@@ -25,7 +25,6 @@ export const MOVE = {
   morphOut: 0.12,
   morphIn: 0.16,
   labelStagger: 0.04,
-  labelShrink: 0.32,
   swap: 0.42,
   dissolveStagger: 0.02,
   dissolveClipAt: 0.08,
@@ -50,8 +49,11 @@ export const MOVE = {
   coverM: 12,
   droppedPip: 0.45,
   pushOut: 0.32,
-  pull: 1.4,
   drift: 0.9,
+  // The fastest a pane moves against the world, whatever moves it: 3 px a step at 60 Hz, so 6 px across a dropped frame.
+  steadyPxS: 180,
+  // ...and a pane handed back from the look finds its place slower still, under the wearer's notice: 1.4 px a step.
+  driftPxS: 84,
   saveRise: 0.25,
   saveHold: 0.6,
   whisperHold: 2.5,

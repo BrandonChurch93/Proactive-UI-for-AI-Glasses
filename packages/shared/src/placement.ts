@@ -120,8 +120,8 @@ function clampInto(r: Rect, vp: Viewport): Rect {
   };
 }
 
-// A card or expanded view keeps the look while the center of the view is on it or within this margin of it, and shrinks a second after it leaves.
-export const READ = { marginPx: 24, leaveS: 1, swayPx: 6 } as const;
+// At the destination's door a card or an expanded view keeps the look while the center of the view is on it or within this margin of it.
+export const READ = { marginPx: 24, swayPx: 6 } as const;
 
 export function lookOnPane(r: Rect, cx: number, cy: number, scale: number): boolean {
   const m = READ.marginPx * scale;

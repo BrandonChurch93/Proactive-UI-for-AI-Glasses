@@ -281,7 +281,8 @@ async function visit(id: string, lap: number): Promise<void> {
     lines.push(line);
     console.log(fail || keepAll ? `${line} · trace ${await writeTrace(id, lap, line)}` : line);
     if (verbose) console.log(`   ${JSON.stringify(await page.evaluate(`window.__app.walk.overlay.report().panes.filter((p) => p.visible).map((p) => p.id + ':' + p.level)`))}`);
-    await drag(w * 0.35, 0);
+    // Level again: the rows can leave the head tilted up, and a tilted head at rest with nothing in the square is rule 12's snooze.
+    await drag(w * 0.35, (0.06 - (await read(id)).head.pitch) / k);
     await until(id, (s) => !s.arrived, 40);
   }
 }

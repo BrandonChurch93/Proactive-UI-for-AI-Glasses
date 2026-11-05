@@ -7,8 +7,6 @@ import {
   READ,
   VIEWFINDER,
   anchorFactors,
-  DOORWAY,
-  keepOutsFor,
   viewfinderHalf,
   type Projected,
   angleWrap,
@@ -34,7 +32,7 @@ import { BackdropFill } from './backdrop';
 import { leaderPoint, type ColumnHandle, type GroundTextHandle, type KeepOut, type LeaderHandle, type LightHandle, type RouteHandle, type SceneBridge } from './bridge';
 import { batch, condense, dissolve, gaze, hidePane, lightVals, mark, recede, retract, slideIn, slideOut, travel, ungaze, unrecede, type LightVals, type PaneEls } from './motion';
 import { MENU_GLYPHS, buildPane, isBanner, isTucked, styles as s, whisperLine, type PaneHandlers, type PaneView } from './panes';
-import { Aside, PaneYield, Placement, Track, Yield, leftRecently, type AsideState, type FrameCtx, type WorldPlace } from './place';
+import { Aside, PaneYield, Placement, Track, Yield, leftRecently, type AsideState, type Curve, type FrameCtx, type WorldPlace } from './place';
 import { EASE, MOVE, T } from './tokens';
 
 type PaneLevel = 'label' | 'glance' | 'card' | 'expanded' | 'none';
@@ -73,28 +71,28 @@ interface Built {
   scale?: number;
 }
 
-// The pane the look is on: its center keeps an offset from its projected light, fixed the frame the look lands and driven
-// toward the center of the view by the pull while the wearer rests.
+const RANK: Record<PaneLevel, number> = { none: 0, label: 1, glance: 1, card: 2, expanded: 3 };
+
+// The pane the look landed on, pinned to the world where it was drawn: its center keeps its offset from its light, and only the
+// world moves it. At a door it keeps the corner its leader meets instead, so it grows away from the opening.
 interface Held {
   fx: number;
   fy: number;
   off: { x: number; y: number };
-  w: number;
-  h: number;
   outSince: number | null;
-  level: Level;
   readGap?: number;
-  // An expanded view the wearer has dragged across is being read: the pull would move its rows from under the eye.
-  reread?: boolean;
-  // The pull has begun: until then nothing, not even the chrome, moves the pane.
-  pulled?: boolean;
-  vx?: number;
-  vy?: number;
-  lastT?: number;
 }
 
-// Critically damped, so the pull starts softly and settles in t-pull without passing the center.
-const PULL_W = 5.8 / MOVE.pull;
+// One change of level of one surface. Both views stay in the box until it ends, so the glass can play it back from where it stands.
+interface Step {
+  tl: gsap.core.Timeline;
+  play: gsap.core.Timeline | null;
+  a: { level: PaneLevel; view: PaneView; w: number; h: number };
+  b: { level: PaneLevel; view: PaneView; w: number; h: number };
+  looked: boolean;
+  back: boolean;
+  end: number;
+}
 
 function factors(p: WorldPlace): { fx: number; fy: number } {
   return p.fx !== undefined && p.fy !== undefined ? { fx: p.fx, fy: p.fy } : anchorFactors(p.align ?? 'center', p.vertical ?? 'above');
@@ -142,13 +140,23 @@ interface Item {
   lag: number;
   swap: boolean;
   frozen: { x: number; y: number } | null;
-  // The step aside and head-scan yield the pane was last drawn with.
-  lastShift: { x: number; y: number };
   edgeSince: number | null;
   hold: Held | null;
   holdEnded: boolean;
   ride: { x: number; y: number } | null;
   foldedUntil: number;
+  step: Step | null;
+  // The level a growth the look left went back to: the glass stays there until the look returns or the brain comes down.
+  cap: PaneLevel | null;
+  fellAt: number;
+  // Handed back from the look or a ride and finding its place: it does so under the wearer's notice.
+  drifting: boolean;
+  driftUntil: number;
+  // A pane the look is pinned on covers this one: it steps back under it rather than move out of its way.
+  coverO: Track;
+  scaleT: Track | null;
+  drawnAt: number;
+  drawnLight: { x: number; y: number; anchor: string } | null;
   // Where the light was, and which anchor it was, when the pane was last placed: an arrival moves the anchor to the door.
   placedPr: { x: number; y: number; anchor: string } | null;
 }
@@ -159,7 +167,6 @@ const MAP_VOICE = '#ffd98a';
 const MAP_TONES: Record<string, string> = { food: '#e0946a', cafe: '#d4ac7a', theater: '#ef7a74', venue: '#c49ae6', shop: '#e3cc84', service: '#9fd3c2', transit: '#7fa9e6', park: '#9fdc9f' };
 // A newborn pane's first frames move with its placement settling, not with the view; that is not motion to look ahead along.
 const FOLD_SETTLE_S = 0.1;
-const FAST_TURN = 1.5;
 
 export interface OverlayOptions {
   reducedMotion?: boolean;
@@ -306,17 +313,6 @@ class SafetyView {
   dispose(): void {
     this.h?.dispose();
   }
-}
-
-function nudge(r: Rect, vp: { w: number; h: number }, avoid: Rect[]): { x: number; y: number } | null {
-  const ok = (q: Rect): boolean => q.x >= MARGIN && q.y >= MARGIN && q.x + q.w <= vp.w - MARGIN && q.y + q.h <= vp.h - MARGIN && !avoid.some((k) => rectsOverlap(q, k));
-  for (let d = 0; d <= 56; d += 4) {
-    const e = Math.round(d / Math.SQRT2);
-    for (const [sx, sy] of d === 0 ? [[0, 0]] : [[0, d], [0, -d], [d, 0], [-d, 0], [e, e], [-e, e], [e, -e], [-e, -e]]) {
-      if (ok({ ...r, x: r.x + sx!, y: r.y + sy! })) return { x: sx!, y: sy! };
-    }
-  }
-  return null;
 }
 
 export class Overlay {
@@ -528,12 +524,20 @@ export class Overlay {
       lag: 0,
       swap: false,
       frozen: null,
-      lastShift: { x: 0, y: 0 },
       edgeSince: null,
       hold: null,
       holdEnded: false,
       ride: null,
       foldedUntil: -Infinity,
+      step: null,
+      cap: null,
+      fellAt: -Infinity,
+      drifting: false,
+      driftUntil: -Infinity,
+      coverO: new Track(1),
+      scaleT: null,
+      drawnAt: -Infinity,
+      drawnLight: null,
       placedPr: null,
     };
     if (world && this.bridge.anchor(d.placement.anchor)) {
@@ -555,6 +559,8 @@ export class Overlay {
     if (it.stash) this.note(it, 'death', 'brain', 'gone', undefined, it.want);
     for (const e of it.fresh) this.log?.(e);
     it.fresh = [];
+    it.step?.play?.kill();
+    it.step?.tl.kill();
     it.tl?.kill();
     it.gtl?.kill();
     for (const b of [it.cur, it.stash, ...it.old]) {
@@ -880,199 +886,121 @@ export class Overlay {
     return row === undefined ? { id, action } : { id, action, row };
   }
 
-  // The center of the pane as the frame draws it: from its placement's anchor corner at the size it is drawn at now, which a resize
-  // under way can leave short of the placement's rect; the hold draws from the center, so pinning the rect's center moved it.
-  private drawnCenter(it: Item, pl: WorldPlace, r: Rect, t: number, jump: boolean): { x: number; y: number } {
-    const f = factors(pl);
-    const b = it.cur;
-    const w = b ? b.w.at(t) * pl.scale : r.w;
-    const h = b ? b.h.at(t) * pl.scale : r.h;
-    const jx = jump ? (it.place?.jumpX.at(t) ?? 0) : 0;
-    const jy = jump ? (it.place?.jumpY.at(t) ?? 0) : 0;
-    return { x: r.x + r.w * f.fx + jx + w * (0.5 - f.fx), y: r.y + r.h * f.fy + jy + h * (0.5 - f.fy) };
-  }
-
-  // The held place's pane is pinned to the world the frame the look lands: its center keeps its offset from its light exactly
-  // where it stands, drawn or riding, and nothing moves it until the look has held and the wearer rests; then the pull draws it
-  // toward the center of the viewfinder. It goes back to following its light once the look has been gone 1 s.
-  private hold(it: Item, t: number, ctx: FrameCtx, chrome: Rect[], pr: Projected, depth: number, size: { w: number; h: number }): WorldPlace | null {
+  // The frame the look lands, the pane is pinned to the world where it is drawn, and from then on only the world moves it. The pin
+  // outlasts the look by minShown, so the descent plays where the pane stands, and then the pane goes back to its placement.
+  private hold(it: Item, t: number, ctx: FrameCtx, pr: Projected, size: { w: number; h: number }): WorldPlace | null {
     const b = it.cur;
     const placed = it.placed;
-    const g = this.gazeNow();
-    const look = g.target === it.id;
+    const look = this.gazeNow().target === it.id;
     const vp = ctx.vp;
     const half = viewfinderHalf(vp);
     const gap = PIP_GAP.beside * Math.max(1, ctx.ui ?? 1);
     const lightAway = Math.hypot(Math.max(0, Math.abs(pr.x - vp.w / 2) - half), Math.max(0, Math.abs(pr.y - vp.h / 2) - half));
-    // The look landing on a place whose placement had no room for it, or folded it at the edge, brings it back where its light is; the pull draws it in from there.
+    // The look landing on a place whose placement had no room for it, or folded it at the edge, brings it back where its light is, and it stays there.
     const inView = pr.x >= 0 && pr.x <= vp.w && pr.y >= 0 && pr.y <= vp.h;
     if (!it.hold && look && pr.inFront && inView && !it.dying && placed && (placed.mode === 'pip' || placed.mode === 'edge') && !placed.behind && LEVEL_RANK[it.d.level] >= LEVEL_RANK.label && it.placedPr?.anchor === it.d.placement.anchor) {
       const sc = b?.scale ?? this.ui;
       const w0 = size.w * sc;
       const h0 = size.h * sc;
       if (lightAway <= gap + w0) {
-        // Still drawn as it folds, it is pinned where it is; gone, it comes back just above its light.
+        // Still drawn as it folds, it is pinned where it is, against the light of the frame it was drawn in; gone, it comes back just above its light.
         const shown = b?.rect && b.opacity > 0.05 && b.level !== 'none';
-        // Its offset from the light as last drawn, carried to this frame's light.
-        const c = shown ? { x: (b.off?.x ?? b.rect!.x - pr.x) + b.rect!.w / 2, y: (b.off?.y ?? b.rect!.y - pr.y) + b.rect!.h / 2 } : { x: 0, y: -h0 / 2 - gap };
-        it.hold = { fx: 0.5, fy: 0.5, off: c, w: w0, h: h0, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
+        const at = it.placedPr ?? pr;
+        const c = shown ? { x: b.rect!.x + b.rect!.w / 2 - at.x, y: b.rect!.y + b.rect!.h / 2 - at.y } : { x: 0, y: -h0 / 2 - gap };
+        it.hold = { fx: 0.5, fy: 0.5, off: c, outSince: null };
+        it.ride = null;
+        // Gone from the glass it has no drawn place to come from: it condenses here.
+        if (!shown) it.drawnLight = null;
+        it.place?.jumpX.set(0);
+        it.place?.jumpY.set(0);
         const r0 = { x: pr.x + c.x - w0 / 2, y: pr.y + c.y - h0 / 2, w: w0, h: h0 };
         return { mode: 'pane', rect: r0, leader: { x: pr.x + c.x, y: pr.y + c.y }, scale: sc, side: r0.x + r0.w / 2 < vp.w / 2 ? 'left' : 'right', fx: 0.5, fy: 0.5 };
       }
     }
-    if (!pr.inFront || it.dying || !b || (!it.hold && (!b.rect || b.level === 'none')) || !placed || placed.mode !== 'pane' || (g.target && !look) || it.placedPr?.anchor !== it.d.placement.anchor) return this.endHold(it);
+    if (!pr.inFront || it.dying || !b || (!it.hold && (!b.rect || b.level === 'none')) || !placed || placed.mode !== 'pane' || it.placedPr?.anchor !== it.d.placement.anchor) return this.endHold(it);
     const scale = placed.scale;
     const W = size.w * scale;
     const H = size.h * scale;
-    const doorway = this.bridge.doorway?.(it.d.placement.anchor) ?? null;
-    // The last placement was made against last frame's light; carried to this frame's, so a fast turn does not skew the offset.
-    const lag = it.placedPr ? { x: pr.x - it.placedPr.x, y: pr.y - it.placedPr.y } : { x: 0, y: 0 };
     if (!it.hold) {
-      // A pane frozen by a head scan stands where the scan began, not where its placement says: pin it once the scan is over.
-      // ...and one still condensing or growing is not yet at its measured size, which its placement still has to catch up with.
-      if (!look || it.frozen || b.level !== it.d.level) return null;
-      // Pinned where it was drawn last frame, carried to this frame's light, the step aside and yield it was drawn with set apart (the
-      // draw adds them still): a move under way stops at the frame the look lands rather than taking one more step.
-      let c: { x: number; y: number };
-      if (b.rect && b.level === it.d.level && it.placedPr) c = { x: b.rect.x + b.rect.w / 2 - it.lastShift.x - it.placedPr.x, y: b.rect.y + b.rect.h / 2 - it.lastShift.y - it.placedPr.y };
-      else {
-        const at = this.drawnCenter(it, placed, placed.rect, t, true);
-        c = { x: at.x + lag.x - pr.x, y: at.y + lag.y - pr.y };
-      }
-      it.hold = { fx: 0.5, fy: 0.5, off: c, w: W, h: H, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
+      if (!look) return null;
+      // Pinned exactly where it was drawn last frame, against the light of that frame: a move under way stops here, and what the pane
+      // had stepped aside or yielded by becomes part of where it stands.
+      const f = this.bridge.doorway?.(it.d.placement.anchor) ? factors(placed) : { fx: 0.5, fy: 0.5 };
+      const r = b.rect!;
+      const at = it.placedPr ?? pr;
+      it.hold = { ...f, off: { x: r.x + r.w * f.fx - at.x, y: r.y + r.h * f.fy - at.y }, outSince: null };
+      it.ride = null;
+      it.frozen = null;
+      it.aside.bake();
+      it.yieldS.bake();
       it.place?.jumpX.set(0);
       it.place?.jumpY.set(0);
     }
     const hd = it.hold;
     if (look) hd.outSince = null;
     else hd.outSince ??= t;
-    if (hd.outSince !== null && t - hd.outSince >= READ.leaveS - 1e-9) return this.endHold(it);
-    if (Math.abs(W - hd.w) > 0.5 || Math.abs(H - hd.h) > 0.5) {
-      hd.w = W;
-      hd.h = H;
-      // It grows about its own center, never moved for it: the pull, which keeps it off the chrome and inside the glass, carries it clear.
-      hd.level = it.d.level;
-    }
-    // The pull acts only once the look has held, and only while the wearer rests on the place: not dragging, not turning fast, its light still near the viewfinder.
-    // Moving, the pane keeps its offset from its light and stays in the world, so a turn leaves it behind; nothing follows the head.
-    const dt = clamp(t - (hd.lastT ?? t), 0, 0.05);
-    hd.lastT = t;
-    // A drag with the center on the view, or within the reading margin of it, is the wearer working its rows; a drag elsewhere is a turn.
-    if (it.d.level === 'expanded' && this.aiming()) {
-      const r0 = { x: pr.x + hd.off.x - W / 2, y: pr.y + hd.off.y - H / 2, w: W, h: H };
-      const g0 = Math.hypot(Math.max(r0.x - vp.w / 2, 0, vp.w / 2 - (r0.x + r0.w)), Math.max(r0.y - vp.h / 2, 0, vp.h / 2 - (r0.y + r0.h)));
-      if (g0 <= READ.marginPx * this.ui) hd.reread = true;
-    }
-    const rest = look && g.dwellMs >= VIEWFINDER.holdMs && b.fade.v >= 0.9 && !hd.reread && !this.aiming() && Math.abs(this.yawRate) < FAST_TURN && lightAway <= gap + W;
-    if (rest) hd.pulled = true;
-    let vx = rest ? (hd.vx ?? 0) : 0;
-    let vy = rest ? (hd.vy ?? 0) : 0;
-    if (rest) {
-      // At a door the center may stand in the opening, where people walk in and out: the pane is drawn as near the center as standing clear of it allows.
-      let gx = vp.w / 2;
-      if (doorway) {
-        const mid = { x: doorway.x + doorway.w * 0.25, y: doorway.y, w: doorway.w * 0.5, h: doorway.h };
-        const c = DOORWAY.clearPx * Math.max(1, ctx.ui ?? 1);
-        if (rectsOverlap({ x: gx - W / 2, y: vp.h / 2 - H / 2, w: W, h: H }, mid)) {
-          const left = mid.x - c - W / 2;
-          const right = mid.x + mid.w + c + W / 2;
-          const fitsAt = (x: number): boolean => x - W / 2 >= MARGIN && x + W / 2 <= vp.w - MARGIN;
-          const options = [left, right].filter(fitsAt).sort((p, q) => Math.abs(p - gx) - Math.abs(q - gx));
-          if (options.length) gx = options[0]!;
-        }
-      }
-      // ...and as near as covering no face, no one moving and no other pane allows: rule 8 gives them the way, and a pull back onto them would keep the pane dimmed.
-      let gy = vp.h / 2;
-      const movers = [...keepOutsFor(ctx.keepOuts, depth).filter((k) => k.kind !== 'roadway' && !k.still && (k.kind !== 'vehicle' || k.moving)).map((k) => k.rect), ...(ctx.chrome ?? chrome), ...this.othersDrawn(it)].map((k) => ({ x: k.x - MOVE.asidePad, y: k.y - MOVE.asidePad, w: k.w + 2 * MOVE.asidePad, h: k.h + 2 * MOVE.asidePad }));
-      const clearAt = (x: number, y: number): boolean => {
-        const q = { x: x - W / 2, y: y - H / 2, w: W, h: H };
-        return q.x >= MARGIN && q.y >= MARGIN && q.x + W <= vp.w - MARGIN && q.y + H <= vp.h - MARGIN && !movers.some((k) => rectsOverlap(q, k));
-      };
-      if (!clearAt(gx, gy)) {
-        let found: { x: number; y: number } | null = null;
-        for (let r = 8; r <= 480 && !found; r += 8) {
-          for (let i = 0; i < 16 && !found; i++) {
-            const x = gx + Math.cos((i * Math.PI) / 8) * r;
-            const y = gy + Math.sin((i * Math.PI) / 8) * r;
-            if (clearAt(x, y)) found = { x, y };
-          }
-        }
-        if (found) {
-          gx = found.x;
-          gy = found.y;
-        }
-      }
-      vx += (PULL_W * PULL_W * (gx - pr.x - hd.off.x) - 2 * PULL_W * vx) * dt;
-      vy += (PULL_W * PULL_W * (gy - pr.y - hd.off.y) - 2 * PULL_W * vy) * dt;
-    }
-    hd.vx = vx;
-    hd.vy = vy;
-    const pullSpeed = Math.hypot(vx, vy);
-    hd.off = { x: hd.off.x + vx * dt, y: hd.off.y + vy * dt };
-    let rect = { x: pr.x + hd.off.x - W / 2, y: pr.y + hd.off.y - H / 2, w: W, h: H };
+    if (hd.outSince !== null && t - hd.outSince >= MOVE.minShown - 1e-9) return this.endHold(it);
+    const rect = { x: pr.x + hd.off.x - W * hd.fx, y: pr.y + hd.off.y - H * hd.fy, w: W, h: H };
     const out = rect.x < MARGIN - 0.5 || rect.y < MARGIN - 0.5 || rect.x + rect.w > vp.w - MARGIN + 0.5 || rect.y + rect.h > vp.h - MARGIN + 0.5;
-    // While the wearer turns away, a held pane leaving the view lets go and rides with the world like the rest.
-    // An expanded view being read is the exception: the head travels its rows with drags, and it holds its place while part of it leaves the glass (walking rule 10).
-    // While the look stays on the place, a drag that keeps the center on the view or the view as near as that drag has brought it is the wearer working its rows; one that
-    // carries it farther away is a turn away. The few pixels allowed are a standing wearer's sway, and with them the frame a drag begins is not a turn away either.
+    // While the look stays on the place, a drag that keeps the center on the view or the view as near as that drag has brought it is the
+    // wearer working its rows, and the view may run off the glass. The few pixels allowed are a standing wearer's sway.
     const m = READ.marginPx * this.ui;
     const gapNow = Math.hypot(Math.max(rect.x - vp.w / 2, 0, vp.w / 2 - (rect.x + rect.w)), Math.max(rect.y - vp.h / 2, 0, vp.h / 2 - (rect.y + rect.h)));
-    if (!this.aiming()) hd.readGap = undefined;
+    const aiming = this.aiming();
+    if (!aiming) hd.readGap = undefined;
     else hd.readGap = Math.min(hd.readGap ?? gapNow, gapNow);
-    const reading = it.d.level === 'expanded' && this.aiming() && look && (gapNow <= m || gapNow <= (hd.readGap ?? gapNow) + READ.swayPx * this.ui);
-    if (out && this.aiming() && !reading) {
-      it.hold = null;
-      it.ride = { x: rect.x - pr.x, y: rect.y - pr.y };
-      return null;
-    }
-    // A view being read stays where the reader's drags put it. Standing still the center on it is reading.
-    const read = it.d.level === 'expanded' && look && (reading || (gapNow <= m && this.band === 'stopped'));
-    // Not resting, the chrome acts at once, by the least shift that clears it; resting, the pull carries the pane clear of it.
-    // While the wearer drags the pane rides with the world: a shift then would move it against the world under the pointer.
-    if (!read && !rest && hd.pulled && !this.aiming() && chrome.some((k) => rectsOverlap(rect, k))) {
-      const s2 = nudge(rect, vp, chrome);
-      if (s2) {
-        hd.off = { x: hd.off.x + s2.x, y: hd.off.y + s2.y };
-        hd.vx = 0;
-        hd.vy = 0;
-        rect = { ...rect, x: rect.x + s2.x, y: rect.y + s2.y };
-      }
-    }
-    // Leaving the glass with its place a pane's width from the square, it folds at once, as a pane whose anchor leaves the view does.
-    if (!read && out && lightAway > gap + W) {
+    const read = it.d.level === 'expanded' && look && (aiming ? gapNow <= m || gapNow <= (hd.readGap ?? gapNow) + READ.swayPx * this.ui : gapNow <= m && this.band === 'stopped');
+    // Carried off the glass with its place a pane's width from the square it folds where it stands; so does a pane the look has left, once its descent is done.
+    if (!read && out && (lightAway > gap + W || (!look && !it.step))) {
       this.endHold(it);
       it.holdEnded = false;
       it.foldedUntil = t + T.quick;
       return it.place ? it.place.foldNow(pr, vp) : null;
     }
-    return this.pane(rect, pr, hd.off, scale, placed, vp, pullSpeed);
-  }
-
-  // Every other pane on the glass as last drawn, whatever order this frame places them in.
-  private othersDrawn(it: Item): Rect[] {
-    const out: Rect[] = [];
-    for (const x of this.items.values()) if (x !== it && !x.dying && x.cur?.rect && x.cur.opacity > 0.05 && x.cur.level !== 'none') out.push(x.cur.rect);
-    return out;
-  }
-
-  private pane(rect: Rect, pr: Projected, off: { x: number; y: number }, scale: number, placed: WorldPlace, vp: { w: number; h: number }, pullSpeed: number): WorldPlace {
-    const p: WorldPlace = { mode: 'pane', rect, leader: { x: pr.x + off.x, y: pr.y + off.y }, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', fx: 0.5, fy: 0.5 };
+    const p: WorldPlace = { mode: 'pane', rect, leader: { x: pr.x + hd.off.x, y: pr.y + hd.off.y }, scale, side: rect.x + rect.w / 2 < vp.w / 2 ? 'left' : 'right', fx: hd.fx, fy: hd.fy };
     if (placed.align) p.align = placed.align;
     if (placed.vertical) p.vertical = placed.vertical;
-    if (pullSpeed > 20) p.moved = 'held';
     return p;
   }
 
-  private endHold(it: Item, fresh = false): null {
+  private endHold(it: Item): null {
     if (it.hold) {
       it.hold = null;
       it.place?.jumpX.set(0);
       it.place?.jumpY.set(0);
-      if (!fresh && it.placed?.mode === 'pane' && it.placedPr) it.place?.adopt(it.placed, it.placedPr);
+      if (it.placed?.mode === 'pane' && it.placedPr) it.place?.rebase(it.placed, it.placedPr);
       else it.place?.reset(true);
-      it.holdEnded = !fresh;
+      it.holdEnded = true;
     }
     return null;
+  }
+
+  // Nothing moves a pane faster than this against the world: a re-place, a push out of the zone, a step aside or a rope that would
+  // take it further in one frame reaches there over the frames that follow. A frozen pane holds still on the glass by rule 5.
+  private steady(it: Item, b: Built, rect: Rect, pr: { x: number; y: number } | null, fx: number, fy: number, t: number, anchor: string): Rect {
+    const was = it.drawnLight;
+    const dt = t - it.drawnAt;
+    let out = rect;
+    if (pr && was && b.rect && b.opacity > 0.02 && !it.frozen && dt > 0 && dt < 0.1) {
+      const lx = was.anchor === anchor ? was.x : pr.x;
+      const ly = was.anchor === anchor ? was.y : pr.y;
+      const dx = rect.x + rect.w * fx - pr.x - (b.rect.x + b.rect.w * fx - lx);
+      const dy = rect.y + rect.h * fy - pr.y - (b.rect.y + b.rect.h * fy - ly);
+      const d = Math.hypot(dx, dy);
+      const cap = (it.drifting ? MOVE.driftPxS : MOVE.steadyPxS) * dt;
+      if (d > cap) out = { ...rect, x: rect.x - dx * (1 - cap / d), y: rect.y - dy * (1 - cap / d) };
+      else if (t >= it.driftUntil) it.drifting = false;
+    }
+    it.drawnAt = t;
+    it.drawnLight = pr ? { x: pr.x, y: pr.y, anchor } : null;
+    return out;
+  }
+
+  // The panes the look is pinned on, as drawn: the chrome they stand over steps back under them.
+  heldRects(): Rect[] {
+    const out: Rect[] = [];
+    for (const it of this.items.values()) if (it.hold && it.cur?.rect && it.cur.opacity > 0.05) out.push(it.cur.rect);
+    return out;
   }
 
   // The row under the pointer, else the one tapped, else the one under the viewfinder's center while the place is looked at, else the row the action reads for.
@@ -1192,6 +1120,7 @@ export class Overlay {
     const kept = lis.filter((li) => titles.has(li.querySelector('b')?.textContent ?? ''));
     const keep = kept[0];
     if (!keep || !acts || !c.note || c.actions?.length || this.reduced) return false;
+    this.endStep(it, true);
     it.tl?.kill();
     const tl = this.tl();
     const leaving = [...lis.filter((li) => !kept.includes(li)), acts];
@@ -1230,6 +1159,7 @@ export class Overlay {
 
   private morph(it: Item, b: Built, want: PaneLevel, t: number, from: PaneLevel, why: Item['why'] | undefined): void {
     if (from === 'expanded' && want === 'expanded' && b.level === 'expanded' && this.settle(it, b, t, why)) return;
+    this.endStep(it, true);
     it.tl?.kill();
     const tl = this.tl();
     gsap.set(b.box, { clipPath: 'inset(0 0 0% 0)', '--ca': 0 });
@@ -1238,8 +1168,10 @@ export class Overlay {
     if (b.fade.v < 1) tl.to(b.fade, { v: 1, duration: T.quick, ease: EASE.out }, 0);
     if (it.lights) gsap.set(it.L, { lead: 1, leadO: 1, head: 0 });
     const old = b.view;
+    const a = { level: from, view: old, w: b.width, h: b.height };
+    // Out of the flow, so the incoming content lays out from the top of the box; it stays until the step ends, should the step play back.
+    gsap.set(old.el, { position: 'absolute', left: 0, top: 0, width: old.el.offsetWidth, pointerEvents: 'none' });
     tl.to(old.kids, { opacity: 0, filter: 'blur(4px)', duration: MOVE.morphOut, ease: EASE.in }, 0);
-    tl.call(() => old.el.remove(), [], MOVE.morphOut + 0.02);
     if (old.why) tl.to(old.why, { opacity: 0, duration: MOVE.morphOut, ease: EASE.in }, 0);
     const view = buildPane({ ...it.d, level: want as Decision['level'] }, want as Decision['level'], this.handlers);
     b.box.appendChild(view.el);
@@ -1251,9 +1183,12 @@ export class Overlay {
     b.height = view.el.offsetHeight;
     this.watch(b);
     const grow = from !== want;
-    const dur = this.reduced ? 0 : it.swap ? MOVE.swap : want === 'expanded' ? T.open : want === 'card' ? T.baseCard : want === 'label' ? MOVE.labelShrink : T.base;
-    b.w.go(t, b.width, dur, 'out');
-    b.h.go(t, b.height, dur, 'out');
+    const falling = RANK[want] < RANK[from] && !it.swap;
+    const dur = this.reduced ? 0 : it.swap ? MOVE.swap : want === 'expanded' || (falling && from === 'expanded') ? T.open : want === 'card' || falling ? T.baseCard : T.base;
+    // A view coming down to its card is the first half of one curve and the card to its label the second: the descent never stops at the card.
+    const curve: Curve = !falling ? 'out' : from === 'expanded' && want === 'card' && it.d.cause === 'look-away' ? 'softIn' : t - it.fellAt < 0.1 ? 'softOut' : 'gate';
+    b.w.go(t, b.width, dur, curve);
+    b.h.go(t, b.height, dur, curve);
     b.level = want;
     this.sizeBox(b, want);
     const c = it.d.content;
@@ -1266,13 +1201,17 @@ export class Overlay {
       tl.to(kids, { opacity: 1, duration: 0.2, ease: 'none' }, 0);
       end = 0.2;
     } else {
+      const last = MOVE.stagger * Math.max(0, kids.length - 1);
+      // Coming down, the surface starts softly, so the two contents overlap rather than leave an empty box, and the smaller has resolved by the time the surface arrives.
+      const at = falling ? MOVE.morphOut / 2 : MOVE.morphIn;
+      const each = falling ? clamp(dur - at - last, T.snap, T.base) : T.base;
       tl.fromTo(
         kids,
         { opacity: 0, y: -3, filter: 'blur(5px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: T.base, ease: EASE.out, stagger: MOVE.stagger, clearProps: 'filter' },
-        MOVE.morphIn,
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: each, ease: EASE.out, stagger: MOVE.stagger, clearProps: 'filter' },
+        at,
       );
-      end = MOVE.morphIn + T.base + MOVE.stagger * Math.max(0, kids.length - 1);
+      end = at + each + last;
     }
     if (whyAt !== undefined && view.why) {
       const w = Math.max(end, whyAt);
@@ -1285,6 +1224,7 @@ export class Overlay {
     it.tl = tl;
     it.off = null;
     it.size = null;
+    it.step = { tl, play: null, a, b: { level: want, view, w: b.width, h: b.height }, looked: this.gazeNow().target === it.id, back: false, end: t + Math.max(dur, MOVE.morphOut + 0.02) };
     if (why) {
       it.why = why;
       it.restored = false;
@@ -1292,7 +1232,48 @@ export class Overlay {
     }
   }
 
+  // Plays a step back from where it stands, or forward again from a step already playing back: the same timeline, the same two views.
+  private turnStep(it: Item, s: Step, t: number): void {
+    const b = it.cur;
+    if (!b) return;
+    s.back = !s.back;
+    const to = s.back ? s.a : s.b;
+    const now = s.tl.time();
+    const goal = s.back ? 0 : s.tl.duration();
+    const span = Math.max(Math.abs(goal - now), T.snap);
+    s.play?.kill();
+    s.tl.pause();
+    const o = { v: now };
+    s.play = this.tl().to(o, { v: goal, duration: span, ease: 'none', onUpdate: () => void s.tl.time(o.v) });
+    s.end = t + span;
+    b.view = to.view;
+    b.width = to.w;
+    b.height = to.h;
+    b.w.go(t, to.w, span, 'gate');
+    b.h.go(t, to.h, span, 'gate');
+    b.level = to.level;
+    this.sizeBox(b, to.level);
+    this.watch(b);
+    it.want = to.level;
+    it.changedAt = t;
+    this.note(it, 'resize', 'look-away', s.back ? 'played back' : 'played forward', undefined, s.back ? s.b.level : s.a.level);
+  }
+
+  private endStep(it: Item, cut = false): void {
+    const s = it.step;
+    if (!s) return;
+    it.step = null;
+    s.play?.kill();
+    if (s.back) s.tl.kill();
+    const stays = s.back ? s.a.view : s.b.view;
+    (s.back ? s.b.view : s.a.view).el.remove();
+    gsap.set(stays.el, { clearProps: 'position,left,top,width,pointerEvents' });
+    if (s.back) gsap.set(stays.kids, { clearProps: 'filter' });
+    if (!cut && !s.back && RANK[s.b.level] < RANK[s.a.level]) it.fellAt = this.t;
+  }
+
   private transition(it: Item, want: PaneLevel, t: number, edge = false, why?: Item['why']): void {
+    this.endStep(it, true);
     it.tl?.kill();
     const tl = this.tl();
     const prev = it.cur;
@@ -1455,6 +1436,8 @@ export class Overlay {
     gsap.set(this.focusEl, { left: zone.x, top: zone.y, width: zone.w, height: zone.h });
 
     const aimingNow = this.aiming();
+    const overPanes = this.heldRects();
+    const catchHalf = viewfinderHalf(vp) + VIEWFINDER.catchPx * Math.max(1, ui);
     const slots = new Map<string, number>();
     const ordered = this.placeOrder();
     this.stagger(ordered);
@@ -1471,6 +1454,7 @@ export class Overlay {
       const d = it.d;
       let anchorPos: Vec3 | undefined;
       let depth = 1;
+      let underNow = false;
       let placed: WorldPlace | null = null;
       let pr: { x: number; y: number } | null = null;
       if (it.kind === 'world') {
@@ -1488,36 +1472,27 @@ export class Overlay {
           const sizeOf = (l: Level): { w: number; h: number } =>
             kept && kept.level === l ? { w: kept.width, h: kept.height } : (NOMINAL_SIZE[l as 'label' | 'card' | 'expanded'] ?? NOMINAL_SIZE.label);
           if (d.placement.focusOk) it.lookedAt = t;
-          // A drag over, the pane the look is on stays where it rode, pinned; the rest go back to their placement in one move.
+          // A pane near the center is one the wearer is turning onto, looked at yet or not: nothing puts it out of the way.
+          const r0 = it.cur?.rect;
+          const under = Boolean(r0 && r0.x < vp.w / 2 + catchHalf && r0.x + r0.w > vp.w / 2 - catchHalf && r0.y < vp.h / 2 + catchHalf && r0.y + r0.h > vp.h / 2 - catchHalf);
+          underNow = under;
+          // A drag over, a pane goes back to its placement: it has kept its offset from its light, so most of the time it has nowhere to go.
           if (it.ride && (!aimingNow || !p.inFront || it.dying)) {
-            const r = it.placed?.mode === 'pane' ? { ...it.placed.rect, x: p.x + it.ride.x, y: p.y + it.ride.y } : null;
             it.ride = null;
-            if (r && p.inFront && this.gazeNow().target === it.id && !it.hold && it.placed?.mode === 'pane') {
-              const c = this.drawnCenter(it, it.placed, r, t, false);
-              it.hold = { fx: 0.5, fy: 0.5, off: { x: c.x - p.x, y: c.y - p.y }, w: r.w, h: r.h, outSince: null, level: it.d.level, vx: 0, vy: 0, lastT: t };
-            } else {
-              it.place.reset(true);
-              it.holdEnded = true;
-            }
+            if (it.placed?.mode === 'pane' && it.placedPr) it.place.rebase(it.placed, it.placedPr);
+            else it.place.reset(true);
+            it.holdEnded = true;
           }
-          const held = this.hold(it, t, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx, chrome, p, depth, size);
-          // While the wearer drags the view, and a moment after, a pane already on the glass rides with the world where it stands, so the one aimed at is where the turn meets it.
-          // A move under way stops when the ride begins, so the pane never moves against the world it rides with: one still condensing rides from where its move ends, one already on the glass from where it stands.
+          const held = this.hold(it, t, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx, p, size);
+          // While the wearer drags the view, and a moment after, a pane already on the glass rides with the world from exactly where it is drawn, so the one aimed at is where the turn meets it.
           if (!held && !it.ride && aimingNow && p.inFront && it.placed?.mode === 'pane' && it.cur?.rect && it.want !== 'none' && !it.dying) {
-            const settling = t < it.condensingUntil;
-            const jx = settling ? 0 : it.place.jumpX.at(t);
-            const jy = settling ? 0 : it.place.jumpY.at(t);
-            // Against the light its placement was made with: this frame's has already turned with the drag.
+            const f = factors(it.placed);
             const at = it.placedPr ?? p;
-            it.ride = { x: it.placed.rect.x + jx - at.x, y: it.placed.rect.y + jy - at.y };
-            // A pane a head scan froze is drawn where the scan left it, not at its placement: it rides from there, and the freeze
-            // ends without its ease back, which would carry it against the world under the pointer.
-            const fz = it.frozen;
-            if (fz) {
-              const f = factors(it.placed);
-              it.ride = { x: fz.x - it.placed.rect.w * f.fx - p.x, y: fz.y - it.placed.rect.h * f.fy - p.y };
-              it.frozen = null;
-            }
+            const r = it.cur.rect;
+            it.ride = { x: r.x + r.w * f.fx - it.placed.rect.w * f.fx - at.x, y: r.y + r.h * f.fy - it.placed.rect.h * f.fy - at.y };
+            it.frozen = null;
+            it.aside.bake();
+            it.yieldS.bake();
             it.place.jumpX.set(0);
             it.place.jumpY.set(0);
           }
@@ -1535,18 +1510,21 @@ export class Overlay {
             } else placed = { ...last, rect: r };
           }
           else if (it.frozen && it.yieldS.on && it.placed?.mode === 'pane') placed = it.placed;
-          else placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) || leftRecently(t, it.lookedAt), zoneOk: Boolean(d.placement.zoneOk), left: !d.placement.focusOk && leftRecently(t, it.lookedAt), sizeOf, doorway: this.bridge.doorway?.(d.placement.anchor) ?? null }, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx);
-          // Back to following its light, the pane moves there from where the hold left it, in one 320 ms move.
+          else placed = it.place.update({ level: lv, anchor: p, distance: dist, size, focusOk: Boolean(d.placement.focusOk) || leftRecently(t, it.lookedAt) || under, zoneOk: Boolean(d.placement.zoneOk), left: !d.placement.focusOk && !under && leftRecently(t, it.lookedAt), sizeOf, doorway: this.bridge.doorway?.(d.placement.anchor) ?? null }, taken.length ? { ...ctx, chrome: [...chrome, ...taken] } : ctx);
+          // Back with its placement, a pane that stands away from its place drifts there from where it was drawn, carried to this frame's light.
           if (!held && !it.ride && it.holdEnded) {
             it.holdEnded = false;
             const r = it.cur?.rect;
-            // In a fast turn the eye is not on it: it takes its place at once rather than trailing its light.
-            if (r && placed.mode === 'pane' && Math.abs(this.yawRate) < FAST_TURN) {
+            if (r && placed.mode === 'pane' && it.placedPr) {
               const f = factors(placed);
-              it.place.ease(t, { x: r.x + r.w * f.fx, y: r.y + r.h * f.fy }, { x: placed.rect.x + placed.rect.w * f.fx, y: placed.rect.y + placed.rect.h * f.fy }, MOVE.drift, Infinity, 'gate');
+              it.drifting = true;
+              it.driftUntil = t + MOVE.drift;
+              it.place.jumpX.set(0);
+              it.place.jumpY.set(0);
+              it.place.ease(t, { x: r.x + r.w * f.fx + p.x - it.placedPr.x, y: r.y + r.h * f.fy + p.y - it.placedPr.y }, { x: placed.rect.x + placed.rect.w * f.fx, y: placed.rect.y + placed.rect.h * f.fy }, MOVE.drift, Infinity, 'gate');
             }
           }
-          if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && !it.dying) {
+          if (placed.mode === 'pane' && LEVEL_RANK[d.level] >= LEVEL_RANK.label && !it.dying && !it.hold) {
             const r = placed.rect;
             taken.push({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 });
           }
@@ -1583,19 +1561,36 @@ export class Overlay {
           placed = it.place.foldNow(pr, vp);
           it.placed = placed;
           corner = null;
-        } else aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk || d.placement.zoneOk) || leftRecently(t, it.lookedAt), depth, pr ?? undefined, Boolean(it.hold));
+        } else aside = it.aside.update(home, ctx, Boolean(d.placement.focusOk || d.placement.zoneOk) || leftRecently(t, it.lookedAt) || underNow, depth, pr ?? undefined, Boolean(it.hold));
       }
-      const want = this.paneLevelFor(it, placed);
+      if (it.step && t >= it.step.end - 1e-9) this.endStep(it);
+      let want = this.paneLevelFor(it, placed);
+      const look = this.gazeNow().target === it.id;
+      const st = it.step;
+      if (st && it.kind === 'world' && !it.dying && want !== 'none') {
+        const other = st.back ? st.b.level : st.a.level;
+        // A growth the look has left goes back from where it is; a look coming back to a pane on its way down takes it up from where it is.
+        if (st.looked && !look && RANK[it.want] > RANK[other]) {
+          this.turnStep(it, st, t);
+          it.cap = other;
+        } else if (look && RANK[it.want] < RANK[other] && want === other) this.turnStep(it, st, t);
+      }
+      if (it.cap && (look || RANK[want] <= RANK[it.cap])) it.cap = null;
+      if (it.cap) want = it.cap;
+      // A shrink under way is never cut: what the brain decides meanwhile waits for it, unless the pane is leaving the glass.
+      const queued = Boolean(it.step) && want !== 'none' && want !== it.want && RANK[it.want] < RANK[it.step!.back ? it.step!.b.level : it.step!.a.level];
       const decided = it.d.level !== it.decided;
-      const inZone = !d.placement.focusOk && !leftRecently(t - MOVE.pushOut, it.lookedAt) && want === 'none' && Boolean(it.cur?.rect && rectsOverlap(it.cur.rect, zone));
+      const inZone = !d.placement.focusOk && !underNow && !leftRecently(t - MOVE.pushOut, it.lookedAt) && want === 'none' && Boolean(it.cur?.rect && rectsOverlap(it.cur.rect, zone));
       const backInView = Boolean(d.placement.focusOk) && it.want === 'none' && want !== 'none';
       const cr = it.cur?.rect;
       const strayed = want === 'none' && it.kind === 'world' && Boolean(cr && pr && Math.hypot(Math.max(cr.x - pr.x, 0, pr.x - (cr.x + cr.w)), Math.max(cr.y - pr.y, 0, pr.y - (cr.y + cr.h))) > cr.w);
       const urgent = decided || it.dying || it.aside.dropped || it.kind === 'view' || inZone || backInView || strayed || placed?.mode === 'edge' || (it.want === 'none' && !it.cur && t - it.born < 0.05) || (it.why?.kind === 'drop' && want !== 'none');
-      if (want !== it.want) {
+      if (queued) it.pending = null;
+      else if (want !== it.want) {
         if (urgent) {
           it.pending = null;
-          const why = this.explain(it, placed, want, decided);
+          // The second step of a descent is the look-away's, however late the first let it through.
+          const why = t - it.fellAt < 0.1 ? { ...this.explain(it, placed, want, decided), detail: 'demote · look-away' } : this.explain(it, placed, want, decided);
           it.decided = it.d.level;
           this.transition(it, want, t, placed?.mode === 'edge' || inZone, why);
         } else if (!it.yieldS.on) {
@@ -1609,8 +1604,10 @@ export class Overlay {
         it.pending = null;
         it.decided = it.d.level;
       }
-      if (want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t, false, { kind: 'resize', cause: 'shape' });
-      else if (it.cur && it.cur.view.update(d.content)) this.remeasure(it.cur, t);
+      // The content of a decision the glass has not reached yet is not this view's.
+      const current = !it.step && !it.cap && !queued;
+      if (current && want === it.want && it.cur && it.cur.view.shape !== buildShape(it, want, this.handlers)) this.transition(it, want, t, false, { kind: 'resize', cause: 'shape' });
+      else if (current && it.cur && it.cur.view.update(d.content)) this.remeasure(it.cur, t);
 
       const lum = this.snap?.env.backdrop[it.id];
       const fill = it.fill.update(t, lum, t < it.condensingUntil);
@@ -1629,7 +1626,10 @@ export class Overlay {
             else continue;
             scale = b.scale ?? it.placed?.scale ?? 1;
           } else {
-            scale = placed.scale;
+            // Scale steps with a re-placement, every 2.5 s at most: it arrives over t-drift, about the corner the pane grows from, once any drift is over.
+            it.scaleT ??= new Track(placed.scale);
+            if (!it.drifting) it.scaleT.go(t, placed.scale, this.reduced ? 0 : MOVE.drift, 'gate');
+            scale = it.scaleT.at(t);
             b.scale = scale;
             const w = b.w.at(t) * scale;
             const h = b.h.at(t) * scale;
@@ -1639,8 +1639,8 @@ export class Overlay {
             asideO = a.opacity;
             const fz = it.frozen;
             const paneSide = (fz ? fz.x - w * fx + w / 2 : base.x + base.w / 2) < vp.w / 2 ? 'left' : 'right';
-            // The pane the look is held on is not what a head scan checks past: it does not yield.
-            const y = it.yieldS.update(t, it.hold ? null : fz ? (yieldSide !== null ? paneSide : null) : placed.stilled ? paneSide : yieldSide, paneSide);
+            // The pane the look is held on is not what a head scan checks past, nor is the one the wearer is turning onto: they do not yield.
+            const y = it.yieldS.update(t, it.hold || underNow ? null : fz ? (yieldSide !== null ? paneSide : null) : placed.stilled ? paneSide : yieldSide, paneSide);
             yieldO = y.opacity;
             // A riding pane is already pinned to the world; a head scan fades it but does not freeze it, so it has no return to make.
             if (it.yieldS.on && !it.hold && !it.ride) it.frozen ??= { x: at.x + a.dx, y: at.y + a.dy };
@@ -1648,10 +1648,8 @@ export class Overlay {
               if (!it.ride && !it.hold) it.place?.ease(t, fz, { x: at.x + a.dx, y: at.y + a.dy }, MOVE.yieldOut);
               it.frozen = null;
             }
-            rect = fz ? { x: fz.x - w * fx + y.dx, y: fz.y - h * fy, w, h } : { x: base.x + a.dx + y.dx, y: base.y + a.dy, w: base.w, h: base.h };
-            it.lastShift = fz ? { x: y.dx, y: 0 } : { x: a.dx + y.dx, y: a.dy };
+            rect = fz ? { x: fz.x - w * fx + y.dx, y: fz.y - h * fy, w, h } : { x: base.x + a.dx + (it.ride ? 0 : y.dx), y: base.y + a.dy, w: base.w, h: base.h };
             this.setTrace(it, a.trace && !a.dropped ? a.trace : null, a.opacity);
-            if (pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
           }
         } else {
           const slot = d.placement.anchor.startsWith('view:') ? d.placement.anchor : 'view:edge-right';
@@ -1669,12 +1667,25 @@ export class Overlay {
             rect = { ...rect, x: rect.x + y.dx };
           }
         }
-        // A held pane is not clamped: one being read may run off the glass and keeps its place in the world (its pull keeps it inside at rest).
+        if (it.kind === 'world' && b === it.cur && placed?.mode === 'pane') rect = this.steady(it, b, rect, pr, fx, fy, t, d.placement.anchor);
+        // Waiting as its light it still rides on the glass as it fades: the frame it gets a place back it comes from there.
+        else if (b === it.cur) {
+          it.drawnAt = t;
+          it.drawnLight = pr ? { x: pr.x, y: pr.y, anchor: d.placement.anchor } : null;
+        }
+        // A held pane is not clamped: it keeps its place in the world, and one being read may run off the glass.
         if (it.kind === 'world' && !(b === it.cur && it.hold)) rect = { ...rect, x: clamp(rect.x, 0, Math.max(0, vp.w - rect.w)), y: clamp(rect.y, 0, Math.max(0, vp.h - rect.h)) };
+        if (it.kind === 'world' && b === it.cur && placed?.mode === 'pane' && pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
         b.rect = rect;
         // In a gate the crossing line is the only line on the glass: a pane receded under the blur read as an empty grey rectangle, so it goes with the recede and comes back with it.
         const gateO = d.placement.anchor !== 'view:glyph' ? clamp((this.gateK.v - 0.2) / 0.8, 0, 1) : 1;
-        const o = b.fade.v * asideO * yieldO * gateO;
+        let coverK = 1;
+        if (it.kind === 'world' && b === it.cur) {
+          const covered = !it.hold && overPanes.some((q) => rectsOverlap(q, rect));
+          it.coverO.go(t, covered ? 0 : 1, T.quick, covered ? 'in' : 'out');
+          coverK = it.coverO.at(t);
+        }
+        const o = b.fade.v * asideO * yieldO * gateO * coverK;
         b.opacity = o;
         if (b === it.cur) paneOpacity = o;
         b.wrap.style.transform = `translate3d(${rect.x.toFixed(1)}px, ${rect.y.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
@@ -1738,6 +1749,13 @@ export class Overlay {
       this.track(it, placed, aside, pr);
       if (it.dying && !it.cur && it.old.length === 0 && t - it.deadAt > 0.6 && !it.tl?.isActive() && !it.gtl?.isActive() && it.L.pip < 0.01) this.disposeItem(it);
     }
+
+    // Nothing moves a pinned pane for the chrome: the chrome it stands over steps back under it.
+    const over = this.heldRects();
+    const covered = (r: Rect | null): boolean => Boolean(r) && over.some((q) => rectsOverlap(q, r!));
+    this.timeEl.classList.toggle(s.stepsBack!, covered(time));
+    this.menuBtn.classList.toggle(s.stepsBack!, covered(menu));
+    this.glyphEl.classList.toggle(s.stepsBack!, covered(glyph));
 
     const ground = new Map<string, Decision>();
     for (const d of this.frame?.items ?? []) if (d.placement.zone === 'ground') ground.set(d.id, d);

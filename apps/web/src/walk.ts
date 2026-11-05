@@ -40,6 +40,7 @@ export const TURN_PER_VIEW = (2 * Math.PI) / 3;
 const TURNING_S = 0.1;
 // Panes ride with the world while the wearer drags the view and this long after letting go, the time a takeover needs.
 const RIDE_AFTER_S = 0.5;
+const LAND_INSET_PX = 12;
 
 function distanceToQuad(x: number, y: number, q: { x: number; y: number }[]): number {
   let inside = q.length > 2;
@@ -144,7 +145,7 @@ export class Walk {
   // held square has left it, however big it is.
   private travelRef: { id: string; x: number; y: number; yaw: number; pitch: number; d: number } | null = null;
   // The held card or view the center has been on: only then can the center leave it. One grown from a storefront look can be born
-  // off the center, and until the pull brings it under the viewfinder it keeps the look as a label does.
+  // off the center, and until the center reaches it it keeps the look as a label does.
   private onCard: string | null = null;
   // Places the look has left, and whether each one's pane was under the center last frame. Only aiming brings the look back: the
   // pane brought under the center by a drag, or the light inside the viewfinder as a turn ends; the world carrying it back does not.
@@ -324,7 +325,11 @@ export class Walk {
     if (t - this.turnedAt <= STEP * 1.5 || this.holding) pk.ref = g.curOff;
     pk.takenSince = null;
     const take = (id: string | null, caught: boolean, off: number, by: string): string | null => {
-      if (pk.cur !== id) this.lastTake = { t, from: pk.cur, to: id, by: id === g.best && !by.startsWith('aimed') ? `${by} (${g.bestBy})` : by };
+      if (pk.cur !== id) {
+        this.lastTake = { t, from: pk.cur, to: id, by: id === g.best && !by.startsWith('aimed') ? `${by} (${g.bestBy})` : by };
+        // A look landing is judged from where it landed: the turn that ended the last one must not end this one too.
+        this.travelRef = null;
+      }
       if (pk.cur && pk.cur !== id && !g.curDoor) this.leftLook.set(pk.cur, { under: true });
       if (id) this.leftLook.delete(id);
       pk.ref = off;
@@ -442,17 +447,20 @@ export class Walk {
       // light inside the viewfinder as the turn ends. Resting on its storefront, or with its pane still at the center, it takes nothing.
       const lk = this.leftLook.get(who);
       const left = lk !== undefined;
-      const under = Boolean(kept && rectGap(kept) === 0);
+      // Well inside it, so the body's steps carrying its edge back over the center during a turn away are not a landing.
+      const inset = kept ? Math.min(LAND_INSET_PX * s, 0.2 * kept.h) : 0;
+      const under = Boolean(kept && cx >= kept.x + inset && cx <= kept.x + kept.w - inset && cy >= kept.y + inset && cy <= kept.y + kept.h - inset);
       let arrived = false;
       if (lk && kept) {
-        arrived = under && this.holding && !lk.under;
+        // The drag's last frame counts: a quick flick lets go in the frame the center arrives.
+        arrived = under && !lk.under && (this.holding || t - this.releasedAt <= 2 * STEP + 1e-9);
         lk.under = under;
         // Brought back under the center by a drag, it has been aimed at again: the ordinary rules take it from here.
         if (arrived) this.leftLook.delete(who);
-      }
+      } else if (lk) lk.under = false;
       const lightLands = (): boolean => {
         const pr = a && far <= ATTENTION_M ? this.bridge.project(a) : null;
-        return Boolean(pr?.inFront && Math.abs(pr.x - cx) <= half && Math.abs(pr.y - cy) <= half && t - this.turnedAt <= LOOK_AWAY_S + 1e-9);
+        return Boolean(pr?.inFront && Math.abs(pr.x - cx) <= half && Math.abs(pr.y - cy) <= half && resting && t - this.turnedAt <= LOOK_AWAY_S + 1e-9);
       };
       // Only at the end of a turn: resting on the place, or the glass carrying its pane back toward its light, brings nothing back.
       const may = !left || ((arrived || lightLands()) && t - this.turnedAt <= LOOK_AWAY_S + 1e-9);

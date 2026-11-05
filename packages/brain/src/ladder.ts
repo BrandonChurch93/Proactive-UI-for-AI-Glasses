@@ -23,6 +23,8 @@ export interface LadderItem {
   hiddenLogged: boolean;
   byLabels: boolean;
   far: boolean;
+  // The look-away has begun: an expanded view came down to its card and goes on to its label on the next tick.
+  falling: boolean;
 }
 
 export function newLadderItem(id: string): LadderItem {
@@ -45,6 +47,7 @@ export function newLadderItem(id: string): LadderItem {
     hiddenLogged: false,
     byLabels: false,
     far: false,
+    falling: false,
   };
 }
 
@@ -79,11 +82,12 @@ export interface LadderInput {
   growS?: number;
   still?: boolean;
   scanKeep?: boolean;
+  turning?: boolean;
 }
 
 export interface LadderOut {
   level: PaneLevel;
-  via: 'dwell' | 'pinch' | 'score' | 'settle' | 'look-away' | 'auto-fold' | 'band' | 'hold' | 'hidden';
+  via: 'dwell' | 'pinch' | 'score' | 'settle' | 'look-away' | 'undo' | 'auto-fold' | 'band' | 'hold' | 'hidden';
   gaze: boolean;
 }
 
@@ -110,6 +114,8 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
     ) {
       earned = 'expanded';
     }
+    // A head on its way off the pane is not a held look: the hold goes on counting, and nothing climbs until the turn is over.
+    if (inp.turning && rank(earned) > rank('label') && rank(earned) > rank(it.level)) earned = maxLevel(it.level, 'label');
     let via: LadderOut['via'] = 'dwell';
     if (inp.pinch && (band === 'stopped' || band === 'stroll')) {
       const next = up(maxLevel(it.level, 'label'));
@@ -129,7 +135,9 @@ export function step(it: LadderItem, inp: LadderInput, cfg: Config): LadderOut {
   }
 
   if (rank(it.level) > rank('label')) {
-    if (!inp.scanKeep && t - Math.max(it.lastGazeAt, it.stepAt) >= cfg.ladder.lookAwayS - 1e-9) return { level: 'label', via: 'look-away', gaze: false };
+    // A climb the look left before the view had opened never happened: the glass is playing it back, and the card's own look-away runs on.
+    if (it.level === 'expanded' && t - it.since < cfg.ladder.openS - 1e-9) return { level: 'card', via: 'undo', gaze: false };
+    if (!inp.scanKeep && (it.falling || t - Math.max(it.lastGazeAt, it.stepAt) >= cfg.ladder.lookAwayS - 1e-9)) return { level: it.level === 'expanded' ? 'card' : 'label', via: 'look-away', gaze: false };
     const cap = bandCap(band);
     if (rank(it.level) > rank(cap) && (band === 'brisk' || !held)) return { level: cap, via: 'band', gaze: false };
     return { level: it.level, via: 'hold', gaze: false };

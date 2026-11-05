@@ -10,7 +10,7 @@ The street is one block that loops, rendered in real time in Three.js. The weare
 
 | | |
 | --- | --- |
-| ![Walking: the places in view show their labels along the edges of the street, the center kept clear](docs/screenshots/walk-labels.jpg) | ![Strolling: the label under the viewfinder has grown to its card and been drawn slowly to the center](docs/screenshots/stroll-card.jpg) |
+| ![Walking: the places in view show their labels along the edges of the street, the center kept clear](docs/screenshots/walk-labels.jpg) | ![Strolling: the label under the viewfinder has grown to its card where it stands](docs/screenshots/stroll-card.jpg) |
 | ![At the Big Bean's door: the expanded view stands beside the doorway, the Cortado row lifted under the look](docs/screenshots/door-view.jpg) | ![Maya's text at the red light: her message, the reply, and the glasses offering the route](docs/screenshots/maya.jpg) |
 | ![Crossing: the glass steps back, the crossing line says why, the countdown stays on the pavement](docs/screenshots/crossing.jpg) | ![The end panel: the session in one sentence, its timeline, and what the glasses decided](docs/screenshots/end.jpg) |
 
@@ -23,7 +23,7 @@ The street is one block that loops, rendered in real time in Three.js. The weare
 ## What you can do in it
 
 - **Two walks.** Explore lets you wander the block and look at anything; Lunch opens the menu on Food and gets you to lunch. Both loop around the block until you end them.
-- **Look.** Drag to turn your head. The square in the middle is the eye tracker real glasses would have (`EYE TRACKING`). When the view settles, every place in sight shows its label; rest the square on one and it grows into its card after half a second, and into its expanded view after two seconds more, at any pace short of brisk. The card you hold is drawn slowly into the center and stays there while you rest on it; the others drift out of the way. Turn off it and it is a label again half a second later, and resting on the building does not bring it back.
+- **Look.** Drag to turn your head. The square in the middle is the eye tracker real glasses would have (`EYE TRACKING`). When the view settles, every place in sight shows its label; rest the square on one and it grows into its card after half a second, and into its expanded view after two seconds more, at any pace short of brisk. The card you hold stays pinned to the world where your look landed on it, and only the world moves it. Turn off it and half a second later it comes down a level at a time where it stands, and resting on the building does not bring it back.
 - **Find a place.** `FIND A PLACE` at the bottom right lists places by category and walk time. Choose one and the route draws on the pavement, a map tile keeps the way, and the wearer walks there.
 - **Texts that change the walk.** Messages arrive as banners at the top. Reply to Maya and the glasses offer to route you to her; say yes and the walk goes there.
 - **The door and the choice.** At the door the place's expanded view stands beside the opening, never over it. Move the square down its rows and the row under it lifts; a click, Space or Enter chooses it (order the Cortado, hold a table, book a lane).
@@ -55,12 +55,12 @@ Each tick runs in a fixed order:
 1. **Pace band** from speed, with hysteresis: Stopped, Stroll, Walk, Brisk.
 2. **Gates** that beat everything: a crossing or a vehicle near the path (the glass steps back and the safety text shows), a person on the path, snooze, an empty attention budget.
 3. **Candidates and score**: relevance to the goal × value from the world × proximity × novelty − cost, where cost rises with pace and with what is already open.
-4. **The ladder**: a settled view lights the labels of the places in sight; a held look grows the one under the center to its card and then its expanded view; looking away shrinks it to its label; Brisk allows labels only.
+4. **The ladder**: a settled view lights the labels of the places in sight; a held look grows the one under the center to its card and then its expanded view; looking away brings it back down, a level at a time; Brisk allows labels only.
 5. **The pocket, the reading budget, timing and hysteresis**, then placement hints for the overlay.
 
 Same inputs, same decisions, every run: no `Math.random`, no wall clock, a seeded sim. That is what makes the inspector's replay and the eval suite exact. The full spec is `docs/brain-spec.md`.
 
-The overlay (`packages/overlay`) renders the decisions: dark glass panes with a light edge, a light vocabulary (pip, aura, flare, leader) that lives in the scene and is hidden by real things, and a motion vocabulary where every move shows its cause and nothing bounces. It owns the geometry of the walking rules: the focus zone, the pull of the held pane, yielding to a head check, stepping aside for people and cars, the doorway kept clear, backdrop adaptivity.
+The overlay (`packages/overlay`) renders the decisions: dark glass panes with a light edge, a light vocabulary (pip, aura, flare, leader) that lives in the scene and is hidden by real things, and a motion vocabulary where every move shows its cause and nothing bounces. It owns the geometry of the walking rules: the focus zone, the pin of the held pane, the descent played as one timeline, yielding to a head check, stepping aside for people and cars, the doorway kept clear, backdrop adaptivity.
 
 ## The walking rules
 
@@ -68,7 +68,7 @@ The center of the project is `docs/walking-rules.md`.
 
 | Rule | Trigger | What the glasses do |
 | --- | --- | --- |
-| 1 · Speed-scaled focus zone | Every frame | The clear center of view grows with pace, from 33 × 40% Stopped to 52 × 58% Brisk; the held pane is the exception, drawn slowly into the viewfinder while the wearer rests on it |
+| 1 · Speed-scaled focus zone | Every frame | The clear center of view grows with pace, from 33 × 40% Stopped to 52 × 58% Brisk; the held pane is the exception, pinned to the world where the look landed on it |
 | 2 · Reading budget | A show while moving | A label is the name and three words and a number; the reason line stays in the log while walking; no card in Walk without its hold |
 | 3 · Auto-fold | A proactive label not looked at | Folds itself after 2.5 s in Walk, 4 s in Stroll; nothing waits to be dismissed |
 | 4 · Entry | A new show | A pane is born beside its light with the condense move, never sliding in from the edge; while moving, outside the focus zone unless looked at |
@@ -77,7 +77,7 @@ The center of the project is `docs/walking-rules.md`.
 | 7 · The pocket surfaces at the pause | Stopped 2 s with at least 6 s available | "12 s · what you saved" grows beside the held glyph |
 | 8 · The world has right of way | A person or vehicle over a pane | The pane dims and steps aside, or waits as its light; a face is never covered |
 | 9 · Backdrop adaptivity | Every 250 ms | The glass deepens and the type thickens over bright façades; text never below 4.5:1 |
-| 10 · Labels, then one card | The view settles, or a look rests | Labels for every place in sight; the one under the center grows to its card after 0.5 s and to its expanded view after 2 s more, in every band but Brisk; turning off it shrinks it to its label 0.5 s later |
+| 10 · Labels, then one card | The view settles, or a look rests | Labels for every place in sight; the one under the center grows to its card after 0.5 s and to its expanded view after 2 s more, in every band but Brisk; turning off it brings it down to its label from 0.5 s later, a level at a time, the grow played back |
 | 11 · The whisper channel | Brisk | One captioned line at the bottom edge for 2.5 s instead of a pane |
 | 12 · Snooze | Looking up at nothing for 2 s | Everything folds; the glyph counts down 60 s |
 | 13 · The budget is visible | Always, in the inspector | Seven proactive shows per walk, one back per 40 s of quiet; looks, choices and arrivals are free |
@@ -92,7 +92,7 @@ The inspector's Export writes a run (snapshots, overrides, decision log) in the 
 
 The live behaviour is measured in a real browser, playing the demo the way a person does:
 
-- `pnpm aim` plays two laps of Explore and aims at labels and cards with real drags, at Stroll and at Walk: whether the look holds the place aimed at, whether the pane is drawn in, whether anything jumps, and that the pane does not move by a pixel when the look lands or while the pointer is down.
+- `pnpm aim` plays four laps of Explore and aims at labels and cards with real drags, at Stroll and at Walk: whether the look holds the place aimed at, whether anything jumps, that the pane does not move by a pixel when the look lands or while the pointer is down, that no pane within 300 px of the center moves more than 6 px against the world around a landing, and that one turn off a card or a view ends it.
 - `pnpm doors` visits all fourteen places through the menu, walks to each door, holds the look, walks the rows with the viewfinder and chooses: how long the expanded view was on the glass, which rows lifted, and the confirmation.
 - `sh scripts/barall.sh http://localhost:5173/` runs the bar (`scripts/bar.ts`) on both walks at 1920 × 1080 and 3840 × 2160: level changes, births, panes off their lights or over the road or the chrome, labels per settle, the look probes and console errors.
 - `pnpm shots --scenario hungry --times 14,62,117` takes stills at walk times, and `scripts/devices.ts` renders the start screen and three beats on thirteen screens from a 390 px phone to 4K.

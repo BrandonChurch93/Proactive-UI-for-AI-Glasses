@@ -26,6 +26,7 @@ export interface Config {
     swapGapS: number;
     cardHoldS: number;
     lookAwayS: number;
+    openS: number;
     maxProactive: number;
     awarenessPips: number;
     awarenessRelevance: number;
@@ -76,6 +77,7 @@ export const DEFAULT_CONFIG: Config = {
     swapGapS: 1,
     cardHoldS: 2,
     lookAwayS: LOOK_AWAY_S,
+    openS: 0.48,
     maxProactive: 3,
     awarenessPips: 3,
     awarenessRelevance: 0.6,

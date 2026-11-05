@@ -67,6 +67,15 @@ export class Chrome {
     return this.cache;
   }
 
+  // A pane the look is pinned on stands over the chrome rather than move for it: what it covers steps back under it.
+  stepBack(over: { x: number; y: number; w: number; h: number }[]): void {
+    for (const e of [this.pauseBtn, this.hint, this.pace]) {
+      if (e.style.display === 'none') continue;
+      const r = e.getBoundingClientRect();
+      e.classList.toggle(css.stepsBack!, over.some((q) => q.x < r.right && q.x + q.w > r.left && q.y < r.bottom && q.y + q.h > r.top));
+    }
+  }
+
   setInspectorHint(visible: boolean): void {
     this.hint.style.display = visible ? '' : 'none';
     this.pauseBtn.style.display = visible && this.touch ? '' : 'none';
