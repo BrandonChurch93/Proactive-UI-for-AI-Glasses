@@ -1,5 +1,6 @@
 import placesJson from '../../../data/places.json';
 import walkJson from '../../../data/scenarios/walk.json';
+import demosJson from '../../../data/scenarios/demos.json';
 
 export type ScenarioId = 'hungry' | 'walking';
 export type Band = 'stopped' | 'stroll' | 'walk' | 'brisk';
@@ -89,7 +90,7 @@ export interface ReplySpec {
 }
 
 export type Beat =
-  | (BeatBase & { kind: 'gaze'; id: string | null; dy?: number })
+  | (BeatBase & { kind: 'gaze'; id: string | null; dy?: number; dn?: number; pitch?: number })
   | (BeatBase & { kind: 'pinch'; id: string })
   | (BeatBase & {
       kind: 'inbox';
@@ -131,6 +132,27 @@ export interface WalkData {
   holdS: number;
   beats: Beat[];
   recordings: Record<ScenarioId, Recording>;
+}
+
+export type DemoId = 'look' | 'lunch' | 'quiet';
+
+// A recording with its own clock. Every time in it, from, to and inspectorAt included, is on the walk's clock: beats before from have
+// happened when the demo begins. lengthS is the planned length the menu shows, about to minus from.
+export interface Demo {
+  id: DemoId;
+  name: string;
+  line: string;
+  lengthS: number;
+  scenario: ScenarioId;
+  from: number;
+  to: number;
+  signal: { state: SignalState; secondsLeft: number };
+  holdS: number;
+  beats: Beat[];
+  reviewer: Beat[];
+  inspectorAt?: number;
+  // Passers-by left out of this demo's street, so a look it holds is not one anybody happens to walk through.
+  absent?: string[];
 }
 
 const KINDS: readonly EntityKind[] = ['food', 'cafe', 'theater', 'venue', 'shop', 'service', 'transit', 'park', 'sign'];
@@ -232,6 +254,22 @@ function validateWalk(raw: unknown): WalkData {
   return raw as unknown as WalkData;
 }
 
+function validateDemos(raw: unknown): Demo[] {
+  const where = 'scenarios/demos';
+  if (!isRecord(raw) || !Array.isArray(raw.demos)) fail(where, 'demos must be an array');
+  for (const [i, d] of (raw.demos as unknown[]).entries()) {
+    if (!isRecord(d) || (d.id !== 'look' && d.id !== 'lunch' && d.id !== 'quiet')) fail(where, `demos[${i}] needs an id`);
+    if (typeof d.name !== 'string' || typeof d.line !== 'string') fail(where, `${String(d.id)} needs a name and a line`);
+    if (typeof d.lengthS !== 'number' || typeof d.from !== 'number' || typeof d.to !== 'number' || typeof d.holdS !== 'number') fail(where, `${String(d.id)} needs lengthS, from, to and holdS`);
+    if (d.scenario !== 'walking' && d.scenario !== 'hungry') fail(where, `${String(d.id)} scenario must be walking or hungry`);
+    if (!isRecord(d.signal) || typeof d.signal.secondsLeft !== 'number') fail(where, `${String(d.id)} needs a signal`);
+    if (d.inspectorAt !== undefined && typeof d.inspectorAt !== 'number') fail(where, `${String(d.id)} inspectorAt must be a number`);
+    validateBeats(d.beats, `${where}/${String(d.id)}/beats`);
+    validateBeats(d.reviewer, `${where}/${String(d.id)}/reviewer`);
+  }
+  return raw.demos as Demo[];
+}
+
 export const PLACES: readonly PlaceData[] = (() => {
   const list = (placesJson as { places: unknown[] }).places;
   const out = list.map(validatePlace);
@@ -246,6 +284,12 @@ export const PLACES: readonly PlaceData[] = (() => {
 export const PLACE_BY_ID: ReadonlyMap<string, PlaceData> = new Map(PLACES.map((p) => [p.id, p]));
 
 export const WALK: Readonly<WalkData> = validateWalk(walkJson);
+
+export const DEMOS: readonly Demo[] = validateDemos(demosJson);
+
+export function demoById(id: unknown): Demo | undefined {
+  return DEMOS.find((d) => d.id === id);
+}
 
 export const SCENARIO_IDS: readonly ScenarioId[] = ['walking', 'hungry'];
 

@@ -171,6 +171,16 @@ Each place, in `data/places.json` order of interest: its sub line, its rows (key
 - The destination's card and expanded view: Going here (a chip in the header, in the voice color). Any other lunch place's card while a lunch destination is set: Go here instead (primary).
 - The corner asks nothing: the light holds 12 s each lap, WAIT counting down, and a place chosen from the menu releases it.
 
+## Demos
+
+The menu on the asterisk key, verbatim:
+
+- DEMOS
+- Look · 50 s · Labels, a held look, the descent, a head check, the pocket
+- Lunch · 60 s · Maya's text, the route, the door, an order
+- Quiet · 55 s · Brisk, a bus, the crossing, the pocket at the light, the inspector
+- 1 2 3 to play · Esc to close
+
 ## Arrival and end
 
 - Seat's held, inside on the left. (the arrival line on the place's own card when a seat is held there, so a held look still opens its view)

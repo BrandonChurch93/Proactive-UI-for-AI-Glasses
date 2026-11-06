@@ -6,6 +6,7 @@ Claude Code keeps this file current. One dated entry per phase, plus any decisio
 
 Written for a session that remembers nothing. Rewrite it at the end of every phase and before every compaction.
 
+- 2026-11-06 · Phase 32 (`docs/plan-ux-rework.md` section 22, the demos) done and committed; stopped as asked. The asterisk opens `apps/web/src/demo/menu.ts`; `data/scenarios/demos.json` holds Look, Lunch and Quiet on the walk's clock (`from`, `to`, `lengthS` the menu's number, `absent`), `Sim` takes `opts.demo`, `App.demoWalk` and `leaveDemo` run them, `?demo=` and `&loop=1` start them. `pnpm demos` (`scripts/demos.ts`) records and judges them into `.cache/demos`. Scratch tools for tuning sit in `.cache/review`: `demotrace.mts` (headless trace), `demoframes.mts` (stepped stills), `demoprobe.mts`, `ovlog.mts`, `menucheck.mts`. Editing `demos.json` reloads the dev page, so wait before a live run. Next: the reviewer verifies and pushes; the owner records the three takes.
 - 2026-11-05 · Phase 31 (`docs/plan-ux-rework.md` section 21, nothing jumps, nothing snaps, and the pull is retired) done and committed; stopped as asked. The pull is gone: the look pins a pane where it is drawn and only the world moves it (`Overlay.hold`), for 2.5 s past the look, then `Placement.rebase` hands it back. Every level change is a step (`Item.step`, `morph`, `turnStep`, `endStep`) that can play back; the brain comes down a level a tick and climbs only with the look and a still head; `Overlay.steady` caps every move against the world at 180 px/s, 84 px/s for a pane handed back. `pnpm aim` has no near measure and prints the widened landing measure; `.cache/review/lookaway3.mts` has the descent's measure, `frames31.mts` and `sheet.mts` beside it make the frames, on the dev server at 5199. Next: the reviewer runs aim and doors again; the owner plays it. Expect aim's held rate to move a few points between runs (95.5 to 98.4 on the last three builds).
 - 2026-11-04 · Phase 30 (`docs/plan-ux-rework.md` section 20, turned away means gone) done and committed; stopped as asked. A card or a view keeps the look only while the viewfinder stays on it (`Walk.rawGaze`: the rect, the turn's travel, `travelRef`, `onCard`), comes back only by a turn (`Walk.leftLook`), and shrinks 0.5 s after (`LOOK_AWAY_S`); `Walk.lastTake` says what made each change of look. `pnpm aim` plays four laps and makes the owner's move after every card or view (`look-away:` lines). Live checks ran against `pnpm build` served from outside iCloud (`python3 -m http.server` over a copy of `apps/web/dist`, passed as `--base`). Next: the reviewer runs aim and doors again; the owner plays it.
 - 2026-11-03 · Phase 29 (`docs/plan-ux-rework.md` section 19, the last round) done and committed; stopped as asked. Looking away shrinks a card or view 1 s after the wearer turns the center off it (`lookOnPane`, `READ.marginPx` 24, the door included); a held look expands at Walk; the pin is taken from the drawn center (`Overlay.drawnCenter`); panes go with the recede; the caption steps back under a pane; README, screenshots and social image remade. The repository sits on the iCloud Desktop at 97% disk and files get evicted (they read empty): if git crashes with SIGBUS, tsx fails or files read blank, check `ls -lO` for `dataless` first (STATUS What is left). Live checks are steadiest against `pnpm build` served from outside iCloud (`python3 -m http.server` over a copy of `apps/web/dist`), passed as `--base`. Next: the reviewer runs aim and doors again; the owner plays it.
@@ -53,7 +54,14 @@ For the owner. The UX rework (`docs/plan-ux-rework.md`, Phases 9 to 16) ran auto
 
 ### What is left
 
-As of 2026-11-05, after Phase 31.
+As of 2026-11-06, after Phase 32.
+
+- The takes need a judge's eye in motion. I read contact sheets, stills and frames pulled from the webms; nobody has yet watched the three films at speed the way a viewer on LinkedIn will. Look's long middle (0:23 to 0:46, labels passing and one station label) is the part most likely to feel slack.
+- Look runs 51.9 s and Lunch 58.5 s against the menu's 50 and 60, both inside the 2 s the plan allows.
+- In Quiet the stop's label reads `Bus in 2 min` for the moment before the bus covers it. The short form is static copy and I left it.
+- A pane standing at the very edge of the glass can still move against the world during a turn: 10.5 px in a step in Look, far from the center and outside the Phase 31 measure.
+- `pnpm aim` swings with load: 89.7% (fail, run straight after the three video captures) and 96.8% (pass, run alone) on the same build, every landing, drag and look-away clean in both. The cause is not proven, only that the code path did not change and the alone run passed.
+- Auto quality can step down 4 s into a take on a slow machine, which would show. `&quality=high` holds it.
 
 - The repository lives on the iCloud-synced Desktop, and when the disk was 97% full macOS evicted files to iCloud and they read as empty: in Phase 29 that crashed git, hung the typecheck, broke tsx, reloaded the dev page mid-run, resurrected deleted files and left conflict copies (`name 2.ext`). Everything was recovered and committed, but it will happen again. Move the folder off the synced Desktop (or turn off Optimize Mac Storage, or free space) before working on it again. `.git/config` reads empty since then; git runs on its defaults, and the usual `[core]` block (repositoryformatversion 0, filemode, bare false, logallrefupdates, ignorecase, precomposeunicode) can be written back by hand.
 - Turned away means gone. A turn that ends with a card's light inside the viewfinder takes the place back by that light, as the plan says, and the card stays up (11 of 60 turns in the final aim, with a fresh 2 s hold since Phase 31, so it no longer jumps to its view). If that still reads as "it stays expanded", the light could be made to land only when the turn carries it in from outside the viewfinder. Walking past a shop with the head still also ends the look once the card slides off the center.
@@ -138,6 +146,39 @@ Each is written into the doc it changes (look for "As built").
 ## Reviews
 
 One entry per phase check: what you compared, what differed from the reference or the docs, what you fixed.
+
+### Phase 32 · 2026-11-06 · the demos (UX rework)
+
+Three short films the app plays by itself: a menu on the asterisk, three demo recordings, a clean recording state, and `pnpm demos` to prove them.
+
+- Item 1, the menu: asterisk on the title and on a walk, paused underneath, centered glass panel, 1 2 3 or a click, Esc or the asterisk closes it, in `Chrome.rects()` while open; `?demo=` and `&loop=1`; works on the live build, README updated.
+- Item 2, a recording with its own clock: `demos.json`, times on the walk's clock so beats before `from` have happened, `Sim` takes `opts.demo`, `Walk.seek(from)` before the first frame. Pointer reaches nothing, cursor and hint hidden, keys other than the asterisk and Esc do nothing. Hold 2 s, fade through the panel color over `t-scene`.
+- Item 3, the three demos: all play. Final times in `docs/scenarios.md`.
+- Item 4, nothing a cheat: real brain, overlay and world at the real tick. What moved, because the rules said so:
+  - Look's head scan moved to the end, at the north corner: rule 5 needs a curb within 8 m and there is none on the stretch. So Look starts at n 21.6 with the theater almost square on, and ends stopped with the pocket up rather than walking with labels.
+  - Look gained three looks the plan did not name (Atlas Books, the station, Pocket Park): the middle needed them, and the scan needs labels on the scanned side.
+  - Quiet is Lunch, not Explore: rule 11 needs goal relevance of 0.6 and Explore has none.
+  - Quiet starts at Walk, not Brisk, and the bus comes before Brisk: the stop is at n 58, Brisk starts at n 60.
+  - Quiet's whisper needs news, because a place already shown cannot whisper: a seat opens at Mega Burger as a demo beat.
+  - Quiet's pocket comes before the crossing: the corner has one light. The inspector opens after the crossing, not during it, because its drawer cut the crossing line.
+  - The stop's own pane waits as its light when the bus takes its room; the labels the bus passes are what dim and drop.
+- Item 5, the inspector: opens live with the walk playing, on Decisions, budget meter in view. The meter was only in Signals, so Decisions gained it. Width unchanged, it leaves the viewfinder and the street.
+- Item 6, copy: verbatim. Item 7, the check: below. Item 8, docs: scenarios, copy, design-system, inspector-spec, evals, README, this file.
+
+Decisions and changes from the plan:
+
+- Added to the data: `to` (the film's end, since Look's real length differs from the 50 s the copy must say), `absent` (Look leaves out p27 and p33, who walked through the held theater view), and gaze `dn` and `pitch` (the viewfinder on the Big Bean's rows; the rows stand beside the sign).
+- A demo's scripted head counts as the wearer's own turn, so panes ride with the world through it as in a drag. Without it, panes jumped up to 163 px at the glass's edge; with it the worst is 10.5 px.
+- `pnpm demos` allows a gaze 0.7 s, not the plan's 0.5 s: the reviewer's own damped turn over 60 degrees takes 0.6 s and lands on the 10 Hz tick. Everything else is 0.5 s.
+- The 6 px measure is sampled every sim step, within 300 px of the center as in Phase 31, a pane a head scan froze being the exception; the worst anywhere on the glass prints beside it.
+- It also checks each film's moments from the brain's log, which the plan did not ask for: a beat landing does not prove the whisper fired.
+- Two glass bugs the films showed, both fixed: a frozen pane's leader stretched across the whole glass during a head scan, and the pocket stayed as a grey ghost behind the recede.
+
+The check on the final build: tests 67, evals 44 of 44 and 1022 checks, the same as before; lint and build green; no em dashes. `pnpm demos` PASS: Look 13 of 13 beats, 51.9 s; Lunch 12 of 12, 58.5 s; Quiet 3 of 3, 55.0 s; every moment, 0 console errors, 0 step pairs over 6 px, title after the fade. Hand check: asterisk on the title and on a walk, Esc and asterisk close, 2 starts Lunch, Esc ends it and the title returns, a click starts Quiet, `&loop=1` restarts, no console errors. Doors 14 of 14. Aim failed once and passed once on the same build: 89.7% held straight after the demos' video capture, 96.8% run alone; 0 jumps, every landing, drag and look-away clean, 0 frame pairs over 6 px in both.
+
+Reference pass: `reference/hero-block.html` opened beside the menu and the demo frames. Same glass, same light edge, same mono caps; the build's street is much further along than the reference's, as it has been since Phase 9. `reference/walking-rules.html` not reopened.
+
+Done criteria, answered: three demos play to their end from the menu, the hotkey and the address bar: yes. `pnpm demos` clean with three webms and three sheets: yes. Eval report unchanged: yes. Aim and doors once: doors yes; aim needed a second run, as above. Every check green, no em dashes: yes.
 
 ### Phase 31 · 2026-11-05 · nothing jumps, nothing snaps, and the pull is retired (UX rework)
 - Refresh ritual first: walking-rules whole, design-system the timing table, Grow, Shrink and placement rule 1, overlay-spec whole. The references were not reopened: this round changes no look, only motion, and the plan's ritual for it names the docs. The three probes were run on the first working build and again on every build after.

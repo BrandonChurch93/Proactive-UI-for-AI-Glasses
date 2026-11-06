@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { Brain } from '@lumen/brain';
 import {
   LOOK_AWAY_S,
+  SETTLE,
   lookOnPane,
   uiScale,
   PLACES,
@@ -15,6 +16,7 @@ import {
   yawToward,
   compactSnapshot,
   type BrainFrame,
+  type Demo,
   type OverlayEvent,
   type Override,
   type PaneReport,
@@ -114,6 +116,7 @@ export interface WalkOptions {
   focusOutline?: boolean;
   attract?: boolean;
   chrome?: () => Rect[];
+  demo?: Demo;
 }
 
 export class Walk {
@@ -155,6 +158,8 @@ export class Walk {
   holding = false;
   private wasHolding = false;
   private releasedAt = -Infinity;
+  // A demo's scripted head is the wearer's own turn: the panes on the glass ride with the world through it, as they do through a drag.
+  private demoTurnAt = -Infinity;
   private pick: { step: number; cur: string | null; caught: boolean; cand: string | null; candSince: number; outSince: number | null; ref: number; takenSince: number | null } = { step: -2, cur: null, caught: false, cand: null, candSince: 0, outSince: null, ref: Infinity, takenSince: null };
 
   constructor(
@@ -180,6 +185,8 @@ export class Walk {
   }
 
   get duration(): number {
+    const d = this.opts.demo;
+    if (d) return d.to;
     return this.opts.scripted ? WALK_SECONDS[this.scenario] : Math.max(this.known, this.sim.t);
   }
 
@@ -217,7 +224,7 @@ export class Walk {
       time: !this.opts.attract,
       log: (e) => this.overlayLog.push(e),
       gaze: () => this.sim.gaze,
-      aiming: () => !this.opts.scripted && (this.holding || this.sim.t - this.releasedAt <= RIDE_AFTER_S + 1e-9),
+      aiming: () => (this.opts.demo ? this.sim.t - this.demoTurnAt <= RIDE_AFTER_S + 1e-9 : !this.opts.scripted && (this.holding || this.sim.t - this.releasedAt <= RIDE_AFTER_S + 1e-9)),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       handlers: {
         pinch: (id) => this.pinch(id),
@@ -232,7 +239,7 @@ export class Walk {
   }
 
   private reset(): void {
-    this.sim = new Sim(this.scenario, { seed: SEED, viewport: { w: innerWidth, h: innerHeight }, ...(this.opts.suggest !== undefined ? { suggest: this.opts.suggest } : {}) });
+    this.sim = new Sim(this.scenario, { seed: SEED, viewport: { w: innerWidth, h: innerHeight }, ...(this.opts.suggest !== undefined ? { suggest: this.opts.suggest } : {}), ...(this.opts.demo ? { demo: this.opts.demo } : {}) });
     this.sim.scripted = this.opts.scripted;
     this.brain = new Brain();
     this.bridge.setSim(this.sim);
@@ -241,6 +248,7 @@ export class Walk {
     this.tickIndex = 0;
     this.view = undefined;
     this.ended = false;
+    this.demoTurnAt = -Infinity;
   }
 
   setGlassesVisible(on: boolean): void {
@@ -632,6 +640,7 @@ export class Walk {
       else delete sim.live.gazeSince;
     }
     sim.step(STEP);
+    if (this.opts.demo && Math.abs(sim.head.yawRate) >= SETTLE.moveRate) this.demoTurnAt = sim.t;
     this.stepIndex++;
     if (!fast) this.world.update(STEP);
     if (this.stepIndex % STEPS_PER_TICK === 0) this.tick(fast);

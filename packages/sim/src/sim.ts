@@ -27,6 +27,7 @@ import {
   type PaneReport,
   type PersonInfo,
   type Beat,
+  type Demo,
   type ScenarioId,
   type SignalAnchor,
   type Vec3,
@@ -53,6 +54,7 @@ export interface SimOptions {
   viewport?: Viewport;
   layout?: BlockLayout;
   suggest?: ScenarioId | null;
+  demo?: Demo;
 }
 
 export interface LiveInput {
@@ -95,6 +97,7 @@ export class Sim {
   holdUntil: number;
   reroutes: { t: number; to: string }[] = [];
   private timeline: Beat[];
+  private readonly worldBeats: readonly Beat[];
   private want = 'start';
   private lastArrived: string | null = null;
   private liveData = new Map<string, Record<string, LiveValue>>();
@@ -111,7 +114,8 @@ export class Sim {
     this.scenario = scenario;
     this.suggest = opts.suggest === null ? undefined : (opts.suggest ?? scenario);
     this.layout = opts.layout ?? buildLayout(seed);
-    this.signal = { at: 0, leg: 'avenue', state: WALK.signal.state, secondsLeft: WALK.signal.secondsLeft };
+    const signal = opts.demo?.signal ?? WALK.signal;
+    this.signal = { at: 0, leg: 'avenue', state: signal.state, secondsLeft: signal.secondsLeft };
     this.south = new SouthSignal(-WARMUP, false);
     this.wearer = new Wearer(
       {
@@ -124,17 +128,18 @@ export class Sim {
       },
       routeLoop(START),
     );
-    this.holdUntil = WALK.holdS;
-    this.reviewer = new ScriptedReviewer(WALK.recordings[scenario].beats);
+    this.holdUntil = opts.demo?.holdS ?? WALK.holdS;
+    this.reviewer = new ScriptedReviewer(opts.demo?.reviewer ?? WALK.recordings[scenario].beats);
     this.viewport = opts.viewport ?? { w: 1280, h: 800 };
     this.backdrop = new Backdrop(this.layout.colliders, this.layout.sunDir);
     for (const p of PLACES) {
       this.liveData.set(p.id, { ...p.live });
       this.anchors.set(p.id, placeAnchor(p));
     }
-    this.timeline = WALK.beats.filter((b) => !b.after);
+    this.worldBeats = opts.demo?.beats ?? WALK.beats;
+    this.timeline = this.worldBeats.filter((b) => !b.after);
     this.traffic = new Traffic(seed, this.signal, this.scriptedVehicles(this.timeline), -WARMUP, () => this.south.vehicle());
-    this.people = new People({ seed, signal: this.signal, avoidCrosswalks: ['avenue', 'cross'], scripted: this.scriptedPeople(this.timeline) }, -WARMUP);
+    this.people = new People({ seed, signal: this.signal, avoidCrosswalks: ['avenue', 'cross'], scripted: this.scriptedPeople(this.timeline), ...(opts.demo?.absent ? { absent: opts.demo.absent } : {}) }, -WARMUP);
     this.head = new Head(this.wearer.bodyYaw + 0.26, 0.05);
     this.t = -WARMUP;
     const dt = 1 / SIM_HZ;
@@ -201,7 +206,7 @@ export class Sim {
   private startIntent(id: ScenarioId, t: number): void {
     this.intent = id;
     this.intentAt = t;
-    const beats = WALK.beats.filter((b) => b.after === 'intent' && b.intent === id).map((b) => ({ ...b, t: Math.round((t + b.t) * 1e6) / 1e6 }));
+    const beats = this.worldBeats.filter((b) => b.after === 'intent' && b.intent === id).map((b) => ({ ...b, t: Math.round((t + b.t) * 1e6) / 1e6 }));
     this.timeline = [...this.timeline, ...beats].sort((a, b) => a.t - b.t);
     for (const v of this.scriptedVehicles(beats)) this.traffic.add(v);
     for (const p of this.scriptedPeople(beats)) this.people.add(p);

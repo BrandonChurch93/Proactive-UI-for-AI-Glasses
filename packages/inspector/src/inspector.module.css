@@ -239,6 +239,15 @@
   margin-top: 2px;
 }
 
+.budget {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
 .meter {
   display: flex;
   gap: 3px;

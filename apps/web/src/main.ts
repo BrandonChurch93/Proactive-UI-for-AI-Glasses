@@ -1,6 +1,6 @@
 import './styles/tokens.css';
 import * as THREE from 'three';
-import { isScenarioId } from '@lumen/shared';
+import { demoById, isScenarioId } from '@lumen/shared';
 import { Sim } from '@lumen/sim';
 import { mountPlate } from './title/plate';
 import { World } from './world/world';
@@ -24,6 +24,7 @@ declare global {
 const params = new URLSearchParams(location.search);
 const still = params.get('still') === '1';
 const scenario = params.get('scenario');
+const demo = demoById(params.get('demo'));
 const root = document.getElementById('app')!;
 
 async function boot(): Promise<void> {
@@ -47,7 +48,7 @@ async function boot(): Promise<void> {
   const ui = document.createElement('div');
   root.appendChild(ui);
   const plate = mountPlate(root);
-  const first = isScenarioId(scenario) ? scenario : 'walking';
+  const first = demo?.scenario ?? (isScenarioId(scenario) ? scenario : 'walking');
   const small = TOUCH && Math.max(innerWidth, innerHeight) < 1100;
   const quality = params.get('quality') === 'fast' || (!params.get('quality') && small) ? 'fast' : 'high';
   const world = new World(canvas, new Sim(first, { viewport: { w: innerWidth, h: innerHeight } }), { still, quality });
@@ -70,6 +71,7 @@ async function boot(): Promise<void> {
       scripted: (still && params.get('live') !== '1') || params.get('scripted') === '1',
     },
     isScenarioId(scenario) ? scenario : null,
+    demo ? { d: demo, loop: params.get('loop') === '1' } : undefined,
   );
   window.__app = app;
   if (params.get('chrome') === '0') app.chrome.hide();

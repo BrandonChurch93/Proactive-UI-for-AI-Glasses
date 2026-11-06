@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { PLACES, PLACE_BY_ID, SCENARIO_IDS, Settle, WALK, compactSnapshot, hydrateSnapshot, synthesize, type Beat } from '../src';
+import { DEMOS, PLACES, PLACE_BY_ID, SCENARIO_IDS, Settle, WALK, compactSnapshot, hydrateSnapshot, synthesize, type Beat } from '../src';
 
 const PANES = new Set(['menu', 'offer']);
 
@@ -46,5 +46,16 @@ describe('settle', () => {
     expect(seen.slice(0, 40).every(Boolean)).toBe(true);
     expect(seen.includes(false)).toBe(true);
     expect(seen[seen.length - 1]).toBe(true);
+  });
+});
+
+describe('demos', () => {
+  it('each demo runs its planned length within 2 s and every beat falls inside it', () => {
+    expect(DEMOS.map((d) => d.id)).toEqual(['look', 'lunch', 'quiet']);
+    for (const d of DEMOS) {
+      expect(Math.abs(d.to - d.from - d.lengthS)).toBeLessThanOrEqual(2);
+      for (const b of [...d.beats, ...d.reviewer]) expect(b.t).toBeLessThan(d.to);
+      if (d.inspectorAt !== undefined) expect(d.to - d.inspectorAt).toBeLessThanOrEqual(8);
+    }
   });
 });

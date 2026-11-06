@@ -36,11 +36,14 @@ The street is one block that loops, rendered in real time in Three.js. The weare
 pnpm install
 pnpm dev          # the demo at http://localhost:5173
 pnpm build        # typecheck, evals, then a static site in apps/web/dist
+pnpm demos        # plays the three demos, records each and judges it, in .cache/demos
 ```
 
 No keys, no environment variables, no server, no model calls. `apps/web/dist` runs from any static file server.
 
 Controls: drag to look; click, Enter or Space to choose (the pinch); right-click or Esc to dismiss; Space pauses when there is nothing to choose; I opens the inspector. `?scenario=walking` or `?scenario=hungry` skips the start screen; add `&scripted=1` to watch the scripted reviewer play the recorded walk. On touch screens: drag to look, tap to choose, long-press to dismiss; Pause and the inspector sit in the corners. Phones play in landscape; iPads play either way. Browsers without WebGL 2 get a short page saying what this is.
+
+Demos: press the asterisk for a menu of three short films the app plays by itself, Look, Lunch and Quiet, with the real brain, overlay and world at the real tick. `?demo=look`, `?demo=lunch` or `?demo=quiet` starts one straight from the address bar, with no menu and no title screen, so a screen recorder gets a clean take; add `&loop=1` to restart it at its end. Esc ends a demo and returns to the title screen.
 
 ## Deploy
 
@@ -84,7 +87,7 @@ The center of the project is `docs/walking-rules.md`.
 
 ## How the evals work
 
-`pnpm eval` is the real test suite (`packages/evals`, `docs/evals.md`): 44 suites and 1020 checks on this build. It runs the two recorded walks and 41 focused cases (one or more per walking rule, the gates, notifications, proactive moments) through the brain headless in Node, and scores them against hand-written expectations: what must happen in each time window, what must not, show limits, and the brain's state frame by frame. Every run also checks global invariants: every reason cites an allowed kind and never the wearer's body, eyes or habits; no em dash anywhere; every decision in a crossing is a hold; the focus zone stays clear on the overlay's own pane rects; the budget meter matches the show count; two runs produce identical logs. The report lands in `packages/evals/report/latest.json`, and the inspector's Evals tab shows it.
+`pnpm eval` is the real test suite (`packages/evals`, `docs/evals.md`): 44 suites and 1022 checks on this build. It runs the two recorded walks and 41 focused cases (one or more per walking rule, the gates, notifications, proactive moments) through the brain headless in Node, and scores them against hand-written expectations: what must happen in each time window, what must not, show limits, and the brain's state frame by frame. Every run also checks global invariants: every reason cites an allowed kind and never the wearer's body, eyes or habits; no em dash anywhere; every decision in a crossing is a hold; the focus zone stays clear on the overlay's own pane rects; the budget meter matches the show count; two runs produce identical logs. The report lands in `packages/evals/report/latest.json`, and the inspector's Evals tab shows it.
 
 The inspector's Export writes a run (snapshots, overrides, decision log) in the eval format. `pnpm eval --file <export>` replays it through a fresh brain, checks that it reproduces the exported decisions exactly, and runs every invariant on it, so a session someone played by hand can be scored like a scripted one.
 
@@ -93,6 +96,7 @@ The inspector's Export writes a run (snapshots, overrides, decision log) in the 
 The live behaviour is measured in a real browser, playing the demo the way a person does:
 
 - `pnpm aim` plays four laps of Explore and aims at labels and cards with real drags, at Stroll and at Walk: whether the look holds the place aimed at, whether anything jumps, that the pane does not move by a pixel when the look lands or while the pointer is down, that no pane within 300 px of the center moves more than 6 px against the world around a landing, and that one turn off a card or a view ends it.
+- `pnpm demos` plays the three demos at 1920 x 1080, records a webm and a contact sheet of each, and judges every beat, the length, the console and the 6 px measure.
 - `pnpm doors` visits all fourteen places through the menu, walks to each door, holds the look, walks the rows with the viewfinder and chooses: how long the expanded view was on the glass, which rows lifted, and the confirmation.
 - `sh scripts/barall.sh http://localhost:5173/` runs the bar (`scripts/bar.ts`) on both walks at 1920 × 1080 and 3840 × 2160: level changes, births, panes off their lights or over the road or the chrome, labels per settle, the look probes and console errors.
 - `pnpm shots --scenario hungry --times 14,62,117` takes stills at walk times, and `scripts/devices.ts` renders the start screen and three beats on thirteen screens from a 390 px phone to 4K.

@@ -60,6 +60,7 @@ export interface PeopleOptions {
   signal: SignalAnchor;
   avoidCrosswalks: Leg[];
   scripted: ScriptedPerson[];
+  absent?: readonly string[];
 }
 
 export interface ScriptedPerson {
@@ -106,6 +107,7 @@ export class People {
     this.seedAmbient(start);
     this.seedIdle();
     for (const s of opts.scripted) this.add(s);
+    for (const p of this.people) if (opts.absent?.includes(p.id)) p.alive = false;
   }
 
   add(s: ScriptedPerson): void {
@@ -241,6 +243,7 @@ export class People {
         this.queue.sort((a, b) => a.at - b.at);
         continue;
       }
+      if (this.opts.absent?.includes(next.id)) next.alive = false;
       this.people.push(next);
     }
     for (const p of this.people) {

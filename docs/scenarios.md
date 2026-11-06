@@ -46,6 +46,45 @@ Recording: the walk starts at 0:01 and again at the corner a lap later. No desti
 8. 1:39.7 · The far curb: "One message came in. Read it?", reason "Held that while you crossed". The view settles on the west side and its places label together. The loop continues south and across the south crossing.
 9. 2:53 · Back at the start corner: the light held, nothing asks; the walk starts again at 2:56.5 and the second lap begins. The recording ends at 3:02. This is the walk a reviewer remembers: the brain doing almost nothing, correctly.
 
+## Demos · three short films played by the app
+
+`data/scenarios/demos.json` holds three demos for the portfolio and LinkedIn, desktop 16:9, recorded from the live app with a screen recorder. Each has an id, a name, the menu's line, `lengthS` (the planned length the menu shows), the base scenario, `from` and `to` (where the film starts and ends on the walk's clock), its own `signal` and `holdS`, its own world `beats` and `reviewer` beats in the recordings' format, and optionally `inspectorAt` and `absent` (passers-by left out of its street, so a look it holds is not one somebody happens to walk through). Beats before `from` have happened: the sim steps to `from` before the first frame is drawn, the way `?still=` steps the walk. A gaze beat may also carry `dn` (metres along the street from the sign) and `pitch` (the head held there), which puts the viewfinder on a row of a pane that stands beside its sign and is still a look at the place.
+
+The asterisk opens the menu; `?demo=look`, `?demo=lunch` or `?demo=quiet` starts a demo with no menu and no title screen, and `&loop=1` restarts it at its end. A demo runs the real brain, overlay and world at the real tick. While it plays the walk is scripted, the pointer reaches nothing, the cursor and the `I · INSPECTOR` hint are hidden, and only the asterisk and Esc do anything. As in a drag, the panes on the glass ride with the world through the scripted head's turns and half a second after. At `to` the last frame holds 2 s and the view fades to the title screen over `t-scene`; Esc ends it the same way. The owner adds titles in the editor. Times below are the film's own clock, the walk's in brackets.
+
+**Look** (`look`, Explore, 26.5 to 78.4, 51.9 s, shown as 50 s). The Stroll stretch at n 21.6, the Grace Theater across the street, two passers-by left out.
+
+1. 0:00 (0:26.5) · The head has just settled up the street on Atlas Books: the labels come up along the street (rule 10).
+2. 0:00.9 · The head turns to the theater, almost square on: the label 0:01.7, the card 0:02.2, the expanded view with the showtimes 0:04.2, read for 2.5 s.
+3. 0:06.7 · The head turns away: the view comes down to its card and its label where it stands, a level at a time (0:07.1, 0:07.2).
+4. 0:08.7 · A look at Trattoria da Lia, its card at 0:10.0, now at Walk; the pinch at 0:11.1 saves it, "Saved" at its light (rule 6), and nothing opens.
+5. 0:19.5 · A look at Atlas Books at Walk: its card, let go at 0:22.1 before the view would open.
+6. 0:33.2 · Brisk since n 61: the labels have gone. A look at the 47th St Station gets its label and nothing more (rule 11).
+7. 0:46.7 · Coming up to the red light, a look across at Pocket Park: its card, and the labels of that side.
+8. 0:49.1 · Stopped at the north corner, the head scan: left, right, back. The labels on the scanned side yield and come back (rule 5).
+9. 0:51.1 · The red light surfaces what was pinched: `11 s · what you saved` (rule 7), and the last frame holds on it.
+
+**Lunch** (`lunch`, Lunch, 8 to 66.5, 58.5 s, shown as 60 s). Starts at Walk at n 9, just north of the start corner.
+
+1. 0:00.6 · A look at Kathy's Cupcakes settles the view: the labels, its card, let go at 0:02.2.
+2. 0:06 (0:14) · Maya's banner at Stroll: "Lunch? I'm by the Big Bean at 1." with its replies.
+3. 0:09.5 · On my way: "Big Bean · 35 m · route there?"
+4. 0:12 · Yes: the route draws on the pavement, the map tile comes up, "Routing to the Big Bean" for 2.5 s.
+5. 0:33 · One short look at Atlas Books, 35 m off: its compact card, let go at 0:36.
+6. 0:44 · The door: the arrival line at the label. 0:45.3, the look; the card 0:45.9; the expanded view beside the opening 0:47.9.
+7. 0:48.6 · The viewfinder walks the rows: the Cortado, the cold brew at 0:50.2, the oat latte at 0:51.4, back to the Cortado at 0:52.6.
+8. 0:54 · The pinch orders it: "Cortado ordered · ready at 12:46, skip the line." The film ends on the confirmation with the map in the corner.
+
+**Quiet** (`quiet`, Lunch, 49 to 104, 55 s). Lunch rather than Explore: a whisper needs a place that matters to the wearer's goal (rule 11), and Explore has none. Trattoria da Lia was looked at and pinched at 0:38.4, before the film. The light turns at 1:26.
+
+1. 0:00 (0:49) · Walk, labels along the street. The M4 bus comes up from behind and pulls in beside the wearer (a demo beat): the labels it passes dim and drop to their lights, and the stop's own pane waits as its light, the bus having taken its room (rule 8). They come back as it stops at 0:06.
+2. 0:10.7 · Brisk from n 61: the labels go.
+3. 0:13 · A seat opens at Mega Burger (a demo beat, the news the rule needs) and the only thing on the glass is the whisper line at the bottom edge: "Mega Burger · 6 min wait", 2.5 s (rule 11).
+4. 0:23.9 · "No need to run" and the map tile with the turn ahead.
+5. 0:28.6 · Stopped 2 s at the red light: `8 s · what you saved` and the Trattoria (rule 7).
+6. 0:37 · WALK. The glass steps back, the crossing line says why, the countdown stays on the pavement (the gate). 10 s.
+7. 0:47.2 · The far curb. The inspector slides open on the Decisions panel with the budget meter in view, the walk still playing behind it, and the labels of the west side come up at 0:48.6. It stays open to the end.
+
 ## Timing as built
 
 The wearer decelerates into a stop line or a door at 0.9 m/s² rather than stopping dead, and turns its body at 3.2 rad/s, standing still while the turn is over a radian. Gaze beats start the head turning at the beat time and dwell counts from when the head is on the thing, so each ladder step lands a few tenths of a second after the beat. The evals' windows reflect this.

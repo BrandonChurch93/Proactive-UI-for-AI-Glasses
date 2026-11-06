@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { SCENARIO_IDS, SOUTH_CROSSWALK, WALK } from '@lumen/shared';
-import { Sim, LANE_BY_ID, START, routeLoop, routeTo } from '../src';
+import { SCENARIO_IDS, SOUTH_CROSSWALK, WALK, demoById, v3 } from '@lumen/shared';
+import { Sim, LANE_BY_ID, START, ScriptedReviewer, routeLoop, routeTo } from '../src';
 
 const LAP_END = 190;
 
@@ -70,6 +70,36 @@ describe.each(SCENARIO_IDS)('sim · %s', (scenario) => {
     expect(sim.lap).toBeGreaterThanOrEqual(1);
     expect(held).toBeGreaterThan(WALK.holdS - 1);
     expect(sim.snapshot().goal.suggest).toBeUndefined();
+  });
+});
+
+describe('demos', () => {
+  it('a demo plays its own world and clock and leaves the recordings alone', () => {
+    const lunch = demoById('lunch')!;
+    const sim = new Sim(lunch.scenario, { demo: lunch });
+    expect(sim.holdUntil).toBe(lunch.holdS);
+    sim.advanceTo(13.9);
+    expect(sim.snapshot().inbox).toHaveLength(0);
+    sim.advanceTo(14.1);
+    expect(sim.snapshot().inbox.map((n) => n.id)).toEqual(['maya-lunch']);
+    expect(new Sim('hungry').holdUntil).toBe(WALK.holdS);
+  });
+
+  it('a person a demo leaves out never walks its street', () => {
+    const look = demoById('look')!;
+    const sim = new Sim(look.scenario, { demo: look });
+    sim.advanceTo(40);
+    expect(sim.people.people.filter((p) => look.absent!.includes(p.id) && p.alive)).toEqual([]);
+  });
+});
+
+describe('the scripted reviewer', () => {
+  it('a gaze beat can hold the head on a row of a pane beside the sign and still be a look at the place', () => {
+    const r = new ScriptedReviewer([{ t: 0, kind: 'gaze', id: 'big-bean', dn: -1, pitch: 0.35 }]);
+    const sign = v3(11.75, 3, -49);
+    const eye = v3(9.3, 1.68, -49);
+    expect(r.aimPoint(1, () => sign)).toEqual({ ...sign, z: -48 });
+    expect(r.aim(1, eye, 0, () => sign, false).pitch).toBe(0.35);
   });
 });
 

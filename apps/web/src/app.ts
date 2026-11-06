@@ -1,6 +1,7 @@
-import { LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, VIEWFINDER, type Band, type ComponentKind, type ScenarioId } from '@lumen/shared';
+import { DEMOS, LEVEL_RANK, PLACE_BY_ID, isShow, reasonIsClean, uiScale, VIEWFINDER, type Band, type ComponentKind, type Demo, type ScenarioId } from '@lumen/shared';
 import { mount, type EvalReport, type Inspector, type InspectorStore } from '@lumen/inspector';
 import { Chrome } from './chrome/chrome';
+import { DemoMenu } from './demo/menu';
 import { EndCard, TOUCH, TitleScreen, type EndStats } from './title/title';
 
 const LONG_PRESS_MS = 550;
@@ -18,6 +19,8 @@ export interface AppOptions {
 }
 
 type Mode = 'attract' | 'walk';
+
+export const DEMO_HOLD_S = 2;
 
 // The glasses asking, reminding or carrying a message is not deciding.
 const NOT_DECIDED = new Set<ComponentKind>(['menu', 'map', 'thread', 'toast', 'strip', 'ask', 'followup', 'pocket', 'whisper']);
@@ -38,6 +41,9 @@ export class App {
   private lastDismiss = -Infinity;
   private press: ReturnType<typeof setTimeout> | null = null;
   private drag: { x: number; y: number; moved: boolean; pressed: boolean } | null = null;
+  private menu: DemoMenu;
+  private resumeAfterMenu = false;
+  private demo: { d: Demo; loop: boolean; held: number; opened: boolean; leaving: boolean } | null = null;
 
   constructor(
     private world: World,
@@ -46,6 +52,7 @@ export class App {
     private ui: HTMLElement,
     private opts: AppOptions & { pace?: boolean },
     start: ScenarioId | null,
+    demo?: { d: Demo; loop: boolean },
   ) {
     this.title = new TitleScreen(ui, () => this.choose('walking', false, null));
     this.end = new EndCard(ui, {
@@ -65,7 +72,11 @@ export class App {
       TOUCH,
       layer,
     );
-    if (start) {
+    this.menu = new DemoMenu(ui, (d) => this.startDemo(d, false));
+    if (demo) {
+      this.mode = 'walk';
+      this.walk = this.demoWalk(demo.d, demo.loop);
+    } else if (start) {
       this.mode = 'walk';
       this.walk = this.makeWalk(start, Boolean(opts.scripted), start);
       this.mountInspector();
@@ -74,7 +85,7 @@ export class App {
       this.walk = this.makeWalk('walking', true);
       this.title.show();
     }
-    this.chrome.setInspectorHint(this.mode === 'walk');
+    this.chrome.setInspectorHint(this.mode === 'walk' && !demo);
     this.pace = Boolean(opts.pace);
     this.bindInput();
     this.resize();
@@ -96,17 +107,69 @@ export class App {
     }
   }
 
-  private makeWalk(id: ScenarioId, scripted: boolean, suggest?: ScenarioId | null): Walk {
+  private makeWalk(id: ScenarioId, scripted: boolean, suggest?: ScenarioId | null, demo?: Demo): Walk {
     const w = new Walk(this.world, id, this.layer, {
       scripted,
       attract: this.mode === 'attract',
       ...(suggest !== undefined ? { suggest } : {}),
+      ...(demo ? { demo } : {}),
       ...(this.opts.exact ? { exact: true } : {}),
       ...(this.opts.reducedMotion !== undefined ? { reducedMotion: this.opts.reducedMotion } : {}),
       ...(this.opts.focusOutline ? { focusOutline: true } : {}),
       chrome: () => this.chrome.rects(),
     });
     return w;
+  }
+
+  // The sim steps to the demo's start before the first frame is drawn, so what came before it has happened.
+  private demoWalk(d: Demo, loop: boolean): Walk {
+    const w = this.makeWalk(d.scenario, true, undefined, d);
+    w.seek(d.from);
+    this.demo = { d, loop, held: 0, opened: false, leaving: false };
+    this.walk = w;
+    this.mountInspector();
+    this.chrome.setRecording(true);
+    return w;
+  }
+
+  private startDemo(d: Demo, loop: boolean): void {
+    this.menu.closeNow();
+    this.chrome.setMenu(null);
+    this.hideEnd();
+    this.title.reveal();
+    this.walk.dispose();
+    this.mode = 'walk';
+    this.walk = this.demoWalk(d, loop);
+    this.chrome.setInspectorHint(false);
+  }
+
+  private leaveDemo(restart: boolean): void {
+    const run = this.demo;
+    if (!run || run.leaving) return;
+    run.leaving = true;
+    this.walk.paused = true;
+    this.chrome.fadeThrough(() => {
+      if (restart) {
+        this.startDemo(run.d, true);
+        return;
+      }
+      this.demo = null;
+      this.chrome.setRecording(false);
+      this.again();
+    });
+  }
+
+  private openMenu(): void {
+    this.resumeAfterMenu = !this.walk.paused;
+    this.walk.paused = true;
+    this.menu.open();
+    this.chrome.setMenu(this.menu.panel);
+  }
+
+  private closeMenu(): void {
+    this.menu.close();
+    this.chrome.setMenu(null);
+    if (this.resumeAfterMenu) this.walk.paused = false;
   }
 
   private store(w: Walk): InspectorStore {
@@ -405,6 +468,22 @@ export class App {
     addEventListener('keydown', (e) => {
       const typing = (e.target as HTMLElement | null)?.closest?.('input, textarea, [contenteditable]');
       if (typing) return;
+      if (e.key === '*') {
+        if (this.menu.isOpen) this.closeMenu();
+        else if (!this.demo?.leaving) this.openMenu();
+        e.preventDefault();
+        return;
+      }
+      if (this.menu.isOpen) {
+        const d = DEMOS[['1', '2', '3'].indexOf(e.key)];
+        if (d) this.startDemo(d, false);
+        else if (e.key === 'Escape') this.closeMenu();
+        return;
+      }
+      if (this.demo) {
+        if (e.key === 'Escape') this.leaveDemo(false);
+        return;
+      }
       if (this.title.visible && (e.key === 'Enter' || e.key === ' ') && !(e.target as HTMLElement).closest('button')) {
         this.title.skipToChoice();
         e.preventDefault();
@@ -431,7 +510,27 @@ export class App {
     });
   }
 
+  private demoFrame(dt: number): void {
+    const run = this.demo!;
+    const w = this.walk;
+    if (w.paused) return;
+    if (!w.ended) w.step();
+    if (run.d.inspectorAt !== undefined && !run.opened && w.t >= run.d.inspectorAt) {
+      run.opened = true;
+      this.inspector?.open(true);
+    }
+    if (!w.ended) return;
+    run.held += dt;
+    if (run.held >= DEMO_HOLD_S) this.leaveDemo(run.loop);
+  }
+
   frame(dt: number): void {
+    if (this.demo) {
+      this.demoFrame(dt);
+      this.updatePace();
+      this.updateMark();
+      return;
+    }
     const w = this.walk;
     if (!w.paused && !(this.mode !== 'attract' && w.ended)) {
       w.step();

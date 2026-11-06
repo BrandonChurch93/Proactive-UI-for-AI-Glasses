@@ -1678,7 +1678,7 @@ export class Overlay {
         if (it.kind === 'world' && b === it.cur && placed?.mode === 'pane' && pr) b.off = { x: rect.x - pr.x, y: rect.y - pr.y };
         b.rect = rect;
         // In a gate the crossing line is the only line on the glass: a pane receded under the blur read as an empty grey rectangle, so it goes with the recede and comes back with it.
-        const gateO = d.placement.anchor !== 'view:glyph' ? clamp((this.gateK.v - 0.2) / 0.8, 0, 1) : 1;
+        const gateO = d.placement.anchor !== 'view:glyph' || d.component === 'pocket' ? clamp((this.gateK.v - 0.2) / 0.8, 0, 1) : 1;
         let coverK = 1;
         if (it.kind === 'world' && b === it.cur) {
           const covered = !it.hold && overPanes.some((q) => rectsOverlap(q, rect));
@@ -1724,7 +1724,9 @@ export class Overlay {
         if (lr && pr && it.L.leadO > 0.001) {
           const m = edgePointNearest(lr, pr);
           const to = this.bridge.unprojectAtDepth(m.x, m.y, Math.max(0.5, Math.min(depth * 0.55, 6)));
-          const leadO = it.L.leadO * gk * (it.cur ? Math.max(paneOpacity, it.L.head) : 1);
+          // A pane a head scan froze stands still while its light swings away: a leader between them would cross the whole glass.
+          const yieldK = it.frozen ? (yieldO - MOVE.yieldOpacity) / (1 - MOVE.yieldOpacity) : 1;
+          const leadO = it.L.leadO * gk * yieldK * (it.cur ? Math.max(paneOpacity, it.L.head) : 1);
           it.lights.leader.set({ from: anchorPos, to, progress: it.L.lead, opacity: Math.min(1, leadO) });
           it.lights.head.set({ pos: leaderPoint(anchorPos, to, it.L.lead), opacity: it.L.head * gk, scale: 1 });
         } else {

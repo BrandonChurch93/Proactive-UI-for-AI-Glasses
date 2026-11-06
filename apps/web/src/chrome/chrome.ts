@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import type { Rect } from '@lumen/shared';
 import css from './chrome.module.css';
 
@@ -10,6 +11,8 @@ export class Chrome {
   readonly rotate: HTMLElement;
   private mark: HTMLElement;
   private markKey = '';
+  private menu: HTMLElement | null = null;
+  private veil: HTMLElement;
 
   constructor(parent: HTMLElement, handlers: { inspector(): void; pause(): boolean }, touch: boolean, under?: HTMLElement) {
     this.el = document.createElement('div');
@@ -49,7 +52,9 @@ export class Chrome {
     // The viewfinder sits under the glasses: a pane over it covers its ticks, and the pane's hold rule carries the count.
     if (under) under.before(this.mark);
     else this.el.append(this.mark);
-    this.el.append(this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate);
+    this.veil = document.createElement('div');
+    this.veil.className = css.veil!;
+    this.el.append(this.pauseBtn, this.hint, this.pace, this.pausedEl, this.rotate, this.veil);
     parent.appendChild(this.el);
     addEventListener('resize', () => (this.cache = null));
   }
@@ -58,13 +63,37 @@ export class Chrome {
   private cache: Rect[] | null = null;
 
   rects(): Rect[] {
-    this.cache ??= [this.pauseBtn, this.hint, this.pace]
+    this.cache ??= [this.pauseBtn, this.hint, this.pace, ...(this.menu ? [this.menu] : [])]
       .filter((e) => e.style.display !== 'none' && e.offsetWidth > 0)
       .map((e) => {
         const r = e.getBoundingClientRect();
         return { x: r.left, y: r.top, w: r.width, h: r.height };
       });
     return this.cache;
+  }
+
+  setMenu(panel: HTMLElement | null): void {
+    this.menu = panel;
+    this.cache = null;
+  }
+
+  // A demo is recorded: no cursor, and the pointer reaches nothing.
+  setRecording(on: boolean): void {
+    document.documentElement.classList.toggle(css.recording!, on);
+  }
+
+  // Half of t-scene each way, the swap done behind the veil, so a scene fades to the next over t-scene.
+  fadeThrough(swap: () => void): void {
+    gsap.killTweensOf(this.veil);
+    gsap.to(this.veil, {
+      opacity: 1,
+      duration: 0.45,
+      ease: 'power1.inOut',
+      onComplete: () => {
+        swap();
+        gsap.to(this.veil, { opacity: 0, duration: 0.45, ease: 'power1.inOut' });
+      },
+    });
   }
 
   // A pane the look is pinned on stands over the chrome rather than move for it: what it covers steps back under it.

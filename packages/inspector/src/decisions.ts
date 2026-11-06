@@ -5,6 +5,8 @@ import { clock } from './timeline';
 
 type Filter = 'all' | 'shows' | 'holds' | 'overlay';
 
+const BUDGET = 7;
+
 function el(tag: string, cls?: string, text?: string): HTMLElement {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -32,6 +34,8 @@ export class Decisions {
   private seen = 0;
   private count = 0;
   private buttons = new Map<Filter, HTMLButtonElement>();
+  private budget: HTMLElement;
+  private budgetKey = '';
 
   constructor(private store: InspectorStore) {
     this.el = el('div', s.panel);
@@ -55,7 +59,8 @@ export class Decisions {
       filters.appendChild(b);
     }
     this.list = el('div');
-    this.el.append(filters, this.list);
+    this.budget = el('div', s.budget);
+    this.el.append(this.budget, filters, this.list);
   }
 
   focusAt(t: number, id: string): void {
@@ -136,6 +141,18 @@ export class Decisions {
       for (const d of f.events) if (keep(d, this.filter)) fresh.push(this.row(f, d));
     }
     this.rendered = upTo;
+    const model = frames[upTo]?.model;
+    const key = model ? `${model.budget}|${model.budgetUsed}` : '';
+    if (key !== this.budgetKey) {
+      this.budgetKey = key;
+      this.budget.replaceChildren();
+      if (model) {
+        const meter = el('span', s.meter);
+        for (let i = 0; i < BUDGET; i++) meter.appendChild(el('b', i < model.budget ? undefined : s.empty));
+        meter.appendChild(el('em', undefined, `${model.budget} left · ${model.budgetUsed} shown`));
+        this.budget.append(el('span', s.dim, 'Budget'), meter);
+      }
+    }
     for (const r of fresh) {
       this.list.prepend(r);
       this.count++;

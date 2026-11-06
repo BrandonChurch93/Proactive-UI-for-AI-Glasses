@@ -24,7 +24,8 @@ const TABS: [Tab, string][] = [
 
 export interface Inspector {
   readonly isOpen: boolean;
-  open(): void;
+  // Live: the walk keeps playing behind it, as in the Quiet demo.
+  open(live?: boolean): void;
   close(): void;
   toggle(): void;
   openAt(t: number, id: string): void;
@@ -113,11 +114,11 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
     get isOpen() {
       return isOpen;
     },
-    open() {
+    open(live = false) {
       if (isOpen) return;
       isOpen = true;
-      resumeOnClose = !store.paused();
-      store.setPaused(true);
+      resumeOnClose = !live && !store.paused();
+      if (!live) store.setPaused(true);
       drawer.classList.add(s.open!);
       tween?.kill();
       const mobile = matchMedia('(max-width: 760px)').matches;
@@ -125,7 +126,7 @@ export function mount(root: HTMLElement, store: InspectorStore, onClose?: () => 
       refresh();
       requestAnimationFrame(refresh);
       returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      play.focus({ preventScroll: true });
+      if (!live) play.focus({ preventScroll: true });
     },
     close() {
       if (!isOpen) return;

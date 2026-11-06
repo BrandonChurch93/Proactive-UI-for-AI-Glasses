@@ -1,0 +1,285 @@
+{
+  "_note": "Three demos played by the app itself. Times are on the walk's clock: from is where the film starts, to is where it ends, and beats before from have happened by then. lengthS is the planned length the menu shows. beats are the demo's world; reviewer are the wearer's. docs/scenarios.md has them beat by beat.",
+  "demos": [
+    {
+      "id": "look",
+      "name": "Look",
+      "line": "Labels, a held look, the descent, a head check, the pocket",
+      "lengthS": 50,
+      "scenario": "walking",
+      "from": 26.5,
+      "to": 78.4,
+      "signal": {
+        "state": "dont",
+        "secondsLeft": 5
+      },
+      "holdS": 1,
+      "beats": [],
+      "reviewer": [
+        {
+          "t": 1,
+          "kind": "intent",
+          "id": "walking"
+        },
+        {
+          "t": 25.9,
+          "kind": "gaze",
+          "id": "atlas-books"
+        },
+        {
+          "t": 27.4,
+          "kind": "gaze",
+          "id": "grace-theater"
+        },
+        {
+          "t": 33.2,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 35.2,
+          "kind": "gaze",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 37.6,
+          "kind": "pinch",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 38.2,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 46,
+          "kind": "gaze",
+          "id": "atlas-books"
+        },
+        {
+          "t": 48.6,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 66,
+          "kind": "gaze",
+          "id": "47th-st-station"
+        },
+        {
+          "t": 69.5,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 73.2,
+          "kind": "gaze",
+          "id": "pocket-park"
+        },
+        {
+          "t": 75.4,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 75.6,
+          "kind": "headScan",
+          "sequence": [
+            "left",
+            "right",
+            "center"
+          ]
+        }
+      ],
+      "absent": [
+        "p27",
+        "p33"
+      ]
+    },
+    {
+      "id": "lunch",
+      "name": "Lunch",
+      "line": "Maya's text, the route, the door, an order",
+      "lengthS": 60,
+      "scenario": "hungry",
+      "from": 8,
+      "to": 66.5,
+      "signal": {
+        "state": "dont",
+        "secondsLeft": 5
+      },
+      "holdS": 1,
+      "beats": [
+        {
+          "t": 14,
+          "kind": "inbox",
+          "type": "text",
+          "id": "maya-lunch",
+          "from": "Maya",
+          "text": "Lunch? I'm by the Big Bean at 1.",
+          "replies": [
+            {
+              "id": "on-my-way",
+              "label": "On my way",
+              "offer": {
+                "place": "big-bean",
+                "why": "Meeting Maya at 1"
+              }
+            },
+            {
+              "id": "cant",
+              "label": "Can't today",
+              "answer": {
+                "after": 6,
+                "text": "Next time"
+              }
+            },
+            {
+              "id": "where",
+              "label": "Where exactly?",
+              "answer": {
+                "after": 20,
+                "text": "Corner table by the window"
+              },
+              "offer": {
+                "place": "big-bean",
+                "why": "Meeting Maya at 1"
+              }
+            }
+          ]
+        }
+      ],
+      "reviewer": [
+        {
+          "t": 1,
+          "kind": "intent",
+          "id": "hungry"
+        },
+        {
+          "t": 8.6,
+          "kind": "gaze",
+          "id": "kathys-cupcakes"
+        },
+        {
+          "t": 10.2,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 17.5,
+          "kind": "reply",
+          "id": "maya-lunch",
+          "reply": "on-my-way"
+        },
+        {
+          "t": 20,
+          "kind": "go",
+          "id": "maya-lunch"
+        },
+        {
+          "t": 41,
+          "kind": "gaze",
+          "id": "atlas-books"
+        },
+        {
+          "t": 44,
+          "kind": "gaze",
+          "id": null
+        },
+        {
+          "t": 53.3,
+          "kind": "gaze",
+          "id": "big-bean"
+        },
+        {
+          "t": 56.6,
+          "kind": "gaze",
+          "id": "big-bean",
+          "dn": -1.05,
+          "pitch": 0.354
+        },
+        {
+          "t": 58.2,
+          "kind": "gaze",
+          "id": "big-bean",
+          "dn": -1.05,
+          "pitch": 0.29
+        },
+        {
+          "t": 59.4,
+          "kind": "gaze",
+          "id": "big-bean",
+          "dn": -1.05,
+          "pitch": 0.224
+        },
+        {
+          "t": 60.6,
+          "kind": "gaze",
+          "id": "big-bean",
+          "dn": -1.05,
+          "pitch": 0.354
+        },
+        {
+          "t": 62.0,
+          "kind": "choose",
+          "id": "big-bean",
+          "row": "cortado"
+        }
+      ]
+    },
+    {
+      "id": "quiet",
+      "name": "Quiet",
+      "line": "Brisk, a bus, the crossing, the pocket at the light, the inspector",
+      "lengthS": 55,
+      "scenario": "hungry",
+      "from": 49,
+      "to": 104,
+      "signal": {
+        "state": "dont",
+        "secondsLeft": 2
+      },
+      "holdS": 1,
+      "inspectorAt": 96.2,
+      "beats": [
+        {
+          "t": 53,
+          "kind": "bus",
+          "id": "m4-stop",
+          "arrivesIn": 2,
+          "dwellS": 30
+        },
+        {
+          "t": 62,
+          "kind": "live",
+          "id": "mega-burger",
+          "set": {
+            "seats": 5
+          }
+        }
+      ],
+      "reviewer": [
+        {
+          "t": 1,
+          "kind": "intent",
+          "id": "hungry"
+        },
+        {
+          "t": 36,
+          "kind": "gaze",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 38.4,
+          "kind": "pinch",
+          "id": "trattoria-da-lia"
+        },
+        {
+          "t": 39.2,
+          "kind": "gaze",
+          "id": null
+        }
+      ]
+    }
+  ]
+}
